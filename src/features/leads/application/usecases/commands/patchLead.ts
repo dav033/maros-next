@@ -1,7 +1,7 @@
 import type {
   Lead,
   LeadPatch,
-  LeadPatchPolicies,
+    LeadPolicies,
   LeadsAppContext,
 } from "@/leads";
 import { applyLeadPatch, diffToPatch, getLeadById } from "@/leads";
@@ -10,7 +10,7 @@ export async function patchLead(
   ctx: LeadsAppContext,
   id: number,
   patch: LeadPatch,
-  policies: LeadPatchPolicies = {}
+    policies: LeadPolicies = {}
 ): Promise<Lead> {
   console.log('patchLead - START - ID:', id, 'Patch:', patch);
   

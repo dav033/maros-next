@@ -76,11 +76,12 @@ function toContactPatch(current: Contact, value: ContactFormValue): ContactPatch
 const initialCompanyFormValue: CompanyFormValue = {
   name: "",
   address: "",
-  type: CompanyType.DESIGN,
+  type: null,
   serviceId: null,
   isCustomer: false,
   isClient: false,
   contactIds: [],
+  notes: [],
 };
 
 function toCompanyPatch(current: Company, value: CompanyFormValue): CompanyPatch {
@@ -96,7 +97,7 @@ function toCompanyPatch(current: Company, value: CompanyFormValue): CompanyPatch
   if (normalizedAddress !== currentAddress) {
     patch.address = normalizedAddress;
   }
-  if (value.type !== current.type) {
+  if (value.type !== current.type && value.type != null) {
     patch.type = value.type;
   }
   if (value.serviceId !== current.serviceId) {
@@ -210,6 +211,7 @@ export default function CustomersPage() {
       address: contact.address ?? "",
       isCustomer: contact.isCustomer,
       isClient: contact.isClient,
+      companyId: contact.companyId ?? null,
     });
     setContactServerError(null);
     setContactModalOpen(true);
@@ -230,6 +232,7 @@ export default function CustomersPage() {
       isCustomer: company.isCustomer,
       isClient: company.isClient,
       contactIds: companyContactIds,
+      notes: company.notes ?? [],
     });
     setCompanyServerError(null);
     setCompanyModalOpen(true);

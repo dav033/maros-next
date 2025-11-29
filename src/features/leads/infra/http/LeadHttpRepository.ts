@@ -1,13 +1,10 @@
-import type {
-  ApiLeadDTO,
-  Lead,
-  LeadDraft,
-  LeadPatch,
-  LeadRepositoryPort,
-  LeadType,
-} from "@/leads/domain";
-import type { HttpClientLike, RestRepository } from "@/shared";
+import type { LeadType } from "@/features/leads/domain/models";
+import type { ApiLeadDTO } from "@/features/leads/infra/http/mappers";
+import type { HttpClientLike } from "@/shared";
+import type { Lead, LeadDraft, LeadPatch } from "@/features/leads/domain/models";
+import type { LeadRepositoryPort } from "@/features/leads/domain/ports";
 import { optimizedApiClient } from "@/shared";
+import type { RestRepository } from "@/shared/infra/rest/makeResource";
 import { makeResource } from "@/shared/infra/rest/makeResource";
 
 import { endpoints as leadEndpoints } from "./endpoints";
@@ -28,13 +25,6 @@ export class LeadHttpRepository implements LeadRepositoryPort {
     this.resource = makeResource<ApiLeadDTO, Lead, LeadDraft, LeadPatch, number>(
       leadEndpoints,
       { fromApi: mapLeadFromApi, fromApiList: mapLeadsFromApi },
-      this.api,
-      {
-        overrides: {
-          create: this.create,
-          update: this.update,
-        },
-      }
     );
   }
 

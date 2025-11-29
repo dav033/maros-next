@@ -1,4 +1,5 @@
 export enum CompanyType {
+  DESIGN = "DESIGN",
   HOA = "HOA",
   GENERAL_CONTRACTOR = "GENERAL_CONTRACTOR",
   SUPPLIER = "SUPPLIER",
@@ -21,20 +22,20 @@ export interface Company {
 
 export type CompanyDraft = Readonly<{
   name: string;
-  address?: string | undefined;
+  address?: string | null | undefined;
   type: CompanyType;
   serviceId?: number | null;
   isCustomer?: boolean | undefined;
   isClient?: boolean | undefined;
-  notes?: string[];
+  notes?: string[] | null;
 }>;
 
 export type CompanyPatch = Readonly<{
   name?: string | undefined;
-  address?: string | undefined;
-  type?: CompanyType | undefined;
+  address?: string | null | undefined;
+  type?: CompanyType | null | undefined;
   serviceId?: number | null | undefined;
   isCustomer?: boolean | undefined;
   isClient?: boolean | undefined;
-  notes?: string[];
+  notes?: string[] | null | undefined;
 }>;

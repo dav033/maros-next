@@ -6,6 +6,7 @@ import type { ContactsAppContext } from "@/contact";
 import { makeContactsAppContext, ContactHttpRepository } from "@/contact";
 import type { LeadsAppContext } from "@/leads";
 import { makeLeadsAppContext, LeadHttpRepository, LeadNumberAvailabilityHttpService, patchLead } from "@/leads";
+import type { LeadPatch, LeadPolicies } from "@/features/leads/domain/models";
 import type { ProjectTypesAppContext } from "@/projectType";
 import { ProjectTypeHttpRepository } from "@/projectType";
 import type { CompanyAppContext } from "@/company";
@@ -47,7 +48,7 @@ export function DiProvider({ children }: Props) {
         leadNumberAvailability: new LeadNumberAvailabilityHttpService(),
       },
     }) as LeadsAppContext & { patchLead: typeof patchLead };
-    (leadsApp as any).patchLead = (...args: any[]) => patchLead(leadsApp, ...args);
+    (leadsApp as any).patchLead = (id: number, patch: LeadPatch, policies?: LeadPolicies) => patchLead(leadsApp, id, patch, policies);
 
     const projectTypesApp: ProjectTypesAppContext = {
       repos: {

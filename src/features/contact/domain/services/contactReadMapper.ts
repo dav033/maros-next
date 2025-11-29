@@ -43,6 +43,7 @@ export function mapContactFromDTO(dto: ApiContactDTO): Contact {
     isCustomer,
     isClient,
     companyId: companyId ?? undefined,
+    notes: [],
   };
 
   ensureContactIntegrity(contact);

@@ -9,7 +9,7 @@ import { Checkbox, Icon, Input, Label, Select } from "@/shared/ui";
 export type CompanyFormValue = {
   name: string;
   address: string;
-  type: CompanyType;
+  type: CompanyType | null;
   serviceId: number | null;
   isCustomer: boolean;
   isClient: boolean;

@@ -1,5 +1,17 @@
 import type { ISODate } from "@/shared";
-import type { Lead, LeadDraft, LeadPatch, ApiLeadDTO } from "@/leads";
+import type { Lead, LeadDraft, LeadPatch } from "@/leads";
+export type ApiLeadDTO = {
+  id: number;
+  leadNumber: string;
+  name: string;
+  startDate: string;
+  location: string;
+  status: string;
+  leadType: string;
+  contactId?: number;
+  projectTypeId?: number;
+  notes?: string[];
+};
 import type { LeadStatus, LeadType } from "@/leads";
 import { mapLeadFromDTO, mapLeadsFromDTO } from "@/leads";
 
@@ -61,7 +73,7 @@ export function mapLeadDraftToCreatePayload(
     status: draft.status,
     projectTypeId: draft.projectTypeId,
     leadType: draft.leadType,
-    notesJson: draft.notesJson,
+    notesJson: "[]",
   };
 
   if ("contact" in draft) {

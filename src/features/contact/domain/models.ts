@@ -13,26 +13,26 @@ export interface Contact {
 
 export type ContactDraft = Readonly<{
   name: string;
-  phone?: string | undefined;
-  email?: string | undefined;
-  occupation?: string | undefined;
-  address?: string | undefined;
+  phone?: string | null | undefined;
+  email?: string | null | undefined;
+  occupation?: string | null | undefined;
+  address?: string | null | undefined;
   isCustomer?: boolean | undefined;
   isClient?: boolean | undefined;
   companyId?: number | null | undefined;
-  notes?: string[];
+  notes?: string[] | null | undefined;
 }>;
 
 export type ContactPatch = Readonly<{
   name?: string | undefined;
-  occupation?: string | undefined;
-  phone?: string | undefined;
-  email?: string | undefined;
-  address?: string | undefined;
+  occupation?: string | null | undefined;
+  phone?: string | null | undefined;
+  email?: string | null | undefined;
+  address?: string | null | undefined;
   isCustomer?: boolean | undefined;
   isClient?: boolean | undefined;
   companyId?: number | null | undefined;
-  notes?: string[];
+  notes?: string[] | null | undefined;
 }>;
 
 export type ContactId = number;

@@ -1,6 +1,6 @@
 import type { Company } from "@/company";
-import type { CompaniesAppContext } from "../../context";
+import type { CompanyAppContext } from "../../context";
 
-export async function listCompanies(ctx: CompaniesAppContext): Promise<Company[]> {
+export async function listCompanies(ctx: CompanyAppContext): Promise<Company[]> {
   return ctx.repos.company.list();
 }

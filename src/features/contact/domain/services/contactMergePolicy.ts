@@ -20,6 +20,8 @@ export function mergeContact(
     email: isDefined(api.email) ? api.email : local.email,
     address: isDefined(api.address) ? api.address : local.address,
     isCustomer: isDefined(api.isCustomer) ? api.isCustomer : local.isCustomer,
+    isClient: isDefined(api.isClient) ? api.isClient : local.isClient,
+    notes: isDefined(api.notes) ? api.notes! : local.notes,
   };
 
   return merged;

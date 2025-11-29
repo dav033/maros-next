@@ -1,4 +1,4 @@
-import type {
+import {
   Company,
   CompanyDraft,
   CompanyPatch,
@@ -87,8 +87,8 @@ export function mapCompanyDraftToCreateDTO(
     address: draft.address ?? null,
     type: draft.type,
     serviceId: draft.serviceId ?? null,
-    isCustomer: draft.isCustomer,
-    isClient: draft.isClient,
+    isCustomer: draft.isCustomer ?? false,
+    isClient: draft.isClient ?? false,
     // Solo enviamos notas si hay algo
     notes:
       draft.notes && draft.notes.length > 0
@@ -104,12 +104,12 @@ export function mapCompanyPatchToUpdateDTO(
   patch: CompanyPatch,
 ): UpdateCompanyRequestDTO {
   return {
-    name: patch.name,
+    name: patch.name ?? "",
     address: patch.address ?? null,
-    type: patch.type,
+    type: patch.type ?? CompanyType.OTHER,
     serviceId: patch.serviceId ?? null,
-    isCustomer: patch.isCustomer,
-    isClient: patch.isClient,
+    isCustomer: patch.isCustomer ?? false,
+    isClient: patch.isClient ?? false,
     // Mandamos lo que venga en patch.notes (incluido null)
     notes: patch.notes ?? null,
   };

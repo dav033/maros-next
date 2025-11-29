@@ -393,12 +393,6 @@ export function ContactsTable({
               <span className="font-semibold text-theme-light">Client:</span>{" "}
               {companyToView.isClient ? "Yes" : "No"}
             </div>
-            <div>
-              <span className="font-semibold text-theme-light">
-                Contacts:
-              </span>{" "}
-              {companyToView.contactIds?.length ?? 0}
-            </div>
           </div>
         ) : null}
       </Modal>

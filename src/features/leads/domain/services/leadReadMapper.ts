@@ -138,6 +138,8 @@ export function mapLeadFromDTO(dto: ApiLeadDTO): Lead {
       occupation: contactOccupation || undefined,
       address: contactAddress || undefined,
       isCustomer: contactIsCustomer,
+      isClient: false,
+      notes: [],
     },
     projectType: {
       id: projectTypeId,

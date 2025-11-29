@@ -46,7 +46,7 @@ export function applyContactPatch(
   }
 
   if (patch.email !== undefined) {
-    const normalized = normalizeEmail(patch.email);
+    const normalized = normalizeEmail(patch.email ?? undefined);
     if (normalized && !isValidEmail(normalized)) {
       throw new BusinessRuleError(
         "FORMAT_ERROR",
@@ -62,7 +62,7 @@ export function applyContactPatch(
   }
 
   if (patch.phone !== undefined) {
-    const normalized = normalizePhone(patch.phone);
+    const normalized = normalizePhone(patch.phone ?? undefined);
     if (normalized) {
       const digits = countDigits(normalized);
       const minDigits = cfg.minPhoneDigits ?? 0;

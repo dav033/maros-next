@@ -37,7 +37,7 @@ function toDraft(value: CompanyFormValue): CompanyDraft {
   return {
     name: value.name.trim(),
     address: normalizeEmptyToUndefined(value.address),
-    type: value.type,
+    type: value.type ?? CompanyType.OTHER,
     serviceId: value.serviceId,
     isCustomer: value.isCustomer,
     isClient: value.isClient,
@@ -57,7 +57,7 @@ function toPatch(current: Company, value: CompanyFormValue): CompanyPatch {
   if (normalizedAddress !== currentAddress) {
     patch.address = normalizedAddress;
   }
-  if (value.type !== current.type) {
+  if (value.type !== current.type && value.type != null) {
     patch.type = value.type;
   }
   if (value.serviceId !== current.serviceId) {
@@ -172,6 +172,7 @@ export default function CompaniesPage() {
       isCustomer: company.isCustomer,
       isClient: company.isClient,
       contactIds: companyContactIds,
+      notes: company.notes ?? [],
     });
     setServerError(null);
     setMode("edit");

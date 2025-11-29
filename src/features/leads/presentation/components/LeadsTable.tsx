@@ -107,7 +107,7 @@ export function LeadsTable({
   const handleRowContextMenu = React.useCallback(
     (event: React.MouseEvent, lead: Lead) => {
       event.preventDefault();
-      show(event, lead);
+      show(event, []);
     },
     [show]
   );
@@ -327,7 +327,6 @@ export function LeadsTable({
         data={localLeads}
         rowKey={(lead) => lead.id}
         onRowContextMenu={handleRowContextMenu}
-        onRowClick={(lead) => handleEditLead(lead)}
       />
 
       <ContextMenu

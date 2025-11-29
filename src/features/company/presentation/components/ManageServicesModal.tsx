@@ -22,6 +22,22 @@ type ServiceFormValue = {
 };
 
 export function ManageServicesModal({ isOpen, onClose, services }: ManageServicesModalProps) {
+      function handleEditSubmit() {
+        if (!currentService) return;
+        const trimmedName = formValue.name.trim();
+        if (!trimmedName) {
+          setServerError("Service name is required");
+          return;
+        }
+        if (
+          trimmedName === currentService.name &&
+          formValue.color === (currentService.color || "#000000")
+        ) {
+          setMode("list");
+          return;
+        }
+        updateMutation.mutate({ id: currentService.id, patch: { name: trimmedName, color: formValue.color } });
+      }
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [serviceToDelete, setServiceToDelete] = useState<CompanyService | null>(null);
     const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -122,16 +138,6 @@ export function ManageServicesModal({ isOpen, onClose, services }: ManageService
     setMode("edit");
   }
 
-  function handleDelete(service: CompanyService) {
-    const confirmed =
-      typeof window !== "undefined" &&
-      window.confirm(
-        `Are you sure you want to delete "${service.name}"?\n\nThis action cannot be undone.`
-      );
-    if (!confirmed) return;
-
-    deleteMutation.mutate(service.id);
-  }
 
   function handleFormChange(value: ServiceFormValue) {
     setFormValue(value);
@@ -142,23 +148,29 @@ export function ManageServicesModal({ isOpen, onClose, services }: ManageService
     if (!trimmedName) {
       setServerError("Service name is required");
       return;
-    }
-    createMutation.mutate({ name: trimmedName, color: formValue.color });
-  }
-
-  function handleEditSubmit() {
-    if (!currentService) return;
-
     const trimmedName = formValue.name.trim();
-    if (!trimmedName) {
-      setServerError("Service name is required");
+    function handleDeleteConfirmation(service: CompanyService) {
+      const confirmed =
+        typeof window !== "undefined" &&
+        window.confirm(
+          `Are you sure you want to delete "${service.name}"?\n\nThis action cannot be undone.`
+        );
+      if (!confirmed) return;
       return;
+      deleteMutation.mutate(service.id);
     }
-    if (trimmedName === currentService.name && formValue.color === (currentService.color || "#000000")) {
+    }
+    if (
+      currentService &&
+      trimmedName === currentService.name &&
+      formValue.color === (currentService.color || "#000000")
+    ) {
       setMode("list");
       return;
     }
-    updateMutation.mutate({ id: currentService.id, patch: { name: trimmedName, color: formValue.color } });
+    if (currentService) {
+      updateMutation.mutate({ id: currentService.id, patch: { name: trimmedName, color: formValue.color } });
+    }
   }
 
   function backToList() {

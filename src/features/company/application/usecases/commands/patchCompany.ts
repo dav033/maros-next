@@ -1,8 +1,9 @@
-import type { Company, CompanyId, CompanyPatch, CompanyPatchPolicies } from "@/company";
-import type { CompaniesAppContext } from "../../context";
+import type { Company, CompanyId, CompanyPatch } from "@/company";
+import type { CompanyPatchPolicies } from "@/features/company/domain/types";
+import type { CompanyAppContext } from "../../context";
 
 export async function patchCompany(
-  ctx: CompaniesAppContext,
+  ctx: CompanyAppContext,
   id: CompanyId,
   patch: CompanyPatch,
   _policies: CompanyPatchPolicies = {}

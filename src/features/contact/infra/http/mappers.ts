@@ -91,8 +91,8 @@ export function mapContactDraftToCreateDTO(
     phone: draft.phone ?? null,
     email: draft.email ?? null,
     address: draft.address ?? null,
-    isCustomer: draft.isCustomer,
-    isClient: draft.isClient,
+    isCustomer: draft.isCustomer ?? false,
+    isClient: draft.isClient ?? false,
     companyId: draft.companyId ?? null,
     // Solo enviamos notas si hay algo
     notes:
@@ -109,13 +109,13 @@ export function mapContactPatchToUpdateDTO(
   patch: ContactPatch,
 ): UpdateContactRequestDTO {
   return {
-    name: patch.name,
+    name: patch.name ?? "",
     occupation: patch.occupation ?? null,
     phone: patch.phone ?? null,
     email: patch.email ?? null,
     address: patch.address ?? null,
-    isCustomer: patch.isCustomer,
-    isClient: patch.isClient,
+    isCustomer: patch.isCustomer ?? false,
+    isClient: patch.isClient ?? false,
     companyId: patch.companyId ?? null,
     // Si viene undefined, lo convertimos en null (no romper el contrato)
     notes: patch.notes ?? null,

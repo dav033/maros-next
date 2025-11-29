@@ -62,7 +62,7 @@ function resolveTransitions(
 type PatchHandlerCtx = Readonly<{
   clock: Clock;
   current: Lead;
-  policies: LeadPatchPolicies;
+  policies: LeadPolicies;
   events: ApplyLeadPatchResult["events"];
 }>;
 
@@ -132,7 +132,7 @@ export function applyLeadPatch(
   clock: Clock,
   current: Lead,
   patch: LeadPatch,
-  policies: LeadPatchPolicies = {}
+  policies: LeadPolicies = {}
 ): ApplyLeadPatchResult {
   let updated: Lead = { ...current };
   const events: ApplyLeadPatchResult["events"] = [];
