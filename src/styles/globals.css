@@ -1,0 +1,150 @@
+@import "tailwindcss";
+
+:root {
+  --color-dark: #000000;
+  --color-gray: #273f4f;
+  --color-gray-alt: #1f313d;
+  --color-gray-darker: #101010;
+  --color-gray-subtle: #2a2a2a;
+  --color-primary: #041fc4;
+  --color-primary-alt: #c44a04;
+  --color-light: #efeeea;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: system-ui, sans-serif;
+  background-color: var(--color-dark);
+  color: var(--color-light);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-dark);
+  color: var(--color-light);
+  min-height: 100vh;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-gray-darker);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-gray);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gray-alt);
+}
+
+.bg-theme-dark {
+  background-color: var(--color-dark);
+}
+
+.bg-theme-gray {
+  background-color: var(--color-gray);
+}
+
+.bg-theme-gray-alt {
+  background-color: var(--color-gray-alt);
+}
+
+.bg-theme-gray-darker {
+  background-color: var(--color-gray-darker);
+}
+
+.bg-theme-gray-subtle {
+  background-color: var(--color-gray-subtle);
+}
+
+.bg-theme-primary {
+  background-color: var(--color-primary);
+}
+
+.bg-theme-primary-alt {
+  background-color: var(--color-primary-alt);
+}
+
+.text-theme-primary {
+  color: var(--color-primary);
+}
+
+.text-theme-light {
+  color: var(--color-light);
+}
+
+.border-theme-gray {
+  border-color: var(--color-gray);
+}
+
+.border-theme-gray-alt {
+  border-color: var(--color-gray-alt);
+}
+
+.border-theme-primary {
+  border-color: var(--color-primary);
+}
+
+.border-theme-gray-subtle {
+  border-color: var(--color-gray-subtle);
+}
+
+.divide-theme-gray-subtle > :not([hidden]) ~ :not([hidden]) {
+  border-color: var(--color-gray-subtle);
+  border-top-width: 1px;
+}
+
+.table-divider {
+  border-color: var(--color-gray-subtle) !important;
+  border-top-width: 1px !important;
+}
+
+.table-row-divider {
+  border-top: 1px solid var(--color-gray-subtle);
+}
+
+table.custom-table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+table.custom-table thead tr {
+  border-bottom: 1px solid var(--color-gray-subtle);
+}
+
+table.custom-table tbody tr:not(:last-child) {
+  border-bottom: 1px solid var(--color-gray-subtle);
+}
+
+table.custom-table th,
+table.custom-table td {
+  border-top: none;
+  border-bottom: none;
+}
+
+table.custom-table * {
+  border-color: var(--color-gray-subtle) !important;
+}
+
+select,
+select option {
+  background-color: var(--color-dark);
+  color: var(--color-light);
+}
+
+select option:hover,
+select option:focus {
+  background-color: var(--color-gray-subtle);
+}
+
+

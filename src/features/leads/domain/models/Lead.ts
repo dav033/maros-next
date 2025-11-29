@@ -1,0 +1,16 @@
+import type { Contact } from "@/contact";
+import type { LeadStatus, LeadType } from "@/leads";
+import type { ProjectType } from "./ProjectType";
+
+export interface Lead {
+  id: number;
+  leadNumber: string;
+  name: string;
+  startDate: string;
+  location?: string | undefined;
+  status: LeadStatus;
+  contact: Contact;
+  projectType: ProjectType;
+  leadType: LeadType;
+  notesJson?: string;
+}

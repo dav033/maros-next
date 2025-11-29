@@ -1,0 +1,38 @@
+"use client";
+
+import { usePathname } from "next/navigation";
+
+export function useSidebarNavigation() {
+  const currentPath = usePathname() ?? "/";
+
+  const normalize = (path: string) => {
+    if (!path) return "/";
+    if (path === "/") return "/";
+    return path.endsWith("/") && path.length > 1 ? path.slice(0, -1) : path;
+  };
+
+  const isActive = (href: string) => {
+    const normalizedCurrent = normalize(currentPath);
+    const normalizedHref = normalize(href);
+    if (normalizedHref === "/") {
+      return normalizedCurrent === "/";
+    }
+    return normalizedCurrent === normalizedHref || normalizedCurrent.startsWith(normalizedHref + "/");
+  };
+
+  const shouldBeOpen = (sectionBasePath: string) => {
+    if (!sectionBasePath) return false;
+    if (sectionBasePath === "/") {
+      return isActive("/");
+    }
+    const normalizedCurrent = normalize(currentPath);
+    const normalizedSection = normalize(sectionBasePath);
+    return normalizedCurrent === normalizedSection || normalizedCurrent.startsWith(normalizedSection + "/");
+  };
+
+  return {
+    currentPath,
+    isActive,
+    shouldBeOpen,
+  };
+}
