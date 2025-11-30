@@ -172,6 +172,16 @@ export function LeadsTable({
   const columns = React.useMemo<SimpleTableColumn<Lead>[]>(() => {
     return [
       {
+        key: "leadNumber",
+        header: "# Lead",
+        className: "w-[120px] text-center",
+        render: (lead: Lead) => (
+          <span className="font-mono text-theme-light">{lead.leadNumber ?? lead.id}</span>
+        ),
+        sortable: true,
+        sortValue: (lead: Lead) => lead.leadNumber ?? lead.id ?? 0,
+      },
+      {
         key: "name",
         header: "Name",
         className: "w-[200px]",
@@ -243,24 +253,11 @@ export function LeadsTable({
         sortable: true,
         sortValue: (lead: Lead) => lead.location ?? "",
       },
-      {
-        key: "startDate",
-        header: "Start Date",
-        className: "w-[120px]",
-        render: (lead: Lead) => (
-          <span className="text-gray-300">
-            {lead.startDate
-              ? new Date(lead.startDate).toLocaleDateString()
-              : "—"}
-          </span>
-        ),
-        sortable: true,
-        sortValue: (lead: Lead) => lead.startDate ?? "",
-      },
+      // Removed startDate column
       {
         key: "status",
         header: "Status",
-        className: "w-[130px]",
+        className: "w-[90px]",
         render: (lead: Lead) => {
           const statusColors: Record<string, string> = {
             NOT_EXECUTED: "bg-gray-500/15 text-gray-400",
