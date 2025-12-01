@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import type { Company } from "../../domain/models";
-import type { CompanyFormValue, CompanyPatch } from "../../domain/mappers";
+import type { Company, CompanyPatch } from "../../domain/models";
+import type { CompanyFormValue } from "../../domain/mappers";
 import { toCompanyPatch } from "../../domain/mappers";
 import { companyKeys, companyCrudUseCases } from "@/company";
 import { companyEndpoints } from "../../infra/http/endpoints";

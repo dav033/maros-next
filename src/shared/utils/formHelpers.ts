@@ -1,11 +1,3 @@
-
-export function normalizeEmptyToUndefined(value: string | undefined | null): string | undefined {
-  if (value === null || value === undefined || value.trim() === "") {
-    return undefined;
-  }
-  return value;
-}
-
 /**
  * Creates a patch object with only changed fields
  * @param current - Current entity state

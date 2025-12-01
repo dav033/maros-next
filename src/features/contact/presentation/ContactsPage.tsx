@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import type { Contact } from "@/contact";
+import type { Contact, ContactDraft, ContactPatch } from "@/contact";
 import {
   contactsKeys,
   createContact,
@@ -16,7 +16,8 @@ import { useCrudPage, EmptyState, CrudPage, TableSkeleton } from "@/shared/ui";
 import { ContactsToolbar } from "./components/ContactsToolbar";
 import { ContactsTable } from "./components/ContactsTable";
 import { ContactsTableSkeleton } from "./components/ContactsTableSkeleton";
-import { ContactForm, ContactFormValue } from "./components/ContactForm";
+import { ContactForm } from "./components/ContactForm";
+import type { ContactFormValue } from "../domain/mappers";
 import { useInstantContacts } from "./hooks/useInstantContacts";
 import { contactsSearchConfig } from "./search/contactsSearchConfig";
 import { useInstantCompanies } from "@/features/company/presentation/hooks/useInstantCompanies";
@@ -49,7 +50,7 @@ export default function ContactsPage() {
     [contacts, searchState]
   );
 
-  const crud = useCrudPage<Contact, ContactFormValue, Contact, Contact>({
+  const crud = useCrudPage<Contact, ContactFormValue, ContactDraft, ContactPatch>({
     queryKey: [contactsKeys.lists(), ["customers"]],
     createFn: (draft) => createContact(app, draft),
     updateFn: (id, patch) => patchContact(app, id, patch),

@@ -1,5 +1,4 @@
-import type { Contact, ContactPatch } from "@/contact";
-import type { ContactFormValue } from "@/features/contact/presentation/components";
+import type { Contact, ContactPatch, ContactFormValue } from "@/contact";
 import { normalizeEmptyToUndefined } from "@/shared";
 
 export const initialContactFormValue: ContactFormValue = {

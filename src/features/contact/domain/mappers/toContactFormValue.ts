@@ -1,5 +1,5 @@
 import type { Contact } from "../models";
-import type { ContactFormValue } from "../../presentation/components/ContactForm";
+import type { ContactFormValue } from "./toContactPatch";
 
 export function toContactFormValue(contact: Contact): ContactFormValue {
   return {

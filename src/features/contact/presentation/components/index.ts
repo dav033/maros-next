@@ -3,7 +3,6 @@ export { ContactsTable } from "./ContactsTable";
 export type { ContactsTableProps } from "./ContactsTable";
 export { ContactsTableSkeleton } from "./ContactsTableSkeleton";
 export { ContactForm } from "./ContactForm";
-export type { ContactFormValue } from "./ContactForm";
 export { CompanyCell } from "./CompanyCell";
 export { CompanyDetailsModal } from "./CompanyDetailsModal";
 export { useContactsTableColumns } from "./useContactsTableColumns";

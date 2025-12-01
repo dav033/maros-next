@@ -39,3 +39,6 @@ export type CompanyPatch = Readonly<{
   isClient?: boolean | undefined;
   notes?: string[] | null | undefined;
 }>;
+
+export interface CompanyPolicies {}
+export interface CompanyPatchPolicies {}

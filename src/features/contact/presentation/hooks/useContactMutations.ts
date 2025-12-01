@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import type { Contact } from "../../domain/models";
-import type { ContactFormValue, ContactPatch } from "../../domain/mappers";
+import type { Contact, ContactPatch } from "../../domain/models";
+import type { ContactFormValue } from "../../domain/mappers";
 import { toContactPatch } from "../../domain/mappers";
 import { patchContact, deleteContact, contactsKeys } from "@/contact";
 import { useContactsApp } from "@/di";

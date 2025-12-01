@@ -1,5 +1,5 @@
 import type { ContactDraft } from "../models";
-import type { ContactFormValue } from "../../presentation/components/ContactForm";
+import type { ContactFormValue } from "./toContactPatch";
 import { normalizeEmptyToUndefined } from "@/shared/mappers/dto";
 
 export function toContactDraft(value: ContactFormValue): ContactDraft {

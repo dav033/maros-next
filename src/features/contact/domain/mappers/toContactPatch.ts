@@ -1,7 +1,5 @@
-import type { Contact } from "../models";
+import type { Contact, ContactPatch } from "../models";
 import { normalizeEmptyToUndefined } from "@/shared";
-
-export type ContactPatch = Partial<Contact>;
 
 export type ContactFormValue = {
   name: string;

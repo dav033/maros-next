@@ -1,18 +1,8 @@
 "use client";
 
 import type { Company } from "@/company";
+import type { ContactFormValue } from "../../domain/mappers";
 import { Checkbox, Icon, Input, Label, Select, useFormHandlers } from "@/shared/ui";
-
-export type ContactFormValue = {
-  name: string;
-  phone: string;
-  email: string;
-  occupation: string;
-  address: string;
-  isCustomer: boolean;
-  isClient: boolean;
-  companyId: number | null;
-};
 
 export type ContactFormProps = {
   value: ContactFormValue;
