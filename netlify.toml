@@ -10,13 +10,6 @@
 [context.deploy-preview.environment]
   NEXT_PUBLIC_API_BASE_URL = "https://maros-nest.onrender.com/api"
 
-# Redirects for SPA routing
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-  conditions = {Role = ["admin"]}
-
 # Headers for security and CORS (optional - backend should handle CORS)
 [[headers]]
   for = "/*"
