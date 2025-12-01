@@ -84,7 +84,7 @@ function resolveLeadType(input: unknown): LeadType {
 }
 
 export function mapLeadFromDTO(dto: ApiLeadDTO): Lead {
-  const id = dto?.id ?? 0;
+  const id = dto.id;
   const leadNumber = normalizeText(dto?.leadNumber ?? "");
   const name = normalizeText(dto?.name ?? "");
   const location = normalizeText(dto?.location ?? "");
@@ -99,6 +99,7 @@ export function mapLeadFromDTO(dto: ApiLeadDTO): Lead {
   const contactOccupation = normalizeText(dto?.contact?.occupation ?? "");
   const contactAddress = normalizeText(dto?.contact?.address ?? "");
   const contactIsCustomer = !!dto?.contact?.isCustomer;
+  const contactIsClient = !!dto?.contact?.isClient;
 
   const projectTypeId =
     typeof dto?.projectType?.id === "number"
@@ -127,7 +128,7 @@ export function mapLeadFromDTO(dto: ApiLeadDTO): Lead {
       occupation: contactOccupation || undefined,
       address: contactAddress || undefined,
       isCustomer: contactIsCustomer,
-      isClient: false,
+      isClient: contactIsClient,
       notes: [],
     },
     projectType: {

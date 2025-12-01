@@ -12,6 +12,7 @@ type LeadFormData = {
   projectTypeId?: number;
   contactId?: number;
   location: string;
+  status?: string;
 };
 
 type LeadFormProps = {
@@ -64,6 +65,23 @@ export function LeadForm({
         placeholder="Select Project Type *"
         icon="material-symbols:design-services"
         searchable={true}
+        disabled={disabled}
+      />
+
+      <Select
+        options={[
+          { value: "NOT_EXECUTED", label: "Not Executed" },
+          { value: "IN_PROGRESS", label: "In Progress" },
+          { value: "COMPLETED", label: "Completed" },
+          { value: "LOST", label: "Lost" },
+          { value: "POSTPONED", label: "Postponed" },
+          { value: "PERMITS", label: "Permits" },
+        ]}
+        value={form.status ?? ""}
+        onChange={(val: string) => onChange("status", val || undefined)}
+        placeholder="Select Status"
+        icon="material-symbols:flag"
+        searchable={false}
         disabled={disabled}
       />
 

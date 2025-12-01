@@ -51,7 +51,11 @@ export function useContactsTableColumns({
         header: "Company",
         className: "w-[180px]",
         render: (contact: Contact) => {
-          const company = companies.find((c) => c.id === contact.companyId);
+          console.log('Contact en columna:', contact);
+          console.log('contact.company:', contact.company);
+          console.log('contact.companyId:', contact.companyId);
+          const company = contact.company || companies.find((c) => c.id === contact.companyId);
+          console.log('Company final:', company);
           return (
             <CompanyCell
               company={company}

@@ -12,9 +12,23 @@ export type ApiContactDTO = Readonly<{
   isCustomer?: boolean | null;
   isClient?: boolean | null;
   companyId?: number | null;
+  company?: {
+    id: number;
+    name: string;
+    address?: string | null;
+    type?: string | null;
+    serviceId?: number | null;
+    isCustomer?: boolean | null;
+    isClient?: boolean | null;
+    notes?: string[] | null;
+  } | null;
 }>;
 
 export function mapContactFromDTO(dto: ApiContactDTO): Contact {
+  console.log('=== Contact DTO recibido ===');
+  console.log('DTO completo:', dto);
+  console.log('DTO.company:', dto.company);
+  console.log('DTO.companyId:', dto.companyId);
   const id = dto.id;
   if (!Number.isFinite(id) || id == null || id <= 0) {
     throw new BusinessRuleError(
@@ -31,8 +45,20 @@ export function mapContactFromDTO(dto: ApiContactDTO): Contact {
   const address = normalizeText(dto.address) || undefined;
   const isCustomer = !!dto.isCustomer;
   const isClient = !!dto.isClient;
-  const companyId = dto.companyId != null && dto.companyId > 0 ? dto.companyId : null;
+  const companyId = dto.company?.id ?? (dto.companyId != null && dto.companyId > 0 ? dto.companyId : null);
+  const company = dto.company ? {
+    id: dto.company.id,
+    name: dto.company.name,
+    address: dto.company.address || undefined,
+    type: dto.company.type as any,
+    serviceId: dto.company.serviceId || undefined,
+    isCustomer: !!dto.company.isCustomer,
+    isClient: !!dto.company.isClient,
+    notes: dto.company.notes || [],
+  } : undefined;
 
+  console.log('Company mapeada:', company);
+  
   const contact: Contact = {
     id,
     name,
@@ -43,6 +69,7 @@ export function mapContactFromDTO(dto: ApiContactDTO): Contact {
     isCustomer,
     isClient,
     companyId: companyId ?? undefined,
+    company,
     notes: [],
   };
 

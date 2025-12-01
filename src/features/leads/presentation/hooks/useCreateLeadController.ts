@@ -18,6 +18,7 @@ type LeadFormData = {
   projectTypeId?: number;
   contactId?: number;
   location: string;
+  status?: string;
   customerName?: string;
   contactName?: string;
   phone?: string;
@@ -40,6 +41,7 @@ export function useCreateLeadController({ leadType, onCreated }: UseCreateLeadCo
       location: "",
       projectTypeId: undefined,
       contactId: undefined,
+      status: "NOT_EXECUTED",
       customerName: "",
       contactName: "",
       phone: "",

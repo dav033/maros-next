@@ -99,10 +99,7 @@ export class LeadHttpRepository implements LeadRepositoryPort {
 
     const url = leadEndpoints.update(id);
     const body = { lead: leadData };
-    console.log('[FRONT] LeadHttpRepository.update - URL:', url);
-    console.log('[FRONT] LeadHttpRepository.update - Body:', body);
     const { data } = await this.api.put<ApiLeadDTO>(url, body);
-    console.log('[FRONT] LeadHttpRepository.update - Response:', data);
     if (!data) throw new Error("Empty response updating Lead");
     return mapLeadFromApi(data);
   };

@@ -13,6 +13,7 @@ type LeadEditFormProps = {
     projectTypeId?: number;
     contactId?: number;
     leadNumber?: string;
+    status?: string;
   };
   onChange: <K extends keyof LeadEditFormProps["form"]>(key: K, value: LeadEditFormProps["form"][K]) => void;
   projectTypes: ProjectType[];
@@ -81,6 +82,23 @@ export function LeadEditForm({
         placeholder="Select Contact *"
         icon="material-symbols:person"
         searchable={true}
+        disabled={disabled}
+      />
+
+      <Select
+        options={[
+          { value: "NOT_EXECUTED", label: "Not Executed" },
+          { value: "IN_PROGRESS", label: "In Progress" },
+          { value: "COMPLETED", label: "Completed" },
+          { value: "LOST", label: "Lost" },
+          { value: "POSTPONED", label: "Postponed" },
+          { value: "PERMITS", label: "Permits" },
+        ]}
+        value={form.status ?? ""}
+        onChange={(val: string) => onChange("status", val || undefined)}
+        placeholder="Select Status"
+        icon="material-symbols:flag"
+        searchable={false}
         disabled={disabled}
       />
     </div>

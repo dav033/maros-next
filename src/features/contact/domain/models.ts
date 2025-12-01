@@ -8,6 +8,16 @@ export interface Contact {
   isCustomer: boolean;
   isClient: boolean;
   companyId?: number | null;
+  company?: {
+    id: number;
+    name: string;
+    address?: string | undefined;
+    type: any;
+    serviceId?: number | undefined;
+    isCustomer: boolean;
+    isClient: boolean;
+    notes: string[];
+  } | undefined;
   notes: string[];
 }
 

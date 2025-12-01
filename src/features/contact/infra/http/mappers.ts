@@ -15,6 +15,16 @@ export type ApiContactDTO = {
   isCustomer: boolean;
   isClient: boolean;
   companyId?: number | null;
+  company?: {
+    id: number;
+    name: string;
+    address?: string | null;
+    type?: string | null;
+    serviceId?: number | null;
+    isCustomer: boolean;
+    isClient: boolean;
+    notes: string[];
+  } | null;
   notes?: string[] | null;
 };
 
@@ -55,7 +65,17 @@ export function mapContactFromApi(dto: ApiContactDTO): Contact {
     address: dto.address ?? undefined,
     isCustomer: dto.isCustomer,
     isClient: dto.isClient,
-    companyId: dto.companyId ?? undefined,
+    companyId: dto.company?.id ?? dto.companyId ?? undefined,
+    company: dto.company ? {
+      id: dto.company.id,
+      name: dto.company.name,
+      address: dto.company.address ?? undefined,
+      type: dto.company.type as any,
+      serviceId: dto.company.serviceId ?? undefined,
+      isCustomer: dto.company.isCustomer,
+      isClient: dto.company.isClient,
+      notes: dto.company.notes || [],
+    } : undefined,
     notes: dto.notes ?? [],
   };
 }

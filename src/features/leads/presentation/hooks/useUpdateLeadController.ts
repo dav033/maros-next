@@ -12,6 +12,7 @@ type LeadEditFormData = {
   contactId?: number;
   location: string;
   leadNumber?: string;
+  status?: string;
 };
 
 type UseUpdateLeadControllerOptions = {
@@ -29,6 +30,7 @@ export function useUpdateLeadController({ lead, onUpdated }: UseUpdateLeadContro
       projectTypeId: lead?.projectType?.id,
       contactId: lead?.contact?.id,
       leadNumber: lead?.leadNumber ?? "",
+      status: lead?.status ?? "NOT_EXECUTED",
     },
     validate: (form) => {
       const nameOk = form.leadName.trim().length > 0;

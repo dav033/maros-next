@@ -6,7 +6,9 @@ interface CompanyCellProps {
 }
 
 export function CompanyCell({ company, onOpenCompanyModal }: CompanyCellProps) {
+  console.log('CompanyCell recibió company:', company);
   if (!company) {
+    console.log('CompanyCell: company es undefined/null');
     return <span className="text-gray-400">—</span>;
   }
 

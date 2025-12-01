@@ -18,16 +18,6 @@ export function useLeadsTableColumns({
   return React.useMemo<SimpleTableColumn<Lead>[]>(() => {
     return [
       {
-        key: "name",
-        header: "Name",
-        className: "w-[200px]",
-        render: (lead: Lead) => (
-          <span className="text-theme-light">{lead.name}</span>
-        ),
-        sortable: true,
-        sortValue: (lead: Lead) => lead.name ?? "",
-      },
-      {
         key: "notes",
         header: "Notes",
         className: "w-[80px] text-center",
@@ -43,6 +33,26 @@ export function useLeadsTableColumns({
           );
         },
         sortable: false,
+      },
+      {
+        key: "leadNumber",
+        header: "Lead #",
+        className: "w-[100px]",
+        render: (lead: Lead) => (
+          <span className="font-mono text-theme-light">{lead.leadNumber}</span>
+        ),
+        sortable: true,
+        sortValue: (lead: Lead) => lead.leadNumber ?? "",
+      },
+      {
+        key: "name",
+        header: "Name",
+        className: "w-[200px]",
+        render: (lead: Lead) => (
+          <span className="text-theme-light">{lead.name}</span>
+        ),
+        sortable: true,
+        sortValue: (lead: Lead) => lead.name ?? "",
       },
       {
         key: "contact",
