@@ -23,7 +23,7 @@ export class ContactHttpRepository implements ContactRepositoryPort {
         endpoints: contactEndpoints,
         mappers: {
           fromApi: mapContactFromApi,
-          fromApiList: mapContactsFromApi,
+          fromApiList: (dtos) => dtos.map(mapContactFromApi),
           toCreateDto: mapContactDraftToCreateDTO,
           toUpdateDto: mapContactPatchToUpdateDTO,
         },

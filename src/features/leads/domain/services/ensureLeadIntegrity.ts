@@ -35,7 +35,6 @@ export function ensureLeadIntegrity(
   lead: Lead,
   policies: LeadIntegrityPolicies = {}
 ): void {
-  // id obligatorio y positivo
   if (
     typeof lead.id !== "number" ||
     !Number.isFinite(lead.id) ||
@@ -50,7 +49,6 @@ export function ensureLeadIntegrity(
     );
   }
 
-  // name obligatorio y con longitud máxima
   const name = normalizeText(lead.name);
   if (!name) {
     throw new BusinessRuleError(
@@ -71,7 +69,6 @@ export function ensureLeadIntegrity(
     );
   }
 
-  // startDate en formato YYYY-MM-DD (ISO local date)
   const sd = normalizeText(lead.startDate);
   if (!sd || !isIsoLocalDate(sd)) {
     throw new BusinessRuleError(
@@ -83,14 +80,8 @@ export function ensureLeadIntegrity(
     );
   }
 
-  /**
-   * IMPORTANTE: aquí relajamos la validación para datos legacy.
-   *
-   * - Si projectType.id o contact.id vienen en 0 o null, los dejamos pasar.
-   * - Solo lanzamos error si vienen con un valor claramente inválido (< 0 o NaN).
-   */
+  
 
-  // Validación tolerante de projectType.id
   const projectTypeId = lead.projectType?.id;
   if (
     projectTypeId != null &&             // existe
@@ -108,7 +99,6 @@ export function ensureLeadIntegrity(
     );
   }
 
-  // Validación tolerante de contact.id
   const contactId = lead.contact?.id;
   if (
     contactId != null &&                 // existe
@@ -126,7 +116,6 @@ export function ensureLeadIntegrity(
     );
   }
 
-  // Status válido dentro del orden permitido
   const s = lead.status as LeadStatus | null | undefined;
   const effectiveStatus = (s ??
     ("NOT_EXECUTED" as LeadStatus)) as LeadStatus;
@@ -136,7 +125,6 @@ export function ensureLeadIntegrity(
     });
   }
 
-  // Validación opcional de leadNumber según reglas
   if (typeof lead.leadNumber === "string") {
     const normalized = normalizeLeadNumber(
       lead.leadNumber,

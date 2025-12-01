@@ -1,7 +1,7 @@
 import axios, { type AxiosInstance, type AxiosRequestConfig } from "axios";
 import type { HttpClientLike, RequestOptions } from "./types";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080";
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://maros-nest.onrender.com/api";
 
 export class OptimizedApiClient implements HttpClientLike {
   private readonly axiosInstance: AxiosInstance;
@@ -9,7 +9,7 @@ export class OptimizedApiClient implements HttpClientLike {
   constructor(baseURL: string = BASE_URL) {
     this.axiosInstance = axios.create({
       baseURL,
-      withCredentials: false,
+      withCredentials: true, // Match backend CORS credentials: true
     });
   }
 

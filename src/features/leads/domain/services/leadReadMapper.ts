@@ -30,20 +30,14 @@ export type ApiLeadDTO = {
   notes?: string[] | null;
 } | null;
 
-// Ajustar el tipo LeadStatus según cómo esté definido en tu proyecto
-// (string literals o enum). Esta función asume que los valores válidos
-// son exactamente:
-//   "NOT_EXECUTED", "COMPLETED", "IN_PROGRESS", "LOST", "POSTPONED", "PERMITS".
 
 function resolveStatus(status: string | null | undefined): LeadStatus {
-  // 1) Si no viene estado desde el backend, usamos un estado seguro por defecto
   if (!status) {
     return "NOT_EXECUTED" as LeadStatus;
   }
 
   const upper = status.trim().toUpperCase();
 
-  // 2) Estados oficiales del backend (se aceptan tal cual)
   if (
     upper === "NOT_EXECUTED" ||
     upper === "COMPLETED" ||
@@ -55,20 +49,15 @@ function resolveStatus(status: string | null | undefined): LeadStatus {
     return upper as LeadStatus;
   }
 
-  // 3) Estados antiguos o externos que queremos traducir
-  //    al modelo oficial actual
 
-  // Estados que representan leads sin ejecutar / pendientes / indefinidos
   if (upper === "NEW" || upper === "UNDETERMINED" || upper === "TO_DO") {
     return "NOT_EXECUTED" as LeadStatus;
   }
 
-  // DONE equivale a COMPLETED en el nuevo modelo
   if (upper === "DONE") {
     return "COMPLETED" as LeadStatus;
   }
 
-  // 4) Cualquier otro valor desconocido se normaliza a NOT_EXECUTED
   return "NOT_EXECUTED" as LeadStatus;
 }
 

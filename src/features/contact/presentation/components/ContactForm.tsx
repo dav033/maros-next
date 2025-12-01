@@ -1,8 +1,7 @@
 "use client";
 
-import type { ChangeEvent } from "react";
 import type { Company } from "@/company";
-import { Checkbox, Icon, Input, Label, Select } from "@/shared/ui";
+import { Checkbox, Icon, Input, Label, Select, useFormHandlers } from "@/shared/ui";
 
 export type ContactFormValue = {
   name: string;
@@ -28,25 +27,11 @@ export function ContactForm({
   disabled,
   companies = [],
 }: ContactFormProps) {
-  function handleTextChange(
-    event: ChangeEvent<HTMLInputElement>,
-    key: keyof Omit<ContactFormValue, "isCustomer" | "isClient" | "companyId">
-  ) {
-    onChange({ ...value, [key]: event.target.value });
-  }
-
-  function handleCustomerChange(event: ChangeEvent<HTMLInputElement>) {
-    onChange({ ...value, isCustomer: event.target.checked });
-  }
-
-  function handleClientChange(event: ChangeEvent<HTMLInputElement>) {
-    onChange({ ...value, isClient: event.target.checked });
-  }
-
-  function handleCompanyChange(newValue: string) {
-    const companyId = newValue === "" ? null : Number(newValue);
-    onChange({ ...value, companyId });
-  }
+  const {
+    handleTextChange,
+    handleCheckboxChange,
+    handleNumberSelectChange,
+  } = useFormHandlers(value, onChange);
 
   return (
     <div className="space-y-5 rounded-2xl bg-theme-dark/80 p-3 shadow-md">
@@ -98,7 +83,7 @@ export function ContactForm({
       <div>
         <Select
           value={value.companyId ?? ""}
-          onChange={handleCompanyChange}
+          onChange={(val) => handleNumberSelectChange(val, "companyId")}
           disabled={disabled}
           searchable={true}
           icon="lucide:building-2"
@@ -116,7 +101,7 @@ export function ContactForm({
         <Checkbox
           id="contact-is-customer"
           checked={value.isCustomer}
-          onChange={handleCustomerChange}
+          onChange={(e) => handleCheckboxChange(e, "isCustomer")}
           disabled={disabled}
         />
         <Label htmlFor="contact-is-customer">
@@ -127,7 +112,7 @@ export function ContactForm({
         <Checkbox
           id="contact-is-client"
           checked={value.isClient}
-          onChange={handleClientChange}
+          onChange={(e) => handleCheckboxChange(e, "isClient")}
           disabled={disabled}
         />
         <Label htmlFor="contact-is-client">

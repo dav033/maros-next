@@ -133,7 +133,6 @@ export function CompanyForm({ value, onChange, disabled, services = [], contacts
             })),
           ]}
         />
-        {/* Contacts Multi-Select */}
         <div className="relative">
           <button
             type="button"

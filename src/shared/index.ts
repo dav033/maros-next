@@ -7,3 +7,6 @@ export * from "./infra/rest/mappers";
 export * from "./application/makeCrudUseCases";
 export * from "./search";
 export * from "./query";
+export * from "./utils/formHelpers";
+export * from "./hooks/useTableWithSearch";
+export * from "./hooks/useEntityForm";

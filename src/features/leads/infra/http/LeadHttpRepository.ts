@@ -42,29 +42,38 @@ export class LeadHttpRepository implements LeadRepositoryPort {
 
   create = async (draft: LeadDraft): Promise<Lead> => {
     const payload: CreateLeadPayload = mapLeadDraftToCreatePayload(draft);
-    // Convert notes array to JSON string if present
-    if ((draft as any).notes) {
-      (payload as any).notesJson = JSON.stringify((draft as any).notes);
-    }
+    
     if ("contact" in (payload as Record<string, unknown>)) {
-      const { contact, projectTypeId, ...leadData } =
+      const { contact, projectTypeId, leadNumber, name, ...leadData } =
         payload as CreateLeadWithNewContactPayload;
+      
+      const leadPayload: Record<string, unknown> = { ...leadData, projectTypeId };
+      if (name && name.trim() !== '') {
+        leadPayload.name = name;
+      }
+      
       const { data } = await this.api.post<ApiLeadDTO>(
         leadEndpoints.createWithNewContact(),
         {
-          lead: { ...leadData, projectType: { id: projectTypeId } },
+          lead: leadPayload,
           contact,
         }
       );
       if (!data) throw new Error("Empty response creating Lead with new contact");
       return mapLeadFromApi(data);
     }
-    const { contactId, projectTypeId, ...leadData } =
+    const { contactId, projectTypeId, leadNumber, name, ...leadData } =
       payload as CreateLeadWithExistingContactPayload;
+    
+    const leadPayload: Record<string, unknown> = { ...leadData, projectTypeId };
+    if (name && name.trim() !== '') {
+      leadPayload.name = name;
+    }
+    
     const { data } = await this.api.post<ApiLeadDTO>(
       leadEndpoints.createWithExistingContact(),
       {
-        lead: { ...leadData, projectType: { id: projectTypeId } },
+        lead: leadPayload,
         contactId,
       }
     );

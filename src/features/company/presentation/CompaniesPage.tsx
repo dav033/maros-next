@@ -1,15 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import type { Company, CompanyDraft, CompanyPatch, CompanyService, CompanyServiceDraft } from "../domain/models";
-import { CompanyType } from "../domain/models";
+import type { CompanyDraft } from "../domain/models";
 import { companyKeys, companyCrudUseCases } from "../application";
-import { companyServiceCrudUseCases } from "../application/usecases/companyServiceCrud";
 import { useCompanyApp } from "@/di";
-import { normalizeEmptyToUndefined, pickDefined } from "@/shared";
 import { Button, Icon, Modal, useToast } from "@/shared/ui";
-import { CompanyForm, type CompanyFormValue } from "./components/CompanyForm";
+import { useEntityForm, optimizedApiClient } from "@/shared";
+import { CompanyForm } from "./components/CompanyForm";
 import { ManageServicesModal } from "./components/ManageServicesModal";
 import { CompaniesTable } from "./components/CompaniesTable";
 import { CompaniesTableSkeleton } from "./components/CompaniesTableSkeleton";
@@ -17,65 +15,8 @@ import { useInstantCompanies } from "./hooks/useInstantCompanies";
 import { useCompanyServices } from "./hooks/useCompanyServices";
 import { useInstantContacts } from "@/features/contact/presentation/hooks/useInstantContacts";
 import { companyEndpoints } from "../infra/http/endpoints";
-import { optimizedApiClient } from "@/shared";
 import { contactsKeys } from "@/contact";
-
-type Mode = "list" | "create" | "edit" | "manageServices";
-
-const initialFormValue: CompanyFormValue = {
-  name: "",
-  address: "",
-  type: null,
-  serviceId: null,
-  isCustomer: false,
-  isClient: false,
-  contactIds: [],
-  notes: [],
-};
-
-function toDraft(value: CompanyFormValue): CompanyDraft {
-  return {
-    name: value.name.trim(),
-    address: normalizeEmptyToUndefined(value.address),
-    type: value.type ?? CompanyType.OTHER,
-    serviceId: value.serviceId,
-    isCustomer: value.isCustomer,
-    isClient: value.isClient,
-  };
-}
-
-function toPatch(current: Company, value: CompanyFormValue): CompanyPatch {
-  const trimmedName = value.name.trim();
-  const normalizedAddress = normalizeEmptyToUndefined(value.address);
-  const currentAddress = normalizeEmptyToUndefined(current.address);
-
-  const patch: Partial<Company> = {};
-
-  if (trimmedName !== current.name) {
-    patch.name = trimmedName;
-  }
-  if (normalizedAddress !== currentAddress) {
-    patch.address = normalizedAddress;
-  }
-  if (value.type !== current.type && value.type != null) {
-    patch.type = value.type;
-  }
-  if (value.serviceId !== current.serviceId) {
-    patch.serviceId = value.serviceId;
-  }
-  if (value.isCustomer !== current.isCustomer) {
-    patch.isCustomer = value.isCustomer;
-  }
-  if (value.isClient !== current.isClient) {
-    patch.isClient = value.isClient;
-  }
-
-  // Si el formulario tiene notas, inclúyelas en el patch
-  if (Array.isArray(value.notes)) {
-    patch.notes = value.notes;
-  }
-  return patch as CompanyPatch;
-}
+import { initialCompanyFormValue, toDraft, toPatch, mapCompanyToFormValue } from "./helpers/companyFormHelpers";
 
 export default function CompaniesPage() {
   const app = useCompanyApp();
@@ -86,152 +27,93 @@ export default function CompaniesPage() {
   const { services } = useCompanyServices();
   const { contacts } = useInstantContacts();
 
-  const [mode, setMode] = useState<Mode>("list");
-  const [current, setCurrent] = useState<Company | null>(null);
-  const [formValue, setFormValue] = useState<CompanyFormValue>(initialFormValue);
-  const [serverError, setServerError] = useState<string | null>(null);
+  const [isCreateMode, setIsCreateMode] = useState(false);
+  const [isManageServicesOpen, setIsManageServicesOpen] = useState(false);
+
+  const {
+    isOpen: isEditOpen,
+    openEdit,
+    closeModal: closeEditModal,
+    formValue: editFormValue,
+    setFormValue: setEditFormValue,
+    currentEntity: currentCompany,
+    serverError: editServerError,
+    setServerError: setEditServerError,
+    handleSubmit: handleEditSubmit,
+    isSubmitting: isEditSubmitting,
+  } = useEntityForm({
+    initialFormValue: initialCompanyFormValue,
+    toPatch,
+    updateFn: async (id, patch) => {
+      const updated = await companyCrudUseCases.update(app)(id, patch);
+      if (editFormValue.contactIds !== undefined) {
+        await optimizedApiClient.post(
+          companyEndpoints.assignContacts(id),
+          editFormValue.contactIds || []
+        );
+      }
+      return updated;
+    },
+    invalidateKeys: [companyKeys.all, ["customers"], contactsKeys.lists()] as any,
+    successMessage: "Company updated successfully!",
+  });
+
+  const [createFormValue, setCreateFormValue] = useState(initialCompanyFormValue);
+  const [createServerError, setCreateServerError] = useState<string | null>(null);
 
   const createMutation = useMutation({
     mutationFn: async (draft: CompanyDraft) => {
       const created = await companyCrudUseCases.create(app)(draft);
-      // Assign contacts if any were selected
-      if (formValue.contactIds && formValue.contactIds.length > 0) {
+      if (createFormValue.contactIds && createFormValue.contactIds.length > 0) {
         await optimizedApiClient.post(
           companyEndpoints.assignContacts(created.id),
-          formValue.contactIds
+          createFormValue.contactIds
         );
       }
       return created;
     },
     onSuccess: () => {
-      setMode("list");
-      setServerError(null);
-      setFormValue(initialFormValue);
+      setIsCreateMode(false);
+      setCreateServerError(null);
+      setCreateFormValue(initialCompanyFormValue);
       queryClient.invalidateQueries({ queryKey: companyKeys.all });
       queryClient.invalidateQueries({ queryKey: ["customers"] });
       queryClient.invalidateQueries({ queryKey: contactsKeys.lists() });
       toast.showSuccess("Company created successfully!");
     },
     onError: (error: unknown) => {
-      const message =
-        error instanceof Error ? error.message : "Could not create company";
-      setServerError(message);
+      const message = error instanceof Error ? error.message : "Could not create company";
+      setCreateServerError(message);
       toast.showError(message);
     },
   });
 
-  const updateMutation = useMutation({
-    mutationFn: async (input: { id: number; patch: CompanyPatch }) => {
-      const updated = await companyCrudUseCases.update(app)(input.id, input.patch);
-      // Assign contacts if any were selected
-      if (formValue.contactIds && formValue.contactIds.length >= 0) {
-        await optimizedApiClient.post(
-          companyEndpoints.assignContacts(input.id),
-          formValue.contactIds || []
-        );
-      }
-      return updated;
-    },
-    onSuccess: () => {
-      setMode("list");
-      setCurrent(null);
-      setServerError(null);
-      setFormValue(initialFormValue);
-      queryClient.invalidateQueries({ queryKey: companyKeys.all });
-      queryClient.invalidateQueries({ queryKey: ["customers"] });
-      queryClient.invalidateQueries({ queryKey: contactsKeys.lists() });
-      toast.showSuccess("Company updated successfully!");
-    },
-    onError: (error: unknown) => {
-      const message =
-        error instanceof Error ? error.message : "Could not update company";
-      setServerError(message);
-      toast.showError(message);
-    },
-  });
+  const openCreate = () => {
+    setCreateFormValue(initialCompanyFormValue);
+    setCreateServerError(null);
+    setIsCreateMode(true);
+  };
 
-  function openCreate() {
-    setFormValue(initialFormValue);
-    setCurrent(null);
-    setServerError(null);
-    setMode("create");
-  }
+  const closeCreateModal = () => {
+    if (createMutation.isPending) return;
+    setIsCreateMode(false);
+    setCreateServerError(null);
+    setCreateFormValue(initialCompanyFormValue);
+  };
 
-  function openEdit(company: Company) {
-    setCurrent(company);
-    // Get contact IDs that belong to this company
-    const companyContactIds = (contacts ?? [])
-      .filter((contact) => contact.companyId === company.id)
-      .map((contact) => contact.id);
-    
-    setFormValue({
-      name: company.name,
-      address: company.address ?? "",
-      type: company.type,
-      serviceId: company.serviceId ?? null,
-      isCustomer: company.isCustomer,
-      isClient: company.isClient,
-      contactIds: companyContactIds,
-      notes: company.notes ?? [],
-    });
-    setServerError(null);
-    setMode("edit");
-  }
-
-  function openManageServices() {
-    setMode("manageServices");
-  }
-
-  function closeManageServices() {
-    setMode("list");
-  }
-
-  function closeModal() {
-    if (createMutation.isPending || updateMutation.isPending) {
-      return;
-    }
-    setMode("list");
-    setCurrent(null);
-    setServerError(null);
-    setFormValue(initialFormValue);
-  }
-
-  function handleCreateSubmit() {
-    const draft = toDraft(formValue);
+  const handleCreateSubmit = () => {
+    const draft = toDraft(createFormValue);
     if (!draft.name) {
-      setServerError("Name is required");
+      setCreateServerError("Name is required");
       return;
     }
     createMutation.mutate(draft);
-  }
+  };
 
-  function handleEditSubmit() {
-    if (!current) {
-      return;
-    }
-    const patch = toPatch(current, formValue);
-    const hasChanges = Object.keys(patch).length > 0;
-    const hasContactChanges = formValue.contactIds !== undefined;
-    
-    if (!hasChanges && !hasContactChanges) {
-      closeModal();
-      return;
-    }
-    
-    updateMutation.mutate({ id: current.id, patch });
-  }
-
-  function handleFormChange(value: CompanyFormValue) {
-    setFormValue(value);
-  }
-
-  function handleDelete(id: number) {
+  const handleDelete = (id: number) => {
     queryClient.invalidateQueries({ queryKey: companyKeys.all });
     queryClient.invalidateQueries({ queryKey: ["customers"] });
-  }
-
-  const isModalOpen = mode === "create" || mode === "edit";
-  const isManageServicesOpen = mode === "manageServices";
+  };
 
   return (
     <main className="flex min-h-[calc(100vh-80px)] w-full flex-col gap-3 bg-theme-dark px-3 py-3 pt-16 sm:gap-4 sm:px-4 sm:py-4 md:px-8 md:py-6 lg:pt-6">
@@ -243,7 +125,7 @@ export default function CompaniesPage() {
       </header>
 
       <div className="flex items-center justify-end gap-2">
-        <Button variant="secondary" onClick={openManageServices}>
+        <Button variant="secondary" onClick={() => setIsManageServicesOpen(true)}>
           <Icon name="lucide:wrench" className="mr-2" size={16} />
           Manage Services
         </Button>
@@ -270,55 +152,84 @@ export default function CompaniesPage() {
           <CompaniesTable
             companies={companies ?? []}
             isLoading={showSkeleton}
-            onEdit={openEdit}
+            onEdit={(company) => openEdit(company, (c) => mapCompanyToFormValue(c, contacts ?? []))}
             onDelete={handleDelete}
             services={services}
           />
         )}
       </section>
-
       <Modal
-        isOpen={isModalOpen}
-        title={mode === "create" ? "New company" : "Edit company"}
-        onClose={closeModal}
+        isOpen={isCreateMode}
+        title="New company"
+        onClose={closeCreateModal}
         footer={
           <>
-            <Button
-              variant="secondary"
-              onClick={closeModal}
-              disabled={createMutation.isPending || updateMutation.isPending}
-            >
+            <Button variant="secondary" onClick={closeCreateModal} disabled={createMutation.isPending}>
               Cancel
             </Button>
             <Button
               variant="primary"
-              onClick={mode === "create" ? handleCreateSubmit : handleEditSubmit}
-              loading={createMutation.isPending || updateMutation.isPending}
-              disabled={!formValue.name.trim()}
+              onClick={handleCreateSubmit}
+              loading={createMutation.isPending}
+              disabled={!createFormValue.name.trim()}
             >
-              {mode === "create" ? "Create" : "Save changes"}
+              Create
             </Button>
           </>
         }
       >
         <CompanyForm
-          value={formValue}
-          onChange={handleFormChange}
-          disabled={createMutation.isPending || updateMutation.isPending}
+          value={createFormValue}
+          onChange={setCreateFormValue}
+          disabled={createMutation.isPending}
           services={services}
           contacts={contacts ?? []}
         />
-        {serverError && (
+        {createServerError && (
           <div className="mt-4 flex items-start gap-2 rounded-lg bg-red-500/10 border border-red-500/20 p-3">
             <Icon name="lucide:alert-circle" size={16} className="text-red-400 mt-0.5" />
-            <p className="text-sm text-red-400">{serverError}</p>
+            <p className="text-sm text-red-400">{createServerError}</p>
+          </div>
+        )}
+      </Modal>
+      <Modal
+        isOpen={isEditOpen}
+        title="Edit company"
+        onClose={closeEditModal}
+        footer={
+          <>
+            <Button variant="secondary" onClick={closeEditModal} disabled={isEditSubmitting}>
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handleEditSubmit}
+              loading={isEditSubmitting}
+              disabled={!editFormValue.name.trim()}
+            >
+              Save changes
+            </Button>
+          </>
+        }
+      >
+        <CompanyForm
+          value={editFormValue}
+          onChange={setEditFormValue}
+          disabled={isEditSubmitting}
+          services={services}
+          contacts={contacts ?? []}
+        />
+        {editServerError && (
+          <div className="mt-4 flex items-start gap-2 rounded-lg bg-red-500/10 border border-red-500/20 p-3">
+            <Icon name="lucide:alert-circle" size={16} className="text-red-400 mt-0.5" />
+            <p className="text-sm text-red-400">{editServerError}</p>
           </div>
         )}
       </Modal>
 
       <ManageServicesModal
         isOpen={isManageServicesOpen}
-        onClose={closeManageServices}
+        onClose={() => setIsManageServicesOpen(false)}
         services={services ?? []}
       />
     </main>

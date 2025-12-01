@@ -36,7 +36,7 @@ export class CompanyHttpRepository implements CompanyRepositoryPort {
       endpoints: companyEndpoints,
       mappers: {
         fromApi: mapCompanyFromApi,
-        fromApiList: mapCompaniesFromApi,
+        fromApiList: (dtos) => dtos.map(mapCompanyFromApi),
         toCreateDto: mapCompanyDraftToCreateDTO,
         toUpdateDto: mapCompanyPatchToUpdateDTO,
       },

@@ -17,14 +17,10 @@ export default function SidebarDropdown({ config, isInitiallyOpen, children, sto
   const contentRef = useRef<HTMLDivElement | null>(null);
   const [isHydrated, setIsHydrated] = useState(false);
 
-  // Sincronizar con localStorage después de la hidratación
-  // Pero priorizar isInitiallyOpen (basado en ruta) sobre localStorage
   useEffect(() => {
     if (isInitiallyOpen) {
-      // Si la ruta actual requiere que esté abierto, ignorar localStorage
       setIsOpen(true);
     } else {
-      // Solo consultar localStorage si la ruta no requiere que esté abierto
       const saved = localStorage.getItem(storageKey);
       if (saved !== null) {
         setIsOpen(saved === "true");
@@ -33,15 +29,12 @@ export default function SidebarDropdown({ config, isInitiallyOpen, children, sto
     setIsHydrated(true);
   }, [storageKey, isInitiallyOpen]);
 
-  // Reaccionar cuando cambia isInitiallyOpen (cambio de ruta)
   useEffect(() => {
     if (isHydrated && isInitiallyOpen) {
       setIsOpen(true);
     }
   }, [isInitiallyOpen, isHydrated]);
 
-  // Guardar en localStorage cuando cambie el estado (solo después de hidratar)
-  // Pero NO guardar si está forzado a estar abierto por la ruta
   useEffect(() => {
     if (isHydrated && !isInitiallyOpen) {
       localStorage.setItem(storageKey, String(isOpen));

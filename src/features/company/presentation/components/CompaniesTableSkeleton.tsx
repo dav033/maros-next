@@ -1,58 +1,52 @@
 "use client";
 
-import { Skeleton } from "@/shared/ui";
+import { TableSkeleton } from "@/shared/ui";
+import type { TableSkeletonColumn } from "@/shared/ui";
 
-const SKELETON_ROWS = 13;
+const columns: TableSkeletonColumn[] = [
+  {
+    width: "w-[80px]",
+    header: "Notes",
+    align: "center",
+    skeletonWidth: "w-12",
+  },
+  {
+    width: "w-[200px]",
+    header: "Name",
+    skeletonWidth: "w-3/4",
+  },
+  {
+    width: "w-[250px]",
+    header: "Address",
+    skeletonWidth: "w-4/5",
+  },
+  {
+    width: "w-[120px]",
+    header: "Type",
+    skeletonWidth: "w-20",
+    isBadge: true,
+  },
+  {
+    width: "w-[150px]",
+    header: "Service",
+    skeletonWidth: "w-24",
+    isBadge: true,
+  },
+  {
+    width: "w-[100px]",
+    header: "Status",
+    align: "center",
+    skeletonWidth: "w-16",
+    isBadge: true,
+  },
+  {
+    width: "w-[80px]",
+    header: "",
+    align: "center",
+    skeletonWidth: "w-5",
+  },
+];
 
 export function CompaniesTableSkeleton() {
-  return (
-    <section className="flex-1 rounded-2xl border border-theme-gray bg-gray-800/50 shadow-sm">
-      <table className="w-full table-fixed text-sm">
-        <colgroup>
-          <col className="w-[200px]" />
-          <col className="w-[250px]" />
-          <col className="w-[120px]" />
-          <col className="w-[100px]" />
-          <col className="w-[100px]" />
-        </colgroup>
-        <thead className="bg-gray-700/60">
-          <tr className="border-b border-theme-gray-subtle text-left text-xs uppercase tracking-wide text-gray-400">
-            <th className="px-4 py-3">Name</th>
-            <th className="px-4 py-3">Address</th>
-            <th className="px-4 py-3">Type</th>
-            <th className="px-4 py-3 text-right">Customer</th>
-            <th className="px-4 py-3 text-right">Client</th>
-          </tr>
-        </thead>
-        <tbody>
-          {Array.from({ length: SKELETON_ROWS }).map((_, index) => (
-            <tr
-              key={index}
-              className="border-b border-theme-gray-subtle last:border-b-0"
-            >
-              <td className="px-4 py-3">
-                <Skeleton className="h-4 w-3/4" />
-              </td>
-              <td className="px-4 py-3">
-                <Skeleton className="h-4 w-4/5" />
-              </td>
-              <td className="px-4 py-3">
-                <Skeleton className="h-5 w-20 rounded-full" />
-              </td>
-              <td className="px-4 py-3">
-                <div className="flex justify-end">
-                  <Skeleton className="h-5 w-12 rounded-full" />
-                </div>
-              </td>
-              <td className="px-4 py-3">
-                <div className="flex justify-end">
-                  <Skeleton className="h-5 w-12 rounded-full" />
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </section>
-  );
+  return <TableSkeleton columns={columns} rowCount={13} />;
 }

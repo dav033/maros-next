@@ -1,0 +1,78 @@
+
+export function normalizeEmptyToUndefined(value: string | undefined | null): string | undefined {
+  if (value === null || value === undefined || value.trim() === "") {
+    return undefined;
+  }
+  return value;
+}
+
+/**
+ * Creates a patch object with only changed fields
+ * @param current - Current entity state
+ * @param updates - Updated values
+ * @param normalizers - Optional normalizer functions for specific fields
+ * @returns Patch object with only changed fields
+ */
+export function createPatch<T extends Record<string, any>>(
+  current: T,
+  updates: Partial<T>,
+  normalizers?: Partial<Record<keyof T, (val: any) => any>>
+): Partial<T> {
+  const patch: Partial<T> = {};
+
+  for (const key in updates) {
+    if (!Object.prototype.hasOwnProperty.call(updates, key)) {
+      continue;
+    }
+
+    const updateValue = updates[key];
+    const currentValue = current[key];
+    
+    const normalizer = normalizers?.[key];
+    const normalizedUpdate = normalizer ? normalizer(updateValue) : updateValue;
+    const normalizedCurrent = normalizer ? normalizer(currentValue) : currentValue;
+
+    const areEqual = 
+      normalizedUpdate === normalizedCurrent ||
+      (normalizedUpdate == null && normalizedCurrent == null);
+
+    if (!areEqual) {
+      patch[key] = normalizedUpdate;
+    }
+  }
+
+  return patch;
+}
+
+/**
+ * Checks if a patch has any changes
+ */
+export function hasChanges<T>(patch: Partial<T>): boolean {
+  return Object.keys(patch).length > 0;
+}
+
+/**
+ * Trims string fields in an object
+ */
+export function trimStringFields<T extends Record<string, any>>(obj: T): T {
+  const result = { ...obj };
+  for (const key in result) {
+    if (typeof result[key] === "string") {
+      result[key] = (result[key] as string).trim() as any;
+    }
+  }
+  return result;
+}
+
+/**
+ * Removes undefined and null values from an object
+ */
+export function removeNullish<T extends Record<string, any>>(obj: T): Partial<T> {
+  const result: Partial<T> = {};
+  for (const key in obj) {
+    if (obj[key] != null) {
+      result[key] = obj[key];
+    }
+  }
+  return result;
+}

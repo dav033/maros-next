@@ -17,13 +17,12 @@ import { mapLeadFromDTO, mapLeadsFromDTO } from "@/leads";
 
 export type CreateLeadBasePayload = {
   leadNumber: string | null;
-  name: string;
+  name?: string;
   startDate: ISODate;
   location: string;
   status: LeadStatus | null;
   projectTypeId: number;
   leadType: LeadType;
-  notesJson?: string;
 };
 
 export type CreateLeadWithNewContactPayload = CreateLeadBasePayload & {
@@ -67,14 +66,16 @@ export function mapLeadDraftToCreatePayload(
 ): CreateLeadPayload {
   const base: CreateLeadBasePayload = {
     leadNumber: draft.leadNumber,
-    name: draft.name,
     startDate: draft.startDate,
     location: draft.location,
     status: draft.status,
     projectTypeId: draft.projectTypeId,
     leadType: draft.leadType,
-    notesJson: "[]",
   };
+
+  if (draft.name && draft.name.trim() !== '') {
+    base.name = draft.name;
+  }
 
   if ("contact" in draft) {
     return {

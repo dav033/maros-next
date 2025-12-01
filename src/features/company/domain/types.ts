@@ -1,4 +1,3 @@
-// Domain Types
 export type CompanyId = number;
 
 export type CompanyType =
@@ -38,6 +37,5 @@ export interface CompanyPatch {
   notes?: string[];
 }
 
-// Policies
 export interface CompanyPolicies {}
 export interface CompanyPatchPolicies {}

@@ -3,10 +3,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { optimizedApiClient } from "@/shared";
 import { customersEndpoints } from "../endpoints";
+import { customersKeys } from "../keys";
 import type { CustomersResponse } from "../types";
 import { buildInstantQueryResult } from "@/shared";
-import { mapContactsFromApi } from "@/features/contact/infra/http/mappers";
-import { mapCompaniesFromApi, type ApiCompanyDTO } from "@/features/company/infra/http/mappers";
+import { mapContactFromApi } from "@/features/contact/infra/http/mappers";
+import { mapCompanyFromApi, type ApiCompanyDTO } from "@/features/company/infra/http/mappers";
 import type { Contact } from "@/contact";
 import type { Company } from "@/company";
 
@@ -30,7 +31,7 @@ interface ApiCustomersResponse {
 
 export function useInstantCustomers(): UseInstantCustomersResult {
   const query = useQuery<CustomersResponse, Error>({
-    queryKey: ["customers"],
+    queryKey: customersKeys.all,
     queryFn: async () => {
       const { data } = await optimizedApiClient.get<ApiCustomersResponse>(
         customersEndpoints.getCustomers()
@@ -41,8 +42,8 @@ export function useInstantCustomers(): UseInstantCustomersResult {
       }
 
       return {
-        contacts: mapContactsFromApi(data.contacts ?? []),
-        companies: mapCompaniesFromApi(data.companies ?? []),
+        contacts: (data.contacts ?? []).map(mapContactFromApi),
+        companies: (data.companies ?? []).map(mapCompanyFromApi),
       };
     },
     staleTime: DEFAULT_STALE_TIME,

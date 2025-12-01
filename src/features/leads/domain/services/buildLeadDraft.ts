@@ -35,7 +35,6 @@ function normalizeText(s: string): string {
 function validateLeadName(raw: string | undefined, location: string, leadNumber: string | null): string {
   let v = normalizeText(raw ?? "");
   
-  // Allow empty name, will be auto-generated on backend: {leadNumber}-{location}
   if (!v) {
     const normalizedLocation = normalizeText(location);
     if (!normalizedLocation) {
@@ -45,7 +44,6 @@ function validateLeadName(raw: string | undefined, location: string, leadNumber:
         { details: { field: "location" } }
       );
     }
-    // Return empty string, backend will generate the name
     return "";
   }
   

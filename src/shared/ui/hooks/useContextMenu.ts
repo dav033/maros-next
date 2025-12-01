@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 import type {
   ContextMenuOption,
@@ -25,7 +27,6 @@ export function useContextMenu(): UseContextMenuResult {
       let x = event.clientX;
       let y = event.clientY;
 
-      // Calcular altura real del menú según el número de opciones
       const OPTION_HEIGHT = 44; // Ajusta según tu diseño
       const PADDING = 16;
       const menuHeight = Math.min(MENU_HEIGHT, options.length * OPTION_HEIGHT + PADDING * 2);

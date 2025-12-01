@@ -16,7 +16,6 @@ export function ensureLeadDraftIntegrity(
   policies: LeadPolicies = {}
 ): void {
   const name = normalizeText((draft as unknown as Record<string, unknown>)["name"]);
-  // Allow empty name, will be auto-generated on backend
   if (name && name.length > 140) {
     throw new BusinessRuleError("FORMAT_ERROR", "Lead name max length is 140", {
       details: { field: "name", length: name.length },

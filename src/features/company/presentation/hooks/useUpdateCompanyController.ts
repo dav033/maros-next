@@ -1,11 +1,10 @@
 "use client";
 
-import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useMemo, useState } from "react";
 import { useCompanyApp } from "@/di";
 import { companyKeys } from "../../application/keys";
 import { companyCrudUseCases } from "../../application/usecases/companyCrud";
 import type { Company, CompanyPatch, CompanyType } from "../../domain/models";
+import { useFormController } from "@/shared/ui";
 
 type CompanyFormData = {
   name: string;
@@ -27,37 +26,17 @@ export function useUpdateCompanyController({
   onUpdated,
 }: UseUpdateCompanyControllerOptions) {
   const ctx = useCompanyApp();
-  const queryClient = useQueryClient();
 
-  const [form, setForm] = useState<CompanyFormData>({
-    name: initialData.name,
-    address: initialData.address ?? "",
-    type: initialData.type,
-    serviceId: initialData.serviceId ?? null,
-    isCustomer: initialData.isCustomer,
-  });
-
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const canSubmit = useMemo(() => {
-    return form.name.trim().length > 0;
-  }, [form.name]);
-
-  const setField = useCallback(
-    <K extends keyof CompanyFormData>(key: K, value: CompanyFormData[K]) => {
-      setError(null);
-      setForm((prev) => ({ ...prev, [key]: value }));
+  return useFormController<CompanyFormData, Company>({
+    initialForm: {
+      name: initialData.name,
+      address: initialData.address ?? "",
+      type: initialData.type,
+      serviceId: initialData.serviceId ?? null,
+      isCustomer: initialData.isCustomer,
     },
-    []
-  );
-
-  const submit = useCallback(async () => {
-    if (!canSubmit || isLoading) return false;
-    setIsLoading(true);
-    setError(null);
-
-    try {
+    validate: (form) => form.name.trim().length > 0,
+    transformBeforeSubmit: (form) => {
       const patch: CompanyPatch = {
         name: form.name.trim() !== initialData.name ? form.name.trim() : undefined,
         address: form.address?.trim() !== initialData.address ? form.address?.trim() : undefined,
@@ -65,29 +44,14 @@ export function useUpdateCompanyController({
         serviceId: form.serviceId !== initialData.serviceId ? form.serviceId : undefined,
         isCustomer: form.isCustomer !== initialData.isCustomer ? form.isCustomer : undefined,
       };
-
-      const updated = await companyCrudUseCases.update(ctx)(companyId, patch);
-
-      queryClient.invalidateQueries({ queryKey: companyKeys.all });
-
-      onUpdated?.(updated);
-      return true;
-    } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : String(e);
-      setError(msg);
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [canSubmit, isLoading, form, initialData, companyId, ctx, queryClient, onUpdated]);
-
-  return {
-    form,
-    setField,
-    isLoading,
-    error,
-    setError,
-    canSubmit,
-    submit,
-  };
+      
+      const hasChanges = Object.values(patch).some(v => v !== undefined);
+      return hasChanges ? (patch as any) : null;
+    },
+    onSubmit: async (patch) => {
+      return await companyCrudUseCases.update(ctx)(companyId, patch as CompanyPatch);
+    },
+    invalidateKeys: [companyKeys.all],
+    onSuccess: onUpdated,
+  });
 }
