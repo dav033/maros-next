@@ -1,7 +1,5 @@
-import type { Company, CompanyType } from "../models";
+import type { Company, CompanyType, CompanyPatch } from "../models";
 import { normalizeEmptyToUndefined } from "@/shared";
-
-export type CompanyPatch = Partial<Company>;
 
 export type CompanyFormValue = {
   name: string;
