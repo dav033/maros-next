@@ -20,10 +20,8 @@ export function diffToPatch(current: Lead, updated: Lead): LeadPatch {
     ...((updated.leadNumber ?? "") !== (current.leadNumber ?? "")
       ? { leadNumber: updated.leadNumber ?? null }
       : {}),
-    ...(updated.notesJson !== current.notesJson
-      ? {
-          notes: updated.notesJson ? JSON.parse(updated.notesJson) : [],
-        }
+    ...(JSON.stringify(updated.notes) !== JSON.stringify(current.notes)
+      ? { notes: updated.notes }
       : {}),
   };
 }

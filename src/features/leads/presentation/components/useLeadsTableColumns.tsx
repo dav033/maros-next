@@ -22,7 +22,7 @@ export function useLeadsTableColumns({
         header: "Notes",
         className: "w-[80px] text-center",
         render: (lead: Lead) => {
-          const notesArray = getNotesArray(lead.notesJson);
+          const notesArray = Array.isArray(lead.notes) ? lead.notes : [];
           return (
             <NotesButton
               hasNotes={notesArray.length > 0}

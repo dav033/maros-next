@@ -27,7 +27,7 @@ export interface Lead {
   contact: Contact;
   projectType: ProjectType;
   leadType: LeadType;
-  notesJson?: string;
+  notes: string[];
 }
 
 export type LeadId = number;
