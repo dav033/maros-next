@@ -106,7 +106,10 @@ export function useLeadsTableLogic({
 
   const handleOpenNotesModal = React.useCallback(
     (lead: Lead) => {
-      const notes = getNotesArray(lead.notesJson);
+      console.log('[OPEN NOTES MODAL] Lead:', lead);
+      console.log('[OPEN NOTES MODAL] Lead.notes:', lead.notes);
+      const notes = Array.isArray(lead.notes) ? lead.notes : [];
+      console.log('[OPEN NOTES MODAL] Notes to pass:', notes);
       openNotesModal(lead, lead.name, notes);
     },
     [openNotesModal]
