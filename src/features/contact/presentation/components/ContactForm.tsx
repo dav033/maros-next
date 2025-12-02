@@ -2,7 +2,7 @@
 
 import type { Company } from "@/company";
 import type { ContactFormValue } from "../../domain/mappers";
-import { Checkbox, Icon, Input, Label, Select, useFormHandlers } from "@/shared/ui";
+import { Checkbox, Icon, Input, Label, Select, useFormHandlers, Textarea } from "@/shared/ui";
 
 export type ContactFormProps = {
   value: ContactFormValue;
@@ -97,6 +97,15 @@ export function ContactForm({
         <Label htmlFor="contact-is-customer">
          Customer
         </Label>
+      </div>
+      <div>
+        <Textarea
+          value={value.note ?? ""}
+          onChange={(event) => handleTextChange(event, "note" as any)}
+          placeholder="Add a note (optional)"
+          disabled={disabled}
+          rows={3}
+        />
       </div>
       <div className="flex items-center gap-2 rounded-2xl bg-theme-dark px-3 py-1.5">
         <Checkbox

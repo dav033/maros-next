@@ -10,6 +10,7 @@ export type ContactFormValue = {
   isCustomer: boolean;
   isClient: boolean;
   companyId: number | null;
+  note?: string;
 };
 
 export function toContactPatch(current: Contact, value: ContactFormValue): ContactPatch {

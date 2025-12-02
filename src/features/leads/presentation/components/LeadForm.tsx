@@ -13,6 +13,7 @@ type LeadFormData = {
   contactId?: number;
   location: string;
   status?: string;
+  note?: string;
 };
 
 type LeadFormProps = {
@@ -96,6 +97,13 @@ export function LeadForm({
           disabled={disabled}
         />
       )}
+
+      <Input
+        value={form.note ?? ""}
+        onChange={(e) => onChange("note", e.target.value)}
+        placeholder="Add a note (optional)"
+        disabled={disabled}
+      />
     </div>
   );
 }

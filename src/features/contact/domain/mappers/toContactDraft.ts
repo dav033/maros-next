@@ -12,5 +12,6 @@ export function toContactDraft(value: ContactFormValue): ContactDraft {
     isCustomer: value.isCustomer,
     isClient: value.isClient,
     companyId: value.companyId,
+    notes: value.note?.trim() ? [value.note.trim()] : null,
   };
 }

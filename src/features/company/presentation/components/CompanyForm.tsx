@@ -4,7 +4,7 @@ import type { ChangeEvent } from "react";
 import { useState, useEffect, useRef } from "react";
 import type { CompanyType, CompanyService } from "../../domain/models";
 import type { Contact } from "@/contact";
-import { Checkbox, Icon, Input, Label, Select } from "@/shared/ui";
+import { Checkbox, Icon, Input, Label, Select, Textarea } from "@/shared/ui";
 
 export type CompanyFormValue = {
   name: string;
@@ -15,6 +15,7 @@ export type CompanyFormValue = {
   isClient: boolean;
   contactIds: number[];
   notes: string[];
+  note?: string;
 };
 
 export type CompanyFormProps = {
@@ -199,6 +200,15 @@ export function CompanyForm({ value, onChange, disabled, services = [], contacts
         <Label htmlFor="company-is-client">
           PROVEEDOR
         </Label>
+      </div>
+      <div>
+        <Textarea
+          value={value.note ?? ""}
+          onChange={(event) => onChange({ ...value, note: event.target.value })}
+          placeholder="Add a note (optional)"
+          disabled={disabled}
+          rows={3}
+        />
       </div>
     </div>
   );

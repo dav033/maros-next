@@ -16,6 +16,7 @@ export const initialContactFormValue: ContactFormValue = {
   isCustomer: false,
   isClient: false,
   companyId: null,
+  note: "",
 };
 
 export function useContactMutations() {

@@ -13,6 +13,7 @@ type CompanyFormData = {
   type: CompanyType;
   serviceId?: number | null;
   isCustomer: boolean;
+  note?: string;
 };
 
 type UseCreateCompanyControllerOptions = {
@@ -29,6 +30,7 @@ export function useCreateCompanyController({ onCreated }: UseCreateCompanyContro
     type: "DESIGN" as CompanyType,
     serviceId: null,
     isCustomer: false,
+    note: "",
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -55,6 +57,7 @@ export function useCreateCompanyController({ onCreated }: UseCreateCompanyContro
         type: form.type,
         serviceId: form.serviceId ?? null,
         isCustomer: form.isCustomer,
+        notes: form.note?.trim() ? [form.note.trim()] : null,
       };
 
       const created = await companyCrudUseCases.create(ctx)(draft);
