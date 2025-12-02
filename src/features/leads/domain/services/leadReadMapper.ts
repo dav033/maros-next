@@ -15,6 +15,7 @@ export type ApiContactDTO = {
   email?: string | null;
   address?: string | null;
   isCustomer?: boolean | null;
+  isClient?: boolean | null;
 } | null;
 
 export type ApiLeadDTO = {
@@ -84,7 +85,7 @@ function resolveLeadType(input: unknown): LeadType {
 }
 
 export function mapLeadFromDTO(dto: ApiLeadDTO): Lead {
-  const id = dto.id;
+  const id = dto?.id ?? 0;
   const leadNumber = normalizeText(dto?.leadNumber ?? "");
   const name = normalizeText(dto?.name ?? "");
   const location = normalizeText(dto?.location ?? "");

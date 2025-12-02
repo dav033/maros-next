@@ -101,7 +101,7 @@ export function ContactForm({
       <div>
         <Textarea
           value={value.note ?? ""}
-          onChange={(event) => handleTextChange(event, "note" as any)}
+          onChange={(event) => onChange({ ...value, note: event.target.value })}
           placeholder="Add a note (optional)"
           disabled={disabled}
           rows={3}
