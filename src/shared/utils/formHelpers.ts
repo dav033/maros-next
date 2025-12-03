@@ -1,8 +1,8 @@
 /**
- * Creates a patch object with only changed fields
- * @param current - Current entity state
- * @param updates - Updated values
- * @param normalizers - Optional normalizer functions for specific fields
+ * Creates a patch object containing only changed fields between current and updated values
+ * @param current - The current entity state
+ * @param updates - The updated values from form
+ * @param normalizers - Optional field-specific normalizers (e.g., trimming, empty to undefined)
  * @returns Patch object with only changed fields
  */
 export function createPatch<T extends Record<string, any>>(
@@ -37,14 +37,15 @@ export function createPatch<T extends Record<string, any>>(
 }
 
 /**
- * Checks if a patch has any changes
+ * Checks if a patch object contains any changes
  */
 export function hasChanges<T>(patch: Partial<T>): boolean {
   return Object.keys(patch).length > 0;
 }
 
 /**
- * Trims string fields in an object
+ * Trims all string fields in an object
+ * Useful for normalizing form input before processing
  */
 export function trimStringFields<T extends Record<string, any>>(obj: T): T {
   const result = { ...obj };
@@ -57,7 +58,7 @@ export function trimStringFields<T extends Record<string, any>>(obj: T): T {
 }
 
 /**
- * Removes undefined and null values from an object
+ * Removes null and undefined values from an object
  */
 export function removeNullish<T extends Record<string, any>>(obj: T): Partial<T> {
   const result: Partial<T> = {};
@@ -68,3 +69,5 @@ export function removeNullish<T extends Record<string, any>>(obj: T): Partial<T>
   }
   return result;
 }
+
+

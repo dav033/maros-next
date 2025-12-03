@@ -1,5 +1,5 @@
 import type { Company } from "../models";
-import type { CompanyFormValue } from "../../presentation/components/CompanyForm";
+import type { CompanyFormValue } from "../../presentation/molecules/CompanyForm";
 import type { Contact } from "@/contact";
 
 export function toCompanyFormValue(company: Company, contacts: Contact[] = []): CompanyFormValue {

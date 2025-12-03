@@ -25,10 +25,6 @@ export type ApiContactDTO = Readonly<{
 }>;
 
 export function mapContactFromDTO(dto: ApiContactDTO): Contact {
-  console.log('=== Contact DTO recibido ===');
-  console.log('DTO completo:', dto);
-  console.log('DTO.company:', dto.company);
-  console.log('DTO.companyId:', dto.companyId);
   const id = dto.id;
   if (!Number.isFinite(id) || id == null || id <= 0) {
     throw new BusinessRuleError(
@@ -56,8 +52,6 @@ export function mapContactFromDTO(dto: ApiContactDTO): Contact {
     isClient: !!dto.company.isClient,
     notes: dto.company.notes || [],
   } : undefined;
-
-  console.log('Company mapeada:', company);
   
   const contact: Contact = {
     id,

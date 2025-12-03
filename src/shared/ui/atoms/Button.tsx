@@ -9,6 +9,7 @@ export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   leftIcon?: ReactNode;
   rightIcon?: ReactNode;
   loading?: boolean;
+  fullWidth?: boolean;
 };
 
 const base =
@@ -41,10 +42,12 @@ export function Button({
   className = "",
   loading = false,
   disabled,
+  fullWidth = false,
   children,
   ...props
 }: ButtonProps) {
-  const classes = [base, variants[variant], sizes[size], "w-full sm:w-auto", className]
+  const widthClass = fullWidth ? "w-full sm:w-auto" : "";
+  const classes = [base, variants[variant], sizes[size], widthClass, className]
     .filter(Boolean)
     .join(" ");
 

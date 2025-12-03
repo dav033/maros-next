@@ -79,16 +79,9 @@ export function makeHttpResourceRepository<
 
     async update(id: ID, patch: Patch): Promise<Entity> {
       const dto = toUpdateDto(patch);
-      console.log("[resourceRepository.update] Patch:", patch);
-      console.log("[resourceRepository.update] Mapped DTO:", dto);
-      console.log("[resourceRepository.update] Endpoint:", endpoints.update(id));
-      console.log("[resourceRepository.update] Sending PUT request with body:", JSON.stringify(dto, null, 2));
       const { data } = await api.put<ApiDto>(endpoints.update(id), dto);
-      console.log("[resourceRepository.update] Response data:", data);
       if (!data) throw new Error("Empty response on update");
-      const result = fromApi(data);
-      console.log("[resourceRepository.update] Mapped result:", result);
-      return result;
+      return fromApi(data);
     },
 
     async delete(id: ID): Promise<void> {

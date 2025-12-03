@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useToast } from "../context/ToastContext";
+import { useCallback } from "react";
+import { useCrudState } from "./useCrudState";
+import { useCrudMutations } from "./useCrudMutations";
+import { useCrudModal } from "./useCrudModal";
+import { useCrudForm } from "./useCrudForm";
 
-export type CrudMode = "list" | "create" | "edit";
+export type { CrudMode } from "./useCrudState";
 
 export type UseCrudPageOptions<TEntity, TFormValue, TDraft, TPatch> = {
   queryKey: unknown[] | unknown[][];
@@ -22,29 +24,49 @@ export type UseCrudPageOptions<TEntity, TFormValue, TDraft, TPatch> = {
 };
 
 export type UseCrudPageResult<TEntity, TFormValue> = {
-  mode: CrudMode;
+  mode: ReturnType<typeof useCrudState>["mode"];
   currentItem: TEntity | null;
   formValue: TFormValue;
   serverError: string | null;
-  
   isCreating: boolean;
   isUpdating: boolean;
   isPending: boolean;
-  
   openCreate: () => void;
   openEdit: (item: TEntity) => void;
   closeModal: () => void;
-  
   setFormValue: (value: TFormValue) => void;
   handleFormChange: (value: TFormValue) => void;
   setServerError: (error: string | null) => void;
-  
   handleCreateSubmit: () => void;
   handleEditSubmit: () => void;
-  
   handleDelete: (id: number) => void;
 };
-
+/**
+ * Composite hook that orchestrates CRUD page functionality.
+ * 
+ * This hook has been refactored into smaller, composable hooks:
+ * - useCrudState: Manages state (mode, currentItem, formValue, errors)
+ * - useCrudMutations: Handles create/update/delete operations
+ * - useCrudModal: Controls modal open/close/mode switching
+ * - useCrudForm: Manages form submissions and transformations
+ * 
+ * Benefits of this architecture:
+ * - Each hook has a single responsibility
+ * - Easier to test in isolation
+ * - Reusable components for custom CRUD implementations
+ * - Better type safety and intellisense
+ * 
+ * @example
+ * const crud = useCrudPage({
+ *   queryKey: ["contacts"],
+ *   createFn: (draft) => api.create(draft),
+ *   updateFn: (id, patch) => api.update(id, patch),
+ *   toDraft: (form) => ({ ...form }),
+ *   toPatch: (current, form) => createPatch(current, form),
+ *   initialFormValue: { name: "" },
+ *   toFormValue: (entity) => ({ name: entity.name }),
+ * });
+ */
 export function useCrudPage<TEntity extends { id: number }, TFormValue, TDraft, TPatch>(
   options: UseCrudPageOptions<TEntity, TFormValue, TDraft, TPatch>
 ): UseCrudPageResult<TEntity, TFormValue> {
@@ -60,127 +82,85 @@ export function useCrudPage<TEntity extends { id: number }, TFormValue, TDraft, 
     onSuccess,
   } = options;
 
-  const queryClient = useQueryClient();
-  const toast = useToast();
+  // 1. State management
+  const state = useCrudState<TEntity, TFormValue>({
+    initialFormValue,
+  });
 
-  const [mode, setMode] = useState<CrudMode>("list");
-  const [currentItem, setCurrentItem] = useState<TEntity | null>(null);
-  const [formValue, setFormValue] = useState<TFormValue>(initialFormValue);
-  const [serverError, setServerError] = useState<string | null>(null);
-
-  const invalidateQueries = () => {
-    if (Array.isArray(queryKey[0])) {
-      (queryKey as unknown[][]).forEach((key) => {
-        queryClient.invalidateQueries({ queryKey: key });
-      });
-    } else {
-      queryClient.invalidateQueries({ queryKey: queryKey as unknown[] });
-    }
-  };
-
-  const createMutation = useMutation({
-    mutationFn: createFn,
-    onSuccess: async () => {
-      setMode("list");
-      setCurrentItem(null);
-      setServerError(null);
-      setFormValue(initialFormValue);
-      invalidateQueries();
-      toast.showSuccess(successMessages?.create ?? "Created successfully!");
+  // 2. Mutations (create/update)
+  const mutations = useCrudMutations<TEntity, TDraft, TPatch>({
+    queryKey,
+    createFn,
+    updateFn,
+    successMessages,
+    onCreateSuccess: async () => {
+      state.resetState();
       await onSuccess?.();
     },
-    onError: (error: unknown) => {
-      const message = error instanceof Error ? error.message : "Could not create";
-      setServerError(message);
-      toast.showError(message);
+    onUpdateSuccess: async () => {
+      state.resetState();
+      await onSuccess?.();
     },
   });
 
-  const updateMutation = useMutation({
-    mutationFn: ({ id, patch }: { id: number; patch: TPatch }) => updateFn(id, patch),
-    onSuccess: async () => {
-      setMode("list");
-      setCurrentItem(null);
-      setServerError(null);
-      setFormValue(initialFormValue);
-      invalidateQueries();
-      toast.showSuccess(successMessages?.update ?? "Updated successfully!");
-      await onSuccess?.();
-    },
-    onError: (error: unknown) => {
-      const message = error instanceof Error ? error.message : "Could not update";
-      setServerError(message);
-      toast.showError(message);
-    },
+  // 3. Modal control
+  const modal = useCrudModal<TEntity, TFormValue>({
+    mode: state.mode,
+    currentItem: state.currentItem,
+    initialFormValue,
+    toFormValue,
+    isPending: mutations.isPending,
+    setMode: state.setMode,
+    setCurrentItem: state.setCurrentItem,
+    setFormValue: state.setFormValue,
+    setServerError: state.setServerError,
+    resetState: state.resetState,
   });
 
-  const openCreate = useCallback(() => {
-    setFormValue(initialFormValue);
-    setCurrentItem(null);
-    setServerError(null);
-    setMode("create");
-  }, [initialFormValue]);
+  // 4. Form handling
+  const form = useCrudForm<TEntity, TFormValue, TDraft, TPatch>({
+    formValue: state.formValue,
+    currentItem: state.currentItem,
+    toDraft,
+    toPatch,
+    setFormValue: state.setFormValue,
+    setServerError: state.setServerError,
+    handleCreate: mutations.handleCreate,
+    handleUpdate: mutations.handleUpdate,
+    closeModal: modal.closeModal,
+  });
 
-  const openEdit = useCallback((item: TEntity) => {
-    setCurrentItem(item);
-    setFormValue(toFormValue(item));
-    setServerError(null);
-    setMode("edit");
-  }, [toFormValue]);
-
-  const closeModal = useCallback(() => {
-    if (createMutation.isPending || updateMutation.isPending) {
-      return;
-    }
-    setMode("list");
-    setCurrentItem(null);
-    setServerError(null);
-    setFormValue(initialFormValue);
-  }, [createMutation.isPending, updateMutation.isPending, initialFormValue]);
-
-  const handleFormChange = useCallback((value: TFormValue) => {
-    setFormValue(value);
-  }, []);
-
-  const handleCreateSubmit = useCallback(() => {
-    const draft = toDraft(formValue);
-    createMutation.mutate(draft);
-  }, [formValue, toDraft, createMutation]);
-
-  const handleEditSubmit = useCallback(() => {
-    if (!currentItem) {
-      return;
-    }
-    const patch = toPatch(currentItem, formValue);
-    if (Object.keys(patch as object).length === 0) {
-      closeModal();
-      return;
-    }
-    updateMutation.mutate({ id: currentItem.id, patch });
-  }, [currentItem, formValue, toPatch, updateMutation, closeModal]);
-
+  // Backward compatible handleDelete
   const handleDelete = useCallback((id: number) => {
-    invalidateQueries();
-  }, []);
+    mutations.invalidateQueries();
+  }, [mutations]);
 
+  // Compose and return the complete API
   return {
-    mode,
-    currentItem,
-    formValue,
-    serverError,
+    // State
+    mode: state.mode,
+    currentItem: state.currentItem,
+    formValue: form.formValue,
+    serverError: state.serverError,
     
-    isCreating: createMutation.isPending,
-    isUpdating: updateMutation.isPending,
-    isPending: createMutation.isPending || updateMutation.isPending,
+    // Mutations status
+    isCreating: mutations.isCreating,
+    isUpdating: mutations.isUpdating,
+    isPending: mutations.isPending,
     
-    openCreate,
-    openEdit,
-    closeModal,
-    setFormValue,
-    handleFormChange,
-    setServerError,
-    handleCreateSubmit,
-    handleEditSubmit,
+    // Modal actions
+    openCreate: modal.openCreate,
+    openEdit: modal.openEdit,
+    closeModal: modal.closeModal,
+    
+    // Form actions
+    setFormValue: state.setFormValue,
+    handleFormChange: form.handleFormChange,
+    setServerError: form.setServerError,
+    handleCreateSubmit: form.handleCreateSubmit,
+    handleEditSubmit: form.handleEditSubmit,
+    
+    // Delete (legacy support)
     handleDelete,
   };
 }

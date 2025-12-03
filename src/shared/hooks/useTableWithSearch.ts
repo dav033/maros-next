@@ -1,12 +1,19 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
+import { filterBySearch, normalizeValue } from "@/shared/search";
+import type { SearchConfig } from "@/shared/search";
 
 export interface UseTableWithSearchOptions<T> {
   data: T[];
   searchableFields?: (keyof T)[];
   defaultSearchField?: string;
   customSearchFn?: (item: T, query: string, field: string) => boolean;
+  /**
+   * Optional custom normalization function for search values.
+   * If not provided, defaults to lowercase + trim.
+   */
+  normalize?: (value: string) => string;
 }
 
 export interface UseTableWithSearchResult<T> {
@@ -19,41 +26,47 @@ export interface UseTableWithSearchResult<T> {
   filteredCount: number;
 }
 
-
+/**
+ * Hook for table search functionality using the centralized search utilities.
+ * Now leverages SearchConfig and filterBySearch for consistent behavior.
+ */
 export function useTableWithSearch<T extends Record<string, any>>({
   data,
   searchableFields = [],
   defaultSearchField = "all",
   customSearchFn,
+  normalize,
 }: UseTableWithSearchOptions<T>): UseTableWithSearchResult<T> {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchField, setSearchField] = useState(defaultSearchField);
+
+  // Build SearchConfig from options
+  const searchConfig = useMemo<SearchConfig<T>>(() => ({
+    fields: searchableFields.map((key) => ({
+      key: key as keyof T & string,
+      label: String(key),
+    })),
+    defaultField: (defaultSearchField as keyof T & string) ?? (searchableFields[0] as keyof T & string),
+    normalize,
+  }), [searchableFields, normalize, defaultSearchField]);
 
   const filteredData = useMemo(() => {
     if (!searchQuery.trim()) {
       return data;
     }
 
-    const term = searchQuery.toLowerCase();
+    // Use custom search function if provided
+    if (customSearchFn) {
+      const term = normalizeValue(searchQuery, searchConfig);
+      return data.filter((item) => customSearchFn(item, term, searchField));
+    }
 
-    return data.filter((item) => {
-      if (customSearchFn) {
-        return customSearchFn(item, term, searchField);
-      }
-
-      if (searchField === "all") {
-        return searchableFields.some((field) => {
-          const value = item[field];
-          if (value == null) return false;
-          return String(value).toLowerCase().includes(term);
-        });
-      }
-
-      const value = item[searchField as keyof T];
-      if (value == null) return false;
-      return String(value).toLowerCase().includes(term);
+    // Otherwise use the centralized filterBySearch
+    return filterBySearch(data, searchConfig, {
+      query: searchQuery,
+      field: searchField as keyof T & string | "all",
     });
-  }, [data, searchQuery, searchField, searchableFields, customSearchFn]);
+  }, [data, searchQuery, searchField, searchConfig, customSearchFn]);
 
   const handleSetSearchQuery = useCallback((query: string) => {
     setSearchQuery(query);

@@ -1,37 +1,64 @@
-import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import type { Company, CompanyPatch } from "../../domain/models";
-import type { CompanyFormValue } from "../../domain/mappers";
-import { toCompanyPatch } from "../../domain/mappers";
-import { companyKeys, companyCrudUseCases } from "@/company";
-import { companyEndpoints } from "../../infra/http/endpoints";
-import { contactsKeys } from "@/contact";
+import type { CompanyDraft, CompanyPatch } from "../../domain/models";
+import { companyKeys, companyCrudUseCases, updateCompanyWithContacts } from "../../application";
 import { useCompanyApp } from "@/di";
 import { useToast } from "@/shared/ui";
-import { optimizedApiClient } from "@/shared";
-
-export const initialCompanyFormValue: CompanyFormValue = {
-  name: "",
-  address: "",
-  type: null,
-  serviceId: null,
-  isCustomer: false,
-  isClient: false,
-  contactIds: [],
-  notes: [],
-};
+import { contactsKeys } from "@/contact";
 
 export function useCompanyMutations() {
-  const companyApp = useCompanyApp();
+  const app = useCompanyApp();
   const queryClient = useQueryClient();
   const toast = useToast();
 
-  const updateCompanyMutation = useMutation({
-    mutationFn: (input: { id: number; patch: CompanyPatch }) =>
-      companyCrudUseCases.update(companyApp)(input.id, input.patch),
+  const invalidateQueries = () => {
+    queryClient.invalidateQueries({ queryKey: companyKeys.all });
+    queryClient.invalidateQueries({ queryKey: ["customers"] });
+    queryClient.invalidateQueries({ queryKey: contactsKeys.lists() });
+  };
+
+  const createMutation = useMutation({
+    mutationFn: async ({
+      draft,
+      contactIds,
+    }: {
+      draft: CompanyDraft;
+      contactIds?: number[];
+    }) => {
+      const created = await companyCrudUseCases.create(app)(draft);
+      if (contactIds && contactIds.length > 0) {
+        await app.repos.company.assignContacts(created.id, contactIds);
+      }
+      return created;
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["customers"] });
-      queryClient.invalidateQueries({ queryKey: companyKeys.all });
+      invalidateQueries();
+      toast.showSuccess("Company created successfully!");
+    },
+    onError: (error: unknown) => {
+      const message =
+        error instanceof Error ? error.message : "Could not create company";
+      toast.showError(message);
+      throw error;
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async ({
+      id,
+      patch,
+      contactIds,
+    }: {
+      id: number;
+      patch: CompanyPatch;
+      contactIds?: number[];
+    }) => {
+      return await updateCompanyWithContacts(app, id, {
+        companyPatch: Object.keys(patch).length > 0 ? patch : undefined,
+        contactIds,
+      });
+    },
+    onSuccess: () => {
+      invalidateQueries();
       toast.showSuccess("Company updated successfully!");
     },
     onError: (error: unknown) => {
@@ -42,39 +69,9 @@ export function useCompanyMutations() {
     },
   });
 
-  const handleDeleteCompany = async (companyId: number) => {
-    try {
-      await companyCrudUseCases.delete(companyApp)(companyId);
-      queryClient.invalidateQueries({ queryKey: ["customers"] });
-      queryClient.invalidateQueries({ queryKey: companyKeys.all });
-      toast.showSuccess("Company deleted successfully!");
-    } catch (error: unknown) {
-      const message =
-        error instanceof Error ? error.message : "Could not delete company";
-      toast.showError(message);
-    }
-  };
-
-  const assignContacts = async (companyId: number, contactIds: number[]) => {
-    try {
-      await optimizedApiClient.post(
-        companyEndpoints.assignContacts(companyId),
-        contactIds || []
-      );
-      queryClient.invalidateQueries({ queryKey: ["customers"] });
-      queryClient.invalidateQueries({ queryKey: contactsKeys.lists() });
-    } catch (error: unknown) {
-      const message =
-        error instanceof Error ? error.message : "Could not assign contacts";
-      toast.showError(message);
-      throw error;
-    }
-  };
-
   return {
-    updateCompanyMutation,
-    handleDeleteCompany,
-    assignContacts,
-    toCompanyPatch,
+    createMutation,
+    updateMutation,
+    invalidateQueries,
   };
 }

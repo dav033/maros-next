@@ -3,15 +3,15 @@
 import type { ReactNode } from "react";
 import { createContext, useContext, useMemo } from "react";
 import type { ContactsAppContext } from "@/contact";
-import { makeContactsAppContext, ContactHttpRepository } from "@/contact";
 import type { LeadsAppContext } from "@/leads";
-import { makeLeadsAppContext, LeadHttpRepository, LeadNumberAvailabilityHttpService, patchLead } from "@/leads";
-import type { LeadPatch, LeadPolicies } from "@/features/leads/domain/models";
 import type { ProjectTypesAppContext } from "@/projectType";
-import { ProjectTypeHttpRepository } from "@/projectType";
 import type { CompanyAppContext } from "@/company";
-import { makeCompanyAppContext, CompanyHttpRepository, CompanyServiceHttpRepository } from "@/company";
-import { SystemClock } from "@/shared";
+import {
+  createContactsAppContext,
+  createLeadsAppContext,
+  createProjectTypesAppContext,
+  createCompanyAppContext,
+} from "./factories";
 
 type DiContextValue = {
   contactsApp: ContactsAppContext;
@@ -26,50 +26,21 @@ type Props = {
   children: ReactNode;
 };
 
+/**
+ * Dependency Injection Provider for the application.
+ * 
+ * Initializes and provides all feature contexts through modular factories.
+ * Each factory encapsulates the creation of its own dependencies.
+ * 
+ * @see ./factories for individual context creation logic
+ */
 export function DiProvider({ children }: Props) {
-  const value = useMemo(() => {
-    const contactHttpRepo = new ContactHttpRepository();
-    const projectTypeRepo = new ProjectTypeHttpRepository();
-    
-    const contactsApp = makeContactsAppContext({
-      repos: {
-        contact: contactHttpRepo,
-      },
-    });
-
-    const leadsApp = makeLeadsAppContext({
-      clock: SystemClock,
-      repos: {
-        contact: contactHttpRepo,
-        lead: new LeadHttpRepository(),
-        projectType: projectTypeRepo,
-      },
-      services: {
-        leadNumberAvailability: new LeadNumberAvailabilityHttpService(),
-      },
-    }) as LeadsAppContext & { patchLead: typeof patchLead };
-    (leadsApp as any).patchLead = (id: number, patch: LeadPatch, policies?: LeadPolicies) => patchLead(leadsApp, id, patch, policies);
-
-    const projectTypesApp: ProjectTypesAppContext = {
-      repos: {
-        projectType: projectTypeRepo,
-      },
-    };
-
-    const companyApp = makeCompanyAppContext({
-      repos: {
-        company: new CompanyHttpRepository(),
-        companyService: new CompanyServiceHttpRepository(),
-      },
-    });
-
-    return {
-      contactsApp,
-      leadsApp,
-      projectTypesApp,
-      companyApp,
-    };
-  }, []);
+  const value = useMemo(() => ({
+    contactsApp: createContactsAppContext(),
+    leadsApp: createLeadsAppContext(),
+    projectTypesApp: createProjectTypesAppContext(),
+    companyApp: createCompanyAppContext(),
+  }), []);
 
   return <DiContext.Provider value={value}>{children}</DiContext.Provider>;
 }

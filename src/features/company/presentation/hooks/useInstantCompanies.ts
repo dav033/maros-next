@@ -11,6 +11,7 @@ const DEFAULT_STALE_TIME = 5 * 60 * 1000;
 
 export type UseInstantCompaniesResult = {
   companies: Company[] | undefined;
+  hasData: boolean;
   isLoading: boolean;
   isFetching: boolean;
   showSkeleton: boolean;
@@ -19,6 +20,10 @@ export type UseInstantCompaniesResult = {
   refetch: () => Promise<void>;
 };
 
+/**
+ * Hook for instant company data loading with skeleton support
+ * Uses standard instant query pattern from buildInstantQueryResult
+ */
 export function useInstantCompanies(): UseInstantCompaniesResult {
   const ctx = useCompanyApp();
 
@@ -40,6 +45,7 @@ export function useInstantCompanies(): UseInstantCompaniesResult {
 
   return {
     companies: instant.data,
+    hasData: instant.hasData,
     isLoading: instant.isLoading,
     isFetching: instant.isFetching,
     showSkeleton: instant.showSkeleton,

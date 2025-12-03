@@ -1,16 +1,6 @@
-import type { Company, CompanyType, CompanyPatch } from "../models";
+import type { Company, CompanyPatch } from "../models";
 import { normalizeEmptyToUndefined } from "@/shared";
-
-export type CompanyFormValue = {
-  name: string;
-  address: string;
-  type: CompanyType | null;
-  serviceId: number | null;
-  isCustomer: boolean;
-  isClient: boolean;
-  contactIds: number[];
-  notes: string[];
-};
+import type { CompanyFormValue } from "../../presentation/molecules/CompanyForm";
 
 export function toCompanyPatch(current: Company, value: CompanyFormValue): CompanyPatch {
   const trimmedName = value.name.trim();

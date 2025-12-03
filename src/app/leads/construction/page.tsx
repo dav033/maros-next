@@ -1,6 +1,6 @@
 "use client";
 
-import { LeadsPageByType } from "@/features/leads/presentation/components/LeadsPageByType";
+import { LeadsPageByType } from "@/features/leads/presentation/pages/LeadsPageByType";
 import { LeadType } from "@/leads";
 
 export default function ConstructionLeadsPage() {

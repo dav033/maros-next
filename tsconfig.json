@@ -40,6 +40,9 @@
       ],
       "@/company": [
         "./src/features/company"
+      ],
+      "@/customers": [
+        "./src/features/customers"
       ]
     }
   },

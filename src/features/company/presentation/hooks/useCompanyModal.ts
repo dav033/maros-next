@@ -1,8 +1,10 @@
+"use client";
+
 import { useState } from "react";
 import type { Company } from "../../domain/models";
-import type { CompanyFormValue } from "../../domain/mappers";
+import type { CompanyFormValue } from "../molecules/CompanyForm";
 import type { Contact } from "@/contact";
-import { initialCompanyFormValue } from "./useCompanyMutations";
+import { initialCompanyFormValue } from "../helpers/companyFormHelpers";
 
 export function useCompanyModal() {
   const [companyModalOpen, setCompanyModalOpen] = useState(false);

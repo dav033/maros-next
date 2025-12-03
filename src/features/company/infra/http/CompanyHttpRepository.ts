@@ -57,10 +57,7 @@ export class CompanyHttpRepository implements CompanyRepositoryPort {
   }
 
   async update(id: number, patch: CompanyPatch): Promise<Company> {
-    console.log("[CompanyHttpRepository.update] Called with:", { id, patch });
-    const result = await this.resource.update(id, patch);
-    console.log("[CompanyHttpRepository.update] Result:", result);
-    return result;
+    return this.resource.update(id, patch);
   }
 
   async delete(id: number): Promise<void> {

@@ -18,11 +18,19 @@ export function useSearchState<T>(config: SearchConfig<T>) {
     setState((prev) => ({ ...prev, field }));
   }
 
+  function clearSearch() {
+    setState({
+      query: "",
+      field: "all",
+    });
+  }
+
   return {
     state,
     setState,
     setQuery,
     setField,
+    clearSearch,
     config,
   };
 }

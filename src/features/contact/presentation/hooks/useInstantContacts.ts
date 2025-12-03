@@ -13,6 +13,7 @@ const DEFAULT_STALE_TIME = 5 * 60 * 1000;
 
 export type UseInstantContactsResult = {
   contacts: Contact[] | undefined;
+  hasData: boolean;
   isLoading: boolean;
   isFetching: boolean;
   showSkeleton: boolean;
@@ -21,6 +22,10 @@ export type UseInstantContactsResult = {
   refetch: () => Promise<void>;
 };
 
+/**
+ * Hook for instant contact data loading with skeleton support
+ * Uses standard instant query pattern from buildInstantQueryResult
+ */
 export function useInstantContacts(): UseInstantContactsResult {
   const ctx = useContactsApp();
 
@@ -42,6 +47,7 @@ export function useInstantContacts(): UseInstantContactsResult {
 
   return {
     contacts: instant.data,
+    hasData: instant.hasData,
     isLoading: instant.isLoading,
     isFetching: instant.isFetching,
     showSkeleton: instant.showSkeleton,

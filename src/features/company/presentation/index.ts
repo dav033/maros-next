@@ -1,2 +1,6 @@
 export * from "./hooks";
-export { default as CompaniesPage } from "./CompaniesPage";
+export * from "./helpers";
+export * from "./atoms";
+export * from "./molecules";
+export * from "./organisms";
+export * from "./pages";

@@ -10,6 +10,7 @@ const DEFAULT_STALE_TIME = 5 * 60 * 1000;
 
 export type UseInstantLeadsByTypeResult = {
   leads: Lead[] | undefined;
+  hasData: boolean;
   isLoading: boolean;
   isFetching: boolean;
   showSkeleton: boolean;
@@ -18,6 +19,10 @@ export type UseInstantLeadsByTypeResult = {
   refetch: () => Promise<void>;
 };
 
+/**
+ * Hook for instant leads data loading filtered by type with skeleton support
+ * Uses standard instant query pattern from buildInstantQueryResult
+ */
 export function useInstantLeadsByType(type: LeadType): UseInstantLeadsByTypeResult {
   const ctx = useLeadsApp();
 
@@ -39,6 +44,7 @@ export function useInstantLeadsByType(type: LeadType): UseInstantLeadsByTypeResu
 
   return {
     leads: instant.data,
+    hasData: instant.hasData,
     isLoading: instant.isLoading,
     isFetching: instant.isFetching,
     showSkeleton: instant.showSkeleton,

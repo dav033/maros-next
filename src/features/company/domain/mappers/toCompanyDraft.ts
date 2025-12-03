@@ -1,5 +1,5 @@
 import type { CompanyDraft, CompanyType } from "../models";
-import type { CompanyFormValue } from "../../presentation/components/CompanyForm";
+import type { CompanyFormValue } from "../../presentation/molecules/CompanyForm";
 import { normalizeEmptyToUndefined } from "@/shared/mappers/dto";
 import { CompanyType as CompanyTypeEnum } from "../models";
 

@@ -11,7 +11,9 @@ import type {
 import type { ResourceRepository } from "@/shared";
 
 export interface CompanyRepositoryPort
-  extends ResourceRepository<CompanyId, Company, CompanyDraft, CompanyPatch> {}
+  extends ResourceRepository<CompanyId, Company, CompanyDraft, CompanyPatch> {
+  assignContacts(companyId: number, contactIds: number[]): Promise<void>;
+}
 
 export interface CompanyServiceRepositoryPort
   extends ResourceRepository<

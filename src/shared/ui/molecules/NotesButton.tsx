@@ -1,4 +1,5 @@
 import React from 'react';
+import { Button } from '@/shared/ui';
 import Icon from '@/shared/ui/atoms/Icon';
 
 interface NotesButtonProps {
@@ -15,11 +16,13 @@ export const NotesButton: React.FC<NotesButtonProps> = ({
   title = 'View notes',
 }) => {
   return (
-    <button
+    <Button
       type="button"
       onClick={onClick}
       title={title}
-      className="group relative inline-flex items-center gap-1.5 transition-all duration-200 cursor-pointer"
+      variant="ghost"
+      size="sm"
+      className="group relative inline-flex items-center gap-1.5 !p-0 cursor-pointer bg-transparent shadow-none"
     >
       <div
         className={`
@@ -48,6 +51,6 @@ export const NotesButton: React.FC<NotesButtonProps> = ({
           </span>
         )}
       </div>
-    </button>
+    </Button>
   );
 };

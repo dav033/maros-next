@@ -1,5 +1,5 @@
 import type { Contact, ContactPatch } from "../models";
-import { normalizeEmptyToUndefined } from "@/shared";
+import { normalizeEmptyToUndefined, createPatch, trimStringFields } from "@/shared";
 
 export type ContactFormValue = {
   name: string;
@@ -13,44 +13,39 @@ export type ContactFormValue = {
   note?: string;
 };
 
+/**
+ * Builds a standardized patch for contact updates
+ * - Trims all string fields
+ * - Normalizes empty strings to undefined for optional fields
+ * - Only includes changed fields
+ * 
+ * @param current - Current contact state
+ * @param value - Updated form values
+ * @returns Patch with only changed fields
+ */
 export function toContactPatch(current: Contact, value: ContactFormValue): ContactPatch {
-  const trimmedName = value.name.trim();
-  const normalizedPhone = normalizeEmptyToUndefined(value.phone);
-  const normalizedEmail = normalizeEmptyToUndefined(value.email);
-  const normalizedOccupation = normalizeEmptyToUndefined(value.occupation);
-  const normalizedAddress = normalizeEmptyToUndefined(value.address);
+  // Trim string fields
+  const trimmed = trimStringFields(value);
   
-  const currentPhone = normalizeEmptyToUndefined(current.phone);
-  const currentEmail = normalizeEmptyToUndefined(current.email);
-  const currentOccupation = normalizeEmptyToUndefined(current.occupation);
-  const currentAddress = normalizeEmptyToUndefined(current.address);
+  // Prepare normalized updates matching Contact shape
+  const updates: Partial<Contact> = {
+    name: trimmed.name,
+    phone: normalizeEmptyToUndefined(trimmed.phone),
+    email: normalizeEmptyToUndefined(trimmed.email),
+    occupation: normalizeEmptyToUndefined(trimmed.occupation),
+    address: normalizeEmptyToUndefined(trimmed.address),
+    isCustomer: trimmed.isCustomer,
+    isClient: trimmed.isClient,
+    companyId: trimmed.companyId,
+  };
+
+  // Create patch with normalizers for optional fields
+  const patch = createPatch(current, updates, {
+    phone: normalizeEmptyToUndefined,
+    email: normalizeEmptyToUndefined,
+    occupation: normalizeEmptyToUndefined,
+    address: normalizeEmptyToUndefined,
+  });
   
-  const patch: Partial<Contact> = {};
-
-  if (trimmedName !== current.name) {
-    patch.name = trimmedName;
-  }
-  if (normalizedPhone !== currentPhone) {
-    patch.phone = normalizedPhone;
-  }
-  if (normalizedEmail !== currentEmail) {
-    patch.email = normalizedEmail;
-  }
-  if (normalizedOccupation !== currentOccupation) {
-    patch.occupation = normalizedOccupation;
-  }
-  if (normalizedAddress !== currentAddress) {
-    patch.address = normalizedAddress;
-  }
-  if (value.isCustomer !== current.isCustomer) {
-    patch.isCustomer = value.isCustomer;
-  }
-  if (value.isClient !== current.isClient) {
-    patch.isClient = value.isClient;
-  }
-  if (value.companyId !== (current.companyId ?? null)) {
-    patch.companyId = value.companyId;
-  }
-
   return patch as ContactPatch;
 }

@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import type { Contact } from "../../domain/models";
 import type { ContactFormValue } from "../../domain/mappers";

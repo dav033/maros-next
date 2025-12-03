@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import Icon from "./Icon";
+import { Button, Icon } from "@/shared/ui";
 
 type ToastType = "success" | "error" | "info" | "warning";
 
@@ -57,13 +57,16 @@ export function Toast({ message, type = "info", duration = 3000, onClose }: Toas
     >
       <Icon name={styles.icon} size={20} className={`${styles.text} mt-0.5 shrink-0`} />
       <p className={`flex-1 text-sm font-medium ${styles.text}`}>{message}</p>
-      <button
+      <Button
+        type="button"
         onClick={onClose}
-        className={`${styles.text} hover:opacity-70 transition-opacity shrink-0`}
+        variant="ghost"
+        size="sm"
+        className={`${styles.text} hover:opacity-70 transition-opacity shrink-0 !p-0`}
         aria-label="Close"
       >
         <Icon name="lucide:x" size={18} />
-      </button>
+      </Button>
     </div>
   );
 }

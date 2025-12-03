@@ -6,6 +6,7 @@ export type InputProps = InputHTMLAttributes<HTMLInputElement> & {
   leftAddon?: ReactNode;
   rightAddon?: ReactNode;
   hint?: string;
+  fullWidth?: boolean;
 };
 
 export function Input({
@@ -17,6 +18,7 @@ export function Input({
   id,
   className = "",
   value,
+  fullWidth = true,
   ...props
 }: InputProps) {
   const inputId =
@@ -24,7 +26,8 @@ export function Input({
     (label ? `${String(label).toLowerCase().replace(/\s+/g, "-")}-input` : undefined);
 
   const baseInputClass = [
-    "block w-full rounded-lg border bg-theme-dark text-theme-light placeholder:text-gray-400",
+    "block rounded-lg border bg-theme-dark text-theme-light placeholder:text-gray-400",
+    fullWidth ? "w-full" : "",
     "border-theme-gray focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none",
     leftAddon ? "pl-10" : "pl-3",
     rightAddon ? "pr-10" : "pr-3",

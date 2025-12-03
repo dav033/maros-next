@@ -13,13 +13,16 @@ export type SelectOption = {
 
 export interface SelectProps {
   options: ReadonlyArray<SelectOption>;
-  value: string | number | undefined;
+  value: string | number | undefined | null;
   onChange: (value: string) => void;
   placeholder?: string;
   searchable?: boolean;
   icon?: string;
   disabled?: boolean;
   className?: string;
+  allowEmpty?: boolean;
+  emptyLabel?: string;
+  fullWidth?: boolean;
 }
 
 export function Select({
@@ -31,6 +34,9 @@ export function Select({
   icon,
   disabled = false,
   className = "",
+  allowEmpty = true,
+  emptyLabel = "None",
+  fullWidth = true,
 }: SelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -134,7 +140,7 @@ export function Select({
   );
 
   return (
-    <div ref={containerRef} className={`relative w-full overflow-visible ${className}`}>
+    <div ref={containerRef} className={`relative overflow-visible ${fullWidth ? 'w-full' : ''} ${className}`}>
       {icon && (
         <span className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
           <Icon name={icon} className="text-gray-400" size={20} />
@@ -148,7 +154,7 @@ export function Select({
           onChange={(e) => onChange(e.target.value)}
           className={`${baseControl} ${plClass}`}
         >
-          <option value="">{placeholder}</option>
+          {allowEmpty && <option value="">{emptyLabel}</option>}
           {options.map((opt) => (
             <option key={String(opt.value)} value={String(opt.value)} disabled={!!opt.disabled}>
               {opt.label || "No label"}

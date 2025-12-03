@@ -1,4 +1,5 @@
 export { default as Icon } from "./Icon";
+export * from "./Badge";
 export * from "./Button";
 export * from "./Checkbox";
 export * from "./ColorPicker";
@@ -8,3 +9,4 @@ export * from "./Skeleton";
 export * from "./StatusBadge";
 export * from "./Textarea";
 export * from "./Select";
+export * from "./Typography";

@@ -1,27 +1,47 @@
 import type { Lead, LeadPatch } from "../models";
 import type { ISODate } from "@/shared";
+import { createPatch, normalizeEmptyToUndefined } from "@/shared";
 
 export function diffToPatch(current: Lead, updated: Lead): LeadPatch {
-  return {
-    ...(updated.name !== current.name ? { name: updated.name } : {}),
-    ...((updated.location ?? "") !== (current.location ?? "")
-      ? { location: updated.location ?? "" }
-      : {}),
-    ...(updated.status !== current.status ? { status: updated.status } : {}),
-    ...(updated.startDate !== current.startDate
-      ? { startDate: updated.startDate as ISODate }
-      : {}),
-    ...(updated.projectType.id !== current.projectType.id
-      ? { projectTypeId: updated.projectType.id }
-      : {}),
-    ...(updated.contact.id !== current.contact.id
-      ? { contactId: updated.contact.id }
-      : {}),
-    ...((updated.leadNumber ?? "") !== (current.leadNumber ?? "")
-      ? { leadNumber: updated.leadNumber ?? null }
-      : {}),
-    ...(JSON.stringify(updated.notes) !== JSON.stringify(current.notes)
-      ? { notes: updated.notes }
-      : {}),
+  
+  const flattenedUpdated = {
+    name: updated.name,
+    location: updated.location ?? "",
+    status: updated.status,
+    startDate: updated.startDate,
+    projectTypeId: updated.projectType.id,
+    contactId: updated.contact.id,
+    leadNumber: updated.leadNumber ?? "",
+    notes: updated.notes,
   };
+  
+  
+  const flattenedCurrent = {
+    name: current.name,
+    location: current.location ?? "",
+    status: current.status,
+    startDate: current.startDate,
+    projectTypeId: current.projectType.id,
+    contactId: current.contact.id,
+    leadNumber: current.leadNumber ?? "",
+    notes: current.notes,
+  };
+
+  
+  const patch = createPatch(flattenedCurrent, flattenedUpdated, {
+    location: normalizeEmptyToUndefined,
+    leadNumber: (v: string) => {
+      const normalized = normalizeEmptyToUndefined(v);
+      return normalized ?? null;
+    },
+  });
+
+  
+  if (JSON.stringify(updated.notes) !== JSON.stringify(current.notes)) {
+    patch.notes = updated.notes;
+  } else {
+    delete patch.notes;
+  }
+
+  return patch as LeadPatch;
 }

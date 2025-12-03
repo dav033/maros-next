@@ -4,8 +4,8 @@ import type { HttpClientLike } from "@/shared";
 import type { Lead, LeadDraft, LeadPatch } from "@/features/leads/domain/models";
 import type { LeadRepositoryPort } from "@/features/leads/domain/ports";
 import { optimizedApiClient } from "@/shared";
-import type { RestRepository } from "@/shared/infra/rest/makeResource";
-import { makeResource } from "@/shared/infra/rest/makeResource";
+import type { ResourceRepository } from "@/shared/infra/rest/resourceRepository";
+import { makeHttpResourceRepository } from "@/shared/infra/rest/resourceRepository";
 
 import { endpoints as leadEndpoints } from "./endpoints";
 import {
@@ -19,18 +19,19 @@ import {
 } from "./mappers";
 
 export class LeadHttpRepository implements LeadRepositoryPort {
-  private readonly resource: RestRepository<number, Lead, LeadDraft, LeadPatch>;
+  private readonly resource: ResourceRepository<number, Lead, LeadDraft, LeadPatch>;
 
   constructor(private readonly api: HttpClientLike = optimizedApiClient) {
-    this.resource = makeResource<ApiLeadDTO, Lead, LeadDraft, LeadPatch, number>(
-      leadEndpoints,
-      { fromApi: mapLeadFromApi, fromApiList: mapLeadsFromApi },
-    );
+    this.resource = makeHttpResourceRepository<number, ApiLeadDTO, Lead, LeadDraft, LeadPatch>({
+      endpoints: leadEndpoints,
+      mappers: { fromApi: mapLeadFromApi, fromApiList: mapLeadsFromApi },
+      api: this.api,
+    });
   }
 
-  getById = (id: number) => this.resource.findById(id);
+  getById = (id: number) => this.resource.getById(id);
   findById = (id: number) => this.getById(id);
-  list = () => this.resource.findAll();
+  list = () => this.resource.list();
   delete = (id: number) => this.resource.delete(id);
 
   async findByType(type: LeadType): Promise<Lead[]> {

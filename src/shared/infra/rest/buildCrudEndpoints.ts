@@ -1,4 +1,4 @@
-import type { ResourceEndpoints } from "./makeResource";
+import type { ResourceEndpoints } from "./resourceRepository";
 
 export function buildCrudEndpoints<ID extends string | number>(
   base: string,

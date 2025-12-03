@@ -113,8 +113,6 @@ export function mapLeadFromDTO(dto: ApiLeadDTO): Lead {
   const projectTypeColor = normalizeText(dto?.projectType?.color ?? "");
 
   const notesArray = Array.isArray(dto?.notes) && dto.notes.length > 0 ? dto.notes.map(n => String(n)) : [];
-  console.log('[LEAD MAPPER] DTO notes:', dto?.notes);
-  console.log('[LEAD MAPPER] Mapped notesArray:', notesArray);
   
   return {
     id,

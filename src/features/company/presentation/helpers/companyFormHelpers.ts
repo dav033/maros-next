@@ -1,7 +1,7 @@
 import type { Company, CompanyDraft, CompanyPatch } from "../../domain/models";
-import type { CompanyFormValue } from "../components/CompanyForm";
+import type { CompanyFormValue } from "../molecules/CompanyForm";
 import { CompanyType } from "../../domain/models";
-import { normalizeEmptyToUndefined } from "@/shared";
+import { normalizeEmptyToUndefined, createPatch, trimStringFields } from "@/shared";
 import type { Contact } from "@/contact";
 
 export const initialCompanyFormValue: CompanyFormValue = {
@@ -15,6 +15,10 @@ export const initialCompanyFormValue: CompanyFormValue = {
   notes: [],
 };
 
+/**
+ * Converts form values to a draft for company creation
+ * Applies trimming and normalization
+ */
 export function toDraft(value: CompanyFormValue): CompanyDraft {
   return {
     name: value.name.trim(),
@@ -26,35 +30,35 @@ export function toDraft(value: CompanyFormValue): CompanyDraft {
   };
 }
 
+/**
+ * Builds a standardized patch for company updates
+ * - Trims all string fields
+ * - Normalizes empty strings to undefined
+ * - Only includes changed fields
+ * 
+ * @param current - Current company state
+ * @param value - Updated form values
+ * @returns Patch with only changed fields
+ */
 export function toPatch(current: Company, value: CompanyFormValue): CompanyPatch {
-  const trimmedName = value.name.trim();
-  const normalizedAddress = normalizeEmptyToUndefined(value.address);
-  const currentAddress = normalizeEmptyToUndefined(current.address);
+  // Trim string fields
+  const trimmed = trimStringFields(value);
+  
+  // Prepare normalized updates matching Company shape
+  const updates: Partial<Company> = {
+    name: trimmed.name,
+    address: normalizeEmptyToUndefined(trimmed.address),
+    type: trimmed.type ?? undefined,
+    serviceId: trimmed.serviceId,
+    isCustomer: trimmed.isCustomer,
+    isClient: trimmed.isClient,
+    notes: trimmed.notes,
+  };
 
-  const patch: Partial<Company> = {};
-
-  if (trimmedName !== current.name) {
-    patch.name = trimmedName;
-  }
-  if (normalizedAddress !== currentAddress) {
-    patch.address = normalizedAddress;
-  }
-  if (value.type !== current.type && value.type != null) {
-    patch.type = value.type;
-  }
-  if (value.serviceId !== current.serviceId) {
-    patch.serviceId = value.serviceId;
-  }
-  if (value.isCustomer !== current.isCustomer) {
-    patch.isCustomer = value.isCustomer;
-  }
-  if (value.isClient !== current.isClient) {
-    patch.isClient = value.isClient;
-  }
-
-  if (Array.isArray(value.notes)) {
-    patch.notes = value.notes;
-  }
+  // Create patch with normalizers for optional fields
+  const patch = createPatch(current, updates, {
+    address: normalizeEmptyToUndefined,
+  });
   
   return patch as CompanyPatch;
 }

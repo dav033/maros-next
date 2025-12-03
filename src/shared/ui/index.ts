@@ -1,4 +1,6 @@
 export { Icon } from "./atoms";
+export { Badge } from "./atoms";
+export type { BadgeProps, BadgeVariant, BadgeSize } from "./atoms/Badge";
 export { Button } from "./atoms";
 export { Checkbox } from "./atoms";
 export { ColorPicker } from "./atoms";
@@ -12,6 +14,8 @@ export { Select } from "./atoms";
 export type { SelectOption, SelectProps } from "./atoms/Select";
 export { Toast } from "./atoms/Toast";
 export type { ToastProps } from "./atoms/Toast";
+export { Typography } from "./atoms";
+export type { TypographyProps, TypographyVariant, TypographyColor } from "./atoms/Typography";
 
 export { Modal } from "./molecules";
 export { ContextMenu } from "./molecules";
@@ -19,23 +23,25 @@ export type { ContextMenuProps } from "./molecules/ContextMenu";
 export { Alert } from "./molecules";
 export { SearchBoxWithDropdown } from "./molecules";
 export { TableToolbar } from "./molecules";
-export { SimpleTable } from "./molecules/SimpleTable";
-export type { SimpleTableColumn } from "./molecules/SimpleTable";
-export { CrudPage } from "./molecules/CrudPage";
-export type { CrudPageConfig } from "./molecules/CrudPage";
 export { EmptyState } from "./molecules/EmptyState";
 export { TableSkeleton } from "./molecules/TableSkeleton";
 export type { TableSkeletonColumn } from "./molecules/TableSkeleton";
 export { CustomerSection } from "./molecules/CustomerSection";
-export { EditModal } from "./molecules/EditModal";
-export { NotesEditorModal } from "./molecules/NotesEditorModal";
-export { DeleteFeedbackModal } from "./molecules/DeleteFeedbackModal";
-export { ServiceBadge } from "./molecules/ServiceBadge";
-export type { ServiceBadgeProps } from "./molecules/ServiceBadge";
-export { ContactInfoDisplay } from "./molecules/ContactInfoDisplay";
-export type { ContactInfoDisplayProps } from "./molecules/ContactInfoDisplay";
-export { ContactViewModal } from "./molecules/ContactViewModal";
-export type { ContactViewModalProps } from "./molecules/ContactViewModal";
+
+export { SimpleTable } from "./organisms/SimpleTable";
+export type { SimpleTableColumn } from "./organisms/SimpleTable";
+export { CrudPage } from "./organisms/CrudPage";
+export type { CrudPageConfig } from "./organisms/CrudPage";
+export { EditModal } from "./organisms/EditModal";
+export { NotesEditorModal } from "./organisms/NotesEditorModal";
+export { DeleteFeedbackModal } from "./organisms/DeleteFeedbackModal";
+export { ContactViewModal } from "./organisms/ContactViewModal";
+export type { ContactViewModalProps } from "./organisms/ContactViewModal";
+
+export { CrudPageTemplate } from "./templates/CrudPageTemplate";
+export type { CrudPageTemplateProps } from "./templates/CrudPageTemplate";
+export { EntityCrudPageTemplate } from "./templates/EntityCrudPageTemplate";
+export type { EntityCrudPageTemplateProps } from "./templates/EntityCrudPageTemplate";
 
 export { useContextMenu } from "./hooks";
 export type {
@@ -53,5 +59,9 @@ export { useDeleteModal } from "./hooks/useDeleteModal";
 export type { DeleteModalState, UseDeleteModalResult } from "./hooks/useDeleteModal";
 export { useNotesModal } from "./hooks/useNotesModal";
 export type { NotesModalState, UseNotesModalResult } from "./hooks/useNotesModal";
+export { usePersistentToggle } from "./hooks/usePersistentToggle";
+export type { UsePersistentToggleOptions, UsePersistentToggleResult } from "./hooks/usePersistentToggle";
+export { useAnimatedHeight } from "./hooks/useAnimatedHeight";
+export type { UseAnimatedHeightOptions, UseAnimatedHeightResult } from "./hooks/useAnimatedHeight";
 
 export { ToastProvider, useToast } from "./context/ToastContext";

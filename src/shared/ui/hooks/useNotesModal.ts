@@ -1,7 +1,5 @@
 "use client";
-
 import { useState, useCallback } from "react";
-
 export type NotesModalState<T> = {
   isOpen: boolean;
   item: T | null;
@@ -9,7 +7,6 @@ export type NotesModalState<T> = {
   notes: string[];
   isLoading: boolean;
 };
-
 export type UseNotesModalResult<T> = {
   notesModalState: NotesModalState<T>;
   openNotesModal: (item: T, title: string, notes: string[]) => void;
@@ -17,7 +14,6 @@ export type UseNotesModalResult<T> = {
   updateNotes: (notes: string[]) => void;
   saveNotes: (onSaveFn: (item: T, notes: string[]) => Promise<void>) => Promise<void>;
 };
-
 export function useNotesModal<T>(): UseNotesModalResult<T> {
   const [notesModalState, setNotesModalState] = useState<NotesModalState<T>>({
     isOpen: false,
@@ -26,7 +22,6 @@ export function useNotesModal<T>(): UseNotesModalResult<T> {
     notes: [],
     isLoading: false,
   });
-
   const openNotesModal = useCallback((item: T, title: string, notes: string[]) => {
     setNotesModalState({
       isOpen: true,
@@ -36,7 +31,6 @@ export function useNotesModal<T>(): UseNotesModalResult<T> {
       isLoading: false,
     });
   }, []);
-
   const closeNotesModal = useCallback(() => {
     setNotesModalState((prev) => {
       if (prev.isLoading) return prev;
@@ -49,20 +43,16 @@ export function useNotesModal<T>(): UseNotesModalResult<T> {
       };
     });
   }, []);
-
   const updateNotes = useCallback((notes: string[]) => {
     setNotesModalState((prev) => ({ ...prev, notes }));
   }, []);
-
   const saveNotes = useCallback(
     async (onSaveFn: (item: T, notes: string[]) => Promise<void>) => {
       if (!notesModalState.item) {
         closeNotesModal();
         return;
       }
-
       setNotesModalState((prev) => ({ ...prev, isLoading: true }));
-
       try {
         await onSaveFn(notesModalState.item, notesModalState.notes);
         closeNotesModal();
@@ -75,7 +65,6 @@ export function useNotesModal<T>(): UseNotesModalResult<T> {
     },
     [notesModalState.item, notesModalState.notes, closeNotesModal]
   );
-
   return {
     notesModalState,
     openNotesModal,

@@ -3,7 +3,7 @@
 import type { ReactNode, MouseEvent } from "react";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { Icon } from "@/shared/ui";
+import { Icon, Button } from "@/shared/ui";
 
 export type ModalProps = {
   isOpen: boolean;
@@ -11,6 +11,7 @@ export type ModalProps = {
   children: ReactNode;
   onClose: () => void;
   footer?: ReactNode;
+  fullWidth?: boolean;
 };
 
 export function Modal({
@@ -19,6 +20,7 @@ export function Modal({
   children,
   onClose,
   footer,
+  fullWidth = false,
 }: ModalProps) {
   const [mounted, setMounted] = useState(false);
 
@@ -62,7 +64,7 @@ export function Modal({
       onClick={handleBackdropClick}
     >
       <div
-        className="w-full max-w-lg rounded-2xl border border-theme-gray bg-theme-dark p-4 shadow-2xl sm:p-6 max-h-[90vh] overflow-y-auto"
+        className={`w-full rounded-2xl border border-theme-gray bg-theme-dark p-4 shadow-2xl sm:p-6 max-h-[90vh] overflow-y-auto ${fullWidth ? 'max-w-7xl' : 'max-w-lg'}`}
         onClick={handleContentClick}
         role="dialog"
         aria-modal="true"
@@ -71,14 +73,16 @@ export function Modal({
           {title && (
             <h2 className="text-base font-semibold text-theme-light sm:text-lg flex items-center">{title}</h2>
           )}
-          <button
+          <Button
             type="button"
             onClick={onClose}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full text-gray-400 hover:bg-theme-gray-subtle hover:text-theme-light active:scale-95 transition-transform"
+            variant="ghost"
+            size="sm"
+            className="h-9 w-9 !p-0 rounded-full text-gray-400 hover:bg-theme-gray-subtle hover:text-theme-light active:scale-95 transition-transform"
             aria-label="Close"
           >
             <Icon name="lucide:x" size={20} />
-          </button>
+          </Button>
         </div>
         <div className="space-y-4">{children}</div>
         {footer && <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">{footer}</div>}

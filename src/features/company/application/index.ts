@@ -3,3 +3,5 @@ export { makeCompanyAppContext } from "./context";
 export { companyCrudUseCases } from "./usecases/companyCrud";
 export { companyServiceCrudUseCases } from "./usecases/companyServiceCrud";
 export { companyKeys, companyServiceKeys } from "./keys";
+export { updateCompanyWithContacts } from "./usecases/commands";
+export type { UpdateCompanyWithContactsInput } from "./usecases/commands";
