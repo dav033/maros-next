@@ -1,7 +1,7 @@
-import type { Company, CompanyDraft, CompanyPatch } from "../../domain/models";
-import type { CompanyRepositoryPort } from "../../domain/ports";
-import type { HttpClientLike } from "@/shared";
-import { makeHttpResourceRepository, optimizedApiClient } from "@/shared";
+import type { Company, CompanyDraft, CompanyPatch } from "@/features/company/domain";
+import type { CompanyRepositoryPort } from "@/features/company/domain";
+import type { HttpClientLike } from "@/shared/infra";
+import { makeHttpResourceRepository, optimizedApiClient } from "@/shared/infra";
 
 import { companyEndpoints } from "./endpoints";
 import {

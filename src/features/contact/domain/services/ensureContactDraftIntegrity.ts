@@ -1,9 +1,9 @@
+import { BusinessRuleError } from "@/shared/domain";
 import {
-  BusinessRuleError,
   countDigits,
   isValidEmail,
   normalizeText,
-} from "@/shared";
+} from "@/shared/validation";
 import type { ContactDraft, ContactDraftPolicies } from "../models";
 
 export function ensureContactDraftIntegrity(

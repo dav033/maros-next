@@ -1,4 +1,5 @@
-import type { ContactsAppContext, Contact, ContactPatch } from "@/contact";
+import type { Contact, ContactPatch } from "@/contact/domain";
+import type { ContactsAppContext } from "../../../application/context";
 
 export async function patchContact(
   ctx: ContactsAppContext,

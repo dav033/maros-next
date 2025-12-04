@@ -17,7 +17,6 @@ export function ServiceBadge({ service }: ServiceBadgeProps) {
       dot
       dotColor={color}
       customColor={color === "#000000" ? "#9ca3af" : color}
-      customBgColor={`${color}20`}
     >
       {service.name}
     </Badge>

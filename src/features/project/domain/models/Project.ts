@@ -1,5 +1,5 @@
-import type { Lead } from "@/leads";
-import type { InvoiceStatus, ProjectStatus } from "@/project";
+import type { Lead } from "@/features/leads/domain";
+import type { InvoiceStatus, ProjectStatus } from "@/features/project/domain";
 
 export interface Project {
   location: string;

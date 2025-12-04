@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import type { Lead } from "@/leads";
+import type { Lead } from "@/leads/domain";
 import { getNotesArray } from "@/shared/utils/notes";
 import type { SimpleTableColumn } from "@/shared/ui";
 import { ContactInfoDisplay } from "@/features/contact/presentation/atoms/ContactInfoDisplay";

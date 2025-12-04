@@ -1,12 +1,12 @@
 import type { Contact, ContactDraftPolicies, ContactPatch, ApplyContactPatchResult } from "../models";
+import { BusinessRuleError } from "@/shared/domain";
 import {
-  BusinessRuleError,
   countDigits,
   isValidEmail,
   normalizeEmail,
   normalizePhone,
   normalizeText,
-} from "@/shared";
+} from "@/shared/validation";
 
 const DEFAULTS: ContactDraftPolicies = {
   maxNameLength: 200,

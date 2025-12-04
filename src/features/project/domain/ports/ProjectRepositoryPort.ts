@@ -1,4 +1,4 @@
-import type { LeadId, Project, ProjectDraft, ProjectId, ProjectPatch, ProjectStatus } from "@/project";
+import type { LeadId, Project, ProjectDraft, ProjectId, ProjectPatch, ProjectStatus } from "@/project/domain";
 
 export interface ProjectRepositoryPort {
   findById(id: ProjectId): Promise<Project | null>;

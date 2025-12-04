@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useCompanyApp } from "@/di";
 import { companyServiceCrudUseCases } from "../../application/usecases/companyServiceCrud";
 import type { CompanyService } from "../../domain/models";
-import { buildInstantQueryResult } from "@/shared";
+import { buildInstantQueryResult } from "@/shared/query";
 
 const DEFAULT_STALE_TIME = 5 * 60 * 1000;
 

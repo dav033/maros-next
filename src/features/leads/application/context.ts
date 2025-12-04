@@ -1,10 +1,10 @@
 import type {
   LeadNumberAvailabilityPort,
   LeadRepositoryPort,
-} from "@/leads";
-import type { ContactRepositoryPort } from "@/contact";
-import type { ProjectTypeRepositoryPort } from "@/projectType";
-import type { Clock } from "@/shared";
+} from "@/features/leads/domain";
+import type { ContactRepositoryPort } from "@/features/contact/domain";
+import type { ProjectTypeRepositoryPort } from "@/features/projectType/domain";
+import type { Clock } from "@/shared/domain";
 
 export type LeadsAppContext = Readonly<{
   clock: Clock;

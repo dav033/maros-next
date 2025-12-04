@@ -1,5 +1,5 @@
 import type { Company, CompanyPatch } from "../models";
-import { normalizeEmptyToUndefined } from "@/shared";
+import { normalizeEmptyToUndefined } from "@/shared/mappers";
 import type { CompanyFormValue } from "../../presentation/molecules/CompanyForm";
 
 export function toCompanyPatch(current: Company, value: CompanyFormValue): CompanyPatch {

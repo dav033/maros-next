@@ -2,16 +2,16 @@
 
 import { useState, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import type { Contact } from "@/contact";
-import type { Company } from "@/company";
+import type { Contact } from "@/contact/domain";
+import type { Company } from "@/company/domain";
 import { useCompanyApp } from "@/di";
 import { 
   companyKeys, 
   companyCrudUseCases, 
   updateCompanyWithContacts,
   type UpdateCompanyWithContactsInput 
-} from "@/company";
-import { contactsKeys } from "@/contact";
+} from "@/company/application";
+import { contactsKeys } from "@/contact/application";
 import { useToast } from "@/shared/ui";
 import { customersKeys } from "../../infra/keys";
 import { 
@@ -98,7 +98,7 @@ export function useCompanyCustomers({ contacts }: UseCompanyCustomersOptions) {
 
         queryClient.invalidateQueries({ queryKey: customersKeys.all });
         queryClient.invalidateQueries({ queryKey: companyKeys.all });
-        queryClient.invalidateQueries({ queryKey: contactsKeys.lists() });
+        queryClient.invalidateQueries({ queryKey: contactsKeys.list });
 
         toast.showSuccess("Company updated successfully!");
         closeModal();

@@ -1,7 +1,7 @@
 import type {
   CompanyRepositoryPort,
   CompanyServiceRepositoryPort,
-} from "@/company";
+} from "@/features/company/domain";
 
 export type CompanyAppContext = Readonly<{
   repos: {

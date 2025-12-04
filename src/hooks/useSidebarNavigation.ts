@@ -11,8 +11,9 @@ export function useSidebarNavigation() {
     return path.endsWith("/") && path.length > 1 ? path.slice(0, -1) : path;
   };
 
+  const normalizedCurrent = normalize(currentPath);
+
   const isActive = (href: string) => {
-    const normalizedCurrent = normalize(currentPath);
     const normalizedHref = normalize(href);
     if (normalizedHref === "/") {
       return normalizedCurrent === "/";
@@ -25,7 +26,6 @@ export function useSidebarNavigation() {
     if (sectionBasePath === "/") {
       return isActive("/");
     }
-    const normalizedCurrent = normalize(currentPath);
     const normalizedSection = normalize(sectionBasePath);
     return normalizedCurrent === normalizedSection || normalizedCurrent.startsWith(normalizedSection + "/");
   };

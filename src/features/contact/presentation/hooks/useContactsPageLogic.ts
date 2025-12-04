@@ -2,17 +2,19 @@
 
 import * as React from "react";
 import { useMemo } from "react";
-import type { Contact, ContactDraft, ContactPatch } from "@/contact";
+import type { Contact, ContactDraft, ContactPatch } from "@/contact/domain";
 import {
   contactsKeys,
   createContact,
   patchContact,
+} from "@/contact/application";
+import {
   toContactDraft,
   toContactPatch,
   toContactFormValue,
-} from "@/contact";
+} from "../../domain/mappers";
 import { useContactsApp } from "@/di";
-import { useSearchState, filterBySearch } from "@/shared/search";
+import { useTableWithSearch } from "@/shared/hooks";
 import { useCrudPage } from "@/shared/ui";
 import type { ContactFormValue } from "../../domain/mappers";
 import { useInstantContacts } from "./useInstantContacts";
@@ -45,9 +47,12 @@ export interface UseContactsPageLogicReturn {
   services: ReturnType<typeof useCompanyServices>["services"];
   
   // Search
-  searchState: ReturnType<typeof useSearchState<Contact>>["state"];
+  searchQuery: string;
+  searchField: string;
   setSearchQuery: (query: string) => void;
   setSearchField: (field: string) => void;
+  totalCount: number;
+  filteredCount: number;
   
   // Loading
   showSkeleton: boolean;
@@ -85,25 +90,28 @@ export function useContactsPageLogic(): UseContactsPageLogicReturn {
   const [companyFormValue, setCompanyFormValue] = React.useState<CompanyFormValue>(initialCompanyFormValue);
   const [companyServerError, setCompanyServerError] = React.useState<string | null>(null);
 
-  // Search state
-  const {
-    state: searchState,
-    setQuery,
-    setField,
-  } = useSearchState<Contact>(contactsSearchConfig);
-
   // Contacts data
   const { contacts, showSkeleton } = useInstantContacts();
 
-  // Filtered contacts based on search
-  const filteredContacts = useMemo(
-    () => filterBySearch(contacts ?? [], contactsSearchConfig, searchState),
-    [contacts, searchState]
-  );
+  // Search and filtering with useTableWithSearch
+  const {
+    filteredData: filteredContacts,
+    searchQuery,
+    searchField,
+    setSearchQuery,
+    setSearchField,
+    totalCount,
+    filteredCount,
+  } = useTableWithSearch<Contact>({
+    data: contacts ?? [],
+    searchableFields: contactsSearchConfig.fields.map(f => f.key),
+    defaultSearchField: contactsSearchConfig.defaultField,
+    normalize: contactsSearchConfig.normalize,
+  });
 
   // Contact CRUD operations
   const crud = useCrudPage<Contact, ContactFormValue, ContactDraft, ContactPatch>({
-    queryKey: [contactsKeys.lists(), ["customers"]],
+    queryKey: [contactsKeys.list, ["customers"]],
     createFn: (draft) => createContact(app, draft),
     updateFn: (id, patch) => patchContact(app, id, patch),
     toDraft: toContactDraft,
@@ -169,9 +177,12 @@ export function useContactsPageLogic(): UseContactsPageLogicReturn {
     services,
     
     // Search
-    searchState,
-    setSearchQuery: setQuery,
-    setSearchField: setField as (field: string) => void,
+    searchQuery,
+    searchField,
+    setSearchQuery,
+    setSearchField,
+    totalCount,
+    filteredCount,
     
     // Loading
     showSkeleton,

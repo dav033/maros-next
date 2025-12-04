@@ -1,4 +1,5 @@
-import type { Lead, LeadsAppContext, LeadType } from "@/leads";
+import type { Lead, LeadType } from "@/leads/domain";
+import type { LeadsAppContext } from "@/leads";
 
 export async function fetchLeadsByType(
   ctx: LeadsAppContext,

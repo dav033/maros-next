@@ -1,10 +1,10 @@
 import type { Contact, ContactIntegrityPolicies } from "../models";
+import { BusinessRuleError } from "@/shared/domain";
 import {
-  BusinessRuleError,
   countDigits,
   isValidEmail,
   normalizeText,
-} from "@/shared";
+} from "@/shared/validation";
 
 export function ensureContactIntegrity(
   contact: Contact,

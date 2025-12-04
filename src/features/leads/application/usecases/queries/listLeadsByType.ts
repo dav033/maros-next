@@ -1,5 +1,6 @@
-import type { Lead, LeadsAppContext, LeadType } from "@/leads";
-import { sortByStartDateDesc } from "@/leads";
+import type { Lead, LeadType } from "@/leads/domain";
+import type { LeadsAppContext } from "@/leads";
+import { sortByStartDateDesc } from "@/leads/domain";
 
 export type ListLeadsByTypeOptions = Readonly<{
   sort?: "startDateDesc" | "none";

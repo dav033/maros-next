@@ -1,6 +1,6 @@
-import type { ProjectType } from "@/projectType";
+import type { ProjectType } from "@/projectType/domain";
 import type { ProjectTypeRepositoryPort } from "../../domain/ports/ProjectTypeRepositoryPort";
-import { api, optimizedApiClient } from "@/shared";
+import { api, optimizedApiClient } from "@/shared/infra";
 
 export class ProjectTypeHttpRepository implements ProjectTypeRepositoryPort {
   async findAll(): Promise<ProjectType[]> {

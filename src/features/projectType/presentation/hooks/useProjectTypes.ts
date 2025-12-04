@@ -2,8 +2,8 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useProjectTypesApp } from "@/di";
-import { listProjectTypes } from "@/projectType";
-import type { ProjectType } from "@/projectType";
+import { listProjectTypes } from "@/projectType/application";
+import type { ProjectType } from "@/projectType/domain";
 
 const DEFAULT_STALE_TIME = 10 * 60 * 1000;
 

@@ -1,4 +1,4 @@
-import type { Contact } from "@/contact";
+import type { Contact } from "@/contact/domain";
 import type { SearchConfig } from "@/shared/search";
 
 export const customerContactsSearchPlaceholder = "Search contacts…";

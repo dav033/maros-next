@@ -12,6 +12,7 @@ export type ApiContactDTO = {
   phone?: string | null;
   email?: string | null;
   address?: string | null;
+  addressLink?: string | null;
   isCustomer: boolean;
   isClient: boolean;
   companyId?: number | null;
@@ -35,6 +36,7 @@ export type CreateContactRequestDTO = {
   phone?: string | null;
   email?: string | null;
   address?: string | null;
+  addressLink?: string | null;
   isCustomer: boolean;
   isClient: boolean;
   companyId?: number | null;
@@ -43,13 +45,14 @@ export type CreateContactRequestDTO = {
 
 
 export type UpdateContactRequestDTO = {
-  name: string;
+  name?: string;
   occupation?: string | null;
   phone?: string | null;
   email?: string | null;
   address?: string | null;
-  isCustomer: boolean;
-  isClient: boolean;
+  addressLink?: string | null;
+  isCustomer?: boolean;
+  isClient?: boolean;
   companyId?: number | null;
   notes?: string[] | null;
 };
@@ -63,6 +66,7 @@ export function mapContactFromApi(dto: ApiContactDTO): Contact {
     phone: dto.phone ?? undefined,
     email: dto.email ?? undefined,
     address: dto.address ?? undefined,
+    addressLink: dto.addressLink ?? undefined,
     isCustomer: dto.isCustomer,
     isClient: dto.isClient,
     companyId: dto.company?.id ?? dto.companyId ?? undefined,
@@ -95,6 +99,7 @@ export function mapContactDraftToCreateDTO(
     phone: draft.phone ?? null,
     email: draft.email ?? null,
     address: draft.address ?? null,
+    addressLink: draft.addressLink ?? null,
     isCustomer: draft.isCustomer ?? false,
     isClient: draft.isClient ?? false,
     companyId: draft.companyId ?? null,
@@ -109,15 +114,18 @@ export function mapContactDraftToCreateDTO(
 export function mapContactPatchToUpdateDTO(
   patch: ContactPatch,
 ): UpdateContactRequestDTO {
-  return {
-    name: patch.name ?? "",
-    occupation: patch.occupation ?? null,
-    phone: patch.phone ?? null,
-    email: patch.email ?? null,
-    address: patch.address ?? null,
-    isCustomer: patch.isCustomer ?? false,
-    isClient: patch.isClient ?? false,
-    companyId: patch.companyId ?? null,
-    notes: patch.notes ?? null,
-  };
+  const dto: UpdateContactRequestDTO = {};
+  
+  if (patch.name !== undefined) dto.name = patch.name;
+  if (patch.occupation !== undefined) dto.occupation = patch.occupation;
+  if (patch.phone !== undefined) dto.phone = patch.phone;
+  if (patch.email !== undefined) dto.email = patch.email;
+  if (patch.address !== undefined) dto.address = patch.address;
+  if (patch.addressLink !== undefined) dto.addressLink = patch.addressLink;
+  if (patch.isCustomer !== undefined) dto.isCustomer = patch.isCustomer;
+  if (patch.isClient !== undefined) dto.isClient = patch.isClient;
+  if (patch.companyId !== undefined) dto.companyId = patch.companyId;
+  if (patch.notes !== undefined) dto.notes = patch.notes;
+  
+  return dto;
 }

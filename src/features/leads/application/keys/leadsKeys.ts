@@ -1,4 +1,4 @@
-import type { LeadType } from "@/leads";
+import type { LeadType } from "@/leads/domain";
 
 export const leadsKeys = {
   all: ["leads"] as const,

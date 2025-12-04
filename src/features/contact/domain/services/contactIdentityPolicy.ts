@@ -4,7 +4,7 @@ import {
   normalizeLower,
   normalizePhone,
   normalizeText,
-} from "@/shared";
+} from "@/shared/validation";
 
 export function normalizeName(name?: string): string {
   return normalizeLower(name);

@@ -1,7 +1,7 @@
 "use client";
 
 import { LeadsPageByType } from "@/features/leads/presentation/pages/LeadsPageByType";
-import { LeadType } from "@/leads";
+import { LeadType } from "@/leads/domain";
 
 export default function RoofingLeadsPage() {
   return <LeadsPageByType leadType={LeadType.ROOFING} />;

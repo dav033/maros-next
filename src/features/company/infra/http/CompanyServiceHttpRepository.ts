@@ -2,13 +2,13 @@ import type {
   CompanyService,
   CompanyServiceDraft,
   CompanyServicePatch,
-} from "../../domain/models";
-import type { CompanyServiceRepositoryPort } from "../../domain/ports";
-import type { HttpClientLike } from "@/shared";
+} from "@/features/company/domain";
+import type { CompanyServiceRepositoryPort } from "@/features/company/domain";
+import type { HttpClientLike } from "@/shared/infra";
 import {
   makeHttpResourceRepository,
   optimizedApiClient,
-} from "@/shared";
+} from "@/shared/infra";
 
 import { companyServiceEndpoints } from "./endpoints";
 import {

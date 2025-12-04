@@ -1,5 +1,5 @@
 import type { Contact } from "../models";
-import { normalizeLower } from "@/shared";
+import { normalizeLower } from "@/shared/validation";
 
 export function searchByName(
   q: string,

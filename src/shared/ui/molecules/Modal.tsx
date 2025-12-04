@@ -4,6 +4,7 @@ import type { ReactNode, MouseEvent } from "react";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Icon, Button } from "@/shared/ui";
+import { ICON_SIZES } from "@/shared/ui/iconSizes";
 
 export type ModalProps = {
   isOpen: boolean;
@@ -78,10 +79,10 @@ export function Modal({
             onClick={onClose}
             variant="ghost"
             size="sm"
-            className="h-9 w-9 !p-0 rounded-full text-gray-400 hover:bg-theme-gray-subtle hover:text-theme-light active:scale-95 transition-transform"
+            className="h-9 w-9 p-0! rounded-full text-gray-400 hover:bg-theme-gray-subtle hover:text-theme-light active:scale-95 transition-transform"
             aria-label="Close"
           >
-            <Icon name="lucide:x" size={20} />
+            <Icon name="lucide:x" size={ICON_SIZES.md} />
           </Button>
         </div>
         <div className="space-y-4">{children}</div>

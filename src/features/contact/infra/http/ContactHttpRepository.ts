@@ -1,6 +1,7 @@
-import type { Contact, ContactDraft, ContactPatch, ContactRepositoryPort } from "@/contact";
-import type { HttpClientLike } from "@/shared";
-import { makeHttpResourceRepository, optimizedApiClient } from "@/shared";
+import type { Contact, ContactDraft, ContactPatch } from "@/features/contact/domain";
+import type { ContactRepositoryPort } from "@/features/contact/domain";
+import type { HttpClientLike } from "@/shared/infra";
+import { makeHttpResourceRepository, optimizedApiClient } from "@/shared/infra";
 
 import { contactEndpoints } from "./endpoints";
 import {

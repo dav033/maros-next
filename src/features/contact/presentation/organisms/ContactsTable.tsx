@@ -3,7 +3,7 @@
 import * as React from "react";
 import type { Contact } from "@/contact";
 import type { Company } from "@/company";
-import { ContextMenu, SimpleTable } from "@/shared/ui";
+import { ContextMenu, SimpleTable, EmptyState } from "@/shared/ui";
 import { DeleteFeedbackModal } from "@/shared/ui/organisms/DeleteFeedbackModal";
 import { NotesEditorModal } from "@/shared/ui/organisms/NotesEditorModal";
 import { CompanyDetailsModal } from "./CompanyDetailsModal";
@@ -40,19 +40,13 @@ export function ContactsTable({
     onOpenNotesModal: notesModal.open,
   });
 
-
   if (!localContacts || localContacts.length === 0) {
-    if (isLoading) {
-      return (
-        <div className="rounded-2xl border border-theme-border/60 bg-theme-dark/40 p-4 text-sm text-theme-muted">
-          Loading contacts...
-        </div>
-      );
-    }
     return (
-      <div className="rounded-2xl border border-dashed border-theme-border/60 bg-theme-dark/40 p-4 text-sm text-theme-muted">
-        No contacts found.
-      </div>
+      <EmptyState
+        iconName="lucide:users"
+        title="No contacts found."
+        subtitle="Use the button above to create a new contact."
+      />
     );
   }
 

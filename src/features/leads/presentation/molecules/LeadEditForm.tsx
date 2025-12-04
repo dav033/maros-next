@@ -1,10 +1,10 @@
 "use client";
 
-import type { Lead } from "@/leads";
+import type { Lead } from "@/leads/domain";
 import { Input, Select } from "@/shared/ui";
 import type { SelectOption } from "@/shared/ui";
-import type { Contact } from "@/contact";
-import type { ProjectType } from "@/projectType";
+import type { Contact } from "@/contact/domain";
+import type { ProjectType } from "@/projectType/domain";
 
 type LeadEditFormProps = {
   form: {

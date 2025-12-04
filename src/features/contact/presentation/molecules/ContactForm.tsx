@@ -2,6 +2,7 @@
 
 import type { Company } from "@/company";
 import type { ContactFormValue } from "../../domain/mappers";
+import { contactRoleOptions } from "@/contact/domain";
 import { Checkbox, Icon, Input, Label, Select, useFormHandlers, Textarea } from "@/shared/ui";
 
 export type ContactFormProps = {
@@ -37,12 +38,17 @@ export function ContactForm({
             required
             leftAddon={<Icon name="lucide:user" size={16} />}
           />
-          <Input
-            value={value.occupation}
-            onChange={(event) => handleTextChange(event, "occupation")}
-            placeholder="Role or occupation"
+          <Select
+            value={value.occupation ?? ""}
+            onChange={(val) => onChange({ ...value, occupation: val || "" })}
             disabled={disabled}
-            leftAddon={<Icon name="lucide:briefcase" size={16} />}
+            searchable={true}
+            icon="lucide:briefcase"
+            placeholder="Select role"
+            options={[
+              { value: "", label: "No role" },
+              ...contactRoleOptions,
+            ]}
           />
         </div>
         <div className="space-y-4">

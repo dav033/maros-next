@@ -1,33 +1,40 @@
 "use client";
 
-import { useMemo } from "react";
-import type { Lead } from "@/leads";
-import { useInstantLeadsByType, leadsSearchConfig } from "@/leads";
-import { useSearchState, filterBySearch } from "@/shared/search";
-import { useInstantContacts } from "@/contact";
-import { useProjectTypes } from "@/projectType";
-import type { LeadType } from "@/leads";
+import type { Lead } from "@/leads/domain";
+import { useInstantLeadsByType, leadsSearchConfig } from "@/leads/presentation";
+import { useTableWithSearch } from "@/shared/hooks";
+import { useInstantContacts } from "@/contact/presentation";
+import { useProjectTypes } from "@/projectType/presentation";
+import type { LeadType } from "@/leads/domain";
 
 export function useLeadsPageByType(leadType: LeadType) {
-  const {
-    state: searchState,
-    setQuery,
-    setField,
-  } = useSearchState<Lead>(leadsSearchConfig);
-
   const { leads, showSkeleton, refetch } = useInstantLeadsByType(leadType);
   const { contacts } = useInstantContacts();
   const { projectTypes } = useProjectTypes();
 
-  const filteredLeads = useMemo(
-    () => filterBySearch(leads ?? [], leadsSearchConfig, searchState),
-    [leads, searchState]
-  );
+  // Search and filtering with useTableWithSearch
+  const {
+    filteredData: filteredLeads,
+    searchQuery,
+    searchField,
+    setSearchQuery,
+    setSearchField,
+    totalCount,
+    filteredCount,
+  } = useTableWithSearch<Lead>({
+    data: leads ?? [],
+    searchableFields: leadsSearchConfig.fields.map(f => f.key),
+    defaultSearchField: leadsSearchConfig.defaultField,
+    normalize: leadsSearchConfig.normalize,
+  });
 
   return {
-    searchState,
-    setQuery,
-    setField,
+    searchQuery,
+    searchField,
+    setSearchQuery,
+    setSearchField,
+    totalCount,
+    filteredCount,
     leads,
     showSkeleton,
     refetch,

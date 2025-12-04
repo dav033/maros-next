@@ -2,9 +2,9 @@
 
 import { useState, useCallback } from "react";
 import { useLeadsApp } from "@/di";
-import { leadsKeys, createLead } from "@/leads";
-import type { Lead, LeadType } from "@/leads";
-import { contactsKeys } from "@/contact";
+import { leadsKeys, createLead } from "@/leads/application";
+import type { Lead, LeadType } from "@/leads/domain";
+import { contactsKeys } from "@/contact/application";
 import { useFormController } from "@/shared/ui";
 
 enum ContactMode {
@@ -87,7 +87,7 @@ export function useCreateLeadController({ leadType, onCreated }: UseCreateLeadCo
         policies: {},
       });
     },
-    invalidateKeys: [contactsKeys.lists(), leadsKeys.all],
+    invalidateKeys: [contactsKeys.list, leadsKeys.all],
     onSuccess: onCreated,
   });
 

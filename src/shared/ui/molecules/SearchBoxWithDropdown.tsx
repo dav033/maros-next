@@ -55,7 +55,6 @@ export function SearchBoxWithDropdown({
               value: option.key,
               label: option.label,
             }))}
-            fullWidth
           />
         </div>
 

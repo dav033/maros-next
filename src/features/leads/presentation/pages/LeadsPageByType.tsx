@@ -1,6 +1,6 @@
 "use client";
 
-import type { LeadType } from "@/leads";
+import type { LeadType } from "@/leads/domain";
 import { useLeadsPageLogic } from "./useLeadsPageLogic";
 import { LeadsPageView } from "./LeadsPageView";
 

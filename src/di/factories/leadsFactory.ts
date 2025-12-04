@@ -2,7 +2,7 @@ import type { LeadsAppContext } from "@/leads";
 import { makeLeadsAppContext, LeadHttpRepository, LeadNumberAvailabilityHttpService } from "@/leads";
 import { ContactHttpRepository } from "@/contact";
 import { ProjectTypeHttpRepository } from "@/projectType";
-import { SystemClock } from "@/shared";
+import { SystemClock } from "@/shared/domain";
 
 /**
  * Factory for creating the Leads application context.

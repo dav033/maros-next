@@ -1,5 +1,5 @@
-import type { Contact } from "@/contact";
-import type { Company } from "@/company";
+import type { Contact } from "@/contact/domain";
+import type { Company } from "@/company/domain";
 
 /**
  * Domain model representing customer data

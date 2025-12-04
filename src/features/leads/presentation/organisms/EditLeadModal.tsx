@@ -1,9 +1,9 @@
 import { Button, Modal } from "@/shared/ui";
 import { Spinner } from "@/shared/ui/atoms/Spinner";
-import type { Lead } from "@/leads";
-import { LeadEditForm } from "@/leads";
-import type { Contact } from "@/contact";
-import type { ProjectType } from "@/projectType";
+import type { Lead } from "@/leads/domain";
+import { LeadEditForm } from "@/leads/presentation";
+import type { Contact } from "@/contact/domain";
+import type { ProjectType } from "@/projectType/domain";
 
 interface EditLeadModalProps {
   isOpen: boolean;

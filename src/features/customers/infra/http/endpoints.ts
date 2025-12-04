@@ -1,4 +1,4 @@
-import { api } from "@/shared";
+import { api } from "@/shared/infra";
 
 const CRM_BASE = api.path("crm");
 

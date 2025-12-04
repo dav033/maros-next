@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { buildInstantQueryResult } from "@/shared";
+import { buildInstantQueryResult } from "@/shared/query";
 import type { Contact } from "@/contact";
 import type { Company } from "@/company";
 

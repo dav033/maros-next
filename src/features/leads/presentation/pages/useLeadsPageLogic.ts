@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import type { Lead, LeadType } from "@/leads";
-import { useCreateLeadController, useUpdateLeadController, LEAD_TYPE_CONFIGS } from "@/leads";
+import type { Lead, LeadType } from "@/leads/domain";
+import { useCreateLeadController } from "../hooks/useCreateLeadController";
+import { useUpdateLeadController } from "../hooks/useUpdateLeadController";
+import { LEAD_TYPE_CONFIGS } from "../../config/leadTypeConfigs";
 import { useToast } from "@/shared/ui/context/ToastContext";
 import { useLeadsPageByType } from "./useLeadsPageByType";
 
@@ -21,9 +23,12 @@ export interface UseLeadsPageLogicReturn {
   projectTypes: ReturnType<typeof useLeadsPageByType>["projectTypes"];
   
   // Search
-  searchState: ReturnType<typeof useLeadsPageByType>["searchState"];
-  setQuery: ReturnType<typeof useLeadsPageByType>["setQuery"];
-  setField: ReturnType<typeof useLeadsPageByType>["setField"];
+  searchQuery: string;
+  searchField: string;
+  setSearchQuery: (query: string) => void;
+  setSearchField: (field: string) => void;
+  totalCount: number;
+  filteredCount: number;
   
   // Loading
   showSkeleton: boolean;
@@ -65,9 +70,12 @@ export function useLeadsPageLogic({ leadType }: UseLeadsPageLogicOptions): UseLe
 
   // Data and search
   const {
-    searchState,
-    setQuery,
-    setField,
+    searchQuery,
+    searchField,
+    setSearchQuery,
+    setSearchField,
+    totalCount,
+    filteredCount,
     leads,
     showSkeleton,
     refetch,
@@ -127,9 +135,12 @@ export function useLeadsPageLogic({ leadType }: UseLeadsPageLogicOptions): UseLe
     projectTypes,
     
     // Search
-    searchState,
-    setQuery,
-    setField,
+    searchQuery,
+    searchField,
+    setSearchQuery,
+    setSearchField,
+    totalCount,
+    filteredCount,
     
     // Loading
     showSkeleton,

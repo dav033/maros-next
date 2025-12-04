@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import type { Contact } from "@/contact";
+import { ContactRoleLabels } from "@/contact/domain";
 import type { Company } from "@/company";
 import type { SimpleTableColumn } from "@/shared/ui";
 import { StatusBadge } from "@/shared/ui";
@@ -65,8 +66,8 @@ export function useContactsTableColumns({
       },
       {
         key: "occupation",
-        header: "Occupation",
-        className: "w-[150px]",
+        header: "Role",
+        className: "w-[200px]",
         render: (contact: Contact) => (
           <span className="text-gray-300">{contact.occupation ?? "—"}</span>
         ),

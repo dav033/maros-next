@@ -1,6 +1,6 @@
 import type { Lead, LeadStatus } from "../models";
-import type { Clock } from "@/shared";
-import { BusinessRuleError } from "@/shared";
+import type { Clock } from "@/shared/domain";
+import { BusinessRuleError } from "@/shared/domain";
 
 export type DomainEvent = Readonly<{
   type: string;

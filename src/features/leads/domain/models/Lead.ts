@@ -1,5 +1,5 @@
-import type { Contact } from "@/contact";
-import type { LeadStatus, LeadType } from "@/leads";
+import type { Contact } from "@/contact/domain";
+import type { LeadStatus, LeadType } from "@/leads/domain";
 import type { ProjectType } from "./ProjectType";
 
 export interface Lead {
@@ -8,6 +8,7 @@ export interface Lead {
   name: string;
   startDate: string;
   location?: string | undefined;
+  addressLink?: string | undefined;
   status: LeadStatus;
   contact: Contact;
   projectType: ProjectType;

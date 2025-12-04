@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { cx } from "../utils/cx";
 
 export type BadgeVariant = 
   | "primary" 
@@ -24,9 +25,6 @@ export interface BadgeProps {
   onClick?: () => void;
   className?: string;
   customColor?: string;
-  customBgColor?: string;
-  customTextColor?: string;
-  customBorderColor?: string;
 }
 
 const variants: Record<BadgeVariant, { bg: string; text: string; border?: string }> = {
@@ -106,30 +104,26 @@ export function Badge({
   onClick,
   className = "",
   customColor,
-  customBgColor,
-  customTextColor,
-  customBorderColor,
 }: BadgeProps) {
   const variantStyles = variants[variant];
   const sizeStyles = sizes[size];
 
-  const baseClasses = [
+  const baseClasses = cx(
     "inline-flex items-center rounded-full font-medium",
     sizeStyles.text,
     sizeStyles.padding,
     icon || dot ? sizeStyles.gap : "",
     interactive ? "transition-colors cursor-pointer" : "",
-    className,
-  ]
-    .filter(Boolean)
-    .join(" ");
+    className
+  );
 
-  const customStyles = customColor || customBgColor
+  // If customColor is provided, calculate all styles from it
+  const customStyles = customColor
     ? {
-        backgroundColor: customBgColor || `${customColor}20`,
-        color: customTextColor ?? (customColor ? customColor : undefined),
-        borderColor: customBorderColor ?? (customColor ? `${customColor}40` : undefined),
-        borderWidth: (customBorderColor ?? customColor) ? "1px" : undefined,
+        backgroundColor: `${customColor}20`,
+        color: customColor,
+        borderColor: `${customColor}40`,
+        borderWidth: "1px",
       }
     : undefined;
 

@@ -2,8 +2,7 @@
 
 import * as React from "react";
 import type { Company } from "../../domain/models";
-import { ContextMenu, SimpleTable } from "@/shared/ui";
-import { CompaniesToolbar } from "../molecules/CompaniesToolbar";
+import { ContextMenu, SimpleTable, EmptyState } from "@/shared/ui";
 import { DeleteFeedbackModal } from "@/shared/ui/organisms/DeleteFeedbackModal";
 import { NotesEditorModal } from "@/shared/ui/organisms/NotesEditorModal";
 import { useCompaniesTableLogic } from "../hooks/useCompaniesTableLogic";
@@ -15,8 +14,6 @@ export interface CompaniesTableProps {
   onEdit: (company: Company) => void;
   onDelete: (companyId: number) => void;
   services?: Array<{ id: number; name: string; color?: string | null }>;
-  onManageServices?: () => void;
-  onNewCompany?: () => void;
 }
 
 export function CompaniesTable({
@@ -25,8 +22,6 @@ export function CompaniesTable({
   onEdit,
   onDelete,
   services = [],
-  onManageServices,
-  onNewCompany,
 }: CompaniesTableProps) {
   const {
     localCompanies,
@@ -44,37 +39,20 @@ export function CompaniesTable({
   });
 
   if (!localCompanies || localCompanies.length === 0) {
-    if (isLoading) {
-      return (
-        <div className="rounded-2xl border border-theme-border/60 bg-theme-dark/40 p-4 text-sm text-theme-muted">
-          Loading companies...
-        </div>
-      );
-    }
     return (
-      <div className="rounded-2xl border border-dashed border-theme-border/60 bg-theme-dark/40 p-4 text-sm text-theme-muted">
-        No companies found.
-      </div>
+      <EmptyState
+        iconName="lucide:building-2"
+        title="No companies found."
+        subtitle="Use the button above to create a new company."
+      />
     );
   }
 
   return (
     <>
-      <div className="mb-2">
-        <CompaniesToolbar
-          searchQuery={searchState.searchQuery}
-          searchField={searchState.searchField}
-          onSearchQueryChange={searchState.setSearchQuery}
-          onSearchFieldChange={searchState.setSearchField}
-          totalCount={searchState.totalCount}
-          filteredCount={searchState.filteredCount}
-          onManageServices={onManageServices}
-          onNewCompany={onNewCompany}
-        />
-      </div>
       <SimpleTable<Company>
         columns={columns}
-        data={filteredCompanies}
+        data={localCompanies}
         rowKey={(company) => company.id}
         onRowContextMenu={handleRowContextMenu}
       />

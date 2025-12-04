@@ -3,7 +3,7 @@ import type { CompanyDraft, CompanyPatch } from "../../domain/models";
 import { companyKeys, companyCrudUseCases, updateCompanyWithContacts } from "../../application";
 import { useCompanyApp } from "@/di";
 import { useToast } from "@/shared/ui";
-import { contactsKeys } from "@/contact";
+import { contactsKeys } from "@/contact/application";
 
 export function useCompanyMutations() {
   const app = useCompanyApp();
@@ -13,7 +13,7 @@ export function useCompanyMutations() {
   const invalidateQueries = () => {
     queryClient.invalidateQueries({ queryKey: companyKeys.all });
     queryClient.invalidateQueries({ queryKey: ["customers"] });
-    queryClient.invalidateQueries({ queryKey: contactsKeys.lists() });
+    queryClient.invalidateQueries({ queryKey: contactsKeys.list });
   };
 
   const createMutation = useMutation({

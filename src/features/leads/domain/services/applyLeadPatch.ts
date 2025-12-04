@@ -5,8 +5,8 @@ import type {
   LeadPolicies,
   LeadStatus,
 } from "../models";
-import type { Clock, ISODate } from "@/shared";
-import { BusinessRuleError } from "@/shared";
+import type { Clock, ISODate } from "@/shared/domain";
+import { BusinessRuleError } from "@/shared/domain";
 
 import { ensureLeadIntegrity } from "./ensureLeadIntegrity";
 import { makeLeadNumber } from "./leadNumberPolicy";

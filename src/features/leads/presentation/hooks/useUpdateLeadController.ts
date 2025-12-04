@@ -2,8 +2,8 @@
 
 import { useEffect } from "react";
 import { useLeadsApp } from "@/di";
-import { leadsKeys, patchLead } from "@/leads";
-import type { Lead, LeadPatch } from "@/leads";
+import { leadsKeys, patchLead } from "@/leads/application";
+import type { Lead, LeadPatch } from "@/leads/domain";
 import { useFormController } from "@/shared/ui";
 
 type LeadEditFormData = {

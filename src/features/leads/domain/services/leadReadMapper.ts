@@ -1,5 +1,5 @@
 import type { Lead, LeadStatus, LeadType } from "../models";
-import { coerceIsoLocalDate, normalizeText } from "@/shared";
+import { coerceIsoLocalDate, normalizeText } from "@/shared/validation";
 
 export type ApiProjectTypeDTO = {
   id?: number | string | null;

@@ -1,6 +1,6 @@
 import type { ContactId, NewContact } from "../models";
-import { BusinessRuleError } from "@/shared";
-import { normalizeText } from "@/shared";
+import { BusinessRuleError } from "@/shared/domain";
+import { normalizeText } from "@/shared/validation";
 
 export function normalizeNewContact(input: NewContact): NewContact {
   return {

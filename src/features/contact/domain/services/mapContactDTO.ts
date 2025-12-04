@@ -1,4 +1,4 @@
-import { normalizeEmptyToUndefined, pickDefined } from "@/shared";
+import { normalizeEmptyToUndefined, pickDefined } from "@/shared/mappers";
 
 export interface CreateContactRequestDTO {
   name: string;

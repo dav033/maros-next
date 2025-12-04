@@ -2,7 +2,7 @@
 
 import { useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useEntityForm } from "@/shared";
+import { useEntityForm } from "@/shared/hooks";
 import { useToast } from "@/shared/ui";
 
 export type CustomerCrudSectionConfig<TEntity, TFormValue, TPatch> = {

@@ -1,12 +1,11 @@
-import type { Contact } from "@/contact";
+import type { Contact, ContactUniquenessPort } from "../../domain";
 import type {
   ApiContactDTO,
   ContactUniquenessCheck,
-  ContactUniquenessPort,
-} from "@/contact";
-import { findDuplicate, mapContactsFromDTO, toUniquenessCandidate } from "@/contact";
-import type { HttpClientLike } from "@/shared";
-import { optimizedApiClient } from "@/shared";
+} from "../../domain";
+import { findDuplicate, mapContactsFromDTO, toUniquenessCandidate } from "../../domain/services";
+import type { HttpClientLike } from "@/shared/infra";
+import { optimizedApiClient } from "@/shared/infra";
 
 import { contactEndpoints as endpoints } from "./endpoints";
 

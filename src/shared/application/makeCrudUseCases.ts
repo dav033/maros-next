@@ -1,4 +1,4 @@
-import type { ResourceRepository } from "@/shared";
+import type { ResourceRepository } from "@/shared/infra";
 
 export type MakeCrudUseCasesConfig<ID, Entity, Draft, Patch, Ctx> = {
   getRepo: (ctx: Ctx) => ResourceRepository<ID, Entity, Draft, Patch>;

@@ -1,5 +1,6 @@
 import type { Contact, ContactPatch } from "../models";
-import { normalizeEmptyToUndefined, createPatch, trimStringFields } from "@/shared";
+import { normalizeEmptyToUndefined } from "@/shared/mappers";
+import { createPatch, trimStringFields } from "@/shared/utils";
 
 export type ContactFormValue = {
   name: string;

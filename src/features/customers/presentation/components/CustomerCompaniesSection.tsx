@@ -1,7 +1,7 @@
 "use client";
 
-import type { Contact } from "@/contact";
-import type { Company } from "@/company";
+import type { Contact } from "@/contact/domain";
+import type { Company } from "@/company/domain";
 import { CompaniesTable } from "@/features/company/presentation/organisms/CompaniesTable";
 import { CompaniesTableSkeleton } from "@/features/company/presentation/organisms/CompaniesTableSkeleton";
 import { CompanyForm } from "@/features/company/presentation/molecules/CompanyForm";

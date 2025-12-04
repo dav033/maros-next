@@ -5,6 +5,7 @@ export interface Contact {
   phone?: string | undefined;
   email?: string | undefined;
   address?: string | undefined;
+  addressLink?: string | undefined;
   isCustomer: boolean;
   isClient: boolean;
   companyId?: number | null;
@@ -27,6 +28,7 @@ export type ContactDraft = Readonly<{
   email?: string | null | undefined;
   occupation?: string | null | undefined;
   address?: string | null | undefined;
+  addressLink?: string | null | undefined;
   isCustomer?: boolean | undefined;
   isClient?: boolean | undefined;
   companyId?: number | null | undefined;
@@ -39,6 +41,7 @@ export type ContactPatch = Readonly<{
   phone?: string | null | undefined;
   email?: string | null | undefined;
   address?: string | null | undefined;
+  addressLink?: string | null | undefined;
   isCustomer?: boolean | undefined;
   isClient?: boolean | undefined;
   companyId?: number | null | undefined;

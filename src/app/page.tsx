@@ -1,28 +1,27 @@
+import { getMainPages } from "@/components/sidebar/sidebarConfig";
+import { PageContainer } from "@/shared/ui";
+
 export default function Page() {
-  const pages = [
-    { name: "Companies", path: "/company" },
-    { name: "Contacts", path: "/contacts" },
-    { name: "Customers", path: "/customers" },
-    { name: "Construction Leads", path: "/leads/construction" },
-    { name: "Plumbing Leads", path: "/leads/plumbing" },
-    { name: "Roofing Leads", path: "/leads/roofing" },
-  ];
+  const pages = getMainPages();
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen bg-theme-dark text-theme-light">
-      <h1 className="text-3xl font-bold mb-6">Available Categories</h1>
-      <ul className="w-full max-w-md space-y-4">
+    <PageContainer 
+      centered 
+      title="Available Categories"
+      className="px-4"
+    >
+      <ul className="w-full max-w-md space-y-4 mx-auto">
         {pages.map((page) => (
-          <li key={page.path} className="rounded-lg border border-theme-gray-subtle bg-theme-dark/70 hover:bg-theme-dark/90 transition-colors">
+          <li key={page.href} className="rounded-lg border border-theme-gray-subtle bg-theme-dark/70 hover:bg-theme-dark/90 transition-colors">
             <a
-              href={page.path}
+              href={page.href}
               className="block px-6 py-4 text-lg font-medium text-theme-light hover:text-theme-accent"
             >
-              {page.name}
+              {page.title}
             </a>
           </li>
         ))}
       </ul>
-    </main>
+    </PageContainer>
   );
 }

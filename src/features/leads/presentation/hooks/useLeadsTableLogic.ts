@@ -1,8 +1,8 @@
 "use client";
 
 import * as React from "react";
-import type { Lead } from "@/leads";
-import { deleteLead, patchLead } from "@/leads";
+import type { Lead } from "@/leads/domain";
+import { deleteLead, patchLead } from "@/leads/application";
 import { useLeadsApp } from "@/di";
 import { getNotesArray } from "@/shared/utils/notes";
 import {

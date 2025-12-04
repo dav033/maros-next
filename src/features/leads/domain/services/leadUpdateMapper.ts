@@ -1,4 +1,4 @@
-import type { LeadPatch } from "@/leads";
+import type { LeadPatch } from "@/leads/domain";
 
 export type UpdateLeadPayload = {
   name?: string;

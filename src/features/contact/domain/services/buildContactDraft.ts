@@ -1,4 +1,5 @@
-import { BusinessRuleError, normalizeEmail, normalizePhone, normalizeText } from "@/shared";
+import { BusinessRuleError } from "@/shared/domain";
+import { normalizeEmail, normalizePhone, normalizeText } from "@/shared/validation";
 import type { ContactDraft } from "../models";
 
 type ContactInput = {

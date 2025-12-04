@@ -1,6 +1,6 @@
 "use client";
 
-import type { Lead } from "@/leads";
+import type { Lead } from "@/leads/domain";
 import {
   leadsSearchConfig,
   leadsSearchPlaceholder,

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { SidebarItemProps as SidebarItemConfig } from "@/types";
-import { Icon } from "@/shared/ui";
+import { Icon, cx } from "@/shared/ui";
 import { useSidebar } from "./SidebarContext";
 
 type Props = {
@@ -18,13 +18,13 @@ export default function SidebarItem({ item, depth = 0, isActive }: Props) {
   const active = isActive(href);
   const basePadding = depth === 0 ? "pl-3" : depth === 1 ? "pl-5" : "pl-7";
 
-  const className = [
+  const className = cx(
     "flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors",
     basePadding,
     active
       ? "bg-theme-gray-subtle text-theme-light"
       : "text-theme-light hover:bg-theme-gray-subtle/80"
-  ].join(" ");
+  );
 
   const handleClick = () => {
     if (window.innerWidth < 1024) {

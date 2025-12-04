@@ -1,4 +1,4 @@
-import { api, buildCrudEndpoints } from "@/shared";
+import { api, buildCrudEndpoints } from "@/shared/infra";
 
 const COMPANIES_BASE = api.resource("companies");
 const COMPANY_SERVICES_BASE = api.resource("company-services");

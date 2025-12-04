@@ -1,4 +1,4 @@
-import { BusinessRuleError } from "@/shared";
+import { BusinessRuleError } from "@/shared/domain";
 
 export type LeadNumberRules = Readonly<{
   trim?: boolean;

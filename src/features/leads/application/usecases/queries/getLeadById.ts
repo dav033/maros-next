@@ -1,5 +1,6 @@
-import type { Lead, LeadId, LeadsAppContext } from "@/leads";
-import { BusinessRuleError } from "@/shared";
+import type { Lead, LeadId } from "@/leads/domain";
+import type { LeadsAppContext } from "@/leads";
+import { BusinessRuleError } from "@/shared/domain";
 
 export async function getLeadById(
   ctx: LeadsAppContext,

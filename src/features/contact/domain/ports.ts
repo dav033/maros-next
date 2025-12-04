@@ -1,8 +1,16 @@
 import type { Contact, ContactDraft, ContactId, ContactPatch, ContactUniquenessCheck } from "./models";
-import type { ResourceRepository } from "@/shared";
 
-export interface ContactRepositoryPort
-  extends ResourceRepository<ContactId, Contact, ContactDraft, ContactPatch> {
+/**
+ * Domain port for Contact repository.
+ * Defines the contract for persisting and retrieving contacts.
+ * Infra implementations should implement this interface.
+ */
+export interface ContactRepositoryPort {
+  getById(id: ContactId): Promise<Contact | null>;
+  list(): Promise<Contact[]>;
+  create(draft: ContactDraft): Promise<Contact>;
+  update(id: ContactId, patch: ContactPatch): Promise<Contact>;
+  delete(id: ContactId): Promise<void>;
   search?(query: string): Promise<Contact[]>;
 }
 

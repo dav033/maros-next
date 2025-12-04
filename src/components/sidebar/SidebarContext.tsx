@@ -5,7 +5,6 @@ import { createContext, useContext, useState, useCallback, type ReactNode } from
 type SidebarContextValue = {
   isOpen: boolean;
   toggle: () => void;
-  open: () => void;
   close: () => void;
 };
 
@@ -18,16 +17,12 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
     setIsOpen((prev) => !prev);
   }, []);
 
-  const open = useCallback(() => {
-    setIsOpen(true);
-  }, []);
-
   const close = useCallback(() => {
     setIsOpen(false);
   }, []);
 
   return (
-    <SidebarContext.Provider value={{ isOpen, toggle, open, close }}>
+    <SidebarContext.Provider value={{ isOpen, toggle, close }}>
       {children}
     </SidebarContext.Provider>
   );

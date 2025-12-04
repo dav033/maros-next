@@ -1,5 +1,5 @@
 
-import { BusinessRuleError } from "@/shared";
+import { BusinessRuleError } from "@/shared/domain";
 
 import {
   type LeadNumberRules,

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useInstantCompanies } from "./useInstantCompanies";
+import { useTableWithSearch } from "@/shared/hooks";
 import { useCompanyServices } from "./useCompanyServices";
 import { useInstantContacts } from "@/features/contact/presentation/hooks/useInstantContacts";
 import { useCompanyCreateModal } from "./useCompanyCreateModal";
@@ -11,7 +12,8 @@ import { useCompanyContactModal } from "./useCompanyContactModal";
 import { useCompanyMutations } from "./useCompanyMutations";
 import type { ContactFormValue } from "@/features/contact/domain/mappers";
 import { useContactsApp } from "@/di";
-import { createContact, toContactDraft, contactsKeys } from "@/contact";
+import { createContact, contactsKeys } from "@/contact/application";
+import { toContactDraft } from "@/features/contact/domain/mappers";
 import { useQueryClient } from "@tanstack/react-query";
 
 const initialContactFormValue: ContactFormValue = {
@@ -48,6 +50,15 @@ export interface UseCompaniesPageLogicReturn {
   
   // Actions
   handleDelete: () => void;
+  
+  // Search
+  filteredCompanies: any[];
+  searchQuery: string;
+  searchField: string;
+  setSearchQuery: (query: string) => void;
+  setSearchField: (field: string) => void;
+  totalCount: number;
+  filteredCount: number;
 }
 
 /**
@@ -100,7 +111,7 @@ export function useCompaniesPageLogic(): UseCompaniesPageLogicReturn {
       const draft = toContactDraft(contactFormValue);
       const newContact = await createContact(contactsApp, draft);
       
-      await queryClient.invalidateQueries({ queryKey: contactsKeys.lists() });
+      await queryClient.invalidateQueries({ queryKey: contactsKeys.list });
       
       contactModal.onContactCreated(newContact.id);
       setContactFormValue(initialContactFormValue);
@@ -121,6 +132,45 @@ export function useCompaniesPageLogic(): UseCompaniesPageLogicReturn {
   const handleDelete = () => {
     invalidateQueries();
   };
+
+  // Search functionality
+  const {
+    filteredData: filteredCompanies,
+    searchQuery,
+    searchField,
+    setSearchQuery,
+    setSearchField,
+    totalCount,
+    filteredCount,
+  } = useTableWithSearch({
+    data: companies || [],
+    searchableFields: ["name", "address", "type"],
+    customSearchFn: (company, term, field) => {
+      if (field === "all") {
+        return !!(
+          company.name?.toLowerCase().includes(term) ||
+          company.address?.toLowerCase().includes(term) ||
+          company.type?.toLowerCase().includes(term) ||
+          (company.serviceId &&
+            services
+              ?.find((s) => s.id === company.serviceId)
+              ?.name?.toLowerCase()
+              .includes(term))
+        );
+      }
+      if (field === "service") {
+        return !!(
+          company.serviceId &&
+          services
+            ?.find((s) => s.id === company.serviceId)
+            ?.name?.toLowerCase()
+            .includes(term)
+        );
+      }
+      const value = company[field as keyof typeof company];
+      return value != null && String(value).toLowerCase().includes(term);
+    },
+  });
 
   return {
     // Data
@@ -145,5 +195,14 @@ export function useCompaniesPageLogic(): UseCompaniesPageLogicReturn {
     
     // Actions
     handleDelete,
+    
+    // Search
+    filteredCompanies,
+    searchQuery,
+    searchField,
+    setSearchQuery,
+    setSearchField,
+    totalCount,
+    filteredCount,
   };
 }

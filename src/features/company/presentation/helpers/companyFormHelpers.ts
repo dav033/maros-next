@@ -1,8 +1,9 @@
 import type { Company, CompanyDraft, CompanyPatch } from "../../domain/models";
 import type { CompanyFormValue } from "../molecules/CompanyForm";
 import { CompanyType } from "../../domain/models";
-import { normalizeEmptyToUndefined, createPatch, trimStringFields } from "@/shared";
-import type { Contact } from "@/contact";
+import { normalizeEmptyToUndefined } from "@/shared/mappers";
+import { createPatch, trimStringFields } from "@/shared/utils";
+import type { Contact } from "@/contact/domain";
 
 export const initialCompanyFormValue: CompanyFormValue = {
   name: "",

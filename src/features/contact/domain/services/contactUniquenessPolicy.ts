@@ -1,5 +1,5 @@
 import type { Contact, ContactLike, ContactUniquenessCheck, DuplicateCheckOptions, UniquenessOptions } from "../models";
-import { BusinessRuleError } from "@/shared";
+import { BusinessRuleError } from "@/shared/domain";
 import { areContactsPotentialDuplicates, makeContactIdentityKey } from "./contactIdentityPolicy";
 
 export function toUniquenessCandidate(c: ContactLike): ContactUniquenessCheck {

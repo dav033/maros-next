@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { Icon } from "@/shared/ui";
+import { Icon, PageContainer } from "@/shared/ui";
 
 export default function NotFound() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-theme-dark px-4">
+    <PageContainer centered>
       <div className="text-center">
         <div className="mb-8 flex justify-center">
           <Icon name="mdi:alert-circle-outline" className="text-9xl text-theme-light/20" />
@@ -27,6 +27,6 @@ export default function NotFound() {
           Back to home
         </Link>
       </div>
-    </div>
+    </PageContainer>
   );
 }

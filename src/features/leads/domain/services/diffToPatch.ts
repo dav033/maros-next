@@ -1,6 +1,7 @@
 import type { Lead, LeadPatch } from "../models";
-import type { ISODate } from "@/shared";
-import { createPatch, normalizeEmptyToUndefined } from "@/shared";
+import type { ISODate } from "@/shared/domain";
+import { normalizeEmptyToUndefined } from "@/shared/mappers";
+import { createPatch } from "@/shared/utils";
 
 export function diffToPatch(current: Lead, updated: Lead): LeadPatch {
   

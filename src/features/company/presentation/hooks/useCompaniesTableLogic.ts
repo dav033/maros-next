@@ -4,7 +4,7 @@ import * as React from "react";
 import type { Company } from "../../domain/models";
 import { companyCrudUseCases } from "../../application";
 import { useCompanyApp } from "@/di";
-import { useTableWithSearch } from "@/shared";
+import { useTableWithSearch } from "@/shared/hooks";
 import {
   useContextMenu,
   useDeleteModal,

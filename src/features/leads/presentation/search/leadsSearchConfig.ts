@@ -1,4 +1,4 @@
-import type { Lead } from "@/leads";
+import type { Lead } from "@/leads/domain";
 import type { SearchConfig } from "@/shared/search";
 
 export const leadsSearchPlaceholder = "Search leads…";

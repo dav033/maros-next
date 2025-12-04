@@ -1,6 +1,6 @@
-import type { Contact } from "@/contact";
-import type { ProjectType } from "@/projectType";
-import type { ISODate } from "@/shared";
+import type { Contact } from "@/contact/domain";
+import type { ProjectType } from "@/projectType/domain";
+import type { ISODate } from "@/shared/domain";
 
 export enum LeadStatus {
   NOT_EXECUTED = "NOT_EXECUTED",
@@ -51,6 +51,7 @@ type LeadDraftBase = Readonly<{
   name: string;
   startDate: ISODate;
   location: string;
+  addressLink?: string | null;
   status: LeadStatus | null;
   projectTypeId: ProjectTypeId;
   leadType: LeadType;
@@ -71,6 +72,7 @@ export type LeadDraft = LeadDraftWithNewContact | LeadDraftWithExistingContact;
 export type LeadPatch = Readonly<{
   name?: string;
   location?: string;
+  addressLink?: string | null;
   status?: LeadStatus | null;
   contactId?: number;
   projectTypeId?: number;

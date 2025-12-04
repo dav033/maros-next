@@ -5,7 +5,7 @@ import { useCompanyApp } from "@/di";
 import { companyKeys } from "../../application/keys";
 import { companyCrudUseCases } from "../../application/usecases/companyCrud";
 import type { Company } from "../../domain/models";
-import { buildInstantQueryResult } from "@/shared";
+import { buildInstantQueryResult } from "@/shared/query";
 
 const DEFAULT_STALE_TIME = 5 * 60 * 1000;
 

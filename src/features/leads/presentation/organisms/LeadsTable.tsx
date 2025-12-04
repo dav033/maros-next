@@ -1,15 +1,15 @@
 "use client";
 
 import * as React from "react";
-import type { Lead } from "@/leads";
+import type { Lead } from "@/leads/domain";
 import {
   ContextMenu,
   SimpleTable,
   ContactViewModal,
+  EmptyState,
 } from "@/shared/ui";
 import { NotesEditorModal } from "@/shared/ui/organisms/NotesEditorModal";
 import { DeleteFeedbackModal } from "@/shared/ui/organisms/DeleteFeedbackModal";
-import { Spinner } from "@/shared/ui/atoms/Spinner";
 import { useLeadsTableLogic } from "../hooks/useLeadsTableLogic";
 import { useLeadsTableColumns } from "../hooks/useLeadsTableColumns";
 
@@ -41,28 +41,17 @@ export function LeadsTable({
   });
 
   if (!localLeads || localLeads.length === 0) {
-    if (isLoading) {
-      return (
-        <div className="flex items-center justify-center py-8">
-          <Spinner />
-        </div>
-      );
-    }
     return (
-      <div className="rounded-2xl border border-dashed border-theme-border/60 bg-theme-dark/40 p-4 text-sm text-theme-muted">
-        No leads found.
-      </div>
+      <EmptyState
+        iconName="lucide:clipboard-list"
+        title="No leads found."
+        subtitle="Use the button above to create a new lead."
+      />
     );
   }
 
   return (
     <>
-      {isLoading && (
-        <div className="mb-2 flex items-center gap-2 text-sm text-theme-muted">
-          <Spinner /> <span>Loading leads...</span>
-        </div>
-      )}
-
       <SimpleTable<Lead>
         columns={columns}
         data={localLeads}

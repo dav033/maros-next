@@ -1,5 +1,6 @@
 import type { Contact } from "../models";
-import { BusinessRuleError, normalizeText } from "@/shared";
+import { BusinessRuleError } from "@/shared/domain";
+import { normalizeText } from "@/shared/validation";
 import { ensureContactIntegrity } from "./ensureContactIntegrity";
 
 export type ApiContactDTO = Readonly<{

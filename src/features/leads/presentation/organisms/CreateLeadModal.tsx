@@ -1,9 +1,8 @@
 import { Button, Modal } from "@/shared/ui";
 import { Spinner } from "@/shared/ui/atoms/Spinner";
-import type { ContactMode } from "@/leads";
-import { ContactModeSelector, LeadForm } from "@/leads";
-import type { Contact } from "@/contact";
-import type { ProjectType } from "@/projectType";
+import { ContactModeSelector, ContactMode, LeadForm } from "@/leads/presentation";
+import type { Contact } from "@/contact/domain";
+import type { ProjectType } from "@/projectType/domain";
 
 interface CreateLeadModalProps {
   isOpen: boolean;

@@ -1,5 +1,7 @@
-import type { Lead, LeadId, LeadsAppContext, LeadStatus } from "@/leads";
-import { applyStatus, DEFAULT_TRANSITIONS, getLeadById } from "@/leads";
+import type { Lead, LeadId, LeadStatus } from "@/leads/domain";
+import type { LeadsAppContext } from "@/leads";
+import { applyStatus, DEFAULT_TRANSITIONS } from "@/leads/domain";
+import { getLeadById } from "../queries/getLeadById";
 
 export type ChangeLeadStatusOptions = Readonly<{
   transitions?: Readonly<Record<LeadStatus, readonly LeadStatus[]>>;

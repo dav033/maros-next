@@ -1,7 +1,7 @@
 "use client";
 
-import { CompaniesPageHeader } from "../molecules/CompaniesPageHeader";
 import { CompaniesTable } from "../organisms/CompaniesTable";
+import { CompaniesToolbar } from "../molecules/CompaniesToolbar";
 import { CompaniesTableSkeleton } from "../organisms/CompaniesTableSkeleton";
 import { EmptyCompaniesState } from "../molecules/EmptyCompaniesState";
 import { CompanyModal } from "../organisms/CompanyModal";
@@ -16,14 +16,7 @@ export interface CompaniesPageViewProps {
 
 /**
  * Pure presentational component for the Companies page.
- * 
- * Receives all logic and state from useCompaniesPageLogic hook.
- * Contains only UI rendering, no business logic.
- * 
- * Manages three modals:
- * - Company create/edit modals
- * - Services management modal
- * - Nested contact creation modal
+ * Manages three modals: Company CRUD, Services management, and nested Contact creation.
  */
 export function CompaniesPageView({ logic }: CompaniesPageViewProps) {
   const {
@@ -42,24 +35,50 @@ export function CompaniesPageView({ logic }: CompaniesPageViewProps) {
     handleContactSubmit,
     handleContactModalClose,
     handleDelete,
+    filteredCompanies,
+    searchQuery,
+    searchField,
+    setSearchQuery,
+    setSearchField,
+    totalCount,
+    filteredCount,
   } = logic;
 
   return (
     <EntityCrudPageTemplate
-      header={<CompaniesPageHeader />}
+      header={
+        <header className="flex flex-col gap-1">
+          <h1 className="text-xl font-semibold text-theme-light sm:text-2xl">
+            Companies
+          </h1>
+          <p className="text-xs text-gray-400 sm:text-sm">
+            Manage companies and contractors in your network.
+          </p>
+        </header>
+      }
+      toolbar={
+        <CompaniesToolbar
+          searchQuery={searchQuery}
+          searchField={searchField}
+          onSearchQueryChange={setSearchQuery}
+          onSearchFieldChange={setSearchField}
+          totalCount={totalCount}
+          filteredCount={filteredCount}
+          onManageServices={servicesModal.open}
+          onNewCompany={createModal.open}
+        />
+      }
       isLoading={showSkeleton}
       loadingContent={<CompaniesTableSkeleton />}
-      isEmpty={!companies || companies.length === 0}
-      emptyContent={<EmptyCompaniesState />}
+      isEmpty={false}
+      emptyContent={null}
       tableContent={
         <CompaniesTable
-          companies={companies ?? []}
+          companies={filteredCompanies}
           isLoading={showSkeleton}
           onEdit={editModal.open}
           onDelete={handleDelete}
           services={services}
-          onManageServices={servicesModal.open}
-          onNewCompany={createModal.open}
         />
       }
       modals={

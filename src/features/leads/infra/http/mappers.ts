@@ -1,5 +1,5 @@
-import type { ISODate } from "@/shared";
-import type { Lead, LeadDraft, LeadPatch } from "@/leads";
+import type { ISODate } from "@/shared/domain";
+import type { Lead, LeadDraft, LeadPatch } from "@/leads/domain";
 export type ApiLeadDTO = {
   id: number;
   leadNumber: string;
@@ -12,8 +12,8 @@ export type ApiLeadDTO = {
   projectTypeId?: number;
   notes?: string[];
 };
-import type { LeadStatus, LeadType } from "@/leads";
-import { mapLeadFromDTO, mapLeadsFromDTO } from "@/leads";
+import type { LeadStatus, LeadType } from "@/leads/domain";
+import { mapLeadFromDTO, mapLeadsFromDTO } from "@/leads/domain";
 
 export type CreateLeadBasePayload = {
   leadNumber: string | null;

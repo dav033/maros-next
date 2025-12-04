@@ -1,5 +1,6 @@
-import type { Contact, ContactPatch, ContactFormValue } from "@/contact";
-import { normalizeEmptyToUndefined, createPatch, trimStringFields } from "@/shared";
+import type { Contact, ContactPatch, ContactFormValue } from "@/contact/domain";
+import { normalizeEmptyToUndefined } from "@/shared/mappers";
+import { createPatch, trimStringFields } from "@/shared/utils";
 
 export const initialContactFormValue: ContactFormValue = {
   name: "",

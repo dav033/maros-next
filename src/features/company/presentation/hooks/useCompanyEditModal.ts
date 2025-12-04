@@ -1,6 +1,6 @@
 "use client";
 
-import { useEntityForm } from "@/shared";
+import { useEntityForm } from "@/shared/hooks";
 import type { Company } from "../../domain/models";
 import type { Contact } from "@/features/contact/domain/models";
 import type { CompanyFormValue } from "../molecules/CompanyForm";

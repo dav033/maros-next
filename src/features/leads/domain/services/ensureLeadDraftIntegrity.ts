@@ -1,5 +1,5 @@
 import type { LeadDraft, LeadDraftWithExistingContact, LeadDraftWithNewContact, LeadPolicies } from "../models";
-import { BusinessRuleError } from "@/shared";
+import { BusinessRuleError } from "@/shared/domain";
 
 import { ensureNewContactMinimums } from "./leadContactLinkPolicy";
 

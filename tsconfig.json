@@ -26,23 +26,128 @@
       "@/*": [
         "./src/*"
       ],
+      "@/shared/domain": [
+        "./src/shared/domain.ts"
+      ],
+      "@/shared/infra": [
+        "./src/shared/infra.ts"
+      ],
+      "@/shared/application": [
+        "./src/shared/application.ts"
+      ],
+      "@/shared/hooks": [
+        "./src/shared/hooks.ts"
+      ],
+      "@/shared/ui": [
+        "./src/shared/ui.ts"
+      ],
+      "@/shared/search": [
+        "./src/shared/search.ts"
+      ],
+      "@/shared/utils": [
+        "./src/shared/utils.ts"
+      ],
+      "@/shared/validation": [
+        "./src/shared/validation.ts"
+      ],
+      "@/shared/mappers": [
+        "./src/shared/mappers.ts"
+      ],
+      "@/shared/query": [
+        "./src/shared/query.ts"
+      ],
+      "@/features/*": [
+        "./src/features/*"
+      ],
+      "@/contact/domain": [
+        "./src/features/contact/domain/index"
+      ],
+      "@/contact/application": [
+        "./src/features/contact/application/index"
+      ],
+      "@/contact/infra": [
+        "./src/features/contact/infra/index"
+      ],
+      "@/contact/presentation": [
+        "./src/features/contact/presentation/index"
+      ],
+      "@/leads/domain": [
+        "./src/features/leads/domain/index"
+      ],
+      "@/leads/application": [
+        "./src/features/leads/application/index"
+      ],
+      "@/leads/infra": [
+        "./src/features/leads/infra/index"
+      ],
+      "@/leads/presentation": [
+        "./src/features/leads/presentation/index"
+      ],
+      "@/projectType/domain": [
+        "./src/features/projectType/domain/index"
+      ],
+      "@/projectType/application": [
+        "./src/features/projectType/application/index"
+      ],
+      "@/projectType/infra": [
+        "./src/features/projectType/infra/index"
+      ],
+      "@/projectType/presentation": [
+        "./src/features/projectType/presentation/index"
+      ],
+      "@/project/domain": [
+        "./src/features/project/domain/index"
+      ],
+      "@/project/application": [
+        "./src/features/project/application/index"
+      ],
+      "@/project/infra": [
+        "./src/features/project/infra/index"
+      ],
+      "@/project/presentation": [
+        "./src/features/project/presentation/index"
+      ],
+      "@/company/domain": [
+        "./src/features/company/domain/index"
+      ],
+      "@/company/application": [
+        "./src/features/company/application/index"
+      ],
+      "@/company/infra": [
+        "./src/features/company/infra/index"
+      ],
+      "@/company/presentation": [
+        "./src/features/company/presentation/index"
+      ],
+      "@/customers/domain": [
+        "./src/features/customers/domain/index"
+      ],
+      "@/customers/application": [
+        "./src/features/customers/application/index"
+      ],
+      "@/customers/infra": [
+        "./src/features/customers/infra/index"
+      ],
+      "@/customers/presentation": [
+        "./src/features/customers/presentation/index"
+      ],
       "@/contact": [
-        "./src/features/contact"
+        "./src/features/contact/index.ts"
       ],
       "@/leads": [
-        "./src/features/leads"
+        "./src/features/leads/index.ts"
       ],
       "@/projectType": [
-        "./src/features/projectType"
+        "./src/features/projectType/index.ts"
       ],
       "@/project": [
-        "./src/features/project"
+        "./src/features/project/index.ts"
       ],
       "@/company": [
-        "./src/features/company"
+        "./src/features/company/index.ts"
       ],
       "@/customers": [
-        "./src/features/customers"
+        "./src/features/customers/index.ts"
       ]
     }
   },

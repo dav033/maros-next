@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Modal, Input, Button } from "@/shared/ui";
+import { Modal, Input, Button, ICON_SIZES } from "@/shared/ui";
 import { Spinner } from "@/shared/ui/atoms/Spinner";
 import { Icon } from "@/shared/ui";
 import { useNotesEditor } from "../hooks/useNotesEditor";
@@ -105,7 +105,7 @@ export function NotesEditorModal({
                         onClick={() => editor.handleStartEditNote(idx)}
                         className="h-7 w-7 p-0 min-h-0 bg-gray-800 hover:bg-blue-600 hover:text-white"
                       >
-                        <Icon name="lucide:pencil" size={14} />
+                        <Icon name="lucide:pencil" size={ICON_SIZES.xs} />
                       </Button>
                       <Button
                         type="button"
@@ -114,7 +114,7 @@ export function NotesEditorModal({
                         onClick={() => editor.handleDeleteNoteAtIndex(idx)}
                         className="h-7 w-7 p-0 min-h-0 bg-red-900/60 text-red-300 hover:bg-red-600 hover:text-white"
                       >
-                        <Icon name="lucide:trash-2" size={14} />
+                        <Icon name="lucide:trash-2" size={ICON_SIZES.xs} />
                       </Button>
                     </div>
                   </>

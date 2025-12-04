@@ -1,4 +1,4 @@
-import type { ContactRepositoryPort, ContactUniquenessPort } from "../domain";
+import type { ContactRepositoryPort, ContactUniquenessPort } from "@/features/contact/domain";
 
 export type ContactsAppContext = Readonly<{
   repos: {

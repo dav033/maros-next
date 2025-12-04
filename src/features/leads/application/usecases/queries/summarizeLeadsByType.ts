@@ -1,4 +1,4 @@
-import type { LeadStatusCount, LeadType } from "@/leads";
+import type { LeadStatusCount, LeadType } from "@/leads/domain";
 import type { LeadsAppContext } from "../../context";
 import { summarizeLeadsByType as summarizeLeadsByTypeDomain } from "../../../domain/services/leadStatusSummary";
 

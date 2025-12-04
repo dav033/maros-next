@@ -5,7 +5,7 @@ import type {
   CompanyServicePatch,
 } from "@/company";
 import type { CompanyAppContext } from "@/company";
-import { makeCrudUseCases } from "@/shared";
+import { makeCrudUseCases } from "@/shared/application";
 
 export const companyServiceCrudUseCases = makeCrudUseCases<
   CompanyServiceId,

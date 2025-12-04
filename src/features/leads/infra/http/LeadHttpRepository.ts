@@ -1,11 +1,10 @@
 import type { LeadType } from "@/features/leads/domain/models";
 import type { ApiLeadDTO } from "@/features/leads/infra/http/mappers";
-import type { HttpClientLike } from "@/shared";
+import type { HttpClientLike, ResourceRepository } from "@/shared/infra";
 import type { Lead, LeadDraft, LeadPatch } from "@/features/leads/domain/models";
 import type { LeadRepositoryPort } from "@/features/leads/domain/ports";
-import { optimizedApiClient } from "@/shared";
-import type { ResourceRepository } from "@/shared/infra/rest/resourceRepository";
-import { makeHttpResourceRepository } from "@/shared/infra/rest/resourceRepository";
+import { optimizedApiClient } from "@/shared/infra";
+import { makeHttpResourceRepository } from "@/shared/infra";
 
 import { endpoints as leadEndpoints } from "./endpoints";
 import {

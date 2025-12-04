@@ -1,4 +1,4 @@
-import type { ProjectTypeRepositoryPort } from "@/projectType";
+import type { ProjectTypeRepositoryPort } from "@/features/projectType/domain";
 
 export type ProjectTypesAppContext = Readonly<{
   repos: Readonly<{

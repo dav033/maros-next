@@ -1,5 +1,5 @@
-import type { ISODate } from "@/shared";
-import { BusinessRuleError } from "@/shared";
+import type { ISODate } from "@/shared/domain";
+import { BusinessRuleError } from "@/shared/domain";
 
 export function validateDateWithinRange(
   date: string,

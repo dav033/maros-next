@@ -5,9 +5,9 @@ import { useContactsApp } from "@/di";
 import {
   contactsKeys,
   listContacts,
-} from "@/contact";
-import type { Contact } from "@/contact";
-import { buildInstantQueryResult } from "@/shared";
+} from "@/contact/application";
+import type { Contact } from "@/contact/domain";
+import { buildInstantQueryResult } from "@/shared/query";
 
 const DEFAULT_STALE_TIME = 5 * 60 * 1000;
 
@@ -30,7 +30,7 @@ export function useInstantContacts(): UseInstantContactsResult {
   const ctx = useContactsApp();
 
   const query = useQuery<Contact[], Error>({
-    queryKey: contactsKeys.lists(),
+    queryKey: contactsKeys.list,
     queryFn: async () => {
       const items = await listContacts(ctx);
       return items ?? [];

@@ -5,32 +5,32 @@ import type {
   ContactDraft,
   ContactPatch,
   ContactUniquenessCheck,
-} from "@/contact";
+} from "@/contact/domain";
 import {
   createContact,
   deleteContact,
   getContactById,
   listContacts,
-  mergeContactIntoCollection,
   patchContact,
   validateContactUniqueness,
   contactsKeys,
-} from "@/contact";
+} from "@/contact/application";
+import { mergeContactIntoCollection } from "@/contact/domain";
 import { useContactsApp } from "@/di";
-import { queryClient } from "@/lib";
+import { queryClient } from "@/shared/lib/queryClient";
 
 export function useContactsApplication() {
   const ctx = useContactsApp();
 
   const upsertCache = (entity: Contact) => {
-    queryClient.setQueryData<Contact[]>(contactsKeys.lists(), (prev) => {
+    queryClient.setQueryData<Contact[]>(contactsKeys.list, (prev) => {
       const curr = Array.isArray(prev) ? prev : [];
       return mergeContactIntoCollection(curr, entity);
     });
   };
 
   const removeFromCache = (id: number) => {
-    queryClient.setQueryData<Contact[]>(contactsKeys.lists(), (prev) => {
+    queryClient.setQueryData<Contact[]>(contactsKeys.list, (prev) => {
       const curr = Array.isArray(prev) ? prev : [];
       return curr.filter((c) => c.id !== id);
     });

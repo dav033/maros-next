@@ -1,4 +1,5 @@
-import type { ProjectTypesAppContext, ProjectType } from "@/projectType";
+import type { ProjectTypesAppContext } from "@/projectType/application";
+import type { ProjectType } from "@/projectType/domain";
 
 export async function listProjectTypes(
   ctx: ProjectTypesAppContext

@@ -13,7 +13,7 @@ export function ProjectTypeBadge({ projectType }: ProjectTypeBadgeProps) {
     return <span className="text-gray-400">—</span>;
   }
 
-  // Queremos misma intensidad para todos: usamos colores consistentes y alpha fijo (hex 20)
+  // Determinamos el color basado en el nombre del tipo de proyecto
   const colorFromName = (name: string): string | null => {
     const n = name.toLowerCase();
     if (n.includes("roof") || n.includes("techo")) return "#ef4444"; // red-500
@@ -25,9 +25,7 @@ export function ProjectTypeBadge({ projectType }: ProjectTypeBadgeProps) {
     return null;
   };
 
-  const color = projectType.color ?? colorFromName(projectType.name) ?? "#9ca3af"; // gray-400 fallback (unclassified)
-  const textGray = "#9ca3af"; // unify text contrast similar to Unclassified
-  const borderGray = "#4b5563"; // gray-600 border for consistent contrast
+  const color = projectType.color ?? colorFromName(projectType.name) ?? "#9ca3af";
 
   return (
     <Badge
@@ -35,9 +33,6 @@ export function ProjectTypeBadge({ projectType }: ProjectTypeBadgeProps) {
       dot
       dotColor={color}
       customColor={color}
-      customBgColor={`${color}20`}
-      customTextColor={textGray}
-      customBorderColor={borderGray}
     >
       {projectType.name}
     </Badge>

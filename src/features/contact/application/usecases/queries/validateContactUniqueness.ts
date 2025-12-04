@@ -1,6 +1,6 @@
-import type { ContactUniquenessCheck } from "@/contact";
-import type { ContactsAppContext } from "@/contact";
-import { findDuplicate } from "@/contact";
+import type { ContactUniquenessCheck } from "@/contact/domain";
+import type { ContactsAppContext } from "../../../application/context";
+import { findDuplicate } from "../../../domain/services";
 
 export async function validateContactUniqueness(
   ctx: ContactsAppContext,

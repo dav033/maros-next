@@ -2,9 +2,10 @@ import type {
   Lead,
   LeadPatch,
     LeadPolicies,
-  LeadsAppContext,
-} from "@/leads";
-import { applyLeadPatch, diffToPatch, getLeadById } from "@/leads";
+} from "@/leads/domain";
+import type { LeadsAppContext } from "@/leads";
+import { applyLeadPatch, diffToPatch } from "@/leads/domain";
+import { getLeadById } from "../queries/getLeadById";
 
 export async function patchLead(
   ctx: LeadsAppContext,

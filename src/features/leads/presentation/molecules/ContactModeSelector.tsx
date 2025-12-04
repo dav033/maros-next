@@ -2,7 +2,7 @@
 
 import { Icon, Input, Button } from "@/shared/ui";
 
-enum ContactMode {
+export enum ContactMode {
   NEW_CONTACT = "NEW_CONTACT",
   EXISTING_CONTACT = "EXISTING_CONTACT",
 }
@@ -91,5 +91,3 @@ export function ContactModeSelector({
     </div>
   );
 }
-
-export { ContactMode };

@@ -13,6 +13,7 @@ export interface Company {
   id: CompanyId;
   name: string;
   address?: string | undefined;
+  addressLink?: string | undefined;
   type: CompanyType;
   serviceId?: number | null;
   isCustomer: boolean;
@@ -23,6 +24,7 @@ export interface Company {
 export type CompanyDraft = Readonly<{
   name: string;
   address?: string | null | undefined;
+  addressLink?: string | null | undefined;
   type: CompanyType;
   serviceId?: number | null;
   isCustomer?: boolean | undefined;
@@ -33,6 +35,7 @@ export type CompanyDraft = Readonly<{
 export type CompanyPatch = Readonly<{
   name?: string | undefined;
   address?: string | null | undefined;
+  addressLink?: string | null | undefined;
   type?: CompanyType | null | undefined;
   serviceId?: number | null | undefined;
   isCustomer?: boolean | undefined;

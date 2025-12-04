@@ -1,7 +1,7 @@
 "use client";
 
 import type { Contact } from "@/contact";
-import { EmptyState, CrudPage } from "@/shared/ui";
+import { EntityCrudPageTemplate, Modal, Button } from "@/shared/ui";
 import { ContactsToolbar } from "../molecules/ContactsToolbar";
 import { ContactsTable } from "../organisms/ContactsTable";
 import { ContactsTableSkeleton } from "../organisms/ContactsTableSkeleton";
@@ -15,15 +15,7 @@ export interface ContactsPageViewProps {
 
 /**
  * Pure presentational component for the Contacts page.
- * 
- * Receives all logic and state from useContactsPageLogic hook.
- * Contains only UI rendering, no business logic.
- * 
- * Benefits:
- * - Easy to test (just props)
- * - Easy to maintain (no logic mixed with UI)
- * - Reusable (can be used in different contexts)
- * - Clear separation of concerns
+ * Receives all logic from useContactsPageLogic hook.
  */
 export function ContactsPageView({ logic }: ContactsPageViewProps) {
   const {
@@ -31,10 +23,12 @@ export function ContactsPageView({ logic }: ContactsPageViewProps) {
     filteredContacts,
     companies,
     services,
-    searchState,
+    searchQuery,
+    searchField,
     setSearchQuery,
     setSearchField,
-    contacts,
+    totalCount,
+    filteredCount,
     showSkeleton,
     isCompanyModalOpen,
     companyFormValue,
@@ -46,54 +40,72 @@ export function ContactsPageView({ logic }: ContactsPageViewProps) {
     handleCompanySubmit,
   } = logic;
 
+  const isModalOpen = crud.mode === "create" || crud.mode === "edit";
+  const modalTitle = crud.mode === "create" ? "New contact" : "Edit contact";
+
   return (
-    <CrudPage
-      config={{
-        title: "Contacts",
-        subtitle: "Manage people and customers connected to your projects.",
-        
-        showToolbar: true,
-        toolbarContent: (
-          <ContactsToolbar<Contact>
-            searchQuery={searchState.query}
-            onSearchQueryChange={setSearchQuery}
-            searchField={searchState.field}
-            onSearchFieldChange={(value) => setSearchField(value as keyof Contact | "all")}
-            onCreateContact={crud.openCreate}
-            totalCount={contacts?.length ?? 0}
-            filteredCount={filteredContacts.length}
-          />
-        ),
-        
-        showCreateButton: false,
-        isLoading: showSkeleton,
-        isEmpty: filteredContacts.length === 0,
-        
-        skeletonContent: <ContactsTableSkeleton />,
-        
-        emptyStateContent: (
-          <EmptyState
-            iconName="lucide:users"
-            title="No contacts found."
-            subtitle="Use the button above to create a new contact."
-          />
-        ),
-        
-        tableContent: (
-          <ContactsTable
-            contacts={filteredContacts}
-            companies={companies}
-            isLoading={showSkeleton}
-            onEdit={crud.openEdit}
-            onDelete={crud.handleDelete}
-          />
-        ),
-        
-        modalOpen: crud.mode === "create" || crud.mode === "edit",
-        modalTitle: crud.mode === "create" ? "New contact" : "Edit contact",
-        
-        modalContent: (
-          <>
+    <EntityCrudPageTemplate
+      header={
+        <div className="flex flex-col gap-1">
+          <h1 className="text-xl font-semibold text-theme-light sm:text-2xl">Contacts</h1>
+          <p className="text-xs text-gray-400 sm:text-sm">
+            Manage people and customers connected to your projects.
+          </p>
+        </div>
+      }
+      toolbar={
+        <ContactsToolbar<Contact>
+          searchQuery={searchQuery}
+          onSearchQueryChange={setSearchQuery}
+          searchField={searchField}
+          onSearchFieldChange={(value) => setSearchField(value as keyof Contact | "all")}
+          onCreateContact={crud.openCreate}
+          totalCount={totalCount}
+          filteredCount={filteredCount}
+        />
+      }
+      isLoading={showSkeleton}
+      loadingContent={<ContactsTableSkeleton />}
+      isEmpty={false}
+      emptyContent={null}
+      tableContent={
+        <ContactsTable
+          contacts={filteredContacts}
+          companies={companies}
+          isLoading={showSkeleton}
+          onEdit={crud.openEdit}
+          onDelete={crud.handleDelete}
+        />
+      }
+      modals={
+        <>
+          {/* Create/Edit Contact Modal */}
+          <Modal
+            isOpen={isModalOpen}
+            onClose={crud.closeModal}
+            title={modalTitle}
+            footer={
+              <>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={crud.closeModal}
+                  disabled={crud.isPending}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="button"
+                  variant="primary"
+                  onClick={crud.mode === "create" ? crud.handleCreateSubmit : crud.handleEditSubmit}
+                  disabled={!crud.formValue.name.trim() || crud.isPending}
+                  loading={crud.isPending}
+                >
+                  {crud.mode === "create" ? "Create" : "Save changes"}
+                </Button>
+              </>
+            }
+          >
             <ContactForm
               value={crud.formValue}
               onChange={crud.handleFormChange}
@@ -101,31 +113,27 @@ export function ContactsPageView({ logic }: ContactsPageViewProps) {
               companies={companies ?? []}
               onCreateNewCompany={openCompanyModal}
             />
-            
-            {/* Nested company creation modal */}
-            <CompanyModal
-              isOpen={isCompanyModalOpen}
-              title="New company"
-              onClose={closeCompanyModal}
-              onSubmit={handleCompanySubmit}
-              formValue={companyFormValue}
-              onChange={handleCompanyFormChange}
-              isSubmitting={isCompanySubmitting}
-              serverError={companyServerError}
-              services={services ?? []}
-              contacts={[]}
-              submitLabel="Create"
-            />
-          </>
-        ),
-        
-        onModalClose: crud.closeModal,
-        submitDisabled: !crud.formValue.name.trim(),
-        submitLoading: crud.isPending,
-        onSubmit: crud.mode === "create" ? crud.handleCreateSubmit : crud.handleEditSubmit,
-        submitLabel: crud.mode === "create" ? "Create" : "Save changes",
-        errorMessage: crud.serverError,
-      }}
+            {crud.serverError && (
+              <p className="mt-2 text-sm text-red-500">{crud.serverError}</p>
+            )}
+          </Modal>
+
+          {/* Nested Company Creation Modal */}
+          <CompanyModal
+            isOpen={isCompanyModalOpen}
+            title="New company"
+            onClose={closeCompanyModal}
+            onSubmit={handleCompanySubmit}
+            formValue={companyFormValue}
+            onChange={handleCompanyFormChange}
+            isSubmitting={isCompanySubmitting}
+            serverError={companyServerError}
+            services={services ?? []}
+            contacts={[]}
+            submitLabel="Create"
+          />
+        </>
+      }
     />
   );
 }

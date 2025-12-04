@@ -1,11 +1,11 @@
 "use client";
 
-import type { Lead } from "@/leads";
-import { LeadsToolbar, LeadsTable } from "@/leads";
-import { TableSkeleton, EmptyState, EntityCrudPageTemplate } from "@/shared/ui";
+import type { Lead } from "@/leads/domain";
+import { LeadsToolbar, LeadsTable } from "@/leads/presentation";
+import { TableSkeleton, EmptyState, EntityCrudPageTemplate, Button } from "@/shared/ui";
 import { CreateLeadModal } from "../organisms/CreateLeadModal";
 import { EditLeadModal } from "../organisms/EditLeadModal";
-import { LeadsPageHeader, LeadsPageToolbar } from "../organisms/LeadsPageComponents";
+import { LeadsPageHeader } from "../organisms/LeadsPageComponents";
 import type { UseLeadsPageLogicReturn } from "./useLeadsPageLogic";
 
 export interface LeadsPageViewProps {
@@ -15,13 +15,7 @@ export interface LeadsPageViewProps {
 
 /**
  * Pure presentational component for the Leads page (by type).
- * 
- * Receives all logic and state from useLeadsPageLogic hook.
- * Contains only UI rendering, no business logic.
- * 
- * Manages two modals:
- * - Create lead modal (with new/existing contact options)
- * - Edit lead modal
+ * Manages two modals: Create lead (with contact selection) and Edit lead.
  */
 export function LeadsPageView({ logic, onDelete }: LeadsPageViewProps) {
   const {
@@ -30,9 +24,12 @@ export function LeadsPageView({ logic, onDelete }: LeadsPageViewProps) {
     filteredLeads,
     contacts,
     projectTypes,
-    searchState,
-    setQuery,
-    setField,
+    searchQuery,
+    searchField,
+    setSearchQuery,
+    setSearchField,
+    totalCount,
+    filteredCount,
     showSkeleton,
     isCreateModalOpen,
     openCreateModal,
@@ -57,16 +54,20 @@ export function LeadsPageView({ logic, onDelete }: LeadsPageViewProps) {
         />
       }
       toolbar={
-        <LeadsPageToolbar
-          searchQuery={searchState.query}
-          onSearchQueryChange={setQuery}
-          searchField={searchState.field}
-          onSearchFieldChange={(value) => setField(value as keyof Lead | "all")}
-          totalCount={leads?.length ?? 0}
-          filteredCount={filteredLeads.length}
-          onNewLead={openCreateModal}
-          LeadsToolbar={LeadsToolbar}
-        />
+        <div className="flex items-center justify-between gap-4">
+          <LeadsToolbar
+            searchQuery={searchQuery}
+            onSearchQueryChange={setSearchQuery}
+            searchField={searchField}
+            onSearchFieldChange={(value) => setSearchField(value as keyof Lead | "all")}
+            totalCount={totalCount}
+            filteredCount={filteredCount}
+          />
+          <Button variant="primary" onClick={openCreateModal}>
+            <span className="mr-2 text-lg leading-none">＋</span>
+            New Lead
+          </Button>
+        </div>
       }
       isLoading={showSkeleton}
       loadingContent={
@@ -83,14 +84,8 @@ export function LeadsPageView({ logic, onDelete }: LeadsPageViewProps) {
           rowCount={13}
         />
       }
-      isEmpty={!leads || leads.length === 0}
-      emptyContent={
-        <EmptyState
-          iconName={emptyIconName}
-          title={emptyTitle}
-          subtitle={Boolean(searchState.query) ? "Try adjusting your search criteria." : emptySubtitle}
-        />
-      }
+      isEmpty={false}
+      emptyContent={null}
       tableContent={
         <LeadsTable
           leads={filteredLeads}

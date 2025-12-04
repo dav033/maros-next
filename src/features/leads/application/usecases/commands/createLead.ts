@@ -5,13 +5,13 @@ import type {
   LeadType,
   NewContact,
   ProjectTypeId,
-} from "@/leads";
+} from "@/leads/domain";
 import type { LeadsAppContext } from "../../context";
 import {
   buildLeadDraftForExistingContact,
   buildLeadDraftForNewContact,
   ensureLeadNumberAvailable,
-} from "@/leads";
+} from "@/leads/domain";
 
 export type CreateLeadInput =
   | Readonly<{

@@ -1,4 +1,4 @@
-import type { ProjectType } from "@/projectType";
+import type { ProjectType } from "@/projectType/domain";
 import type { LeadsAppContext } from "../../context";
 
 export async function listProjectTypes(

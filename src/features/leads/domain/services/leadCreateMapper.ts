@@ -1,6 +1,6 @@
-import type { ISODate } from "@/shared";
-import type { LeadDraft } from "@/leads";
-import type { LeadStatus, LeadType } from "@/leads";
+import type { ISODate } from "@/shared/domain";
+import type { LeadDraft } from "@/leads/domain";
+import type { LeadStatus, LeadType } from "@/leads/domain";
 
 type CreateLeadBasePayload = {
   leadNumber: string | null;

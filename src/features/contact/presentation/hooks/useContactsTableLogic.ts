@@ -1,8 +1,8 @@
 "use client";
 
 import * as React from "react";
-import type { Contact } from "@/contact";
-import type { Company } from "@/company";
+import type { Contact } from "@/contact/domain";
+import type { Company } from "@/company/domain";
 import { useContactsApp } from "@/di";
 import {
   useContextMenu,
@@ -10,7 +10,7 @@ import {
   useNotesModal,
 } from "@/shared/ui";
 import type { ContextMenuOption } from "@/shared/ui";
-import { deleteContact, patchContact } from "@/contact";
+import { deleteContact, patchContact } from "@/contact/application";
 
 interface UseContactsTableLogicProps {
   contacts: Contact[];
