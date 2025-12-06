@@ -12,6 +12,7 @@ export interface UseFormControllerConfig<TForm, TResult> {
 export interface UseFormControllerReturn<TForm, TResult> {
   form: TForm;
   setField: <K extends keyof TForm>(key: K, value: TForm[K]) => void;
+  setFields: (fields: Partial<TForm>) => void;
   setForm: (form: TForm) => void;
   isLoading: boolean;
   error: string | null;
@@ -38,6 +39,11 @@ export function useFormController<TForm extends Record<string, any>, TResult>({
   const setField = useCallback(<K extends keyof TForm>(key: K, value: TForm[K]) => {
     setError(null);
     setForm((prev) => ({ ...prev, [key]: value }));
+  }, []);
+
+  const setFields = useCallback((fields: Partial<TForm>) => {
+    setError(null);
+    setForm((prev) => ({ ...prev, ...fields }));
   }, []);
   const submit = useCallback(async () => {
     if (!canSubmit || isLoading) return false;
@@ -72,6 +78,7 @@ export function useFormController<TForm extends Record<string, any>, TResult>({
   return {
     form,
     setField,
+    setFields,
     setForm,
     isLoading,
     error,

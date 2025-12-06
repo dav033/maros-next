@@ -10,6 +10,7 @@ interface CreateLeadModalProps {
   title: string;
   form: any;
   onFormChange: (key: any, value: any) => void;
+  onFormBatchChange?: (fields: any) => void;
   contactMode: ContactMode;
   onContactModeChange: (mode: ContactMode) => void;
   contacts: Contact[];
@@ -27,6 +28,7 @@ export function CreateLeadModal({
   title,
   form,
   onFormChange,
+  onFormBatchChange,
   contactMode,
   onContactModeChange,
   contacts,
@@ -79,6 +81,7 @@ export function CreateLeadModal({
         <LeadForm
           form={form}
           onChange={onFormChange}
+          onBatchChange={onFormBatchChange}
           projectTypes={projectTypes}
           contacts={contacts
             .filter((c): c is Contact & { id: number } => typeof c.id === "number")

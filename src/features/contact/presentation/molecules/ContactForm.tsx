@@ -82,6 +82,7 @@ export function ContactForm({
         showHelperText={false}
         onAddressChange={(addr) => onChange({ ...value, address: addr })}
         onAddressLinkChange={(link) => onChange({ ...value, addressLink: link || undefined })}
+        onLocationChange={({ address, link }) => onChange({ ...value, address, addressLink: link || undefined })}
       />
 
       <div className="space-y-2">

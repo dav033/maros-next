@@ -20,6 +20,7 @@ type LeadFormData = {
 type LeadFormProps = {
   form: LeadFormData;
   onChange: <K extends keyof LeadFormData>(key: K, value: LeadFormData[K]) => void;
+  onBatchChange?: (fields: Partial<LeadFormData>) => void;
   projectTypes: ProjectType[];
   contacts: Contact[];
   showContactSelect: boolean;
@@ -29,6 +30,7 @@ type LeadFormProps = {
 export function LeadForm({
   form,
   onChange,
+  onBatchChange,
   projectTypes,
   contacts,
   showContactSelect,
@@ -60,6 +62,14 @@ export function LeadForm({
         disabled={disabled}
         onAddressChange={(value) => onChange("location", value)}
         onAddressLinkChange={(value) => onChange("addressLink", value)}
+        onLocationChange={({ address, link }) => {
+          if (onBatchChange) {
+            onBatchChange({ location: address, addressLink: link || null });
+          } else {
+            onChange("location", address);
+            onChange("addressLink", link || null);
+          }
+        }}
       />
 
       {/* Project Type and Status in the same row */}

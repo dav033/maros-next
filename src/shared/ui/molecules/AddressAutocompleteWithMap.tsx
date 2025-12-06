@@ -236,7 +236,7 @@ export function AddressAutocompleteWithMap({
         <input
           ref={inputRef}
           type="text"
-          defaultValue={value ?? ""}
+          value={value ?? ""}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder ?? "Type an address"}
           className="flex-1 rounded-lg border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"

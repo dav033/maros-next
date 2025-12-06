@@ -17,6 +17,7 @@ type LeadEditFormProps = {
     status?: string;
   };
   onChange: <K extends keyof LeadEditFormProps["form"]>(key: K, value: LeadEditFormProps["form"][K]) => void;
+  onBatchChange?: (fields: Partial<LeadEditFormProps["form"]>) => void;
   projectTypes: ProjectType[];
   contacts: Contact[];
   disabled?: boolean;
@@ -25,6 +26,7 @@ type LeadEditFormProps = {
 export function LeadEditForm({
   form,
   onChange,
+  onBatchChange,
   projectTypes,
   contacts,
   disabled = false,
@@ -58,6 +60,14 @@ export function LeadEditForm({
         disabled={disabled}
         onAddressChange={(value) => onChange("location", value)}
         onAddressLinkChange={(value) => onChange("addressLink", value)}
+        onLocationChange={({ address, link }) => {
+          if (onBatchChange) {
+            onBatchChange({ location: address, addressLink: link || null });
+          } else {
+            onChange("location", address);
+            onChange("addressLink", link || null);
+          }
+        }}
       />
 
       {/* Project Type and Status in the same row */}

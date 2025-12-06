@@ -103,6 +103,7 @@ export function LeadsPageView({ logic, onDelete }: LeadsPageViewProps) {
             title={createModalTitle}
             form={createController.form}
             onFormChange={createController.setField}
+            onFormBatchChange={createController.setFields}
             contactMode={createController.contactMode}
             onContactModeChange={createController.setContactMode}
             contacts={contacts ?? []}
@@ -121,6 +122,7 @@ export function LeadsPageView({ logic, onDelete }: LeadsPageViewProps) {
             lead={selectedLead}
             form={updateController.form}
             onFormChange={updateController.setField}
+            onFormBatchChange={updateController.setFields}
             contacts={contacts ?? []}
             projectTypes={projectTypes}
             isLoading={updateController.isLoading}

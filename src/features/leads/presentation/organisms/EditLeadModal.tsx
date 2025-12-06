@@ -11,6 +11,7 @@ interface EditLeadModalProps {
   lead: Lead | null;
   form: any;
   onFormChange: (key: any, value: any) => void;
+  onFormBatchChange?: (fields: any) => void;
   contacts: Contact[];
   projectTypes: ProjectType[];
   isLoading: boolean;
@@ -25,6 +26,7 @@ export function EditLeadModal({
   lead,
   form,
   onFormChange,
+  onFormBatchChange,
   contacts,
   projectTypes,
   isLoading,
@@ -65,6 +67,7 @@ export function EditLeadModal({
         <LeadEditForm
           form={form}
           onChange={onFormChange}
+          onBatchChange={onFormBatchChange}
           projectTypes={projectTypes}
           contacts={contacts}
           disabled={isLoading}
