@@ -18,6 +18,7 @@ type LeadFormData = {
   projectTypeId?: number;
   contactId?: number;
   location: string;
+  addressLink?: string | null;
   status?: string;
   note?: string;
   customerName?: string;
@@ -40,6 +41,7 @@ export function useCreateLeadController({ leadType, onCreated }: UseCreateLeadCo
       leadNumber: "",
       leadName: "",
       location: "",
+      addressLink: null,
       projectTypeId: undefined,
       contactId: undefined,
       status: "NOT_EXECUTED",
@@ -64,6 +66,7 @@ export function useCreateLeadController({ leadType, onCreated }: UseCreateLeadCo
             leadName: form.leadName.trim() || "",
             leadNumber: form.leadNumber.trim() || null,
             location: form.location.trim(),
+            addressLink: form.addressLink || null,
             projectTypeId: form.projectTypeId!,
             leadType,
             contact: {
@@ -77,6 +80,7 @@ export function useCreateLeadController({ leadType, onCreated }: UseCreateLeadCo
             leadName: form.leadName.trim() || "",
             leadNumber: form.leadNumber.trim() || null,
             location: form.location.trim(),
+            addressLink: form.addressLink || null,
             projectTypeId: form.projectTypeId!,
             leadType,
             contactId: form.contactId!,

@@ -48,8 +48,8 @@ export function CompanyContactsSelector({
       ? `${selectedCount} contact${selectedCount === 1 ? "" : "s"} selected`
       : "Select contacts";
 
-  const filteredContacts = contacts.filter((contact) =>
-    contact.name?.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredContacts = contacts.filter((contact): contact is Contact & { id: number } =>
+    typeof contact.id === "number" && contact.name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (

@@ -1,8 +1,7 @@
 "use client";
 
-import { Input, Select } from "@/shared/ui";
+import { Input, Select, LocationField } from "@/shared/ui";
 import type { SelectOption } from "@/shared/ui";
-import { LeadLocationField } from "./LeadLocationField";
 
 type ProjectType = { id: number; name: string; color?: string };
 type Contact = { id: number; name: string; phone?: string; email?: string };
@@ -55,40 +54,43 @@ export function LeadForm({
       />
 
       {/* Location field with text mode and Google Maps */}
-      <LeadLocationField
-        location={form.location}
+      <LocationField
+        address={form.location}
         addressLink={form.addressLink}
         disabled={disabled}
-        onLocationChange={(value) => onChange("location", value)}
+        onAddressChange={(value) => onChange("location", value)}
         onAddressLinkChange={(value) => onChange("addressLink", value)}
       />
 
-      <Select
-        options={projectTypeOptions}
-        value={form.projectTypeId ?? ""}
-        onChange={(val: string) => onChange("projectTypeId", val ? Number(val) : undefined)}
-        placeholder="Select Project Type *"
-        icon="material-symbols:design-services"
-        searchable={true}
-        disabled={disabled}
-      />
+      {/* Project Type and Status in the same row */}
+      <div className="grid grid-cols-2 gap-3">
+        <Select
+          options={projectTypeOptions}
+          value={form.projectTypeId ?? ""}
+          onChange={(val: string) => onChange("projectTypeId", val ? Number(val) : undefined)}
+          placeholder="Select Project Type *"
+          icon="material-symbols:design-services"
+          searchable={true}
+          disabled={disabled}
+        />
 
-      <Select
-        options={[
-          { value: "NOT_EXECUTED", label: "Not Executed" },
-          { value: "IN_PROGRESS", label: "In Progress" },
-          { value: "COMPLETED", label: "Completed" },
-          { value: "LOST", label: "Lost" },
-          { value: "POSTPONED", label: "Postponed" },
-          { value: "PERMITS", label: "Permits" },
-        ]}
-        value={form.status ?? ""}
-        onChange={(val: string) => onChange("status", val || undefined)}
-        placeholder="Select Status"
-        icon="material-symbols:flag"
-        searchable={false}
-        disabled={disabled}
-      />
+        <Select
+          options={[
+            { value: "NOT_EXECUTED", label: "Not Executed" },
+            { value: "IN_PROGRESS", label: "In Progress" },
+            { value: "COMPLETED", label: "Completed" },
+            { value: "LOST", label: "Lost" },
+            { value: "POSTPONED", label: "Postponed" },
+            { value: "PERMITS", label: "Permits" },
+          ]}
+          value={form.status ?? ""}
+          onChange={(val: string) => onChange("status", val || undefined)}
+          placeholder="Select Status"
+          icon="material-symbols:flag"
+          searchable={false}
+          disabled={disabled}
+        />
+      </div>
 
       {showContactSelect && (
         <Select

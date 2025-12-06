@@ -68,23 +68,19 @@ export function useContactsTableColumns({
         key: "role",
         header: "Role",
         className: "w-[200px]",
-        render: (contact: Contact) => (
-          <span className="text-gray-300">
-            {contact.role ? ContactRoleLabels[contact.role] : "—"}
-          </span>
-        ),
+        render: (contact: Contact) => {
+          // Show role label if available, otherwise show custom occupation
+          const roleLabel = contact.role ? ContactRoleLabels[contact.role as keyof typeof ContactRoleLabels] : null;
+          const displayValue = roleLabel || contact.occupation || "—";
+          return (
+            <span className="text-gray-300 italic">
+              {displayValue}
+            </span>
+          );
+        },
         sortable: true,
-        sortValue: (contact: Contact) => contact.role ? ContactRoleLabels[contact.role] : "",
-      },
-      {
-        key: "occupation",
-        header: "Custom Occupation",
-        className: "w-[150px]",
-        render: (contact: Contact) => (
-          <span className="text-gray-300">{contact.occupation ?? "—"}</span>
-        ),
-        sortable: true,
-        sortValue: (contact: Contact) => contact.occupation ?? "",
+        sortValue: (contact: Contact) => 
+          contact.role ? ContactRoleLabels[contact.role as keyof typeof ContactRoleLabels] : (contact.occupation ?? ""),
       },
       {
         key: "phone",

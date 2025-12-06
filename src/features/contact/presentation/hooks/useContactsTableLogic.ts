@@ -61,6 +61,7 @@ export function useContactsTableLogic({
   const handleDeleteContactClick = React.useCallback(
     async (contact: Contact) => {
       await confirmDelete(async (contactToDelete) => {
+        if (typeof contactToDelete.id !== "number") return;
         await deleteContact(app, contactToDelete.id);
         setLocalContacts((prev) =>
           prev.filter((c) => c.id !== contactToDelete.id)
@@ -136,6 +137,7 @@ export function useContactsTableLogic({
 
   const handleSaveContactNotes = React.useCallback(async () => {
     await saveNotes(async (contact, notes) => {
+      if (typeof contact.id !== "number") return;
       const updated = await patchContact(app, contact.id, {
         notes: notes ?? [],
       });

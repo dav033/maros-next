@@ -80,7 +80,9 @@ export function CreateLeadModal({
           form={form}
           onChange={onFormChange}
           projectTypes={projectTypes}
-          contacts={contacts}
+          contacts={contacts
+            .filter((c): c is Contact & { id: number } => typeof c.id === "number")
+            .map((c) => ({ id: c.id as number, name: c.name, phone: c.phone, email: c.email }))}
           showContactSelect={contactMode === ContactMode.EXISTING_CONTACT}
           disabled={isLoading}
         />

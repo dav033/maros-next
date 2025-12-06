@@ -62,6 +62,7 @@ export function mapContactFromApi(dto: ApiContactDTO): Contact {
   return {
     id: dto.id,
     name: dto.name,
+    role: dto.occupation ?? undefined,
     occupation: dto.occupation ?? undefined,
     phone: dto.phone ?? undefined,
     email: dto.email ?? undefined,
@@ -95,7 +96,7 @@ export function mapContactDraftToCreateDTO(
 ): CreateContactRequestDTO {
   return {
     name: draft.name,
-    occupation: draft.occupation ?? null,
+    occupation: draft.role ?? draft.occupation ?? null,
     phone: draft.phone ?? null,
     email: draft.email ?? null,
     address: draft.address ?? null,
@@ -117,7 +118,15 @@ export function mapContactPatchToUpdateDTO(
   const dto: UpdateContactRequestDTO = {};
   
   if (patch.name !== undefined) dto.name = patch.name;
-  if (patch.occupation !== undefined) dto.occupation = patch.occupation;
+  
+  // Map role/occupation changes to occupation field
+  // Prioritize role as it's the primary UI field
+  if (patch.role !== undefined) {
+    dto.occupation = patch.role;
+  } else if (patch.occupation !== undefined) {
+    dto.occupation = patch.occupation;
+  }
+
   if (patch.phone !== undefined) dto.phone = patch.phone;
   if (patch.email !== undefined) dto.email = patch.email;
   if (patch.address !== undefined) dto.address = patch.address;

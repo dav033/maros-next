@@ -50,7 +50,6 @@ export function useUpdateLeadController({ lead, onUpdated }: UseUpdateLeadContro
           (form.addressLink ?? "") !== (lead.addressLink ?? "")
             ? (form.addressLink && form.addressLink.trim() !== "" ? form.addressLink.trim() : null)
             : undefined,
-        status: form.status !== lead.status ? (form.status as any) : undefined,
         projectTypeId: form.projectTypeId !== lead.projectType?.id ? form.projectTypeId : undefined,
         contactId: form.contactId !== lead.contact?.id ? form.contactId : undefined,
         leadNumber: form.leadNumber?.trim() !== lead.leadNumber 
@@ -81,10 +80,9 @@ export function useUpdateLeadController({ lead, onUpdated }: UseUpdateLeadContro
         projectTypeId: lead.projectType?.id,
         contactId: lead.contact?.id ?? undefined,
         leadNumber: lead.leadNumber ?? "",
-        status: lead.status ?? "NOT_EXECUTED",
       });
     }
-  }, [lead, controller.setForm]);
+  }, [lead]);
 
   return controller;
 }

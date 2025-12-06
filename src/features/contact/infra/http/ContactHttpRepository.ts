@@ -9,17 +9,18 @@ import {
   mapContactFromApi,
   mapContactPatchToUpdateDTO,
   mapContactsFromApi,
+  ApiContactDTO,
 } from "./mappers";
 
 export class ContactHttpRepository implements ContactRepositoryPort {
   private readonly api: HttpClientLike;
   private readonly resource: ReturnType<
-    typeof makeHttpResourceRepository<number, Contact, Contact, ContactDraft, ContactPatch>
+    typeof makeHttpResourceRepository<number, ApiContactDTO, Contact, ContactDraft, ContactPatch>
   >;
 
   constructor(api: HttpClientLike = optimizedApiClient) {
     this.api = api;
-    this.resource = makeHttpResourceRepository<number, Contact, Contact, ContactDraft, ContactPatch>(
+    this.resource = makeHttpResourceRepository<number, ApiContactDTO, Contact, ContactDraft, ContactPatch>(
       {
         endpoints: contactEndpoints,
         mappers: {

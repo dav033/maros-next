@@ -10,7 +10,8 @@ export function ensureContactIntegrity(
   contact: Contact,
   policies: ContactIntegrityPolicies = {}
 ): void {
-  if (!Number.isFinite(contact.id) || contact.id <= 0) {
+  const id = contact.id ?? 0;
+  if (!Number.isFinite(id) || id <= 0) {
     throw new BusinessRuleError(
       "INTEGRITY_VIOLATION",
       "Contact id must be a positive number",

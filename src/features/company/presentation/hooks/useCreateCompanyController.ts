@@ -10,6 +10,7 @@ import type { Company, CompanyDraft, CompanyType } from "../../domain/models";
 type CompanyFormData = {
   name: string;
   address?: string;
+  addressLink?: string;
   type: CompanyType;
   serviceId?: number | null;
   isCustomer: boolean;
@@ -27,6 +28,7 @@ export function useCreateCompanyController({ onCreated }: UseCreateCompanyContro
   const [form, setForm] = useState<CompanyFormData>({
     name: "",
     address: "",
+    addressLink: "",
     type: "DESIGN" as CompanyType,
     serviceId: null,
     isCustomer: false,
@@ -54,6 +56,7 @@ export function useCreateCompanyController({ onCreated }: UseCreateCompanyContro
       const draft: CompanyDraft = {
         name: form.name.trim(),
         address: form.address?.trim(),
+        addressLink: form.addressLink?.trim(),
         type: form.type,
         serviceId: form.serviceId ?? null,
         isCustomer: form.isCustomer,

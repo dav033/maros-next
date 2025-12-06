@@ -1,8 +1,7 @@
 "use client";
 
 import type { Lead } from "@/leads/domain";
-import { Input, Select } from "@/shared/ui";
-import { LeadLocationField } from "./LeadLocationField";
+import { Input, Select, LocationField } from "@/shared/ui";
 import type { SelectOption } from "@/shared/ui";
 import type { Contact } from "@/contact/domain";
 import type { ProjectType } from "@/projectType/domain";
@@ -35,10 +34,12 @@ export function LeadEditForm({
     label: pt.name,
   }));
 
-  const contactOptions: SelectOption[] = contacts.map((c) => ({
-    value: c.id,
-    label: c.name,
-  }));
+  const contactOptions: SelectOption[] = contacts
+    .filter((c): c is Contact & { id: number } => typeof c.id === "number")
+    .map((c) => ({
+      value: c.id,
+      label: c.name,
+    }));
 
   return (
     <div className="space-y-4">
@@ -51,31 +52,43 @@ export function LeadEditForm({
         required
       />
 
-      <LeadLocationField
-        location={form.location}
+      <LocationField
+        address={form.location}
         addressLink={form.addressLink}
         disabled={disabled}
-        onLocationChange={(value) => onChange("location", value)}
+        onAddressChange={(value) => onChange("location", value)}
         onAddressLinkChange={(value) => onChange("addressLink", value)}
       />
 
-      <Input
-        label="Lead Number (Optional)"
-        placeholder="Auto-generated if empty"
-        value={form.leadNumber ?? ""}
-        onChange={(e) => onChange("leadNumber", e.target.value)}
-        disabled={disabled}
-      />
+      {/* Project Type and Status in the same row */}
+      <div className="grid grid-cols-2 gap-3">
+        <Select
+          options={projectTypeOptions}
+          value={form.projectTypeId ?? ""}
+          onChange={(val: string) => onChange("projectTypeId", val ? Number(val) : undefined)}
+          placeholder="Select Project Type *"
+          icon="material-symbols:design-services"
+          searchable={true}
+          disabled={disabled}
+        />
 
-      <Select
-        options={projectTypeOptions}
-        value={form.projectTypeId ?? ""}
-        onChange={(val: string) => onChange("projectTypeId", val ? Number(val) : undefined)}
-        placeholder="Select Project Type *"
-        icon="material-symbols:design-services"
-        searchable={true}
-        disabled={disabled}
-      />
+        <Select
+          options={[
+            { value: "NOT_EXECUTED", label: "Not Executed" },
+            { value: "IN_PROGRESS", label: "In Progress" },
+            { value: "COMPLETED", label: "Completed" },
+            { value: "LOST", label: "Lost" },
+            { value: "POSTPONED", label: "Postponed" },
+            { value: "PERMITS", label: "Permits" },
+          ]}
+          value={form.status ?? ""}
+          onChange={(val: string) => onChange("status", val || undefined)}
+          placeholder="Select Status"
+          icon="material-symbols:flag"
+          searchable={false}
+          disabled={disabled}
+        />
+      </div>
 
       <Select
         options={contactOptions}
@@ -84,23 +97,6 @@ export function LeadEditForm({
         placeholder="Select Contact *"
         icon="material-symbols:person"
         searchable={true}
-        disabled={disabled}
-      />
-
-      <Select
-        options={[
-          { value: "NOT_EXECUTED", label: "Not Executed" },
-          { value: "IN_PROGRESS", label: "In Progress" },
-          { value: "COMPLETED", label: "Completed" },
-          { value: "LOST", label: "Lost" },
-          { value: "POSTPONED", label: "Postponed" },
-          { value: "PERMITS", label: "Permits" },
-        ]}
-        value={form.status ?? ""}
-        onChange={(val: string) => onChange("status", val || undefined)}
-        placeholder="Select Status"
-        icon="material-symbols:flag"
-        searchable={false}
         disabled={disabled}
       />
     </div>

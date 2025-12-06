@@ -8,6 +8,7 @@ import type { Contact } from "@/contact/domain";
 export const initialCompanyFormValue: CompanyFormValue = {
   name: "",
   address: "",
+  addressLink: "",
   type: null,
   serviceId: null,
   isCustomer: false,
@@ -24,6 +25,7 @@ export function toDraft(value: CompanyFormValue): CompanyDraft {
   return {
     name: value.name.trim(),
     address: normalizeEmptyToUndefined(value.address),
+    addressLink: normalizeEmptyToUndefined(value.addressLink),
     type: value.type ?? CompanyType.OTHER,
     serviceId: value.serviceId,
     isCustomer: value.isCustomer,
@@ -49,6 +51,7 @@ export function toPatch(current: Company, value: CompanyFormValue): CompanyPatch
   const updates: Partial<Company> = {
     name: trimmed.name,
     address: normalizeEmptyToUndefined(trimmed.address),
+    addressLink: normalizeEmptyToUndefined(trimmed.addressLink),
     type: trimmed.type ?? undefined,
     serviceId: trimmed.serviceId,
     isCustomer: trimmed.isCustomer,
@@ -59,6 +62,7 @@ export function toPatch(current: Company, value: CompanyFormValue): CompanyPatch
   // Create patch with normalizers for optional fields
   const patch = createPatch(current, updates, {
     address: normalizeEmptyToUndefined,
+    addressLink: normalizeEmptyToUndefined,
   });
   
   return patch as CompanyPatch;
@@ -67,11 +71,13 @@ export function toPatch(current: Company, value: CompanyFormValue): CompanyPatch
 export function mapCompanyToFormValue(company: Company, contacts: Contact[]): CompanyFormValue {
   const companyContactIds = contacts
     .filter((contact) => contact.companyId === company.id)
-    .map((contact) => contact.id);
+    .map((contact) => contact.id)
+    .filter((id): id is number => typeof id === "number");
   
   return {
     name: company.name,
     address: company.address ?? "",
+    addressLink: company.addressLink ?? "",
     type: company.type,
     serviceId: company.serviceId ?? null,
     isCustomer: company.isCustomer,

@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { AddressAutocompleteInput } from "@/shared/ui/molecules/AddressAutocompleteInput";
 
 type LeadLocationFieldProps = {
-  location: string;              // raw text
-  addressLink?: string | null;   // Google link
+  location: string;              // texto raw
+  addressLink?: string | null;   // link de Google
   disabled?: boolean;
   onLocationChange: (value: string) => void;
   onAddressLinkChange: (value: string) => void;
@@ -18,7 +18,7 @@ export function LeadLocationField({
   onLocationChange,
   onAddressLinkChange,
 }: LeadLocationFieldProps) {
-  // ✅ If addressLink has content, start in Google mode
+  // ✅ Si addressLink tiene algo, arrancamos en modo Google
   const [useGoogleService, setUseGoogleService] = useState(
     !!addressLink && addressLink.trim() !== ""
   );
@@ -37,7 +37,7 @@ export function LeadLocationField({
 
   return (
     <div className="space-y-3">
-      {/* Checkbox to enable/disable Google Maps */}
+      {/* Checkbox para activar/desactivar Google Maps */}
       <label className="flex items-center gap-2 text-sm text-gray-300">
         <input
           type="checkbox"
@@ -47,14 +47,14 @@ export function LeadLocationField({
           disabled={disabled}
         />
         <span>
-          Enable Google Maps Service
+          Habilitar servicio de Google Maps
           <span className="ml-1 text-xs text-gray-500">
-            (autocomplete + map)
+            (autocompletado + mapa)
           </span>
         </span>
       </label>
 
-      {/* SIMPLE MODE: raw text only */}
+      {/* MODO SIMPLE: solo texto raw */}
       {!useGoogleService && (
         <div className="space-y-1">
           <label className="block text-sm font-medium text-gray-300">
@@ -65,21 +65,22 @@ export function LeadLocationField({
             value={location}
             onChange={(e) => onLocationChange(e.target.value)}
             disabled={disabled}
-            placeholder="Enter address (without Google Maps)"
+            placeholder="Escribe la dirección (sin Google Maps)"
             className="w-full rounded-lg border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <p className="text-xs text-gray-500">
-            Only the address text will be saved here. No Google Maps link will be generated.
+            Aquí solo se guarda el texto de la dirección. No se genera enlace
+            de Google Maps.
           </p>
         </div>
       )}
 
-      {/* GOOGLE MODE: autocomplete + map */}
+      {/* MODO GOOGLE: autocompletado + mapa */}
       {useGoogleService && (
         <div className="space-y-2">
           <AddressAutocompleteInput
             label="Location (Google Maps)"
-            placeholder="Start typing and select the address"
+            placeholder="Empieza a escribir y selecciona la dirección"
             value={location}
             disabled={disabled}
             required={false}
@@ -91,14 +92,13 @@ export function LeadLocationField({
             }}
           />
           <p className="text-xs text-gray-500">
-            The address text will be saved in <strong>location</strong> and
-            the Google Maps link in <strong>addressLink</strong>. When reopening
-            the lead, if <strong>addressLink</strong> exists, this
-            mode will be automatically enabled.
+            Se guardará el texto de la dirección en <strong>location</strong> y
+            el enlace de Google Maps en <strong>addressLink</strong>. Al abrir
+            de nuevo el lead, si existe <strong>addressLink</strong>, este
+            modo quedará activado automáticamente.
           </p>
         </div>
       )}
     </div>
   );
 }
-

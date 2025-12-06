@@ -41,7 +41,9 @@ export class LeadHttpRepository implements LeadRepositoryPort {
   }
 
   create = async (draft: LeadDraft): Promise<Lead> => {
+    console.log('🔍 LeadHttpRepository.create - draft received:', draft);
     const payload: CreateLeadPayload = mapLeadDraftToCreatePayload(draft);
+    console.log('🔍 LeadHttpRepository.create - payload after mapping:', payload);
     
     if ("contact" in (payload as Record<string, unknown>)) {
       const { contact, projectTypeId, leadNumber, name, ...leadData } =
@@ -52,6 +54,7 @@ export class LeadHttpRepository implements LeadRepositoryPort {
         leadPayload.name = name;
       }
       
+      console.log('🔍 LeadHttpRepository.create WITH NEW CONTACT - leadPayload:', leadPayload);
       const { data } = await this.api.post<ApiLeadDTO>(
         leadEndpoints.createWithNewContact(),
         {
@@ -70,6 +73,7 @@ export class LeadHttpRepository implements LeadRepositoryPort {
       leadPayload.name = name;
     }
     
+    console.log('🔍 LeadHttpRepository.create WITH EXISTING CONTACT - leadPayload:', leadPayload);
     const { data } = await this.api.post<ApiLeadDTO>(
       leadEndpoints.createWithExistingContact(),
       {
@@ -89,19 +93,10 @@ export class LeadHttpRepository implements LeadRepositoryPort {
     console.log('🔍 LeadHttpRepository.update - patch received:', patch);
     const payload = mapLeadPatchToUpdatePayload(patch);
     console.log('🔍 LeadHttpRepository.update - payload after mapping:', payload);
-    const { projectTypeId, contactId, ...rest } = payload;
-    const leadData: Record<string, unknown> = { ...rest };
 
-    if (projectTypeId !== undefined) {
-      leadData.projectType = { id: projectTypeId };
-    }
-    if (contactId !== undefined) {
-      leadData.contact = { id: contactId };
-    }
-
-    console.log('🔍 LeadHttpRepository.update - leadData to send:', leadData);
+    console.log('🔍 LeadHttpRepository.update - sending payload as is:', payload);
     const url = leadEndpoints.update(id);
-    const body = { lead: leadData };
+    const body = { lead: payload };
     console.log('🔍 LeadHttpRepository.update - final body:', JSON.stringify(body, null, 2));
     const { data } = await this.api.put<ApiLeadDTO>(url, body);
     if (!data) throw new Error("Empty response updating Lead");

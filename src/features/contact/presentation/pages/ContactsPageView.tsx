@@ -73,7 +73,9 @@ export function ContactsPageView({ logic }: ContactsPageViewProps) {
           contacts={filteredContacts}
           companies={companies}
           isLoading={showSkeleton}
-          onEdit={crud.openEdit}
+          onEdit={(contact) => {
+            if (typeof contact.id === "number") crud.openEdit(contact as Contact & { id: number });
+          }}
           onDelete={crud.handleDelete}
         />
       }

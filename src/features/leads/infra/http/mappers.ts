@@ -106,11 +106,11 @@ export function mapLeadPatchToUpdatePayload(
     name: patch.name,
     location: patch.location,
     addressLink: patch.addressLink === undefined ? undefined : patch.addressLink ?? null,
-    status: patch.status ?? null,
+    status: patch.status === undefined ? undefined : patch.status ?? null,
     contactId: patch.contactId,
     projectTypeId: patch.projectTypeId,
     startDate: patch.startDate,
-    leadNumber: patch.leadNumber ?? null,
+    leadNumber: patch.leadNumber,
     notes: patch.notes,
   };
 }

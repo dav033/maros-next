@@ -1,10 +1,8 @@
-import type { ContactRole } from "./ContactRole";
-
 export interface Contact {
-  id: number;
+  id?: number;
   name: string;
+  role?: string | undefined;
   occupation?: string | undefined;
-  role?: ContactRole | undefined;
   phone?: string | undefined;
   email?: string | undefined;
   address?: string | undefined;
@@ -27,10 +25,10 @@ export interface Contact {
 
 export type ContactDraft = Readonly<{
   name: string;
+  role?: string | null | undefined;
   phone?: string | null | undefined;
   email?: string | null | undefined;
   occupation?: string | null | undefined;
-  role?: ContactRole | null | undefined;
   address?: string | null | undefined;
   addressLink?: string | null | undefined;
   isCustomer?: boolean | undefined;
@@ -41,8 +39,8 @@ export type ContactDraft = Readonly<{
 
 export type ContactPatch = Readonly<{
   name?: string | undefined;
+  role?: string | null | undefined;
   occupation?: string | null | undefined;
-  role?: ContactRole | null | undefined;
   phone?: string | null | undefined;
   email?: string | null | undefined;
   address?: string | null | undefined;

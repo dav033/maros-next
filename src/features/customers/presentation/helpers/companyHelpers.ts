@@ -44,7 +44,8 @@ export function mapCompanyToFormValue(
 ): CompanyFormValue {
   const companyContactIds = contacts
     .filter((contact) => contact.companyId === company.id)
-    .map((contact) => contact.id);
+    .map((contact) => contact.id)
+    .filter((id): id is number => typeof id === "number");
 
   return {
     name: company.name,

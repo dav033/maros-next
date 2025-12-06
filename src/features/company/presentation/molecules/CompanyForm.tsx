@@ -50,10 +50,12 @@ export function CompanyForm({ value, onChange, disabled, services = [], contacts
         <CompanyBasicFields
           name={value.name}
           address={value.address}
+          addressLink={value.addressLink}
           disabled={disabled}
           onNameChange={(event) => handleTextChange(event, "name")}
           onAddressChange={(address) => onChange({ ...value, address })}
           onAddressLinkChange={(addressLink) => onChange({ ...value, addressLink })}
+          onLocationChange={({ address, link }) => onChange({ ...value, address, addressLink: link })}
         />
 
         <CompanyTypeFields

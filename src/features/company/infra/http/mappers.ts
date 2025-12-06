@@ -12,6 +12,7 @@ export type ApiCompanyDTO = {
   id: number;
   name: string;
   address?: string | null;
+  addressLink?: string | null;
   type: CompanyType;
   serviceId?: number | null;
   isCustomer: boolean;
@@ -23,6 +24,7 @@ export type ApiCompanyDTO = {
 export type CreateCompanyRequestDTO = {
   name: string;
   address?: string | null;
+  addressLink?: string | null;
   type: CompanyType;
   serviceId?: number | null;
   isCustomer: boolean;
@@ -34,6 +36,7 @@ export type CreateCompanyRequestDTO = {
 export type UpdateCompanyRequestDTO = {
   name: string;
   address?: string | null;
+  addressLink?: string | null;
   type: CompanyType;
   serviceId?: number | null;
   isCustomer: boolean;
@@ -53,6 +56,7 @@ export function mapCompanyFromApi(dto: ApiCompanyDTO): Company {
     id: dto.id,
     name: dto.name,
     address: dto.address ?? undefined,
+    addressLink: dto.addressLink ?? undefined,
     type: type as CompanyType,
     serviceId: dto.serviceId ?? undefined,
     isCustomer: dto.isCustomer,
@@ -73,6 +77,7 @@ export function mapCompanyDraftToCreateDTO(
   return {
     name: draft.name,
     address: draft.address ?? null,
+    addressLink: draft.addressLink ?? null,
     type: draft.type,
     serviceId: draft.serviceId ?? null,
     isCustomer: draft.isCustomer ?? false,
@@ -95,6 +100,9 @@ export function mapCompanyPatchToUpdateDTO(
   }
   if (patch.address !== undefined) {
     dto.address = patch.address;
+  }
+  if (patch.addressLink !== undefined) {
+    dto.addressLink = patch.addressLink;
   }
   if (patch.type !== undefined) {
     dto.type = patch.type;

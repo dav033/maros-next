@@ -112,7 +112,7 @@ export function applyContactPatch(
       ? [
           {
             type: "ContactUpdated" as const,
-            payload: { id: updated.id, changed },
+            payload: { id: updated.id as number, changed },
           },
         ]
       : [];

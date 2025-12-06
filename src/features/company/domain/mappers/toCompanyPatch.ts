@@ -15,6 +15,9 @@ export function toCompanyPatch(current: Company, value: CompanyFormValue): Compa
   if (normalizedAddress !== currentAddress) {
     patch.address = normalizedAddress;
   }
+  if (normalizeEmptyToUndefined(value.addressLink) !== normalizeEmptyToUndefined(current.addressLink)) {
+    patch.addressLink = normalizeEmptyToUndefined(value.addressLink);
+  }
   if (value.type !== current.type && value.type != null) {
     patch.type = value.type;
   }

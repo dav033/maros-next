@@ -46,11 +46,15 @@ export function CustomerContactsSection({
     normalize: customerContactsSearchConfig.normalize,
   });
 
-  const { modal, handlers } = useCustomerCrudSection({
+  const { modal, handlers } = useCustomerCrudSection<Contact & { id: number }, typeof initialContactFormValue, ReturnType<typeof toContactPatch>>({
     initialFormValue: initialContactFormValue,
     toPatch: toContactPatch,
     toFormValue: mapContactToFormValue,
-    updateFn: (id, patch) => patchContact(contactsApp, id, patch),
+    updateFn: async (id, patch) => {
+      const res = await patchContact(contactsApp, id, patch);
+      if (typeof res.id !== "number") throw new Error("Updated contact has no id");
+      return res as Contact & { id: number };
+    },
     deleteFn: (id) => deleteContact(contactsApp, id),
     invalidateKeys: [customersKeys.all, contactsKeys.list],
     messages: {
@@ -98,7 +102,9 @@ export function CustomerContactsSection({
             contacts={filteredContacts}
             companies={safeCompanies}
             isLoading={false}
-            onEdit={handlers.handleEdit}
+            onEdit={(contact) => {
+              if (typeof contact.id === "number") handlers.handleEdit(contact as Contact & { id: number });
+            }}
             onDelete={handlers.handleDelete}
           />
         )}

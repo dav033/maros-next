@@ -38,7 +38,7 @@ const initialFormValue: ContactFormValue = {
 
 export interface UseContactsPageLogicReturn {
   // Contact CRUD
-  crud: ReturnType<typeof useCrudPage<Contact, ContactFormValue, ContactDraft, ContactPatch>>;
+  crud: ReturnType<typeof useCrudPage<Contact & { id: number }, ContactFormValue, ContactDraft, ContactPatch>>;
   
   // Data
   contacts: Contact[] | undefined;
@@ -110,10 +110,18 @@ export function useContactsPageLogic(): UseContactsPageLogicReturn {
   });
 
   // Contact CRUD operations
-  const crud = useCrudPage<Contact, ContactFormValue, ContactDraft, ContactPatch>({
+  const crud = useCrudPage<Contact & { id: number }, ContactFormValue, ContactDraft, ContactPatch>({
     queryKey: [contactsKeys.list, ["customers"]],
-    createFn: (draft) => createContact(app, draft),
-    updateFn: (id, patch) => patchContact(app, id, patch),
+    createFn: async (draft) => {
+      const res = await createContact(app, draft);
+      if (typeof res.id !== "number") throw new Error("Created contact has no id");
+      return res as Contact & { id: number };
+    },
+    updateFn: async (id, patch) => {
+      const res = await patchContact(app, id, patch);
+      if (typeof res.id !== "number") throw new Error("Updated contact has no id");
+      return res as Contact & { id: number };
+    },
     toDraft: toContactDraft,
     toPatch: toContactPatch,
     initialFormValue,

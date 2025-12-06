@@ -9,6 +9,7 @@ import { useFormController } from "@/shared/ui";
 type CompanyFormData = {
   name: string;
   address?: string;
+  addressLink?: string;
   type: CompanyType;
   serviceId?: number | null;
   isCustomer: boolean;
@@ -31,6 +32,7 @@ export function useUpdateCompanyController({
     initialForm: {
       name: initialData.name,
       address: initialData.address ?? "",
+      addressLink: initialData.addressLink ?? "",
       type: initialData.type,
       serviceId: initialData.serviceId ?? null,
       isCustomer: initialData.isCustomer,
@@ -40,6 +42,7 @@ export function useUpdateCompanyController({
       const patch: CompanyPatch = {
         name: form.name.trim() !== initialData.name ? form.name.trim() : undefined,
         address: form.address?.trim() !== initialData.address ? form.address?.trim() : undefined,
+        addressLink: form.addressLink?.trim() !== initialData.addressLink ? form.addressLink?.trim() : undefined,
         type: form.type !== initialData.type ? form.type : undefined,
         serviceId: form.serviceId !== initialData.serviceId ? form.serviceId : undefined,
         isCustomer: form.isCustomer !== initialData.isCustomer ? form.isCustomer : undefined,

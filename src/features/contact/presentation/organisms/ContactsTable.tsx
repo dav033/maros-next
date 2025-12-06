@@ -55,7 +55,7 @@ export function ContactsTable({
       <SimpleTable<Contact>
         columns={columns}
         data={localContacts}
-        rowKey={(contact) => contact.id}
+        rowKey={(contact) => contact.id ?? 0}
         onRowContextMenu={handleRowContextMenu}
       />
 

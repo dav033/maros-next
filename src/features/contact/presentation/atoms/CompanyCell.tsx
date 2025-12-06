@@ -17,9 +17,11 @@ export function CompanyCell({ company, onOpenCompanyModal }: CompanyCellProps) {
       size="md"
       interactive
       onClick={() => onOpenCompanyModal(company)}
-      className="w-40"
+      className="w-24"
     >
-      {company.name}
+      <span className="truncate block w-full text-center">
+        {company.name}
+      </span>
     </Badge>
   );
 }

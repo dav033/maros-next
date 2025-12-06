@@ -1,22 +1,26 @@
-import { Icon, Input, AddressAutocompleteInput } from "@/shared/ui";
+import { Icon, Input, LocationField } from "@/shared/ui";
 import type { ChangeEvent } from "react";
 
 interface CompanyBasicFieldsProps {
   name: string;
   address: string;
+  addressLink?: string;
   disabled?: boolean;
   onNameChange: (event: ChangeEvent<HTMLInputElement>) => void;
   onAddressChange: (value: string) => void;
   onAddressLinkChange: (value: string) => void;
+  onLocationChange?: (location: { address: string; link: string }) => void;
 }
 
 export function CompanyBasicFields({
   name,
   address,
+  addressLink,
   disabled,
   onNameChange,
   onAddressChange,
   onAddressLinkChange,
+  onLocationChange,
 }: CompanyBasicFieldsProps) {
   return (
     <>
@@ -28,13 +32,17 @@ export function CompanyBasicFields({
         required
         leftAddon={<Icon name="lucide:building-2" size={16} />}
       />
-      <AddressAutocompleteInput
-        value={address}
-        onChange={onAddressChange}
-        onLinkChange={onAddressLinkChange}
+      <LocationField
+        address={address}
+        addressLink={addressLink}
+        label="Address"
         placeholder="Company address"
+        googlePlaceholder="Start typing to search address"
         disabled={disabled}
-        leftAddon={<Icon name="lucide:map-pin" size={16} />}
+        showHelperText={false}
+        onAddressChange={onAddressChange}
+        onAddressLinkChange={onAddressLinkChange}
+        onLocationChange={onLocationChange}
       />
     </>
   );

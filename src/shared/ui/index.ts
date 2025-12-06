@@ -33,6 +33,8 @@ export { Field } from "./molecules/Field";
 export type { FieldProps } from "./molecules/Field";
 export { AddressAutocompleteInput } from "./molecules/AddressAutocompleteInput";
 export { AddressAutocompleteWithMap } from "./molecules/AddressAutocompleteWithMap";
+export { LocationField } from "./molecules/LocationField";
+export type { LocationFieldProps } from "./molecules/LocationField";
 
 export { SimpleTable } from "./organisms/SimpleTable";
 export type { SimpleTableColumn } from "./organisms/SimpleTable";

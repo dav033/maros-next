@@ -1,0 +1,11 @@
+"filename", "language", "TypeScript", "TypeScript JSX", "JSON with Comments", "JavaScript", "JSON", "comment", "blank", "total"
+"c:\Users\david\Downloads\marosProject\maros-next\.eslintrc.js", "JavaScript", 0, 0, 0, -105, 0, -19, -8, -132
+"c:\Users\david\Downloads\marosProject\maros-next\next.config.ts", "TypeScript", -5, 0, 0, 0, 0, 0, -3, -8
+"c:\Users\david\Downloads\marosProject\maros-next\package-lock.json", "JSON", 0, 0, 0, 0, -6534, 0, -1, -6535
+"c:\Users\david\Downloads\marosProject\maros-next\package.json", "JSON", 0, 0, 0, 0, -44, 0, -1, -45
+"c:\Users\david\Downloads\marosProject\maros-next\postcss.config.mjs", "JavaScript", 0, 0, 0, -6, 0, 0, -2, -8
+"c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\presentation\molecules\LeadForm.tsx", "TypeScript JSX", 0, -1, 0, 0, 0, 0, 0, -1
+"c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\molecules\LocationField.tsx", "TypeScript JSX", 0, 95, 0, 0, 0, 39, 9, 143
+"c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\molecules\index.ts", "TypeScript", 1, 0, 0, 0, 0, 0, 0, 1
+"c:\Users\david\Downloads\marosProject\maros-next\tsconfig.json", "JSON with Comments", 0, 0, -165, 0, 0, 0, -1, -166
+"Total", "-", -4, 94, -165, -111, -6578, 20, -7, -6751

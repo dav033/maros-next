@@ -113,7 +113,9 @@ export function useCompaniesPageLogic(): UseCompaniesPageLogicReturn {
       
       await queryClient.invalidateQueries({ queryKey: contactsKeys.list });
       
-      contactModal.onContactCreated(newContact.id);
+      if (typeof newContact.id === "number") {
+        contactModal.onContactCreated(newContact.id);
+      }
       setContactFormValue(initialContactFormValue);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Could not create contact";

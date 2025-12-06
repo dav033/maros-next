@@ -33,14 +33,14 @@ export default function RootLayout({
           </SidebarProvider>
         </AppProviders>
 
-        {/* Define global callback before loading the library (avoids handlers in Server Components) */}
+        {/* Definir callback global antes de cargar la librería (evita handlers en Server Components) */}
         <Script id="google-maps-init" strategy="beforeInteractive">
           {`window.initMaps = function () { window.dispatchEvent(new Event('google-maps-loaded')); };`}
         </Script>
 
-        {/* Google Maps with Places API (uses callback=initMaps) */}
+        {/* Google Maps con Places API (usa callback=initMaps) */}
         <Script
-          src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places&callback=initMaps`}
+          src={`https://maps.googleapis.com/maps/api/js?key=AIzaSyC-f-9Onj4n6jVVjP9MryKvm3aQgyxx5zM&libraries=places&callback=initMaps`}
           strategy="afterInteractive"
         />
       </body>

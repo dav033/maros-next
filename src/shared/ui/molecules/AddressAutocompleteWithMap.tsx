@@ -6,6 +6,7 @@ type AddressAutocompleteWithMapProps = {
   value?: string;
   onChange: (address: string) => void;
   onLinkChange: (link: string) => void;
+  onLocationChange?: (location: { address: string; link: string }) => void;
   initialCenter?: { lat: number; lng: number };
   height?: string;
   label?: string;
@@ -19,6 +20,7 @@ export function AddressAutocompleteWithMap({
   value,
   onChange,
   onLinkChange,
+  onLocationChange,
   initialCenter = { lat: 25.7617, lng: -80.1918 }, // Miami
   height = "220px",
   label,
@@ -36,9 +38,10 @@ export function AddressAutocompleteWithMap({
   const geocoderRef = useRef<any | null>(null);
   const initializedRef = useRef(false);
 
-  // Keep the latest version of the callbacks
+  // Mantener la última versión de los callbacks
   const onChangeRef = useRef(onChange);
   const onLinkChangeRef = useRef(onLinkChange);
+  const onLocationChangeRef = useRef(onLocationChange);
 
   useEffect(() => {
     onChangeRef.current = onChange;
@@ -47,6 +50,10 @@ export function AddressAutocompleteWithMap({
   useEffect(() => {
     onLinkChangeRef.current = onLinkChange;
   }, [onLinkChange]);
+  
+  useEffect(() => {
+    onLocationChangeRef.current = onLocationChange;
+  }, [onLocationChange]);
 
   useEffect(() => {
     if (disabled) return;
@@ -64,7 +71,7 @@ export function AddressAutocompleteWithMap({
       // Geocoder
       geocoderRef.current = new w.google.maps.Geocoder();
 
-      // Create map
+      // Crear mapa
       if (mapRef.current) {
         mapInstanceRef.current = new w.google.maps.Map(mapRef.current, {
           center: initialCenter,
@@ -76,7 +83,7 @@ export function AddressAutocompleteWithMap({
           position: initialCenter,
         });
 
-        // Click on map => move marker + update link (lat,lng)
+        // Click en el mapa => mover marcador + actualizar link (lat,lng)
         mapInstanceRef.current.addListener("click", (e: any) => {
           if (!e.latLng || !markerRef.current || !mapInstanceRef.current) return;
           const pos = e.latLng.toJSON();
@@ -84,7 +91,14 @@ export function AddressAutocompleteWithMap({
           mapInstanceRef.current.setCenter(pos);
 
           const link = `https://www.google.com/maps/search/?api=1&query=${pos.lat}%2C${pos.lng}`;
-          onLinkChangeRef.current(link);
+          
+          if (onLocationChangeRef.current) {
+            // Use existing input value as address
+            const currentAddress = inputRef.current?.value || "";
+            onLocationChangeRef.current({ address: currentAddress, link });
+          } else {
+            onLinkChangeRef.current(link);
+          }
         });
       }
 
@@ -94,7 +108,7 @@ export function AddressAutocompleteWithMap({
           inputRef.current,
           {
             fields: ["formatted_address", "geometry", "place_id", "url"],
-            types: ["address"], // addresses only
+            types: ["address"], // solo direcciones
           }
         );
 
@@ -121,22 +135,26 @@ export function AddressAutocompleteWithMap({
             link = `${base}&query=${query}${queryPlaceId}`;
           }
 
-          // Update form
-          onChangeRef.current(address);
-          onLinkChangeRef.current(link);
+            // Actualizar formulario
+            if (onLocationChangeRef.current) {
+              onLocationChangeRef.current({ address, link });
+            } else {
+              onChangeRef.current(address);
+              onLinkChangeRef.current(link);
+            }
 
-          // Move map / marker
-          if (location && mapInstanceRef.current && markerRef.current) {
-            const pos = location.toJSON();
-            mapInstanceRef.current.setCenter(pos);
-            mapInstanceRef.current.setZoom(16);
-            markerRef.current.setPosition(pos);
-          }
-        });
+            // Mover mapa / marcador
+            if (location && mapInstanceRef.current && markerRef.current) {
+              const pos = location.toJSON();
+              mapInstanceRef.current.setCenter(pos);
+              mapInstanceRef.current.setZoom(16);
+              markerRef.current.setPosition(pos);
+            }
+          });
       }
 
-      // If an address is already provided from the form (edit lead),
-      // set it in the input and center the map once.
+      // Si ya viene una dirección desde el formulario (editar lead),
+      // la ponemos en el input y centramos el mapa una vez.
       if (value && inputRef.current && geocoderRef.current && mapInstanceRef.current && markerRef.current) {
         inputRef.current.value = value;
         geocoderRef.current.geocode({ address: value }, (results: any, status: any) => {
@@ -151,10 +169,10 @@ export function AddressAutocompleteWithMap({
       }
     };
 
-    // Direct attempt (in case Maps is already loaded)
+    // Intento directo (por si Maps ya está cargado)
     initialize();
 
-    // In case you use a global event like "google-maps-loaded"
+    // Por si usas un evento global tipo "google-maps-loaded"
     const handler = () => initialize();
     window.addEventListener("google-maps-loaded", handler);
 
@@ -162,6 +180,13 @@ export function AddressAutocompleteWithMap({
       window.removeEventListener("google-maps-loaded", handler);
     };
   }, [initialCenter, disabled, value]);
+
+  // Sync local input value with prop value (for external updates like form loading)
+  useEffect(() => {
+    if (inputRef.current && value !== undefined && inputRef.current.value !== value) {
+      inputRef.current.value = value;
+    }
+  }, [value]);
 
   if (disabled) {
     return (
@@ -176,6 +201,7 @@ export function AddressAutocompleteWithMap({
           <input
             type="text"
             disabled
+            value={value ?? ""}
             placeholder={placeholder ?? "Address"}
             className="w-full bg-transparent outline-none"
           />
@@ -211,6 +237,7 @@ export function AddressAutocompleteWithMap({
           ref={inputRef}
           type="text"
           defaultValue={value ?? ""}
+          onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder ?? "Type an address"}
           className="flex-1 rounded-lg border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
           autoComplete="off"

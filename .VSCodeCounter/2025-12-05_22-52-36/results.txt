@@ -1,0 +1,578 @@
+Date : 2025-12-05 22:52:36
+Directory : c:\Users\david\Downloads\marosProject\maros-next\src
+Total : 392 files,  15044 codes, 661 comments, 2083 blanks, all 17788 lines
+
+Languages
++----------------+------------+------------+------------+------------+------------+
+| language       | files      | code       | comment    | blank      | total      |
++----------------+------------+------------+------------+------------+------------+
+| TypeScript     |        288 |      8,710 |        466 |      1,385 |     10,561 |
+| TypeScript JSX |        103 |      6,204 |        194 |        663 |      7,061 |
+| PostCSS        |          1 |        130 |          1 |         35 |        166 |
++----------------+------------+------------+------------+------------+------------+
+
+Directories
++------------------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                                                               | files      | code       | comment    | blank      | total      |
++------------------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                                                                  |        392 |     15,044 |        661 |      2,083 |     17,788 |
+| . (Files)                                                                                                                          |          1 |          4 |          0 |          1 |          5 |
+| app                                                                                                                                |         10 |        143 |          2 |         35 |        180 |
+| app (Files)                                                                                                                        |          4 |        113 |          2 |         20 |        135 |
+| app\company                                                                                                                        |          1 |          4 |          0 |          2 |          6 |
+| app\contacts                                                                                                                       |          1 |          4 |          0 |          2 |          6 |
+| app\customers                                                                                                                      |          1 |          4 |          0 |          2 |          6 |
+| app\leads                                                                                                                          |          3 |         18 |          0 |          9 |         27 |
+| app\leads\construction                                                                                                             |          1 |          6 |          0 |          3 |          9 |
+| app\leads\plumbing                                                                                                                 |          1 |          6 |          0 |          3 |          9 |
+| app\leads\roofing                                                                                                                  |          1 |          6 |          0 |          3 |          9 |
+| components                                                                                                                         |          7 |        297 |         12 |         50 |        359 |
+| components\sidebar                                                                                                                 |          7 |        297 |         12 |         50 |        359 |
+| di                                                                                                                                 |          7 |        112 |         34 |         23 |        169 |
+| di (Files)                                                                                                                         |          2 |         61 |          8 |         12 |         81 |
+| di\factories                                                                                                                       |          5 |         51 |         26 |         11 |         88 |
+| features                                                                                                                           |        268 |     10,024 |        358 |      1,389 |     11,771 |
+| features\company                                                                                                                   |         79 |      3,078 |        114 |        418 |      3,610 |
+| features\company (Files)                                                                                                           |          1 |         18 |          4 |          5 |         27 |
+| features\company\application                                                                                                       |         17 |        155 |         12 |         34 |        201 |
+| features\company\application (Files)                                                                                               |          2 |         22 |          0 |          4 |         26 |
+| features\company\application\keys                                                                                                  |          2 |         11 |          0 |          3 |         14 |
+| features\company\application\ports                                                                                                 |          2 |         10 |          0 |          3 |         13 |
+| features\company\application\usecases                                                                                              |         11 |        112 |         12 |         24 |        148 |
+| features\company\application\usecases (Files)                                                                                      |          3 |         36 |          0 |          5 |         41 |
+| features\company\application\usecases\commands                                                                                     |          5 |         60 |         12 |         14 |         86 |
+| features\company\application\usecases\queries                                                                                      |          3 |         16 |          0 |          5 |         21 |
+| features\company\domain                                                                                                            |          9 |        149 |          9 |         26 |        184 |
+| features\company\domain (Files)                                                                                                    |          2 |         28 |          9 |          4 |         41 |
+| features\company\domain\mappers                                                                                                    |          4 |         63 |          0 |         11 |         74 |
+| features\company\domain\models                                                                                                     |          3 |         58 |          0 |         11 |         69 |
+| features\company\infra                                                                                                             |          5 |        257 |          0 |         56 |        313 |
+| features\company\infra (Files)                                                                                                     |          1 |          2 |          0 |          1 |          3 |
+| features\company\infra\http                                                                                                        |          4 |        255 |          0 |         55 |        310 |
+| features\company\presentation                                                                                                      |         47 |      2,499 |         89 |        297 |      2,885 |
+| features\company\presentation (Files)                                                                                              |          1 |          6 |          0 |          1 |          7 |
+| features\company\presentation\atoms                                                                                                |          3 |         44 |          0 |         10 |         54 |
+| features\company\presentation\helpers                                                                                              |          2 |         58 |         17 |         10 |         85 |
+| features\company\presentation\hooks                                                                                                |         18 |      1,245 |         48 |        170 |      1,463 |
+| features\company\presentation\molecules                                                                                            |         15 |        655 |          0 |         67 |        722 |
+| features\company\presentation\molecules (Files)                                                                                    |          8 |        358 |          0 |         36 |        394 |
+| features\company\presentation\molecules\form                                                                                       |          7 |        297 |          0 |         31 |        328 |
+| features\company\presentation\organisms                                                                                            |          5 |        332 |          0 |         26 |        358 |
+| features\company\presentation\pages                                                                                                |          3 |        159 |         24 |         13 |        196 |
+| features\contact                                                                                                                   |         63 |      2,666 |         99 |        347 |      3,112 |
+| features\contact (Files)                                                                                                           |          1 |         10 |          4 |          4 |         18 |
+| features\contact\application                                                                                                       |         12 |         90 |          0 |         21 |        111 |
+| features\contact\application (Files)                                                                                               |          2 |         16 |          0 |          4 |         20 |
+| features\contact\application\keys                                                                                                  |          1 |          4 |          0 |          1 |          5 |
+| features\contact\application\usecases                                                                                              |          9 |         70 |          0 |         16 |         86 |
+| features\contact\application\usecases (Files)                                                                                      |          1 |          2 |          0 |          1 |          3 |
+| features\contact\application\usecases\commands                                                                                     |          4 |         30 |          0 |          8 |         38 |
+| features\contact\application\usecases\queries                                                                                      |          4 |         38 |          0 |          7 |         45 |
+| features\contact\domain                                                                                                            |         20 |      1,005 |         40 |        144 |      1,189 |
+| features\contact\domain (Files)                                                                                                    |          4 |        245 |         27 |         42 |        314 |
+| features\contact\domain\mappers                                                                                                    |          4 |         79 |         13 |         12 |        104 |
+| features\contact\domain\services                                                                                                   |         12 |        681 |          0 |         90 |        771 |
+| features\contact\infra                                                                                                             |          6 |        232 |          0 |         40 |        272 |
+| features\contact\infra (Files)                                                                                                     |          1 |          4 |          0 |          1 |          5 |
+| features\contact\infra\http                                                                                                        |          5 |        228 |          0 |         39 |        267 |
+| features\contact\presentation                                                                                                      |         24 |      1,329 |         55 |        138 |      1,522 |
+| features\contact\presentation (Files)                                                                                              |          1 |          6 |          0 |          1 |          7 |
+| features\contact\presentation\atoms                                                                                                |          3 |         70 |          0 |         11 |         81 |
+| features\contact\presentation\hooks                                                                                                |          8 |        659 |         31 |         76 |        766 |
+| features\contact\presentation\molecules                                                                                            |          3 |        233 |          1 |         15 |        249 |
+| features\contact\presentation\organisms                                                                                            |          4 |        208 |          0 |         19 |        227 |
+| features\contact\presentation\pages                                                                                                |          3 |        135 |         23 |         12 |        170 |
+| features\contact\presentation\search                                                                                               |          2 |         18 |          0 |          4 |         22 |
+| features\customers                                                                                                                 |         24 |        740 |         52 |        114 |        906 |
+| features\customers (Files)                                                                                                         |          1 |          1 |          7 |          2 |         10 |
+| features\customers\application                                                                                                     |          4 |        290 |         10 |         41 |        341 |
+| features\customers\application (Files)                                                                                             |          1 |          3 |          0 |          1 |          4 |
+| features\customers\application\hooks                                                                                               |          3 |        287 |         10 |         40 |        337 |
+| features\customers\domain                                                                                                          |          3 |         10 |          9 |          5 |         24 |
+| features\customers\infra                                                                                                           |          6 |         59 |         18 |         18 |         95 |
+| features\customers\infra (Files)                                                                                                   |          2 |          5 |          0 |          2 |          7 |
+| features\customers\infra\http                                                                                                      |          4 |         54 |         18 |         16 |         88 |
+| features\customers\presentation                                                                                                    |         10 |        380 |          8 |         48 |        436 |
+| features\customers\presentation (Files)                                                                                            |          1 |          4 |          0 |          1 |          5 |
+| features\customers\presentation\components                                                                                         |          3 |        227 |          1 |         21 |        249 |
+| features\customers\presentation\helpers                                                                                            |          2 |         97 |          6 |         15 |        118 |
+| features\customers\presentation\pages                                                                                              |          2 |         36 |          1 |          7 |         44 |
+| features\customers\presentation\search                                                                                             |          2 |         16 |          0 |          4 |         20 |
+| features\leads                                                                                                                     |         78 |      3,363 |         80 |        462 |      3,905 |
+| features\leads (Files)                                                                                                             |          1 |          3 |          2 |          2 |          7 |
+| features\leads\application                                                                                                         |         16 |        271 |          0 |         47 |        318 |
+| features\leads\application (Files)                                                                                                 |          2 |         37 |          0 |          4 |         41 |
+| features\leads\application\errors                                                                                                  |          1 |         18 |          0 |          3 |         21 |
+| features\leads\application\keys                                                                                                    |          1 |          7 |          0 |          2 |          9 |
+| features\leads\application\usecases                                                                                                |         11 |        208 |          0 |         37 |        245 |
+| features\leads\application\usecases\commands                                                                                       |          4 |        114 |          0 |         19 |        133 |
+| features\leads\application\usecases\queries                                                                                        |          7 |         94 |          0 |         18 |        112 |
+| features\leads\application\utils                                                                                                   |          1 |          1 |          0 |          1 |          2 |
+| features\leads\config                                                                                                              |          2 |         40 |          0 |          4 |         44 |
+| features\leads\domain                                                                                                              |         26 |      1,213 |         11 |        193 |      1,417 |
+| features\leads\domain (Files)                                                                                                      |          4 |        105 |          5 |         25 |        135 |
+| features\leads\domain\models                                                                                                       |          3 |         23 |          0 |          4 |         27 |
+| features\leads\domain\ports                                                                                                        |          4 |         21 |          5 |          7 |         33 |
+| features\leads\domain\services                                                                                                     |         15 |      1,064 |          1 |        157 |      1,222 |
+| features\leads\infra                                                                                                               |          6 |        237 |          0 |         39 |        276 |
+| features\leads\infra (Files)                                                                                                       |          1 |          4 |          0 |          1 |          5 |
+| features\leads\infra\http                                                                                                          |          5 |        233 |          0 |         38 |        271 |
+| features\leads\presentation                                                                                                        |         27 |      1,599 |         67 |        177 |      1,843 |
+| features\leads\presentation (Files)                                                                                                |          1 |         10 |          0 |          1 |         11 |
+| features\leads\presentation\atoms                                                                                                  |          3 |         66 |          1 |         13 |         80 |
+| features\leads\presentation\hooks                                                                                                  |          5 |        495 |          5 |         48 |        548 |
+| features\leads\presentation\molecules                                                                                              |          6 |        429 |          5 |         48 |        482 |
+| features\leads\presentation\organisms                                                                                              |          5 |        295 |          0 |         21 |        316 |
+| features\leads\presentation\pages                                                                                                  |          5 |        291 |         56 |         42 |        389 |
+| features\leads\presentation\search                                                                                                 |          2 |         13 |          0 |          4 |         17 |
+| features\project                                                                                                                   |         12 |        110 |         11 |         24 |        145 |
+| features\project (Files)                                                                                                           |          1 |          0 |          6 |          1 |          7 |
+| features\projectType                                                                                                               |         12 |         67 |          2 |         24 |         93 |
+| features\projectType (Files)                                                                                                       |          1 |          2 |          2 |          2 |          6 |
+| features\projectType\application                                                                                                   |          4 |         21 |          0 |          6 |         27 |
+| features\projectType\application (Files)                                                                                           |          2 |          8 |          0 |          3 |         11 |
+| features\projectType\application\usecases                                                                                          |          2 |         13 |          0 |          3 |         16 |
+| features\projectType\application\usecases\queries                                                                                  |          2 |         13 |          0 |          3 |         16 |
+| features\projectType\domain                                                                                                        |          3 |         12 |          0 |          5 |         17 |
+| features\projectType\infra                                                                                                         |          2 |         11 |          0 |          3 |         14 |
+| features\projectType\infra (Files)                                                                                                 |          1 |          1 |          0 |          1 |          2 |
+| features\projectType\infra\http                                                                                                    |          1 |         10 |          0 |          2 |         12 |
+| features\projectType\presentation                                                                                                  |          2 |         21 |          0 |          8 |         29 |
+| features\projectType\presentation (Files)                                                                                          |          1 |          1 |          0 |          2 |          3 |
+| features\projectType\presentation\hooks                                                                                            |          1 |         20 |          0 |          6 |         26 |
+| features\project\application                                                                                                       |          1 |          0 |          1 |          1 |          2 |
+| features\project\domain                                                                                                            |          9 |        110 |          0 |         20 |        130 |
+| features\project\domain (Files)                                                                                                    |          2 |         27 |          0 |          6 |         33 |
+| features\project\domain\models                                                                                                     |          2 |         19 |          0 |          3 |         22 |
+| features\project\domain\ports                                                                                                      |          2 |         14 |          0 |          3 |         17 |
+| features\project\domain\services                                                                                                   |          3 |         50 |          0 |          8 |         58 |
+| features\project\infra                                                                                                             |          1 |          0 |          4 |          2 |          6 |
+| hooks                                                                                                                              |          1 |         31 |          0 |          8 |         39 |
+| shared                                                                                                                             |         94 |      4,255 |        254 |        531 |      5,040 |
+| shared (Files)                                                                                                                     |         10 |         64 |          0 |          9 |         73 |
+| shared\application                                                                                                                 |          1 |         31 |          0 |          8 |         39 |
+| shared\domain                                                                                                                      |          3 |         53 |          0 |         10 |         63 |
+| shared\hooks                                                                                                                       |          2 |        168 |         11 |         27 |        206 |
+| shared\infra                                                                                                                       |          8 |        202 |          1 |         35 |        238 |
+| shared\infra\http                                                                                                                  |          3 |         72 |          0 |         15 |         87 |
+| shared\infra\rest                                                                                                                  |          5 |        130 |          1 |         20 |        151 |
+| shared\infra\rest (Files)                                                                                                          |          4 |        122 |          1 |         18 |        141 |
+| shared\infra\rest\mappers                                                                                                          |          1 |          8 |          0 |          2 |         10 |
+| shared\lib                                                                                                                         |          1 |         15 |         14 |          4 |         33 |
+| shared\mappers                                                                                                                     |          2 |         15 |          0 |          3 |         18 |
+| shared\query                                                                                                                       |          2 |         44 |          0 |          6 |         50 |
+| shared\search                                                                                                                      |          3 |         42 |          0 |         10 |         52 |
+| shared\ui                                                                                                                          |         60 |      3,564 |        211 |        406 |      4,181 |
+| shared\ui (Files)                                                                                                                  |          3 |        150 |         15 |         16 |        181 |
+| shared\ui\atoms                                                                                                                    |         18 |        952 |         29 |        113 |      1,094 |
+| shared\ui\context                                                                                                                  |          1 |         56 |          0 |         12 |         68 |
+| shared\ui\hooks                                                                                                                    |         13 |        861 |         88 |         92 |      1,041 |
+| shared\ui\molecules                                                                                                                |         15 |        985 |         62 |        124 |      1,171 |
+| shared\ui\organisms                                                                                                                |          6 |        477 |          0 |         39 |        516 |
+| shared\ui\templates                                                                                                                |          3 |         80 |          9 |          9 |         98 |
+| shared\ui\utils                                                                                                                    |          1 |          3 |          8 |          1 |         12 |
+| shared\utils                                                                                                                       |          2 |         57 |         17 |         13 |         87 |
+| styles                                                                                                                             |          1 |        130 |          1 |         35 |        166 |
+| types                                                                                                                              |          3 |         48 |          0 |         11 |         59 |
+| types (Files)                                                                                                                      |          2 |         21 |          0 |          6 |         27 |
+| types\hooks                                                                                                                        |          1 |         27 |          0 |          5 |         32 |
++------------------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++------------------------------------------------------------------------------------------------------------------------------------+----------------+------------+------------+------------+------------+
+| filename                                                                                                                           | language       | code       | comment    | blank      | total      |
++------------------------------------------------------------------------------------------------------------------------------------+----------------+------------+------------+------------+------------+
+| c:\Users\david\Downloads\marosProject\maros-next\src\app\AppProviders.tsx                                                          | TypeScript JSX |         19 |          0 |          5 |         24 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\app\company\page.tsx                                                          | TypeScript JSX |          4 |          0 |          2 |          6 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\app\contacts\page.tsx                                                         | TypeScript JSX |          4 |          0 |          2 |          6 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\app\customers\page.tsx                                                        | TypeScript JSX |          4 |          0 |          2 |          6 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\app\layout.tsx                                                                | TypeScript JSX |         42 |          2 |          6 |         50 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\app\leads\construction\page.tsx                                               | TypeScript JSX |          6 |          0 |          3 |          9 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\app\leads\plumbing\page.tsx                                                   | TypeScript JSX |          6 |          0 |          3 |          9 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\app\leads\roofing\page.tsx                                                    | TypeScript JSX |          6 |          0 |          3 |          9 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\app\not-found.tsx                                                             | TypeScript JSX |         27 |          0 |          6 |         33 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\app\page.tsx                                                                  | TypeScript JSX |         25 |          0 |          3 |         28 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\components\sidebar\MobileMenuButton.tsx                                       | TypeScript JSX |         16 |          0 |          4 |         20 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\components\sidebar\Sidebar.tsx                                                | TypeScript JSX |         92 |          0 |         12 |        104 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\components\sidebar\SidebarContext.tsx                                         | TypeScript JSX |         29 |          0 |          9 |         38 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\components\sidebar\SidebarDropdown.tsx                                        | TypeScript JSX |         49 |          2 |          9 |         60 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\components\sidebar\SidebarItem.tsx                                            | TypeScript JSX |         36 |          0 |          8 |         44 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\components\sidebar\index.ts                                                   | TypeScript     |          5 |          0 |          1 |          6 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\components\sidebar\sidebarConfig.ts                                           | TypeScript     |         70 |         10 |          7 |         87 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\di\DiProvider.tsx                                                             | TypeScript JSX |         60 |          8 |         11 |         79 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\di\factories\companyFactory.ts                                                | TypeScript     |         10 |          4 |          2 |         16 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\di\factories\contactsFactory.ts                                               | TypeScript     |         10 |          4 |          3 |         17 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\di\factories\index.ts                                                         | TypeScript     |          4 |         10 |          2 |         16 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\di\factories\leadsFactory.ts                                                  | TypeScript     |         18 |          4 |          2 |         24 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\di\factories\projectTypesFactory.ts                                           | TypeScript     |          9 |          4 |          2 |         15 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\di\index.ts                                                                   | TypeScript     |          1 |          0 |          1 |          2 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\application\context.ts                                       | TypeScript     |         15 |          0 |          3 |         18 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\application\index.ts                                         | TypeScript     |          7 |          0 |          1 |          8 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\application\keys\companyKeys.ts                              | TypeScript     |         10 |          0 |          2 |         12 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\application\keys\index.ts                                    | TypeScript     |          1 |          0 |          1 |          2 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\application\ports\CompanyRepositoryPort.ts                   | TypeScript     |          9 |          0 |          2 |         11 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\application\ports\index.ts                                   | TypeScript     |          1 |          0 |          1 |          2 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\application\usecases\commands\createCompany.ts               | TypeScript     |          9 |          0 |          2 |         11 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\application\usecases\commands\deleteCompany.ts               | TypeScript     |          8 |          0 |          2 |         10 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\application\usecases\commands\index.ts                       | TypeScript     |          4 |          0 |          1 |          5 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\application\usecases\commands\patchCompany.ts                | TypeScript     |         11 |          0 |          2 |         13 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\application\usecases\commands\updateCompanyWithContacts.ts   | TypeScript     |         28 |         12 |          7 |         47 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\application\usecases\companyCrud.ts                          | TypeScript     |         17 |          0 |          2 |         19 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\application\usecases\companyServiceCrud.ts                   | TypeScript     |         17 |          0 |          2 |         19 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\application\usecases\index.ts                                | TypeScript     |          2 |          0 |          1 |          3 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\application\usecases\queries\getCompanyById.ts               | TypeScript     |          9 |          0 |          2 |         11 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\application\usecases\queries\index.ts                        | TypeScript     |          2 |          0 |          1 |          3 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\application\usecases\queries\listCompanies.ts                | TypeScript     |          5 |          0 |          2 |          7 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\domain\index.ts                                              | TypeScript     |          3 |          0 |          1 |          4 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\domain\mappers\index.ts                                      | TypeScript     |          3 |          0 |          1 |          4 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\domain\mappers\toCompanyDraft.ts                             | TypeScript     |         14 |          0 |          2 |         16 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\domain\mappers\toCompanyFormValue.ts                         | TypeScript     |         18 |          0 |          3 |         21 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\domain\mappers\toCompanyPatch.ts                             | TypeScript     |         28 |          0 |          5 |         33 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\domain\models\Company.ts                                     | TypeScript     |         42 |          0 |          6 |         48 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\domain\models\CompanyService.ts                              | TypeScript     |         14 |          0 |          4 |         18 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\domain\models\index.ts                                       | TypeScript     |          2 |          0 |          1 |          3 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\domain\ports.ts                                              | TypeScript     |         25 |          9 |          3 |         37 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\index.ts                                                     | TypeScript     |         18 |          4 |          5 |         27 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\infra\http\CompanyHttpRepository.ts                          | TypeScript     |         64 |          0 |         10 |         74 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\infra\http\CompanyServiceHttpRepository.ts                   | TypeScript     |         71 |          0 |          9 |         80 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\infra\http\endpoints.ts                                      | TypeScript     |         10 |          0 |          4 |         14 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\infra\http\mappers.ts                                        | TypeScript     |        110 |          0 |         32 |        142 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\infra\index.ts                                               | TypeScript     |          2 |          0 |          1 |          3 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\presentation\atoms\CompanyTypeBadge.tsx                      | TypeScript JSX |         21 |          0 |          5 |         26 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\presentation\atoms\ServiceBadge.tsx                          | TypeScript JSX |         21 |          0 |          4 |         25 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\presentation\atoms\index.ts                                  | TypeScript     |          2 |          0 |          1 |          3 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\presentation\helpers\companyFormHelpers.ts                   | TypeScript     |         57 |         17 |          9 |         83 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\presentation\helpers\index.ts                                | TypeScript     |          1 |          0 |          1 |          2 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\presentation\hooks\index.ts                                  | TypeScript     |          5 |          0 |          1 |          6 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\presentation\hooks\useCompaniesPageLogic.ts                  | TypeScript     |        160 |         24 |         25 |        209 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\presentation\hooks\useCompaniesTableColumns.tsx              | TypeScript JSX |        103 |          0 |          4 |        107 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\presentation\hooks\useCompaniesTableLogic.ts                 | TypeScript     |        163 |          0 |         16 |        179 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\presentation\hooks\useCompanyContactModal.ts                 | TypeScript     |         50 |          4 |          9 |         63 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\presentation\hooks\useCompanyCreateModal.ts                  | TypeScript     |         69 |          4 |         11 |         84 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\presentation\hooks\useCompanyEditModal.ts                    | TypeScript     |         78 |          5 |          9 |         92 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\presentation\hooks\useCompanyModal.ts                        | TypeScript     |         56 |          0 |          8 |         64 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\presentation\hooks\useCompanyModalSection.ts                 | TypeScript     |          0 |          0 |          1 |          1 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\presentation\hooks\useCompanyMutations.ts                    | TypeScript     |         72 |          0 |          6 |         78 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\presentation\hooks\useCompanyServiceContextMenu.ts           | TypeScript     |         66 |          0 |          8 |         74 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\presentation\hooks\useCompanyServices.ts                     | TypeScript     |         43 |          4 |          7 |         54 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\presentation\hooks\useCreateCompanyController.ts             | TypeScript     |         73 |          0 |         15 |         88 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\presentation\hooks\useDeleteCompanyController.ts             | TypeScript     |         41 |          0 |         10 |         51 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\presentation\hooks\useInstantCompanies.ts                    | TypeScript     |         45 |          4 |          8 |         57 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\presentation\hooks\useManageServices.ts                      | TypeScript     |        155 |          0 |         20 |        175 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\presentation\hooks\useManageServicesModal.ts                 | TypeScript     |         15 |          3 |          5 |         23 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\presentation\hooks\useUpdateCompanyController.ts             | TypeScript     |         51 |          0 |          7 |         58 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\presentation\index.ts                                        | TypeScript     |          6 |          0 |          1 |          7 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\presentation\molecules\CompaniesPageActions.tsx              | TypeScript JSX |         22 |          0 |          3 |         25 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\presentation\molecules\CompaniesToolbar.tsx                  | TypeScript JSX |         71 |          0 |          7 |         78 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\presentation\molecules\CompanyForm.tsx                       | TypeScript JSX |         94 |          0 |         11 |        105 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\presentation\molecules\EmptyCompaniesState.tsx               | TypeScript JSX |         17 |          0 |          3 |         20 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\presentation\molecules\ErrorAlert.tsx                        | TypeScript JSX |         15 |          0 |          3 |         18 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\presentation\molecules\ServiceFormView.tsx                   | TypeScript JSX |         44 |          0 |          4 |         48 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\presentation\molecules\ServicesListView.tsx                  | TypeScript JSX |         85 |          0 |          4 |         89 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\presentation\molecules\form\CompanyBasicFields.tsx           | TypeScript JSX |         39 |          0 |          3 |         42 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\presentation\molecules\form\CompanyCheckboxField.tsx         | TypeScript JSX |         23 |          0 |          3 |         26 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\presentation\molecules\form\CompanyContactsSelector.tsx      | TypeScript JSX |        115 |          0 |          9 |        124 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\presentation\molecules\form\CompanyTypeFields.tsx            | TypeScript JSX |         49 |          0 |          3 |         52 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\presentation\molecules\form\companyTypeOptions.ts            | TypeScript     |         12 |          0 |          3 |         15 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\presentation\molecules\form\index.ts                         | TypeScript     |          6 |          0 |          1 |          7 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\presentation\molecules\form\useCompanyFormHandlers.ts        | TypeScript     |         53 |          0 |          9 |         62 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\presentation\molecules\index.ts                              | TypeScript     |         10 |          0 |          1 |         11 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\presentation\organisms\CompaniesTable.tsx                    | TypeScript JSX |         93 |          0 |         10 |        103 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\presentation\organisms\CompaniesTableSkeleton.tsx            | TypeScript JSX |         49 |          0 |          4 |         53 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\presentation\organisms\CompanyModal.tsx                      | TypeScript JSX |         67 |          0 |          3 |         70 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\presentation\organisms\ManageServicesModal.tsx               | TypeScript JSX |        119 |          0 |          8 |        127 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\presentation\organisms\index.ts                              | TypeScript     |          4 |          0 |          1 |          5 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\presentation\pages\CompaniesPage.tsx                         | TypeScript JSX |          7 |         16 |          4 |         27 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\presentation\pages\CompaniesPageView.tsx                     | TypeScript JSX |        151 |          8 |          8 |        167 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\company\presentation\pages\index.ts                                  | TypeScript     |          1 |          0 |          1 |          2 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\application\context.ts                                       | TypeScript     |         12 |          0 |          3 |         15 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\application\index.ts                                         | TypeScript     |          4 |          0 |          1 |          5 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\application\keys\contactsKeys.ts                             | TypeScript     |          4 |          0 |          1 |          5 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\application\usecases\commands\createContact.ts               | TypeScript     |          7 |          0 |          2 |          9 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\application\usecases\commands\deleteContact.ts               | TypeScript     |          4 |          0 |          2 |          6 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\application\usecases\commands\index.ts                       | TypeScript     |          3 |          0 |          1 |          4 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\application\usecases\commands\patchContact.ts                | TypeScript     |         16 |          0 |          3 |         19 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\application\usecases\index.ts                                | TypeScript     |          2 |          0 |          1 |          3 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\application\usecases\queries\getContactById.ts               | TypeScript     |         15 |          0 |          2 |         17 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\application\usecases\queries\index.ts                        | TypeScript     |          3 |          0 |          1 |          4 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\application\usecases\queries\listContacts.ts                 | TypeScript     |          5 |          0 |          2 |          7 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\application\usecases\queries\validateContactUniqueness.ts    | TypeScript     |         15 |          0 |          2 |         17 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\domain\ContactRole.ts                                        | TypeScript     |        118 |         22 |         23 |        163 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\domain\index.ts                                              | TypeScript     |          5 |          0 |          1 |          6 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\domain\mappers\index.ts                                      | TypeScript     |          3 |          0 |          1 |          4 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\domain\mappers\toContactDraft.ts                             | TypeScript     |         19 |          0 |          2 |         21 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\domain\mappers\toContactFormValue.ts                         | TypeScript     |         16 |          0 |          2 |         18 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\domain\mappers\toContactPatch.ts                             | TypeScript     |         41 |         13 |          7 |         61 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\domain\models.ts                                             | TypeScript     |        103 |          0 |         14 |        117 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\domain\ports.ts                                              | TypeScript     |         19 |          5 |          4 |         28 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\domain\services\applyContactPatch.ts                         | TypeScript     |        111 |          0 |         11 |        122 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\domain\services\buildContactDraft.ts                         | TypeScript     |         32 |          0 |          7 |         39 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\domain\services\contactIdentityPolicy.ts                     | TypeScript     |         54 |          0 |         11 |         65 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\domain\services\contactMergePolicy.ts                        | TypeScript     |         46 |          0 |          9 |         55 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\domain\services\contactQueries.ts                            | TypeScript     |         14 |          0 |          2 |         16 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\domain\services\contactReadMapper.ts                         | TypeScript     |         76 |          0 |          8 |         84 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\domain\services\contactUniquenessPolicy.ts                   | TypeScript     |         66 |          0 |         11 |         77 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\domain\services\contactValidation.ts                         | TypeScript     |         84 |          0 |         10 |         94 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\domain\services\ensureContactDraftIntegrity.ts               | TypeScript     |         54 |          0 |          5 |         59 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\domain\services\ensureContactIntegrity.ts                    | TypeScript     |         65 |          0 |          6 |         71 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\domain\services\index.ts                                     | TypeScript     |         31 |          0 |          1 |         32 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\domain\services\mapContactDTO.ts                             | TypeScript     |         48 |          0 |          9 |         57 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\index.ts                                                     | TypeScript     |         10 |          4 |          4 |         18 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\infra\http\ContactHttpRepository.ts                          | TypeScript     |         59 |          0 |         12 |         71 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\infra\http\ContactUniquenessHttpService.ts                   | TypeScript     |         44 |          0 |          6 |         50 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\infra\http\endpoints.ts                                      | TypeScript     |          7 |          0 |          3 |         10 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\infra\http\index.ts                                          | TypeScript     |          3 |          0 |          1 |          4 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\infra\http\mappers.ts                                        | TypeScript     |        115 |          0 |         17 |        132 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\infra\index.ts                                               | TypeScript     |          4 |          0 |          1 |          5 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\presentation\atoms\CompanyCell.tsx                           | TypeScript JSX |         22 |          0 |          4 |         26 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\presentation\atoms\ContactInfoDisplay.tsx                    | TypeScript JSX |         46 |          0 |          6 |         52 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\presentation\atoms\index.ts                                  | TypeScript     |          2 |          0 |          1 |          3 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\presentation\hooks\index.ts                                  | TypeScript     |          6 |          0 |          1 |          7 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\presentation\hooks\useContactModal.ts                        | TypeScript     |         52 |          0 |          7 |         59 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\presentation\hooks\useContactMutations.ts                    | TypeScript     |         57 |          0 |          7 |         64 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\presentation\hooks\useContactsApplication.ts                 | TypeScript     |         65 |          0 |          9 |         74 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\presentation\hooks\useContactsPageLogic.ts                   | TypeScript     |        148 |         27 |         26 |        201 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\presentation\hooks\useContactsTableColumns.tsx               | TypeScript JSX |        126 |          0 |          4 |        130 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\presentation\hooks\useContactsTableLogic.ts                  | TypeScript     |        158 |          0 |         14 |        172 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\presentation\hooks\useInstantContacts.ts                     | TypeScript     |         47 |          4 |          8 |         59 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\presentation\index.ts                                        | TypeScript     |          6 |          0 |          1 |          7 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\presentation\molecules\ContactForm.tsx                       | TypeScript JSX |        178 |          1 |          7 |        186 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\presentation\molecules\ContactsToolbar.tsx                   | TypeScript JSX |         53 |          0 |          7 |         60 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\presentation\molecules\index.ts                              | TypeScript     |          2 |          0 |          1 |          3 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\presentation\organisms\CompanyDetailsModal.tsx               | TypeScript JSX |         47 |          0 |          3 |         50 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\presentation\organisms\ContactsTable.tsx                     | TypeScript JSX |        100 |          0 |         11 |        111 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\presentation\organisms\ContactsTableSkeleton.tsx             | TypeScript JSX |         58 |          0 |          4 |         62 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\presentation\organisms\index.ts                              | TypeScript     |          3 |          0 |          1 |          4 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\presentation\pages\ContactsPage.tsx                          | TypeScript JSX |          7 |         17 |          4 |         28 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\presentation\pages\ContactsPageView.tsx                      | TypeScript JSX |        127 |          6 |          7 |        140 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\presentation\pages\index.ts                                  | TypeScript     |          1 |          0 |          1 |          2 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\presentation\search\contactsSearchConfig.ts                  | TypeScript     |         14 |          0 |          3 |         17 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\contact\presentation\search\index.ts                                 | TypeScript     |          4 |          0 |          1 |          5 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\customers\application\hooks\useCompanyCustomers.ts                   | TypeScript     |        133 |          0 |         18 |        151 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\customers\application\hooks\useCustomerCrudSection.ts                | TypeScript     |        109 |          1 |         13 |        123 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\customers\application\hooks\useInstantCustomers.ts                   | TypeScript     |         45 |          9 |          9 |         63 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\customers\application\index.ts                                       | TypeScript     |          3 |          0 |          1 |          4 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\customers\domain\Customer.ts                                         | TypeScript     |          7 |          8 |          3 |         18 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\customers\domain\index.ts                                            | TypeScript     |          2 |          0 |          1 |          3 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\customers\domain\types.ts                                            | TypeScript     |          1 |          1 |          1 |          3 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\customers\index.ts                                                   | TypeScript     |          1 |          7 |          2 |         10 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\customers\infra\http\CustomersHttpRepository.ts                      | TypeScript     |         33 |         11 |          9 |         53 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\customers\infra\http\endpoints.ts                                    | TypeScript     |          5 |          0 |          3 |          8 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\customers\infra\http\index.ts                                        | TypeScript     |          3 |          0 |          1 |          4 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\customers\infra\http\mappers.ts                                      | TypeScript     |         13 |          7 |          3 |         23 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\customers\infra\index.ts                                             | TypeScript     |          2 |          0 |          1 |          3 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\customers\infra\keys.ts                                              | TypeScript     |          3 |          0 |          1 |          4 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\customers\presentation\components\CustomerCompaniesSection.tsx       | TypeScript JSX |         62 |          0 |          5 |         67 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\customers\presentation\components\CustomerContactsSection.tsx        | TypeScript JSX |        111 |          1 |         12 |        124 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\customers\presentation\components\CustomerCrudModal.tsx              | TypeScript JSX |         54 |          0 |          4 |         58 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\customers\presentation\helpers\companyHelpers.ts                     | TypeScript     |         52 |          0 |          8 |         60 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\customers\presentation\helpers\contactHelpers.ts                     | TypeScript     |         45 |          6 |          7 |         58 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\customers\presentation\index.ts                                      | TypeScript     |          4 |          0 |          1 |          5 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\customers\presentation\pages\CustomersPage.tsx                       | TypeScript JSX |         35 |          1 |          6 |         42 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\customers\presentation\pages\index.ts                                | TypeScript     |          1 |          0 |          1 |          2 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\customers\presentation\search\customerContactsSearchConfig.ts        | TypeScript     |         15 |          0 |          3 |         18 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\customers\presentation\search\index.ts                               | TypeScript     |          1 |          0 |          1 |          2 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\application\context.ts                                         | TypeScript     |         21 |          0 |          3 |         24 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\application\errors\UseCaseError.ts                             | TypeScript     |         18 |          0 |          3 |         21 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\application\index.ts                                           | TypeScript     |         16 |          0 |          1 |         17 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\application\keys\leadsKeys.ts                                  | TypeScript     |          7 |          0 |          2 |          9 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\application\usecases\commands\changeLeadStatus.ts              | TypeScript     |         19 |          0 |          5 |         24 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\application\usecases\commands\createLead.ts                    | TypeScript     |         62 |          0 |          6 |         68 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\application\usecases\commands\deleteLead.ts                    | TypeScript     |          8 |          0 |          2 |         10 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\application\usecases\commands\patchLead.ts                     | TypeScript     |         25 |          0 |          6 |         31 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\application\usecases\queries\fetchLeadsByType.ts               | TypeScript     |          8 |          0 |          2 |         10 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\application\usecases\queries\getLeadById.ts                    | TypeScript     |         15 |          0 |          2 |         17 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\application\usecases\queries\listLeadsByType.ts                | TypeScript     |         18 |          0 |          4 |         22 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\application\usecases\queries\listLeadsByTypeAndStatus.ts       | TypeScript     |         20 |          0 |          4 |         24 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\application\usecases\queries\listProjectTypes.ts               | TypeScript     |         12 |          0 |          2 |         14 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\application\usecases\queries\summarizeLeadsByType.ts           | TypeScript     |         10 |          0 |          2 |         12 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\application\usecases\queries\validateLeadNumberAvailability.ts | TypeScript     |         11 |          0 |          2 |         13 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\application\utils\buildLeadSections.ts                         | TypeScript     |          1 |          0 |          1 |          2 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\config\index.ts                                                | TypeScript     |          1 |          0 |          1 |          2 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\config\leadTypeConfigs.ts                                      | TypeScript     |         39 |          0 |          3 |         42 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\domain\index.ts                                                | TypeScript     |          3 |          0 |          1 |          4 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\domain\models.ts                                               | TypeScript     |         85 |          0 |         20 |        105 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\domain\models\Lead.ts                                          | TypeScript     |         16 |          0 |          2 |         18 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\domain\models\ProjectType.ts                                   | TypeScript     |          5 |          0 |          1 |          6 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\domain\models\index.ts                                         | TypeScript     |          2 |          0 |          1 |          3 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\domain\ports.ts                                                | TypeScript     |         13 |          5 |          3 |         21 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\domain\ports\LeadNumberAvailabilityPort.ts                     | TypeScript     |          3 |          0 |          1 |          4 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\domain\ports\LeadRepositoryPort.ts                             | TypeScript     |         11 |          5 |          3 |         19 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\domain\ports\ProjectTypeRepositoryPort.ts                      | TypeScript     |          4 |          0 |          2 |          6 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\domain\ports\index.ts                                          | TypeScript     |          3 |          0 |          1 |          4 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\domain\services\applyLeadPatch.ts                              | TypeScript     |        145 |          1 |         21 |        167 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\domain\services\buildLeadDraft.ts                              | TypeScript     |         98 |          0 |         16 |        114 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\domain\services\diffToPatch.ts                                 | TypeScript     |         41 |          0 |         10 |         51 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\domain\services\ensureLeadDraftIntegrity.ts                    | TypeScript     |         64 |          0 |          6 |         70 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\domain\services\ensureLeadIntegrity.ts                         | TypeScript     |        133 |          0 |         17 |        150 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\domain\services\index.ts                                       | TypeScript     |         46 |          0 |          1 |         47 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\domain\services\leadContactLinkPolicy.ts                       | TypeScript     |         52 |          0 |          8 |         60 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\domain\services\leadCreateMapper.ts                            | TypeScript     |         56 |          0 |          8 |         64 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\domain\services\leadNumberPolicy.ts                            | TypeScript     |         87 |          0 |          9 |         96 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\domain\services\leadReadMapper.ts                              | TypeScript     |        137 |          0 |         20 |        157 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\domain\services\leadSections.ts                                | TypeScript     |         43 |          0 |         11 |         54 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\domain\services\leadStatusPolicy.ts                            | TypeScript     |         53 |          0 |          9 |         62 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\domain\services\leadStatusSummary.ts                           | TypeScript     |         47 |          0 |         10 |         57 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\domain\services\leadUpdateMapper.ts                            | TypeScript     |         23 |          0 |          3 |         26 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\domain\services\leadsQueries.ts                                | TypeScript     |         39 |          0 |          8 |         47 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\domain\types.ts                                                | TypeScript     |          4 |          0 |          1 |          5 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\index.ts                                                       | TypeScript     |          3 |          2 |          2 |          7 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\infra\http\LeadHttpRepository.ts                               | TypeScript     |         91 |          0 |         15 |        106 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\infra\http\LeadNumberAvailabilityHttpService.ts                | TypeScript     |         17 |          0 |          5 |         22 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\infra\http\ProjectTypeHttpRepository.ts                        | TypeScript     |         11 |          0 |          2 |         13 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\infra\http\endpoints.ts                                        | TypeScript     |         10 |          0 |          3 |         13 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\infra\http\mappers.ts                                          | TypeScript     |        104 |          0 |         13 |        117 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\infra\index.ts                                                 | TypeScript     |          4 |          0 |          1 |          5 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\presentation\atoms\LeadStatusBadge.tsx                         | TypeScript JSX |         30 |          0 |          6 |         36 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\presentation\atoms\ProjectTypeBadge.tsx                        | TypeScript JSX |         34 |          1 |          6 |         41 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\presentation\atoms\index.ts                                    | TypeScript     |          2 |          0 |          1 |          3 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\presentation\hooks\useCreateLeadController.ts                  | TypeScript     |        100 |          0 |         10 |        110 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\presentation\hooks\useInstantLeadsByType.ts                    | TypeScript     |         44 |          4 |          8 |         56 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\presentation\hooks\useLeadsTableColumns.tsx                    | TypeScript JSX |        112 |          0 |          4 |        116 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\presentation\hooks\useLeadsTableLogic.ts                       | TypeScript     |        162 |          0 |         15 |        177 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\presentation\hooks\useUpdateLeadController.ts                  | TypeScript     |         77 |          1 |         11 |         89 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\presentation\index.ts                                          | TypeScript     |         10 |          0 |          1 |         11 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\presentation\molecules\ContactModeSelector.tsx                 | TypeScript JSX |         87 |          0 |          7 |         94 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\presentation\molecules\LeadEditForm.tsx                        | TypeScript JSX |         98 |          0 |         11 |        109 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\presentation\molecules\LeadForm.tsx                            | TypeScript JSX |         99 |          1 |         13 |        113 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\presentation\molecules\LeadLocationField.tsx                   | TypeScript JSX |         92 |          4 |          9 |        105 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\presentation\molecules\LeadsToolbar.tsx                        | TypeScript JSX |         49 |          0 |          7 |         56 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\presentation\molecules\index.ts                                | TypeScript     |          4 |          0 |          1 |          5 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\presentation\organisms\CreateLeadModal.tsx                     | TypeScript JSX |         94 |          0 |          3 |         97 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\presentation\organisms\EditLeadModal.tsx                       | TypeScript JSX |         78 |          0 |          4 |         82 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\presentation\organisms\LeadsPageComponents.tsx                 | TypeScript JSX |         19 |          0 |          2 |         21 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\presentation\organisms\LeadsTable.tsx                          | TypeScript JSX |        100 |          0 |         11 |        111 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\presentation\organisms\index.ts                                | TypeScript     |          4 |          0 |          1 |          5 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\presentation\pages\LeadsPageByType.tsx                         | TypeScript JSX |         17 |         20 |          5 |         42 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\presentation\pages\LeadsPageView.tsx                           | TypeScript JSX |        123 |          6 |          7 |        136 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\presentation\pages\index.ts                                    | TypeScript     |          2 |          0 |          1 |          3 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\presentation\pages\useLeadsPageByType.ts                       | TypeScript     |         40 |          1 |          5 |         46 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\presentation\pages\useLeadsPageLogic.ts                        | TypeScript     |        109 |         29 |         24 |        162 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\presentation\search\index.ts                                   | TypeScript     |          1 |          0 |          1 |          2 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\leads\presentation\search\leadsSearchConfig.ts                       | TypeScript     |         12 |          0 |          3 |         15 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\projectType\application\context.ts                                   | TypeScript     |          6 |          0 |          2 |          8 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\projectType\application\index.ts                                     | TypeScript     |          2 |          0 |          1 |          3 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\projectType\application\usecases\queries\index.ts                    | TypeScript     |          1 |          0 |          1 |          2 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\projectType\application\usecases\queries\listProjectTypes.ts         | TypeScript     |         12 |          0 |          2 |         14 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\projectType\domain\index.ts                                          | TypeScript     |          2 |          0 |          1 |          3 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\projectType\domain\models.ts                                         | TypeScript     |          6 |          0 |          2 |          8 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\projectType\domain\ports.ts                                          | TypeScript     |          4 |          0 |          2 |          6 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\projectType\index.ts                                                 | TypeScript     |          2 |          2 |          2 |          6 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\projectType\infra\http\ProjectTypeHttpRepository.ts                  | TypeScript     |         10 |          0 |          2 |         12 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\projectType\infra\index.ts                                           | TypeScript     |          1 |          0 |          1 |          2 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\projectType\presentation\hooks\useProjectTypes.ts                    | TypeScript     |         20 |          0 |          6 |         26 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\projectType\presentation\index.ts                                    | TypeScript     |          1 |          0 |          2 |          3 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\project\application\index.ts                                         | TypeScript     |          0 |          1 |          1 |          2 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\project\domain\index.ts                                              | TypeScript     |          4 |          0 |          1 |          5 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\project\domain\models\Project.ts                                     | TypeScript     |         18 |          0 |          2 |         20 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\project\domain\models\index.ts                                       | TypeScript     |          1 |          0 |          1 |          2 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\project\domain\ports\ProjectRepositoryPort.ts                        | TypeScript     |         13 |          0 |          2 |         15 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\project\domain\ports\index.ts                                        | TypeScript     |          1 |          0 |          1 |          2 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\project\domain\services\ensureProjectIntegrity.ts                    | TypeScript     |         19 |          0 |          4 |         23 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\project\domain\services\index.ts                                     | TypeScript     |          2 |          0 |          1 |          3 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\project\domain\services\validateProjectDates.ts                      | TypeScript     |         29 |          0 |          3 |         32 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\project\domain\types.ts                                              | TypeScript     |         23 |          0 |          5 |         28 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\project\index.ts                                                     | TypeScript     |          0 |          6 |          1 |          7 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\features\project\infra\index.ts                                               | TypeScript     |          0 |          4 |          2 |          6 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\globals.d.ts                                                                  | TypeScript     |          4 |          0 |          1 |          5 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\hooks\useSidebarNavigation.ts                                                 | TypeScript     |         31 |          0 |          8 |         39 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\application.ts                                                         | TypeScript     |          1 |          0 |          0 |          1 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\application\makeCrudUseCases.ts                                        | TypeScript     |         31 |          0 |          8 |         39 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\domain.ts                                                              | TypeScript     |          4 |          0 |          0 |          4 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\domain\BusinessRuleError.ts                                            | TypeScript     |         38 |          0 |          5 |         43 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\domain\result.ts                                                       | TypeScript     |          5 |          0 |          2 |          7 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\domain\time.ts                                                         | TypeScript     |         10 |          0 |          3 |         13 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\hooks.ts                                                               | TypeScript     |          2 |          0 |          0 |          2 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\hooks\useEntityForm.ts                                                 | TypeScript     |        102 |          0 |         15 |        117 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\hooks\useTableWithSearch.ts                                            | TypeScript     |         66 |         11 |         12 |         89 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\infra.ts                                                               | TypeScript     |          3 |          0 |          0 |          3 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\infra\http\OptimizedApiClient.ts                                       | TypeScript     |         43 |          0 |         11 |         54 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\infra\http\index.ts                                                    | TypeScript     |          2 |          0 |          1 |          3 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\infra\http\types.ts                                                    | TypeScript     |         27 |          0 |          3 |         30 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\infra\rest\apiRoutes.ts                                                | TypeScript     |          9 |          0 |          3 |         12 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\infra\rest\buildCrudEndpoints.ts                                       | TypeScript     |         23 |          0 |          3 |         26 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\infra\rest\index.ts                                                    | TypeScript     |          8 |          1 |          2 |         11 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\infra\rest\mappers\index.ts                                            | TypeScript     |          8 |          0 |          2 |         10 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\infra\rest\resourceRepository.ts                                       | TypeScript     |         82 |          0 |         10 |         92 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\lib\queryClient.ts                                                     | TypeScript     |         15 |         14 |          4 |         33 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\mappers.ts                                                             | TypeScript     |          1 |          0 |          0 |          1 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\mappers\dto.ts                                                         | TypeScript     |         14 |          0 |          2 |         16 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\mappers\index.ts                                                       | TypeScript     |          1 |          0 |          1 |          2 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\query.ts                                                               | TypeScript     |          1 |          0 |          0 |          1 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\query\index.ts                                                         | TypeScript     |          2 |          0 |          1 |          3 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\query\instant.ts                                                       | TypeScript     |         42 |          0 |          5 |         47 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\search.ts                                                              | TypeScript     |          1 |          0 |          0 |          1 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\search\index.ts                                                        | TypeScript     |          2 |          0 |          1 |          3 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\search\types.ts                                                        | TypeScript     |         10 |          0 |          3 |         13 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\search\utils.ts                                                        | TypeScript     |         30 |          0 |          6 |         36 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui.ts                                                                  | TypeScript     |          1 |          0 |          0 |          1 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\atoms\Badge.tsx                                                     | TypeScript JSX |        162 |          1 |          9 |        172 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\atoms\Button.tsx                                                    | TypeScript JSX |         83 |          0 |          9 |         92 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\atoms\Checkbox.tsx                                                  | TypeScript JSX |         12 |          0 |          4 |         16 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\atoms\ColorPicker.tsx                                               | TypeScript JSX |         99 |          0 |         11 |        110 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\atoms\DropdownPortal.tsx                                            | TypeScript JSX |         65 |         10 |         10 |         85 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\atoms\Icon.tsx                                                      | TypeScript JSX |         21 |          0 |          3 |         24 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\atoms\Input.tsx                                                     | TypeScript JSX |         70 |          0 |          7 |         77 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\atoms\Label.tsx                                                     | TypeScript JSX |         11 |          0 |          4 |         15 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\atoms\SearchableSelect.tsx                                          | TypeScript JSX |        137 |          4 |         10 |        151 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\atoms\Select.tsx                                                    | TypeScript JSX |         27 |         10 |          6 |         43 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\atoms\SelectNative.tsx                                              | TypeScript JSX |         57 |          4 |          6 |         67 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\atoms\Skeleton.tsx                                                  | TypeScript JSX |         10 |          0 |          4 |         14 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\atoms\Spinner.tsx                                                   | TypeScript JSX |         14 |          0 |          2 |         16 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\atoms\StatusBadge.tsx                                               | TypeScript JSX |         30 |          0 |          5 |         35 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\atoms\Textarea.tsx                                                  | TypeScript JSX |         13 |          0 |          4 |         17 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\atoms\Toast.tsx                                                     | TypeScript JSX |         64 |          0 |          9 |         73 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\atoms\Typography.tsx                                                | TypeScript JSX |         62 |          0 |          9 |         71 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\atoms\index.ts                                                      | TypeScript     |         15 |          0 |          1 |         16 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\context\ToastContext.tsx                                            | TypeScript JSX |         56 |          0 |         12 |         68 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\controlStyles.ts                                                    | TypeScript     |         55 |          2 |          5 |         62 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\hooks\useAnimatedHeight.ts                                          | TypeScript     |         38 |          0 |          2 |         40 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\hooks\useContextMenu.ts                                             | TypeScript     |         59 |          0 |          1 |         60 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\hooks\useCrudForm.ts                                                | TypeScript     |         57 |         10 |         15 |         82 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\hooks\useCrudModal.ts                                               | TypeScript     |         59 |          7 |         11 |         77 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\hooks\useCrudMutations.ts                                           | TypeScript     |         84 |         10 |         14 |        108 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\hooks\useCrudPage.ts                                                | TypeScript     |        115 |         37 |         15 |        167 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\hooks\useCrudState.ts                                               | TypeScript     |         42 |          9 |         10 |         61 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\hooks\useDeleteModal.ts                                             | TypeScript     |         67 |          0 |          1 |         68 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\hooks\useFormController.ts                                          | TypeScript     |         83 |          0 |          1 |         84 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\hooks\useFormHandlers.ts                                            | TypeScript     |         45 |          0 |          1 |         46 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\hooks\useNotesEditor.ts                                             | TypeScript     |         88 |         15 |         18 |        121 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\hooks\useNotesModal.ts                                              | TypeScript     |         75 |          0 |          1 |         76 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\hooks\usePersistentToggle.ts                                        | TypeScript     |         49 |          0 |          2 |         51 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\iconSizes.ts                                                        | TypeScript     |         25 |         13 |          4 |         42 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\index.ts                                                            | TypeScript     |         70 |          0 |          7 |         77 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\molecules\AddressAutocompleteInput.tsx                              | TypeScript JSX |         42 |          0 |          4 |         46 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\molecules\AddressAutocompleteWithMap.tsx                            | TypeScript JSX |        189 |         12 |         31 |        232 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\molecules\Alert.tsx                                                 | TypeScript JSX |         29 |          0 |          7 |         36 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\molecules\ContextMenu.tsx                                           | TypeScript JSX |        143 |          3 |         20 |        166 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\molecules\CustomerSection.tsx                                       | TypeScript JSX |         28 |          0 |          4 |         32 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\molecules\EmptyState.tsx                                            | TypeScript JSX |         30 |          0 |          4 |         34 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\molecules\Field.tsx                                                 | TypeScript JSX |         25 |          4 |          2 |         31 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\molecules\LocationField.tsx                                         | TypeScript JSX |         95 |         39 |          9 |        143 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\molecules\Modal.tsx                                                 | TypeScript JSX |         83 |          0 |         12 |         95 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\molecules\NotesButton.tsx                                           | TypeScript JSX |         54 |          0 |          3 |         57 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\molecules\SearchBoxWithDropdown.tsx                                 | TypeScript JSX |         87 |          0 |         11 |         98 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\molecules\TableEmptyState.tsx                                       | TypeScript JSX |         15 |          4 |          3 |         22 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\molecules\TableSkeleton.tsx                                         | TypeScript JSX |         76 |          0 |          5 |         81 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\molecules\TableToolbar.tsx                                          | TypeScript JSX |         77 |          0 |          8 |         85 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\molecules\index.ts                                                  | TypeScript     |         12 |          0 |          1 |         13 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\organisms\ContactViewModal.tsx                                      | TypeScript JSX |         57 |          0 |          5 |         62 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\organisms\DeleteFeedbackModal.tsx                                   | TypeScript JSX |         59 |          0 |          3 |         62 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\organisms\EditModal.tsx                                             | TypeScript JSX |         53 |          0 |          3 |         56 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\organisms\NotesEditorModal.tsx                                      | TypeScript JSX |        165 |          0 |          8 |        173 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\organisms\SimpleTable.tsx                                           | TypeScript JSX |        138 |          0 |         19 |        157 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\organisms\index.ts                                                  | TypeScript     |          5 |          0 |          1 |          6 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\templates\EntityCrudPageTemplate.tsx                                | TypeScript JSX |         37 |          5 |          4 |         46 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\templates\PageContainer.tsx                                         | TypeScript JSX |         41 |          4 |          4 |         49 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\templates\index.ts                                                  | TypeScript     |          2 |          0 |          1 |          3 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\ui\utils\cx.ts                                                         | TypeScript     |          3 |          8 |          1 |         12 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\utils.ts                                                               | TypeScript     |          1 |          0 |          0 |          1 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\utils\formHelpers.ts                                                   | TypeScript     |         45 |         17 |         12 |         74 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\utils\notes.ts                                                         | TypeScript     |         12 |          0 |          1 |         13 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\shared\validation.ts                                                          | TypeScript     |         49 |          0 |          9 |         58 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\styles\globals.css                                                            | PostCSS        |        130 |          1 |         35 |        166 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\types\hooks\context-menu.ts                                                   | TypeScript     |         27 |          0 |          5 |         32 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\types\index.ts                                                                | TypeScript     |          8 |          0 |          3 |         11 |
+| c:\Users\david\Downloads\marosProject\maros-next\src\types\sidebar.ts                                                              | TypeScript     |         13 |          0 |          3 |         16 |
+| Total                                                                                                                              |                |     15,044 |        661 |      2,083 |     17,788 |
++------------------------------------------------------------------------------------------------------------------------------------+----------------+------------+------------+------------+------------+

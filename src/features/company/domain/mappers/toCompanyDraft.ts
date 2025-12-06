@@ -7,6 +7,7 @@ export function toCompanyDraft(value: CompanyFormValue): CompanyDraft {
   return {
     name: value.name.trim(),
     address: normalizeEmptyToUndefined(value.address),
+    addressLink: normalizeEmptyToUndefined(value.addressLink),
     type: value.type ?? CompanyTypeEnum.OTHER,
     serviceId: value.serviceId,
     isCustomer: value.isCustomer,

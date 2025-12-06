@@ -2,14 +2,14 @@ import type { Contact } from "@/contact/domain";
 import type { Company } from "@/company/domain";
 import type { HttpClientLike } from "@/shared/infra";
 import { optimizedApiClient } from "@/shared/infra";
-import { mapContactFromApi } from "@/features/contact/infra/http/mappers";
+import { mapContactFromApi, type ApiContactDTO } from "@/features/contact/infra/http/mappers";
 import { mapCompanyFromApi, type ApiCompanyDTO } from "@/features/company/infra/http/mappers";
 
 import { customersEndpoints } from "./endpoints";
 import type { CustomersData } from "../../domain/Customer";
 
 interface ApiCustomersResponse {
-  contacts: Contact[];
+  contacts: ApiContactDTO[];
   companies: ApiCompanyDTO[];
 }
 

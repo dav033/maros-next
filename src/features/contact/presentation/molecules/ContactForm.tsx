@@ -4,7 +4,7 @@ import * as React from "react";
 import type { Company } from "@/company";
 import type { ContactFormValue } from "../../domain/mappers";
 import { contactRoleOptions } from "@/contact/domain";
-import { Checkbox, Icon, Input, Label, Select, useFormHandlers, Textarea } from "@/shared/ui";
+import { Checkbox, Icon, Input, Label, Select, useFormHandlers, Textarea, LocationField } from "@/shared/ui";
 
 export type ContactFormProps = {
   value: ContactFormValue;
@@ -26,18 +26,6 @@ export function ContactForm({
     handleCheckboxChange,
     handleNumberSelectChange,
   } = useFormHandlers(value, onChange);
-
-  const [googleEnabled, setGoogleEnabled] = React.useState<boolean>(
-    Boolean(value.addressLink && value.addressLink !== "")
-  );
-
-  function toggleGoogle(enabled: boolean) {
-    setGoogleEnabled(enabled);
-    if (!enabled) {
-      // Clear addressLink when disabling Google mode
-      onChange({ ...value, addressLink: undefined });
-    }
-  }
 
   return (
     <div className="space-y-5 rounded-2xl bg-theme-dark/80 p-3 shadow-md">
@@ -63,13 +51,6 @@ export function ContactForm({
               ...contactRoleOptions,
             ]}
           />
-          <Input
-            value={value.occupation}
-            onChange={(event) => handleTextChange(event, "occupation")}
-            placeholder="Custom occupation (optional)"
-            disabled={disabled}
-            leftAddon={<Icon name="lucide:briefcase" size={16} />}
-          />
         </div>
         <div className="space-y-4">
           <Input
@@ -89,36 +70,20 @@ export function ContactForm({
           />
         </div>
       </div>
-      <div>
-        <Input
-          value={value.address}
-          onChange={(event) => handleTextChange(event, "address")}
-          placeholder="Address"
-          disabled={disabled}
-          leftAddon={<Icon name="lucide:map-pin" size={16} />}
-        />
-      </div>
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <Checkbox
-            id="contact-enable-google"
-            checked={googleEnabled}
-            onChange={(e) => toggleGoogle(e.target.checked)}
-            disabled={disabled}
-          />
-          <Label htmlFor="contact-enable-google">Habilitar Google Maps (autocompletado + mapa)</Label>
-        </div>
-        {value.addressLink ? (
-          <a
-            href={value.addressLink}
-            target="_blank"
-            rel="noreferrer"
-            className="text-sm text-blue-400 hover:underline"
-          >
-            Ver en Google Maps
-          </a>
-        ) : null}
-      </div>
+      
+      {/* Use LocationField component for address */}
+      <LocationField
+        address={value.address || ""}
+        addressLink={value.addressLink}
+        label="Address"
+        placeholder="Enter address"
+        googlePlaceholder="Start typing to search address"
+        disabled={disabled}
+        showHelperText={false}
+        onAddressChange={(addr) => onChange({ ...value, address: addr })}
+        onAddressLinkChange={(link) => onChange({ ...value, addressLink: link || undefined })}
+      />
+
       <div className="space-y-2">
         <Select
           value={value.companyId ?? ""}
