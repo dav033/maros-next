@@ -8,6 +8,7 @@ export function diffToPatch(current: Lead, updated: Lead): LeadPatch {
   const flattenedUpdated = {
     name: updated.name,
     location: updated.location ?? "",
+    addressLink: updated.addressLink ?? null,
     status: updated.status,
     startDate: updated.startDate,
     projectTypeId: updated.projectType.id,
@@ -20,6 +21,7 @@ export function diffToPatch(current: Lead, updated: Lead): LeadPatch {
   const flattenedCurrent = {
     name: current.name,
     location: current.location ?? "",
+    addressLink: current.addressLink ?? null,
     status: current.status,
     startDate: current.startDate,
     projectTypeId: current.projectType.id,

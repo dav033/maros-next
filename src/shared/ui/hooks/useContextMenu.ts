@@ -20,7 +20,7 @@ export function useContextMenu(): UseContextMenuResult {
       event.preventDefault();
       let x = event.clientX;
       let y = event.clientY;
-      const OPTION_HEIGHT = 44; // Ajusta según tu diseño
+      const OPTION_HEIGHT = 44; // Adjust based on your design
       const PADDING = 16;
       const menuHeight = Math.min(MENU_HEIGHT, options.length * OPTION_HEIGHT + PADDING * 2);
       if (typeof window !== "undefined") {

@@ -65,9 +65,21 @@ export function useContactsTableColumns({
         sortable: false,
       },
       {
-        key: "occupation",
+        key: "role",
         header: "Role",
         className: "w-[200px]",
+        render: (contact: Contact) => (
+          <span className="text-gray-300">
+            {contact.role ? ContactRoleLabels[contact.role] : "—"}
+          </span>
+        ),
+        sortable: true,
+        sortValue: (contact: Contact) => contact.role ? ContactRoleLabels[contact.role] : "",
+      },
+      {
+        key: "occupation",
+        header: "Custom Occupation",
+        className: "w-[150px]",
         render: (contact: Contact) => (
           <span className="text-gray-300">{contact.occupation ?? "—"}</span>
         ),

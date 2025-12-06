@@ -8,3 +8,4 @@ export * from "./EmptyState";
 export * from "./TableSkeleton";
 export * from "./TableEmptyState";
 export * from "./Field";
+export * from "./AddressAutocompleteInput";

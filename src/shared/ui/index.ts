@@ -31,6 +31,8 @@ export type { TableEmptyStateProps } from "./molecules/TableEmptyState";
 export { CustomerSection } from "./molecules/CustomerSection";
 export { Field } from "./molecules/Field";
 export type { FieldProps } from "./molecules/Field";
+export { AddressAutocompleteInput } from "./molecules/AddressAutocompleteInput";
+export { AddressAutocompleteWithMap } from "./molecules/AddressAutocompleteWithMap";
 
 export { SimpleTable } from "./organisms/SimpleTable";
 export type { SimpleTableColumn } from "./organisms/SimpleTable";

@@ -24,6 +24,7 @@ export type ApiLeadDTO = {
   name?: string | null;
   startDate?: string | null;
   location?: string | null;
+  addressLink?: string | null;
   status?: string | null;
   leadType?: string | number | null;
   contact?: ApiContactDTO;
@@ -89,11 +90,17 @@ export function mapLeadFromDTO(dto: ApiLeadDTO): Lead {
   const leadNumber = normalizeText(dto?.leadNumber ?? "");
   const name = normalizeText(dto?.name ?? "");
   const location = normalizeText(dto?.location ?? "");
+  const addressLink = normalizeText(dto?.addressLink ?? "");
   const startDate = coerceIsoLocalDate(dto?.startDate ?? "");
   const status = resolveStatus(dto?.status ?? null);
   const leadType = resolveLeadType(dto?.leadType ?? null);
 
-  const contactId = dto?.contact?.id ?? 0;
+  const contactId =
+    typeof dto?.contact?.id === "number"
+      ? dto!.contact!.id
+      : dto?.contact?.id
+      ? Number(dto?.contact?.id)
+      : 0;
   const contactName = normalizeText(dto?.contact?.name ?? "");
   const contactPhone = normalizeText(dto?.contact?.phone ?? "");
   const contactEmail = normalizeText(dto?.contact?.email ?? "");
@@ -120,6 +127,7 @@ export function mapLeadFromDTO(dto: ApiLeadDTO): Lead {
     name,
     startDate,
     location,
+    addressLink,
     status,
     leadType,
     contact: {

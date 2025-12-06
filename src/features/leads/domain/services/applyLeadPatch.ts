@@ -80,6 +80,15 @@ const PATCH_HANDLERS: {
     return { ...acc, location: val || undefined };
   },
 
+  addressLink: (v, _ctx, acc) => {
+    // addressLink can be: string (URL), null (clear it), or undefined (no change)
+    if (v === null) {
+      return { ...acc, addressLink: undefined };
+    }
+    const val = normalizeText(String(v));
+    return { ...acc, addressLink: val || undefined };
+  },
+
   leadNumber: (v, ctx, acc) => {
     const rules = ctx.policies.leadNumberPattern
       ? { pattern: ctx.policies.leadNumberPattern }

@@ -7,6 +7,7 @@ type CreateLeadBasePayload = {
   name: string;
   startDate: ISODate;
   location: string;
+  addressLink?: string | null;
   status: LeadStatus | null;
   projectTypeId: number;
   leadType: LeadType;
@@ -37,6 +38,7 @@ export function mapLeadDraftToCreatePayload(
     name: draft.name,
     startDate: draft.startDate,
     location: draft.location,
+    addressLink: draft.addressLink,
     status: draft.status,
     projectTypeId: draft.projectTypeId,
     leadType: draft.leadType,

@@ -11,6 +11,7 @@ type LeadEditFormData = {
   projectTypeId?: number;
   contactId?: number;
   location: string;
+  addressLink?: string | null;
   leadNumber?: string;
   status?: string;
 };
@@ -27,16 +28,17 @@ export function useUpdateLeadController({ lead, onUpdated }: UseUpdateLeadContro
     initialForm: {
       leadName: lead?.name ?? "",
       location: lead?.location ?? "",
+      addressLink: lead?.addressLink ?? "",
       projectTypeId: lead?.projectType?.id,
-      contactId: lead?.contact?.id,
+      contactId: lead?.contact?.id ?? undefined,
       leadNumber: lead?.leadNumber ?? "",
       status: lead?.status ?? "NOT_EXECUTED",
     },
     validate: (form) => {
       const nameOk = form.leadName.trim().length > 0;
       const projectOk = !!form.projectTypeId;
-      const contactOk = !!form.contactId;
-      return nameOk && projectOk && contactOk;
+      // Allow updating even if contactId is not present (edit may not change contact)
+      return nameOk && projectOk;
     },
     transformBeforeSubmit: (form) => {
       if (!lead) return null;
@@ -44,6 +46,11 @@ export function useUpdateLeadController({ lead, onUpdated }: UseUpdateLeadContro
       const patch: LeadPatch = {
         name: form.leadName.trim() !== lead.name ? form.leadName.trim() : undefined,
         location: form.location.trim() !== lead.location ? form.location.trim() : undefined,
+        addressLink:
+          (form.addressLink ?? "") !== (lead.addressLink ?? "")
+            ? (form.addressLink && form.addressLink.trim() !== "" ? form.addressLink.trim() : null)
+            : undefined,
+        status: form.status !== lead.status ? (form.status as any) : undefined,
         projectTypeId: form.projectTypeId !== lead.projectType?.id ? form.projectTypeId : undefined,
         contactId: form.contactId !== lead.contact?.id ? form.contactId : undefined,
         leadNumber: form.leadNumber?.trim() !== lead.leadNumber 
@@ -70,12 +77,14 @@ export function useUpdateLeadController({ lead, onUpdated }: UseUpdateLeadContro
       controller.setForm({
         leadName: lead.name,
         location: lead.location ?? "",
+        addressLink: lead.addressLink ?? "",
         projectTypeId: lead.projectType?.id,
-        contactId: lead.contact?.id,
+        contactId: lead.contact?.id ?? undefined,
         leadNumber: lead.leadNumber ?? "",
+        status: lead.status ?? "NOT_EXECUTED",
       });
     }
-  }, [lead]);
+  }, [lead, controller.setForm]);
 
   return controller;
 }

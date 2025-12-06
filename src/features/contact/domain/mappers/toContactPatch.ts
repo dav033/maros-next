@@ -2,11 +2,15 @@ import type { Contact, ContactPatch } from "../models";
 import { normalizeEmptyToUndefined } from "@/shared/mappers";
 import { createPatch, trimStringFields } from "@/shared/utils";
 
+import type { ContactRole } from "../ContactRole";
+
 export type ContactFormValue = {
   name: string;
   phone: string;
   email: string;
   occupation: string;
+  role?: string | undefined;
+  addressLink?: string | undefined;
   address: string;
   isCustomer: boolean;
   isClient: boolean;
@@ -34,7 +38,9 @@ export function toContactPatch(current: Contact, value: ContactFormValue): Conta
     phone: normalizeEmptyToUndefined(trimmed.phone),
     email: normalizeEmptyToUndefined(trimmed.email),
     occupation: normalizeEmptyToUndefined(trimmed.occupation),
+    role: trimmed.role ? (trimmed.role as ContactRole) : undefined,
     address: normalizeEmptyToUndefined(trimmed.address),
+    addressLink: normalizeEmptyToUndefined(trimmed.addressLink),
     isCustomer: trimmed.isCustomer,
     isClient: trimmed.isClient,
     companyId: trimmed.companyId,
@@ -46,6 +52,8 @@ export function toContactPatch(current: Contact, value: ContactFormValue): Conta
     email: normalizeEmptyToUndefined,
     occupation: normalizeEmptyToUndefined,
     address: normalizeEmptyToUndefined,
+    addressLink: normalizeEmptyToUndefined,
+    role: (val: any) => val || null,
   });
   
   return patch as ContactPatch;

@@ -2,6 +2,7 @@
 
 import type { Lead } from "@/leads/domain";
 import { Input, Select } from "@/shared/ui";
+import { LeadLocationField } from "./LeadLocationField";
 import type { SelectOption } from "@/shared/ui";
 import type { Contact } from "@/contact/domain";
 import type { ProjectType } from "@/projectType/domain";
@@ -9,7 +10,8 @@ import type { ProjectType } from "@/projectType/domain";
 type LeadEditFormProps = {
   form: {
     leadName: string;
-    location: string;
+    location: string; // raw address
+    addressLink?: string | null;
     projectTypeId?: number;
     contactId?: number;
     leadNumber?: string;
@@ -49,12 +51,12 @@ export function LeadEditForm({
         required
       />
 
-      <Input
-        label="Location"
-        placeholder="Enter location"
-        value={form.location}
-        onChange={(e) => onChange("location", e.target.value)}
+      <LeadLocationField
+        location={form.location}
+        addressLink={form.addressLink}
         disabled={disabled}
+        onLocationChange={(value) => onChange("location", value)}
+        onAddressLinkChange={(value) => onChange("addressLink", value)}
       />
 
       <Input

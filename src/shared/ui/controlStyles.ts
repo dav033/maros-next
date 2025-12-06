@@ -26,7 +26,7 @@ export function controlBaseClass({
     .join(" ");
 }
 
-// Para botones que siguen el mismo patrón de diseño
+// For buttons that follow the same design pattern
 export function controlButtonClass({
   variant = "default",
   size = "md",

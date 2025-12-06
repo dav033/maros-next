@@ -13,7 +13,7 @@ export function ProjectTypeBadge({ projectType }: ProjectTypeBadgeProps) {
     return <span className="text-gray-400">—</span>;
   }
 
-  // Determinamos el color basado en el nombre del tipo de proyecto
+  // Determine color based on project type name
   const colorFromName = (name: string): string | null => {
     const n = name.toLowerCase();
     if (n.includes("roof") || n.includes("techo")) return "#ef4444"; // red-500

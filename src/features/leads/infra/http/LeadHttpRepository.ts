@@ -86,7 +86,9 @@ export class LeadHttpRepository implements LeadRepositoryPort {
   };
 
   update = async (id: number, patch: LeadPatch): Promise<Lead> => {
+    console.log('🔍 LeadHttpRepository.update - patch received:', patch);
     const payload = mapLeadPatchToUpdatePayload(patch);
+    console.log('🔍 LeadHttpRepository.update - payload after mapping:', payload);
     const { projectTypeId, contactId, ...rest } = payload;
     const leadData: Record<string, unknown> = { ...rest };
 
@@ -97,8 +99,10 @@ export class LeadHttpRepository implements LeadRepositoryPort {
       leadData.contact = { id: contactId };
     }
 
+    console.log('🔍 LeadHttpRepository.update - leadData to send:', leadData);
     const url = leadEndpoints.update(id);
     const body = { lead: leadData };
+    console.log('🔍 LeadHttpRepository.update - final body:', JSON.stringify(body, null, 2));
     const { data } = await this.api.put<ApiLeadDTO>(url, body);
     if (!data) throw new Error("Empty response updating Lead");
     return mapLeadFromApi(data);

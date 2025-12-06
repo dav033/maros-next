@@ -2,6 +2,7 @@
 
 import { Input, Select } from "@/shared/ui";
 import type { SelectOption } from "@/shared/ui";
+import { LeadLocationField } from "./LeadLocationField";
 
 type ProjectType = { id: number; name: string; color?: string };
 type Contact = { id: number; name: string; phone?: string; email?: string };
@@ -11,7 +12,8 @@ type LeadFormData = {
   leadName: string;
   projectTypeId?: number;
   contactId?: number;
-  location: string;
+  location: string; // raw address
+  addressLink?: string | null; // Google Maps link
   status?: string;
   note?: string;
 };
@@ -52,11 +54,13 @@ export function LeadForm({
         disabled={disabled}
       />
 
-      <Input
-        value={form.location}
-        onChange={(e) => onChange("location", e.target.value)}
-        placeholder="Location *"
+      {/* Location field with text mode and Google Maps */}
+      <LeadLocationField
+        location={form.location}
+        addressLink={form.addressLink}
         disabled={disabled}
+        onLocationChange={(value) => onChange("location", value)}
+        onAddressLinkChange={(value) => onChange("addressLink", value)}
       />
 
       <Select

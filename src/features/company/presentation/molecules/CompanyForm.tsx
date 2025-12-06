@@ -14,6 +14,7 @@ import {
 export type CompanyFormValue = {
   name: string;
   address: string;
+  addressLink?: string;
   type: CompanyType | null;
   serviceId: number | null;
   isCustomer: boolean;
@@ -51,7 +52,8 @@ export function CompanyForm({ value, onChange, disabled, services = [], contacts
           address={value.address}
           disabled={disabled}
           onNameChange={(event) => handleTextChange(event, "name")}
-          onAddressChange={(event) => handleTextChange(event, "address")}
+          onAddressChange={(address) => onChange({ ...value, address })}
+          onAddressLinkChange={(addressLink) => onChange({ ...value, addressLink })}
         />
 
         <CompanyTypeFields

@@ -23,6 +23,7 @@ export interface Lead {
   name: string;
   startDate: string;
   location?: string | undefined;
+  addressLink?: string | undefined;
   status: LeadStatus;
   contact: Contact;
   projectType: ProjectType;

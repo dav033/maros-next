@@ -6,6 +6,7 @@ export type ApiLeadDTO = {
   name: string;
   startDate: string;
   location: string;
+  addressLink?: string;
   status: string;
   leadType: string;
   contactId?: number;
@@ -20,6 +21,7 @@ export type CreateLeadBasePayload = {
   name?: string;
   startDate: ISODate;
   location: string;
+  addressLink?: string | null;
   status: LeadStatus | null;
   projectTypeId: number;
   leadType: LeadType;
@@ -45,6 +47,7 @@ export type CreateLeadPayload =
 export type UpdateLeadPayload = {
   name?: string;
   location?: string;
+  addressLink?: string | null;
   status?: LeadStatus | null;
   contactId?: number;
   projectTypeId?: number;
@@ -68,6 +71,7 @@ export function mapLeadDraftToCreatePayload(
     leadNumber: draft.leadNumber,
     startDate: draft.startDate,
     location: draft.location,
+    addressLink: draft.addressLink,
     status: draft.status,
     projectTypeId: draft.projectTypeId,
     leadType: draft.leadType,
@@ -101,6 +105,7 @@ export function mapLeadPatchToUpdatePayload(
   return {
     name: patch.name,
     location: patch.location,
+    addressLink: patch.addressLink === undefined ? undefined : patch.addressLink ?? null,
     status: patch.status ?? null,
     contactId: patch.contactId,
     projectTypeId: patch.projectTypeId,
