@@ -65,7 +65,7 @@ const nextConfig: NextConfig = {
       // Excluir davComponents del snapshot para forzar recompilación
       config.snapshot = {
         ...config.snapshot,
-        managedPaths: (config.snapshot?.managedPaths || []).filter((p) => {
+        managedPaths: (config.snapshot?.managedPaths || []).filter((p: string | RegExp) => {
           if (typeof p === 'string') {
             return !p.includes('davComponents');
           }
