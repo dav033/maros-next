@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
   experimental: {
     externalDir: true
   },
-    transpilePackages: ["@dav033/dav-components"]
+  transpilePackages: ["@dav033/dav-components"],
 };
 
 export default nextConfig;
