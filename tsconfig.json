@@ -23,23 +23,51 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"],
-      "@dav033/dav-components": ["../davComponents/src/index.ts"],
-      "@dav033/dav-components/*": ["../davComponents/src/*"],
-      "@/contact": ["./src/features/contact/index.ts"],
-      "@/contact/*": ["./src/features/contact/*"],
-      "@/company": ["./src/features/company/index.ts"],
-      "@/company/*": ["./src/features/company/*"],
-      "@/leads": ["./src/features/leads/index.ts"],
-      "@/leads/*": ["./src/features/leads/*"],
-      "@/customers": ["./src/features/customers/index.ts"],
-      "@/customers/*": ["./src/features/customers/*"],
-      "@/projectType": ["./src/features/projectType/index.ts"],
-      "@/projectType/*": ["./src/features/projectType/*"],
-      "@/project": ["./src/features/project/index.ts"],
-      "@/project/*": ["./src/features/project/*"],
-      "@/reports": ["./src/features/reports/index.ts"],
-      "@/reports/*": ["./src/features/reports/*"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@/contact": [
+        "./src/features/contact/index.ts"
+      ],
+      "@/contact/*": [
+        "./src/features/contact/*"
+      ],
+      "@/company": [
+        "./src/features/company/index.ts"
+      ],
+      "@/company/*": [
+        "./src/features/company/*"
+      ],
+      "@/leads": [
+        "./src/features/leads/index.ts"
+      ],
+      "@/leads/*": [
+        "./src/features/leads/*"
+      ],
+      "@/customers": [
+        "./src/features/customers/index.ts"
+      ],
+      "@/customers/*": [
+        "./src/features/customers/*"
+      ],
+      "@/projectType": [
+        "./src/features/projectType/index.ts"
+      ],
+      "@/projectType/*": [
+        "./src/features/projectType/*"
+      ],
+      "@/project": [
+        "./src/features/project/index.ts"
+      ],
+      "@/project/*": [
+        "./src/features/project/*"
+      ],
+      "@/reports": [
+        "./src/features/reports/index.ts"
+      ],
+      "@/reports/*": [
+        "./src/features/reports/*"
+      ]
     }
   },
   "include": [
