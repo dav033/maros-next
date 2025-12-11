@@ -111,8 +111,16 @@ if (currentVersion !== davComponentsVersion) {
       process.exit(1);
     }
   } else {
-    console.log('\n⚠️  Please run "npm install" to update dependencies');
-    process.exit(1);
+    console.log('📦 Running npm install to update dependencies...');
+    const { execSync } = require('child_process');
+    try {
+      execSync('npm install', { stdio: 'inherit', cwd: path.join(__dirname, '..') });
+      console.log('✅ Dependencies installed successfully');
+      process.exit(0);
+    } catch (error) {
+      console.error('❌ Failed to install dependencies');
+      process.exit(1);
+    }
   }
 } else {
   // package.json está correcto pero node_modules no tiene la dependencia
