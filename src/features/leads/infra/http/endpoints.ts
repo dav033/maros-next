@@ -4,9 +4,9 @@ const BASE = api.resource("leads");
 
 export const endpoints = {
   ...buildCrudEndpoints<number>(BASE),
-  listByType: (type: string) => `${BASE}/type?type=${encodeURIComponent(type)}`,
-  validateLeadNumber: (leadNumber: string) =>
-    `${BASE}/validate/lead-number?leadNumber=${encodeURIComponent(leadNumber)}`,
+  listByType: () => `${BASE}/type`,
+  validateLeadNumber: () => `${BASE}/validate/lead-number`,
   createWithNewContact: () => `${BASE}/new-contact`,
   createWithExistingContact: () => `${BASE}/existing-contact`,
+  getByLeadNumber: (leadNumber: string) => `${BASE}/number/${encodeURIComponent(leadNumber)}`,
 } as const;

@@ -1,4 +1,4 @@
-import { Icon, Input, ColorPicker } from "@/shared/ui";
+import { Icon, Input, ColorPicker } from "@dav033/dav-components";
 
 interface ServiceFormValue {
   name: string;
@@ -20,7 +20,7 @@ export function ServiceFormView({
 }: ServiceFormViewProps) {
   return (
     <>
-      <div className="space-y-4 rounded-2xl bg-theme-dark/80 p-3 shadow-md">
+      <div className="space-y-4">
         <Input
           value={formValue.name}
           onChange={(e) => onChange({ ...formValue, name: e.target.value })}

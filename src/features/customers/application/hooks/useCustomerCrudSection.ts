@@ -2,8 +2,7 @@
 
 import { useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useEntityForm } from "@/shared/hooks";
-import { useToast } from "@/shared/ui";
+import { useEntityForm, useToast } from "@dav033/dav-components";
 
 export type CustomerCrudSectionConfig<TEntity, TFormValue, TPatch> = {
   initialFormValue: TFormValue;
@@ -59,7 +58,7 @@ export function useCustomerCrudSection<TEntity extends { id: number }, TFormValu
     errorDelete = "Could not delete",
   } = messages;
 
-  // Use the existing useEntityForm hook for update logic
+ 
   const {
     isOpen,
     openEdit,

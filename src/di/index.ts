@@ -1,1 +1,9 @@
-export { DiProvider, useContactsApp, useLeadsApp, useProjectTypesApp, useCompanyApp } from "./DiProvider";
+export {
+  DiProvider,
+  useContactsApp,
+  useLeadsApp,
+  useProjectTypesApp,
+  useCompanyApp,
+  useReportsApp,
+  useProjectsApp,
+} from "./DiProvider";

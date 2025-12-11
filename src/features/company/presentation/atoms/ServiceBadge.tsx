@@ -1,4 +1,4 @@
-import { Badge } from "@/shared/ui";
+import { Badge } from "@dav033/dav-components";
 
 export interface ServiceBadgeProps {
   service: {

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Icon, Badge } from "@/shared/ui";
+import { Icon, Badge } from "@dav033/dav-components";
 
 export interface ContactInfoDisplayProps {
   contact: {

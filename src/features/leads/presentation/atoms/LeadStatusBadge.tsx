@@ -1,5 +1,5 @@
-import { Badge } from "@/shared/ui";
-import type { BadgeVariant } from "@/shared/ui";
+import { Badge } from "@dav033/dav-components";
+import type { BadgeVariant } from "@dav033/dav-components";
 
 interface LeadStatusBadgeProps {
   status: string;

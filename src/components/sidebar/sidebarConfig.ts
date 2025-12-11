@@ -1,35 +1,24 @@
-import type { SidebarDropdownConfig } from "@/types";
+import type { SidebarConfig, SidebarDropdownConfig, SidebarSection } from "@dav033/dav-components";
 
-export type SidebarConfig = {
-  top: SidebarDropdownConfig[];
-  bottom: SidebarDropdownConfig[];
+const menuSection: SidebarSection = {
+  section: "Business",
+  items: [
+    {
+      title: "Leads",
+      href: "/leads",
+      icon: "mdi:briefcase-outline",
+    },
+    {
+      title: "Projects",
+      href: "/projects",
+      icon: "mdi:folder-multiple-outline",
+    },
+  ],
 };
 
-export const SIDEBAR_CONFIG: SidebarConfig = {
-  top: [
-    {
-      trigger: {
-        title: "Lead",
-        icon: "mdi:clipboard-text-outline",
-      },
-      items: [
-        {
-          title: "Construction",
-          href: "/leads/construction",
-          icon: "mdi:tools",
-        },
-        {
-          title: "Plumbing",
-          href: "/leads/plumbing",
-          icon: "mdi:pipe-wrench",
-        },
-        {
-          title: "Roofing",
-          href: "/leads/roofing",
-          icon: "material-symbols:roofing-outline",
-        },
-      ],
-    },
+const accountSection: SidebarSection = {
+  section: "Account",
+  items: [
     {
       title: "Contacts",
       href: "/contacts",
@@ -46,42 +35,59 @@ export const SIDEBAR_CONFIG: SidebarConfig = {
       icon: "mdi:account-group-outline",
     },
   ],
+};
+
+const reportsSection: SidebarSection = {
+  section: "Reports",
+  items: [
+    {
+      title: "Restoration Visit",
+      href: "/reports/restoration-visit",
+      icon: "mdi:file-chart-outline",
+    },
+    {
+      title: "Restoration Final",
+      href: "/reports/restoration-final",
+      icon: "mdi:file-check-outline",
+    },
+  ],
+};
+
+export const SIDEBAR_CONFIG: SidebarConfig = {
+  title: "Maros Construction",
+  top: [menuSection, accountSection, reportsSection],
   bottom: [],
 };
 
-/**
- * Extracts all main navigation pages from the sidebar configuration.
- * Useful for generating lists of available pages.
- */
 export function getMainPages() {
   const pages: Array<{ title: string; href: string; icon?: string }> = [];
-  
-  function extractPages(items: SidebarDropdownConfig[]) {
-    for (const item of items) {
-      if ("trigger" in item) {
-        // It's a dropdown, extract its items
-        extractPages(item.items);
+
+  const extractPages = (entries: Array<SidebarDropdownConfig | SidebarSection>) => {
+    for (const entry of entries) {
+      if ("section" in entry) {
+        extractPages(entry.items);
+        continue;
+      }
+      if ("trigger" in entry) {
+        extractPages(entry.items);
       } else {
-        // It's a direct link
         pages.push({
-          title: item.title,
-          href: item.href,
-          icon: item.icon,
+          title: entry.title,
+          href: entry.href,
+          icon: entry.icon,
         });
       }
     }
-  }
+  };
 
   extractPages(SIDEBAR_CONFIG.top);
-  extractPages(SIDEBAR_CONFIG.bottom);
-  
+  if (SIDEBAR_CONFIG.bottom) {
+    extractPages(SIDEBAR_CONFIG.bottom);
+  }
+
   return pages;
 }
 
-/**
- * Gets all available route patterns from the sidebar configuration.
- * Useful for generating static paths or validating routes.
- */
 export function getAllRoutes(): string[] {
-  return getMainPages().map(page => page.href);
+  return getMainPages().map((page) => page.href);
 }

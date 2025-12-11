@@ -9,11 +9,7 @@ import type {
   CompanyServiceId,
 } from "./models";
 
-/**
- * Domain port for Company repository.
- * Defines the contract for persisting and retrieving companies.
- * Infra implementations should implement this interface.
- */
+
 export interface CompanyRepositoryPort {
   getById(id: CompanyId): Promise<Company | null>;
   list(): Promise<Company[]>;
@@ -23,10 +19,7 @@ export interface CompanyRepositoryPort {
   assignContacts(companyId: number, contactIds: number[]): Promise<void>;
 }
 
-/**
- * Domain port for CompanyService repository.
- * Defines the contract for persisting and retrieving company services.
- */
+
 export interface CompanyServiceRepositoryPort {
   getById(id: CompanyServiceId): Promise<CompanyService | null>;
   list(): Promise<CompanyService[]>;

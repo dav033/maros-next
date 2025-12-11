@@ -1,18 +1,15 @@
 import type { Lead, LeadDraft, LeadId, LeadPatch, LeadType } from "./models";
 
-/**
- * Domain port for Lead repository.
- * Defines the contract for persisting and retrieving leads.
- * Infra implementations should implement this interface.
- */
+
 export interface LeadRepositoryPort {
   getById(id: LeadId): Promise<Lead | null>;
+  getByLeadNumber(leadNumber: string): Promise<Lead | null>;
   list(): Promise<Lead[]>;
-  create(draft: LeadDraft): Promise<Lead>;
+  create(draft: LeadDraft, leadTypeForGeneration?: LeadType): Promise<Lead>;
   update(id: LeadId, patch: LeadPatch): Promise<Lead>;
   delete(id: LeadId): Promise<void>;
   findByType(type: LeadType): Promise<Lead[]>;
-  saveNew(draft: LeadDraft): Promise<Lead>;
+  saveNew(draft: LeadDraft, leadTypeForGeneration?: LeadType): Promise<Lead>;
 }
 
 export interface LeadNumberAvailabilityPort {

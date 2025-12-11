@@ -1,6 +1,6 @@
 "use client";
 
-import { Icon, Input, Button } from "@/shared/ui";
+import { Icon, Input, Button } from "@dav033/dav-components";
 
 export enum ContactMode {
   NEW_CONTACT = "NEW_CONTACT",
@@ -40,7 +40,7 @@ export function ContactModeSelector({
             disabled={disabled}
             className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
               contactMode === ContactMode.NEW_CONTACT
-                ? "!bg-[var(--color-primary)] !text-white"
+                ? "!bg-[#1ab3a4] !text-white hover:!bg-[#159c94]"
                 : "text-gray-400 hover:text-gray-200"
             }`}
           >
@@ -54,7 +54,7 @@ export function ContactModeSelector({
             disabled={disabled}
             className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
               contactMode === ContactMode.EXISTING_CONTACT
-                ? "!bg-[var(--color-primary)] !text-white"
+                ? "!bg-[#1ab3a4] !text-white hover:!bg-[#159c94]"
                 : "text-gray-400 hover:text-gray-200"
             }`}
           >

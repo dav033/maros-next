@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Checkbox, Icon, Input } from "@/shared/ui";
+import { Checkbox, Icon, Input } from "@dav033/dav-components";
 import type { Contact } from "@/contact";
 
 interface CompanyContactsSelectorProps {
@@ -88,7 +88,7 @@ export function CompanyContactsSelector({
                   setIsOpen(false);
                 }}
                 disabled={disabled}
-                className="flex w-full items-center gap-2 rounded-lg border border-dashed border-blue-500/30 bg-blue-500/5 px-3 py-2 text-sm text-blue-400 hover:bg-blue-500/10 hover:border-blue-500/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex w-full items-center gap-2 rounded-lg border border-dashed border-[#1ab3a4]/40 bg-[#1ab3a4]/8 px-3 py-2 text-sm text-[#9ff3e7] hover:bg-[#1ab3a4]/14 hover:border-[#1ab3a4]/60 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Icon name="lucide:user-plus" size={16} />
                 <span>Create New Contact</span>

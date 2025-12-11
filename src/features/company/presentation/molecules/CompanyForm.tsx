@@ -2,7 +2,7 @@
 
 import type { CompanyType, CompanyService } from "../../domain/models";
 import type { Contact } from "@/contact";
-import { Textarea } from "@/shared/ui";
+import { Textarea } from "@dav033/dav-components";
 import {
   CompanyBasicFields,
   CompanyTypeFields,
@@ -45,7 +45,7 @@ export function CompanyForm({ value, onChange, disabled, services = [], contacts
   } = useCompanyFormHandlers(value, onChange);
 
   return (
-    <div className="space-y-5 rounded-2xl bg-theme-dark/80 p-3 shadow-md">
+    <div className="space-y-5">
       <div className="space-y-4">
         <CompanyBasicFields
           name={value.name}

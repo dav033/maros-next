@@ -2,7 +2,7 @@ import type { Company, CompanyDraft, CompanyPatch } from "../../domain/models";
 import type { CompanyFormValue } from "../molecules/CompanyForm";
 import { CompanyType } from "../../domain/models";
 import { normalizeEmptyToUndefined } from "@/shared/mappers";
-import { createPatch, trimStringFields } from "@/shared/utils";
+import { createPatch, trimStringFields } from "@dav033/dav-components";
 import type { Contact } from "@/contact/domain";
 
 export const initialCompanyFormValue: CompanyFormValue = {
@@ -17,10 +17,7 @@ export const initialCompanyFormValue: CompanyFormValue = {
   notes: [],
 };
 
-/**
- * Converts form values to a draft for company creation
- * Applies trimming and normalization
- */
+
 export function toDraft(value: CompanyFormValue): CompanyDraft {
   return {
     name: value.name.trim(),
@@ -33,21 +30,12 @@ export function toDraft(value: CompanyFormValue): CompanyDraft {
   };
 }
 
-/**
- * Builds a standardized patch for company updates
- * - Trims all string fields
- * - Normalizes empty strings to undefined
- * - Only includes changed fields
- * 
- * @param current - Current company state
- * @param value - Updated form values
- * @returns Patch with only changed fields
- */
+
 export function toPatch(current: Company, value: CompanyFormValue): CompanyPatch {
-  // Trim string fields
+ 
   const trimmed = trimStringFields(value);
   
-  // Prepare normalized updates matching Company shape
+ 
   const updates: Partial<Company> = {
     name: trimmed.name,
     address: normalizeEmptyToUndefined(trimmed.address),
@@ -59,7 +47,7 @@ export function toPatch(current: Company, value: CompanyFormValue): CompanyPatch
     notes: trimmed.notes,
   };
 
-  // Create patch with normalizers for optional fields
+ 
   const patch = createPatch(current, updates, {
     address: normalizeEmptyToUndefined,
     addressLink: normalizeEmptyToUndefined,

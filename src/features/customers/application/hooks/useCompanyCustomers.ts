@@ -12,7 +12,7 @@ import {
   type UpdateCompanyWithContactsInput 
 } from "@/company/application";
 import { contactsKeys } from "@/contact/application";
-import { useToast } from "@/shared/ui";
+import { useToast } from "@dav033/dav-components";
 import { customersKeys } from "../../infra/keys";
 import { 
   initialCompanyFormValue, 

@@ -1,4 +1,4 @@
-import { Button, Icon } from "@/shared/ui";
+import { Button, Icon, ListCardItem } from "@dav033/dav-components";
 import type { CompanyService } from "../../domain/models";
 
 interface ServicesListViewProps {
@@ -33,53 +33,58 @@ export function ServicesListView({
       {services.length === 0 ? (
         <div className="flex items-center justify-center rounded-lg border border-dashed border-theme-gray-subtle bg-theme-dark/50 p-8">
           <div className="text-center">
-            <Icon name="lucide:wrench" size={40} className="mx-auto mb-3 text-gray-500" />
+            <Icon
+              name="lucide:wrench"
+              size={40}
+              className="mx-auto mb-3 text-gray-500"
+            />
             <p className="text-sm text-gray-400">
               Create your first service to get started.
             </p>
           </div>
         </div>
       ) : (
-        <div className="space-y-1.5 max-h-60 overflow-y-auto">
+        <div className="max-h-60 overflow-y-auto">
           {services.map((service) => (
-            <div
+            <ListCardItem
               key={service.id}
-              className="flex items-center justify-between rounded-lg border border-theme-gray-subtle bg-theme-dark/50 px-2.5 py-2 transition-colors hover:bg-theme-dark/70"
+              actions={
+                <>
+                  <Button
+                    onClick={() => onOpenEdit(service)}
+                    variant="ghost"
+                    size="sm"
+                    title="Edit service"
+                    disabled={isDeleting}
+                    className="h-7 w-7 p-0 min-h-0 rounded text-gray-400 hover:bg-blue-500/10 hover:text-blue-400"
+                  >
+                    <Icon name="lucide:edit" size={14} />
+                  </Button>
+                  <Button
+                    onClick={() => onDelete(service)}
+                    variant="ghost"
+                    size="sm"
+                    title="Delete service"
+                    disabled={isDeleting}
+                    className="h-7 w-7 p-0 min-h-0 rounded text-gray-400 hover:bg-red-500/10 hover:text-red-400"
+                  >
+                    <Icon name="lucide:trash-2" size={14} />
+                  </Button>
+                </>
+              }
             >
-              <div className="flex items-center gap-2">
-                {service.color ? (
-                  <div
-                    className="h-3 w-3 rounded-full shrink-0"
-                    style={{ backgroundColor: service.color }}
-                  />
-                ) : (
-                  <div className="h-3 w-3 rounded-full shrink-0 border border-gray-500" />
-                )}
-                <span className="text-sm text-theme-light">{service.name}</span>
-              </div>
-              <div className="flex items-center gap-0.5">
-                <Button
-                  onClick={() => onOpenEdit(service)}
-                  variant="ghost"
-                  size="sm"
-                  title="Edit service"
-                  disabled={isDeleting}
-                  className="h-7 w-7 p-0 min-h-0"
-                >
-                  <Icon name="lucide:edit" size={14} />
-                </Button>
-                <Button
-                  onClick={() => onDelete(service)}
-                  variant="ghost"
-                  size="sm"
-                  title="Delete service"
-                  disabled={isDeleting}
-                  className="h-7 w-7 p-0 min-h-0 hover:bg-red-500/10 hover:text-red-400"
-                >
-                  <Icon name="lucide:trash-2" size={14} />
-                </Button>
-              </div>
-            </div>
+              {service.color ? (
+                <div
+                  className="h-3.5 w-3.5 rounded-full shrink-0"
+                  style={{ backgroundColor: service.color }}
+                />
+              ) : (
+                <div className="h-3.5 w-3.5 rounded-full shrink-0 border border-gray-500" />
+              )}
+              <span className="text-sm text-theme-light truncate">
+                {service.name}
+              </span>
+            </ListCardItem>
           ))}
         </div>
       )}

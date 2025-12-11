@@ -1,9 +1,8 @@
 "use client";
 
 import type { CompanyService } from "../../domain/models";
-import { Button, Modal } from "@/shared/ui";
-import { DeleteFeedbackModal } from "@/shared/ui/organisms/DeleteFeedbackModal";
-import { useManageServices } from "../hooks/useManageServices";
+import { Button, Modal, BasicModalFooter, DeleteFeedbackModal } from "@dav033/dav-components";
+import { useManageServices } from "../hooks";
 import { ServicesListView } from "../molecules/ServicesListView";
 import { ServiceFormView } from "../molecules/ServiceFormView";
 
@@ -64,19 +63,13 @@ export function ManageServicesModal({ isOpen, onClose, services }: ManageService
       onClose={handleClose}
       footer={
         isFormMode ? (
-          <>
-            <Button variant="secondary" onClick={resetForm} disabled={isPending}>
-              Cancel
-            </Button>
-            <Button
-              variant="primary"
-              onClick={mode === "create" ? handleCreateSubmit : handleEditSubmit}
-              loading={isPending}
-              disabled={!formValue.name.trim()}
-            >
-              {mode === "create" ? "Create" : "Save changes"}
-            </Button>
-          </>
+          <BasicModalFooter
+            onCancel={resetForm}
+            onSubmit={mode === "create" ? handleCreateSubmit : handleEditSubmit}
+            isLoading={isPending}
+            canSubmit={formValue.name.trim().length > 0}
+            mode={mode === "create" ? "create" : "update"}
+          />
         ) : (
           <Button variant="secondary" onClick={handleClose}>
             Close
@@ -118,8 +111,8 @@ export function ManageServicesModal({ isOpen, onClose, services }: ManageService
         loading={isDeleting}
         onClose={closeDeleteModal}
         onConfirm={confirmDelete}
-        confirmLabel="Delete"
-        cancelLabel="Cancel"
+        
+        
       />
     </Modal>
   );

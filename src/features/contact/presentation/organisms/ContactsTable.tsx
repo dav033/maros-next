@@ -3,108 +3,86 @@
 import * as React from "react";
 import type { Contact } from "@/contact";
 import type { Company } from "@/company";
-import { ContextMenu, SimpleTable, EmptyState } from "@/shared/ui";
-import { DeleteFeedbackModal } from "@/shared/ui/organisms/DeleteFeedbackModal";
-import { NotesEditorModal } from "@/shared/ui/organisms/NotesEditorModal";
-import { CompanyDetailsModal } from "./CompanyDetailsModal";
-import { useContactsTableLogic } from "../hooks/useContactsTableLogic";
-import { useContactsTableColumns } from "../hooks/useContactsTableColumns";
+import {
+  ContextMenuTable,
+  type ContextMenuTableItem,
+} from "@dav033/dav-components";
+import { useContactsTableColumns, type UseContactsTableLogicReturn } from "../hooks";
 
 export interface ContactsTableProps {
-  contacts: Contact[];
+  tableLogic?: UseContactsTableLogicReturn;
   companies?: Company[];
   isLoading?: boolean;
-  onEdit: (contact: Contact) => void;
-  onDelete: (contactId: number) => void;
+  // Props alternativos cuando no se usa tableLogic
+  contacts?: Contact[];
+  onEdit?: (contact: Contact) => void;
+  onDelete?: (contact: Contact) => void;
 }
 
-export function ContactsTable({
-  contacts,
+  export function ContactsTable({
+  tableLogic,
   companies = [],
-  isLoading,
+  isLoading = false,
+  contacts,
   onEdit,
   onDelete,
 }: ContactsTableProps) {
-  const {
-    localContacts,
-    contextMenu,
-    companyModal,
-    deleteModal,
-    notesModal,
-    handleRowContextMenu,
-  } = useContactsTableLogic({ contacts, onEdit, onDelete });
+  const rows = tableLogic?.rows ?? contacts ?? [];
+  const resolvedGetContextMenuItems = React.useMemo<((contact: Contact) => ContextMenuTableItem[]) | undefined>(() => {
+    if (tableLogic?.getContextMenuItems) {
+      return tableLogic.getContextMenuItems;
+    }
+
+    if (onEdit || onDelete) {
+      return (contact: Contact) => {
+        const items = [];
+        if (onEdit) {
+          items.push({
+            label: "Edit",
+            onClick: () => onEdit(contact),
+            icon: "lucide:edit",
+          });
+        }
+        if (onDelete) {
+          items.push({
+            label: "Delete",
+            onClick: () => onDelete(contact),
+            variant: "danger" as const,
+            icon: "lucide:trash",
+          });
+        }
+        return items;
+      };
+    }
+
+    return undefined;
+  }, [onDelete, onEdit, tableLogic?.getContextMenuItems]);
+  const onOpenNotesModal = tableLogic?.onOpenNotesModal ?? (() => {});
+  const onOpenCompanyModal = tableLogic?.onOpenCompanyModal ?? (() => {});
 
   const columns = useContactsTableColumns({
     companies,
-    onOpenCompanyModal: companyModal.open,
-    onOpenNotesModal: notesModal.open,
+    onOpenCompanyModal: onOpenCompanyModal,
+    onOpenNotesModal: onOpenNotesModal,
   });
 
-  if (!localContacts || localContacts.length === 0) {
-    return (
-      <EmptyState
-        iconName="lucide:users"
-        title="No contacts found."
-        subtitle="Use the button above to create a new contact."
-      />
-    );
-  }
-
   return (
-    <>
-      <SimpleTable<Contact>
-        columns={columns}
-        data={localContacts}
-        rowKey={(contact) => contact.id ?? 0}
-        onRowContextMenu={handleRowContextMenu}
-      />
-
-      <ContextMenu
-        isOpen={contextMenu.isVisible}
-        position={contextMenu.position}
-        onClose={contextMenu.hide}
-        options={Array.isArray(contextMenu.options) ? contextMenu.options : []}
-      />
-
-      <NotesEditorModal
-        isOpen={notesModal.state.isOpen}
-        title={`Notes – ${notesModal.state.title || ""}`}
-        notes={notesModal.state.notes}
-        loading={notesModal.state.isLoading}
-        onChangeNotes={notesModal.update}
-        onClose={notesModal.close}
-        onSave={notesModal.save}
-      />
-
-      <DeleteFeedbackModal
-        isOpen={deleteModal.state.isOpen}
-        title="Delete Contact"
-        description={
-          <>
-            Are you sure you want to delete contact{" "}
-            <span className="font-semibold text-theme-light">
-              {deleteModal.state.item?.name}
-            </span>
-            ?
-            <br />
-            This action cannot be undone.
-          </>
-        }
-        error={deleteModal.state.error}
-        loading={deleteModal.state.isLoading}
-        onClose={deleteModal.close}
-        onConfirm={() =>
-          deleteModal.state.item && deleteModal.handleDelete(deleteModal.state.item)
-        }
-        confirmLabel="Delete"
-        cancelLabel="Cancel"
-      />
-
-      <CompanyDetailsModal
-        isOpen={companyModal.isOpen}
-        company={companyModal.company}
-        onClose={companyModal.close}
-      />
-    </>
+    <ContextMenuTable<Contact>
+      data={rows}
+      columns={columns}
+      rowKey={(contact) => contact.id ?? 0}
+      getContextMenuItems={resolvedGetContextMenuItems}
+      isLoading={isLoading}
+      loadingState={{
+        iconName: "lucide:loader-2",
+        title: "Loading contacts…",
+        subtitle: "Please wait while we load your contacts.",
+      }}
+      emptyState={{
+        iconName: "lucide:users",
+        title: "No contacts found.",
+        subtitle: "Use the button above to create a new contact.",
+      }}
+    />
   );
 }

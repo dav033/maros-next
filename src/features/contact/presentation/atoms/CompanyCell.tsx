@@ -1,5 +1,5 @@
 import type { Company } from "@/company";
-import { Badge } from "@/shared/ui";
+import { Badge } from "@dav033/dav-components";
 
 interface CompanyCellProps {
   company: Company | undefined;

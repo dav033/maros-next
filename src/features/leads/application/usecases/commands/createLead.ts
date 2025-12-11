@@ -19,7 +19,7 @@ export type CreateLeadInput =
       leadNumber?: string | null;
       location: string;
       projectTypeId: ProjectTypeId;
-      leadType: LeadType;
+      leadType: LeadType; // Solo para generar número si no se proporciona
       contactId: ContactId;
     }>
   | Readonly<{
@@ -27,7 +27,7 @@ export type CreateLeadInput =
       leadNumber?: string | null;
       location: string;
       projectTypeId: ProjectTypeId;
-      leadType: LeadType;
+      leadType: LeadType; // Solo para generar número si no se proporciona
       contact: NewContact;
     }>;
 
@@ -53,7 +53,9 @@ export async function createLead(
       return !available;
     });
   }
-  return ctx.repos.lead.saveNew(draft);
+  // Pasar leadType solo si no se proporciona leadNumber (para generación en backend)
+  const leadTypeForGeneration = !draft.leadNumber ? input.leadType : undefined;
+  return ctx.repos.lead.saveNew(draft, leadTypeForGeneration);
 }
 
 export type CreateLeadWithExistingContactInput = Extract<

@@ -1,164 +1,179 @@
 "use client";
 
 import { CompaniesTable } from "../organisms/CompaniesTable";
-import { CompaniesToolbar } from "../molecules/CompaniesToolbar";
 import { CompaniesTableSkeleton } from "../organisms/CompaniesTableSkeleton";
-import { EmptyCompaniesState } from "../molecules/EmptyCompaniesState";
 import { CompanyModal } from "../organisms/CompanyModal";
 import { ManageServicesModal } from "../organisms/ManageServicesModal";
-import { Modal, Button, EntityCrudPageTemplate } from "@/shared/ui";
-import { ContactForm } from "@/features/contact/presentation/molecules/ContactForm";
-import type { UseCompaniesPageLogicReturn } from "../hooks/useCompaniesPageLogic";
+import { EntityCrudPageTemplate } from "@dav033/dav-components";
+import {
+  TableToolbar,
+  SimplePageHeader,
+  DeleteFeedbackModal,
+  NotesEditorModal,
+  Icon,
+} from "@dav033/dav-components";
+import { ContactModal } from "@/features/contact/presentation/organisms/ContactModal";
+import type { UseCompaniesPageLogicReturn } from "../hooks";
+import {
+  useCompaniesToolbarSearchController,
+  useCompanyContactModalController,
+  useCompanyModalController,
+  useCompanyNotesModalController,
+} from "../hooks";
 
 export interface CompaniesPageViewProps {
   logic: UseCompaniesPageLogicReturn;
 }
 
-/**
- * Pure presentational component for the Companies page.
- * Manages three modals: Company CRUD, Services management, and nested Contact creation.
- */
 export function CompaniesPageView({ logic }: CompaniesPageViewProps) {
+  // 1) Estructura modular del hook
+  const { data, modals, table, quickContact, notes } = logic;
+
+  // 2) Datos
+  const { companies, contacts, services, showSkeleton } = data;
+
+  // 3) Modales
   const {
-    companies,
-    contacts,
-    services,
-    showSkeleton,
-    createModal,
-    editModal,
-    servicesModal,
-    contactModal,
-    contactFormValue,
-    isContactSubmitting,
-    contactError,
-    handleContactFormChange,
-    handleContactSubmit,
-    handleContactModalClose,
-    handleDelete,
-    filteredCompanies,
+    create: createModal,
+    edit: editModal,
+    services: servicesModal,
+    contact: contactModal,
+  } = modals;
+
+  // 4) Tabla
+  const {
+    rows,
+    totalCount,
+    filteredCount,
+    deleteModalProps,
+    getContextMenuItems,
+    // 🔴 OJO: aquí usamos searchState, NO search
+    searchState,
+  } = table;
+
+  const {
     searchQuery,
     searchField,
     setSearchQuery,
     setSearchField,
-    totalCount,
+  } = searchState;
+
+  // 5) Quick contact
+  const {
+    formValue: contactFormValue,
+    isSubmitting: isContactSubmitting,
+    error: contactError,
+    handleChange: handleContactFormChange,
+    handleSubmit: handleContactSubmit,
+    handleClose: handleContactModalClose,
+  } = quickContact;
+
+  // 6) Notas
+  const { modalProps: notesModalProps } = notes;
+
+  // === Controladores de UI ===
+  const companyModalController = useCompanyModalController({
+    createModal,
+    editModal,
+  });
+
+  const contactModalController = useCompanyContactModalController({
+    isOpen: contactModal.isOpen,
+    onClose: handleContactModalClose,
+    onSubmit: handleContactSubmit,
+    formValue: contactFormValue,
+    onFormChange: handleContactFormChange,
+    isLoading: isContactSubmitting,
+    error: contactError,
+  });
+
+  const toolbarSearchController = useCompaniesToolbarSearchController({
+    searchQuery,
+    searchField,
+    setSearchQuery,
+    setSearchField,
     filteredCount,
-  } = logic;
+    totalCount,
+  });
+
+  const notesModalController = useCompanyNotesModalController({
+    isOpen: notesModalProps.isOpen,
+    title: notesModalProps.title || "",
+    notes: notesModalProps.notes,
+    onChangeNotes: notesModalProps.onChangeNotes,
+    onClose: notesModalProps.onClose,
+    onSave: notesModalProps.onSave,
+    loading: notesModalProps.loading,
+  });
 
   return (
     <EntityCrudPageTemplate
       header={
-        <header className="flex flex-col gap-1">
-          <h1 className="text-xl font-semibold text-theme-light sm:text-2xl">
-            Companies
-          </h1>
-          <p className="text-xs text-gray-400 sm:text-sm">
-            Manage companies and contractors in your network.
-          </p>
-        </header>
+        <SimplePageHeader
+          title="Companies"
+          description="Manage companies and services."
+        />
       }
       toolbar={
-        <CompaniesToolbar
-          searchQuery={searchQuery}
-          searchField={searchField}
-          onSearchQueryChange={setSearchQuery}
-          onSearchFieldChange={setSearchField}
-          totalCount={totalCount}
-          filteredCount={filteredCount}
-          onManageServices={servicesModal.open}
-          onNewCompany={createModal.open}
+        <TableToolbar
+          search={toolbarSearchController}
+          onCreate={createModal.open}
+          createLabel="New company"
+          createIcon={<Icon name="mdi:office-building-plus-outline" size={18} />}
         />
       }
       isLoading={showSkeleton}
       loadingContent={<CompaniesTableSkeleton />}
-      isEmpty={false}
-      emptyContent={null}
       tableContent={
         <CompaniesTable
-          companies={filteredCompanies}
-          isLoading={showSkeleton}
-          onEdit={editModal.open}
-          onDelete={handleDelete}
-          services={services}
+          companies={rows}
+          services={services ?? []}
+          getContextMenuItems={getContextMenuItems}
+          onOpenNotesModal={table.onOpenNotesModal}
         />
       }
       modals={
         <>
-          {/* Create Company Modal */}
           <CompanyModal
-            isOpen={createModal.isOpen}
-            title="New company"
-            onClose={createModal.close}
-            onSubmit={createModal.submit}
-            formValue={createModal.formValue}
-            onChange={createModal.setFormValue}
-            isSubmitting={createModal.isSubmitting}
-            serverError={createModal.serverError}
+            controller={companyModalController}
             services={services ?? []}
             contacts={contacts ?? []}
-            submitLabel="Create"
-            onCreateNewContact={() => contactModal.open('create')}
+            onCreateNewContact={() => contactModal.open(companyModalController.mode === 'create' ? 'create' : 'edit')}
           />
 
-          {/* Edit Company Modal */}
-          <CompanyModal
-            isOpen={editModal.isOpen}
-            title="Edit company"
-            onClose={editModal.close}
-            onSubmit={editModal.submit}
-            formValue={editModal.formValue}
-            onChange={editModal.setFormValue}
-            isSubmitting={editModal.isSubmitting}
-            serverError={editModal.serverError}
-            services={services ?? []}
-            contacts={contacts ?? []}
-            submitLabel="Save changes"
-            onCreateNewContact={() => contactModal.open('edit')}
+          <ContactModal
+            controller={contactModalController}
+            companies={companies ?? []}
+            onCreateNewCompany={createModal.open}
           />
 
-          {/* Manage Services Modal */}
           <ManageServicesModal
             isOpen={servicesModal.isOpen}
             onClose={servicesModal.close}
             services={services ?? []}
           />
 
-          {/* Nested Contact Creation Modal */}
-          <Modal
-            isOpen={contactModal.isOpen}
-            title="Create New Contact"
-            onClose={handleContactModalClose}
-            footer={
+          <DeleteFeedbackModal
+            isOpen={deleteModalProps.isOpen}
+            title="Delete Company"
+            description={
               <>
-                <Button 
-                  variant="secondary" 
-                  onClick={handleContactModalClose} 
-                  disabled={isContactSubmitting}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  variant="primary"
-                  onClick={handleContactSubmit}
-                  loading={isContactSubmitting}
-                  disabled={!contactFormValue.name.trim()}
-                >
-                  Create Contact
-                </Button>
+                Are you sure you want to delete company{" "}
+                <span className="font-semibold text-theme-light">
+                  {deleteModalProps.itemToDelete?.name}
+                </span>
+                ?
+                <br />
+                This action cannot be undone.
               </>
             }
-          >
-            <ContactForm
-              value={contactFormValue}
-              onChange={handleContactFormChange}
-              disabled={isContactSubmitting}
-              companies={companies ?? []}
-            />
-            {contactError && (
-              <div className="mt-3 rounded-lg bg-red-500/10 border border-red-500/20 px-3 py-2 text-sm text-red-400">
-                {contactError}
-              </div>
-            )}
-          </Modal>
+            error={deleteModalProps.error}
+            loading={deleteModalProps.isDeleting}
+            onClose={deleteModalProps.onClose}
+            onConfirm={deleteModalProps.onConfirm}
+          />
+
+          <NotesEditorModal controller={notesModalController} />
         </>
       }
     />

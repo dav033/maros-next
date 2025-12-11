@@ -14,7 +14,8 @@ export class LeadNumberAvailabilityHttpService
   async isAvailable(leadNumber: string): Promise<boolean> {
     if (!leadNumber) return true;
     const { data } = await this.api.get<ValidateLeadNumberDTO>(
-      endpoints.validateLeadNumber(leadNumber)
+      endpoints.validateLeadNumber(),
+      { params: { leadNumber } }
     );
     return !!data?.valid;
   }

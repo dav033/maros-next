@@ -11,16 +11,7 @@ import { BusinessRuleError } from "@/shared/domain";
 import { ensureLeadIntegrity } from "./ensureLeadIntegrity";
 import { makeLeadNumber } from "./leadNumberPolicy";
 import { applyStatus, DEFAULT_TRANSITIONS } from "./leadStatusPolicy";
-
-function normalizeText(s: string): string {
-  return String(s ?? "")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function isIsoLocalDate(s: string): boolean {
-  return /^\d{4}-\d{2}-\d{2}$/.test(s);
-}
+import { normalizeText, isIsoLocalDate } from "@/shared/validation";
 
 function validateLeadName(raw: string): string {
   const v = normalizeText(raw);
@@ -81,7 +72,7 @@ const PATCH_HANDLERS: {
   },
 
   addressLink: (v, _ctx, acc) => {
-    // addressLink can be: string (URL), null (clear it), or undefined (no change)
+   
     if (v === null) {
       return { ...acc, addressLink: undefined };
     }
@@ -133,7 +124,7 @@ const PATCH_HANDLERS: {
   },
   notes: (v, _ctx, acc) => ({
     ...acc,
-    notesJson: Array.isArray(v) ? JSON.stringify(v) : undefined,
+    notes: Array.isArray(v) ? v : [],
   }),
 };
 

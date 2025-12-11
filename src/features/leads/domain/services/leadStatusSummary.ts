@@ -1,4 +1,5 @@
 import type { Lead, LeadStatus, LeadType, LeadStatusCount } from "../models";
+import { filterLeadsByType } from "../utils/lead-type.utils";
 
 export type StatusCounts = Readonly<Record<LeadStatus, number>>;
 type MutableStatusCounts = Record<LeadStatus, number>;
@@ -44,7 +45,7 @@ export function summarizeLeadsByType(
   leads: readonly Lead[],
   type: LeadType
 ): Readonly<{ totalLeads: number; byStatus: LeadStatusCount }> {
-  const filtered = (leads ?? []).filter((l) => l.leadType === type);
+  const filtered = filterLeadsByType([...(leads ?? [])], type);
   return summarizeLeads(filtered);
 }
 

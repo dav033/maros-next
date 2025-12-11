@@ -1,4 +1,3 @@
-export * from "./CreateLeadModal";
-export * from "./EditLeadModal";
+export * from "./LeadModal";
 export * from "./LeadsTable";
-export * from "./LeadsPageComponents";
+export * from "./LeadsTableSkeleton";

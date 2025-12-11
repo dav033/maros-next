@@ -1,35 +1,63 @@
 "use client";
 
 import type { Contact } from "@/contact";
-import { EntityCrudPageTemplate, Modal, Button } from "@/shared/ui";
-import { ContactsToolbar } from "../molecules/ContactsToolbar";
+import { EntityCrudPageTemplate } from "@dav033/dav-components";
+import {
+  TableToolbar,
+  SimplePageHeader,
+  DeleteFeedbackModal,
+  NotesEditorModal,
+  Icon,
+} from "@dav033/dav-components";
 import { ContactsTable } from "../organisms/ContactsTable";
 import { ContactsTableSkeleton } from "../organisms/ContactsTableSkeleton";
-import { ContactForm } from "../molecules/ContactForm";
+import { ContactModal } from "../organisms/ContactModal";
 import { CompanyModal } from "@/features/company/presentation/organisms/CompanyModal";
-import type { UseContactsPageLogicReturn } from "../hooks/useContactsPageLogic";
+import { CompanyDetailsModal } from "../organisms/CompanyDetailsModal";
+import type { UseContactsPageLogicReturn } from "../hooks";
+import {
+  useContactCompanyModalController,
+  useContactModalController,
+  useContactsNotesModalController,
+  useContactsToolbarSearchController,
+} from "../hooks";
 
 export interface ContactsPageViewProps {
   logic: UseContactsPageLogicReturn;
 }
 
-/**
- * Pure presentational component for the Contacts page.
- * Receives all logic from useContactsPageLogic hook.
- */
 export function ContactsPageView({ logic }: ContactsPageViewProps) {
   const {
+    data,
     crud,
-    filteredContacts,
+    table,
+    companyModal,
+    notesModal,
+    companyDetailsModal,
+  } = logic;
+
+  const {
+    contacts: filteredContacts,
     companies,
     services,
+    showSkeleton,
+  } = data;
+
+  const {
+    rows: tableFilteredContacts,
+    totalCount,
+    filteredCount,
+    searchState,
+  } = table;
+
+  const {
     searchQuery,
     searchField,
     setSearchQuery,
     setSearchField,
-    totalCount,
-    filteredCount,
-    showSkeleton,
+  } = searchState;
+
+  const {
     isCompanyModalOpen,
     companyFormValue,
     companyServerError,
@@ -38,101 +66,113 @@ export function ContactsPageView({ logic }: ContactsPageViewProps) {
     closeCompanyModal,
     handleCompanyFormChange,
     handleCompanySubmit,
-  } = logic;
+  } = companyModal;
 
-  const isModalOpen = crud.mode === "create" || crud.mode === "edit";
-  const modalTitle = crud.mode === "create" ? "New contact" : "Edit contact";
+  const contactModalController = useContactModalController({
+    mode: crud.mode,
+    closeModal: crud.closeModal,
+    handleCreateSubmit: crud.handleCreateSubmit,
+    handleEditSubmit: crud.handleEditSubmit,
+    formValue: crud.formValue,
+    handleFormChange: crud.handleFormChange,
+    isPending: crud.isPending,
+    serverError: crud.serverError,
+  });
+
+  const companyModalController = useContactCompanyModalController({
+    isOpen: isCompanyModalOpen,
+    onClose: closeCompanyModal,
+    onSubmit: handleCompanySubmit,
+    formValue: companyFormValue,
+    onChange: handleCompanyFormChange,
+    isSubmitting: isCompanySubmitting,
+    serverError: companyServerError,
+  });
+
+  const toolbarSearchController = useContactsToolbarSearchController({
+    searchQuery,
+    searchField,
+    setSearchQuery,
+    setSearchField,
+    filteredCount,
+    totalCount,
+  });
+
+  const notesModalController = useContactsNotesModalController({
+    isOpen: notesModal.isOpen,
+    title: notesModal.title,
+    notes: notesModal.notes,
+    onChangeNotes: notesModal.onChangeNotes,
+    onClose: notesModal.onClose,
+    onSave: notesModal.onSave,
+    loading: notesModal.loading,
+  });
 
   return (
     <EntityCrudPageTemplate
       header={
-        <div className="flex flex-col gap-1">
-          <h1 className="text-xl font-semibold text-theme-light sm:text-2xl">Contacts</h1>
-          <p className="text-xs text-gray-400 sm:text-sm">
-            Manage people and customers connected to your projects.
-          </p>
-        </div>
+        <SimplePageHeader
+          title="Contacts"
+          description="Manage people and customers connected to your projects."
+        />
       }
       toolbar={
-        <ContactsToolbar<Contact>
-          searchQuery={searchQuery}
-          onSearchQueryChange={setSearchQuery}
-          searchField={searchField}
-          onSearchFieldChange={(value) => setSearchField(value as keyof Contact | "all")}
-          onCreateContact={crud.openCreate}
-          totalCount={totalCount}
-          filteredCount={filteredCount}
+        <TableToolbar
+          search={toolbarSearchController}
+          onCreate={crud.openCreate}
+          createLabel="New contact"
+          createIcon={<Icon name="mdi:account-plus-outline" size={18} />}
         />
       }
       isLoading={showSkeleton}
       loadingContent={<ContactsTableSkeleton />}
-      isEmpty={false}
-      emptyContent={null}
       tableContent={
         <ContactsTable
-          contacts={filteredContacts}
+          tableLogic={table}
           companies={companies}
           isLoading={showSkeleton}
-          onEdit={(contact) => {
-            if (typeof contact.id === "number") crud.openEdit(contact as Contact & { id: number });
-          }}
-          onDelete={crud.handleDelete}
         />
       }
       modals={
         <>
-          {/* Create/Edit Contact Modal */}
-          <Modal
-            isOpen={isModalOpen}
-            onClose={crud.closeModal}
-            title={modalTitle}
-            footer={
-              <>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={crud.closeModal}
-                  disabled={crud.isPending}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="button"
-                  variant="primary"
-                  onClick={crud.mode === "create" ? crud.handleCreateSubmit : crud.handleEditSubmit}
-                  disabled={!crud.formValue.name.trim() || crud.isPending}
-                  loading={crud.isPending}
-                >
-                  {crud.mode === "create" ? "Create" : "Save changes"}
-                </Button>
-              </>
-            }
-          >
-            <ContactForm
-              value={crud.formValue}
-              onChange={crud.handleFormChange}
-              disabled={crud.isPending}
-              companies={companies ?? []}
-              onCreateNewCompany={openCompanyModal}
-            />
-            {crud.serverError && (
-              <p className="mt-2 text-sm text-red-500">{crud.serverError}</p>
-            )}
-          </Modal>
+          <ContactModal
+            controller={contactModalController}
+            companies={companies ?? []}
+            onCreateNewCompany={openCompanyModal}
+          />
 
-          {/* Nested Company Creation Modal */}
           <CompanyModal
-            isOpen={isCompanyModalOpen}
-            title="New company"
-            onClose={closeCompanyModal}
-            onSubmit={handleCompanySubmit}
-            formValue={companyFormValue}
-            onChange={handleCompanyFormChange}
-            isSubmitting={isCompanySubmitting}
-            serverError={companyServerError}
+            controller={companyModalController}
             services={services ?? []}
             contacts={[]}
-            submitLabel="Create"
+          />
+
+          <DeleteFeedbackModal
+            isOpen={table.deleteModalProps.isOpen}
+            title="Delete Contact"
+            description={
+              <>
+                Are you sure you want to delete contact{" "}
+                <span className="font-semibold text-theme-light">
+                  {table.deleteModalProps.itemToDelete?.name}
+                </span>
+                ?
+                <br />
+                This action cannot be undone.
+              </>
+            }
+            error={table.deleteModalProps.error}
+            loading={table.deleteModalProps.isDeleting}
+            onClose={table.deleteModalProps.onClose}
+            onConfirm={table.deleteModalProps.onConfirm}
+          />
+
+          <NotesEditorModal controller={notesModalController} />
+
+          <CompanyDetailsModal
+            isOpen={companyDetailsModal.isOpen}
+            company={companyDetailsModal.company}
+            onClose={companyDetailsModal.close}
           />
         </>
       }

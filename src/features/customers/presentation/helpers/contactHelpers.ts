@@ -1,6 +1,6 @@
 import type { Contact, ContactPatch, ContactFormValue } from "@/contact/domain";
 import { normalizeEmptyToUndefined } from "@/shared/mappers";
-import { createPatch, trimStringFields } from "@/shared/utils";
+import { createPatch, trimStringFields } from "@dav033/dav-components";
 
 export const initialContactFormValue: ContactFormValue = {
   name: "",
@@ -13,12 +13,7 @@ export const initialContactFormValue: ContactFormValue = {
   companyId: null,
 };
 
-/**
- * Builds a standardized patch for contact updates in Customers context
- * - Trims all string fields
- * - Normalizes empty strings to undefined for optional fields
- * - Only includes changed fields
- */
+
 export function toContactPatch(current: Contact, value: ContactFormValue): ContactPatch {
   const trimmed = trimStringFields(value);
   

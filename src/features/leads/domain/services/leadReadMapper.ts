@@ -1,4 +1,4 @@
-import type { Lead, LeadStatus, LeadType } from "../models";
+import type { Lead, LeadStatus } from "../models";
 import { coerceIsoLocalDate, normalizeText } from "@/shared/validation";
 
 export type ApiProjectTypeDTO = {
@@ -63,27 +63,7 @@ function resolveStatus(status: string | null | undefined): LeadStatus {
   return "NOT_EXECUTED" as LeadStatus;
 }
 
-function resolveLeadType(input: unknown): LeadType {
-  if (typeof input === "string") {
-    const v = input.trim().toUpperCase();
-    if (v === "CONSTRUCTION" || v === "PLUMBING" || v === "ROOFING") {
-      return v as LeadType;
-    }
-  }
-  if (typeof input === "number") {
-    switch (input) {
-      case 1:
-        return "CONSTRUCTION" as LeadType;
-      case 2:
-        return "PLUMBING" as LeadType;
-      case 3:
-        return "ROOFING" as LeadType;
-      default:
-        return "CONSTRUCTION" as LeadType;
-    }
-  }
-  return "CONSTRUCTION" as LeadType;
-}
+// leadType ya no se lee del DTO, se calcula desde leadNumber
 
 export function mapLeadFromDTO(dto: ApiLeadDTO): Lead {
   const id = dto?.id ?? 0;
@@ -93,7 +73,7 @@ export function mapLeadFromDTO(dto: ApiLeadDTO): Lead {
   const addressLink = normalizeText(dto?.addressLink ?? "");
   const startDate = coerceIsoLocalDate(dto?.startDate ?? "");
   const status = resolveStatus(dto?.status ?? null);
-  const leadType = resolveLeadType(dto?.leadType ?? null);
+  // leadType ya no se almacena en el modelo, se calcula desde leadNumber cuando se necesita
 
   const contactId =
     typeof dto?.contact?.id === "number"
@@ -129,7 +109,6 @@ export function mapLeadFromDTO(dto: ApiLeadDTO): Lead {
     location,
     addressLink,
     status,
-    leadType,
     contact: {
       id: contactId,
       name: contactName,

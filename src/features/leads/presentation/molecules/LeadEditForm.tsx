@@ -1,23 +1,25 @@
 "use client";
 
 import type { Lead } from "@/leads/domain";
-import { Input, Select, LocationField } from "@/shared/ui";
-import type { SelectOption } from "@/shared/ui";
+import { Input, Select, LocationField } from "@dav033/dav-components";
+import type { SelectOption } from "@dav033/dav-components";
 import type { Contact } from "@/contact/domain";
 import type { ProjectType } from "@/projectType/domain";
 
 type LeadEditFormProps = {
   form: {
     leadName: string;
-    location: string; // raw address
+    location: string;
     addressLink?: string | null;
     projectTypeId?: number;
     contactId?: number;
     leadNumber?: string;
     status?: string;
   };
-  onChange: <K extends keyof LeadEditFormProps["form"]>(key: K, value: LeadEditFormProps["form"][K]) => void;
-  onBatchChange?: (fields: Partial<LeadEditFormProps["form"]>) => void;
+  onChange: <K extends keyof LeadEditFormProps["form"]>(
+    key: K,
+    value: LeadEditFormProps["form"][K]
+  ) => void;
   projectTypes: ProjectType[];
   contacts: Contact[];
   disabled?: boolean;
@@ -26,7 +28,6 @@ type LeadEditFormProps = {
 export function LeadEditForm({
   form,
   onChange,
-  onBatchChange,
   projectTypes,
   contacts,
   disabled = false,
@@ -60,26 +61,21 @@ export function LeadEditForm({
         disabled={disabled}
         onAddressChange={(value) => onChange("location", value)}
         onAddressLinkChange={(value) => onChange("addressLink", value)}
-        onLocationChange={({ address, link }) => {
-          if (onBatchChange) {
-            onBatchChange({ location: address, addressLink: link || null });
-          } else {
-            onChange("location", address);
-            onChange("addressLink", link || null);
-          }
-        }}
       />
 
-      {/* Project Type and Status in the same row */}
       <div className="grid grid-cols-2 gap-3">
         <Select
           options={projectTypeOptions}
           value={form.projectTypeId ?? ""}
-          onChange={(val: string) => onChange("projectTypeId", val ? Number(val) : undefined)}
+          onChange={(val: string) =>
+            onChange("projectTypeId", val ? Number(val) : undefined)
+          }
           placeholder="Select Project Type *"
           icon="material-symbols:design-services"
           searchable={true}
           disabled={disabled}
+          allowEmpty={true}
+          emptyLabel="Select Project Type"
         />
 
         <Select
@@ -97,17 +93,23 @@ export function LeadEditForm({
           icon="material-symbols:flag"
           searchable={false}
           disabled={disabled}
+          allowEmpty={true}
+          emptyLabel="Select Status"
         />
       </div>
 
       <Select
         options={contactOptions}
         value={form.contactId ?? ""}
-        onChange={(val: string) => onChange("contactId", val ? Number(val) : undefined)}
+        onChange={(val: string) =>
+          onChange("contactId", val ? Number(val) : undefined)
+        }
         placeholder="Select Contact *"
         icon="material-symbols:person"
         searchable={true}
         disabled={disabled}
+        allowEmpty={true}
+        emptyLabel="Select Contact"
       />
     </div>
   );

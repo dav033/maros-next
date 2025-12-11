@@ -1,5 +1,5 @@
 import type { ChangeEvent } from "react";
-import { Checkbox, Label } from "@/shared/ui";
+import { Checkbox, Label } from "@dav033/dav-components";
 
 interface CompanyCheckboxFieldProps {
   id: string;

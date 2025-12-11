@@ -10,6 +10,7 @@ export { deleteLead } from "./usecases/commands/deleteLead";
 export { patchLead } from "./usecases/commands/patchLead";
 export { fetchLeadsByType } from "./usecases/queries/fetchLeadsByType";
 export { getLeadById } from "./usecases/queries/getLeadById";
+export { getLeadByNumber } from "./usecases/queries/getLeadByNumber";
 export { listLeadsByType } from "./usecases/queries/listLeadsByType";
 export { listLeadsByTypeAndStatus } from "./usecases/queries/listLeadsByTypeAndStatus";
 export { summarizeLeadsByTypeQuery } from "./usecases/queries/summarizeLeadsByType";

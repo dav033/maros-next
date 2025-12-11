@@ -17,20 +17,15 @@ import {
   normalizeNewContact,
 } from "./leadContactLinkPolicy";
 import { makeLeadNumber } from "./leadNumberPolicy";
+import { normalizeText } from "@/shared/validation";
 
 type CommonInput = Readonly<{
   leadNumber?: string | null;
   leadName?: string;
   location: string;
   projectTypeId: ProjectTypeId;
-  leadType: LeadType;
+  leadType?: LeadType; // Opcional: solo para generar número si no se proporciona (no se almacena)
 }>;
-
-function normalizeText(s: string): string {
-  return String(s ?? "")
-    .replace(/\s+/g, " ")
-    .trim();
-}
 
 function validateLeadName(raw: string | undefined, location: string, leadNumber: string | null): string {
   let v = normalizeText(raw ?? "");
@@ -77,7 +72,6 @@ export function buildLeadDraftForNewContact(
     location: normalizeText(input.location),
     status: ((policies as any).defaultStatus ?? null) as LeadStatus | null,
     projectTypeId: input.projectTypeId,
-    leadType: input.leadType,
     contact: normalizedContact,
   };
 
@@ -104,7 +98,6 @@ export function buildLeadDraftForExistingContact(
     location: normalizeText(input.location),
     status: ((policies as any).defaultStatus ?? null) as LeadStatus | null,
     projectTypeId: input.projectTypeId,
-    leadType: input.leadType,
     contactId: input.contactId,
   };
 

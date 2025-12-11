@@ -10,9 +10,9 @@ import { CustomerCrudModal } from "./CustomerCrudModal";
 import { customersKeys } from "../../infra/keys";
 import { initialContactFormValue, toContactPatch, mapContactToFormValue } from "../helpers/contactHelpers";
 import { useCustomerCrudSection } from "../../application/hooks/useCustomerCrudSection";
-import { useTableWithSearch } from "@/shared/hooks";
-import { TableToolbar } from "@/shared/ui";
+import { TableToolbar, useTableWithSearch, DeleteFeedbackModal } from "@dav033/dav-components";
 import { customerContactsSearchConfig, customerContactsSearchPlaceholder } from "../search";
+import { useState } from "react";
 
 export interface CustomerContactsSectionProps {
   contacts: Contact[];
@@ -25,12 +25,14 @@ export function CustomerContactsSection({
   companies,
   isLoading,
 }: CustomerContactsSectionProps) {
+  const [deleteTarget, setDeleteTarget] = useState<Contact | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const contactsApp = useContactsApp();
 
   const safeContacts = contacts ?? [];
   const safeCompanies = companies ?? [];
 
-  // Search and filtering with useTableWithSearch
+ 
   const {
     filteredData: filteredContacts,
     searchQuery,
@@ -65,8 +67,6 @@ export function CustomerContactsSection({
     },
   });
 
-  const hasActiveSearch = searchQuery.trim().length > 0;
-
   const searchFields = customerContactsSearchConfig.fields.map(f => ({
     value: f.key as string,
     label: f.label,
@@ -77,22 +77,20 @@ export function CustomerContactsSection({
       <section className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-medium text-theme-light">Contact Customers</h2>
-          <span className="text-sm text-gray-400">
-            {totalCount} {totalCount === 1 ? "contact" : "contacts"}
-          </span>
+          <span />
         </div>
 
         <TableToolbar
-          searchTerm={searchQuery}
-          onSearchChange={setSearchQuery}
-          selectedField={searchField}
-          onFieldChange={setSearchField}
-          searchFields={searchFields}
-          placeholder={customerContactsSearchPlaceholder}
-          hasActiveSearch={hasActiveSearch}
-          onClearSearch={() => setSearchQuery("")}
-          resultCount={filteredCount}
-          totalCount={totalCount}
+          search={{
+            searchTerm: searchQuery,
+            onSearchChange: setSearchQuery,
+            selectedField: searchField,
+            onFieldChange: setSearchField,
+            searchFields: searchFields,
+            placeholder: customerContactsSearchPlaceholder,
+            resultCount: filteredCount,
+            totalCount: totalCount,
+          }}
         />
 
         {isLoading ? (
@@ -105,10 +103,38 @@ export function CustomerContactsSection({
             onEdit={(contact) => {
               if (typeof contact.id === "number") handlers.handleEdit(contact as Contact & { id: number });
             }}
-            onDelete={handlers.handleDelete}
+            onDelete={(contact) => {
+              if (typeof contact.id === "number") {
+                setDeleteTarget(contact);
+              }
+            }}
           />
         )}
       </section>
+      <DeleteFeedbackModal
+        isOpen={!!deleteTarget}
+        title="Delete Contact"
+        description={
+          <>
+            Are you sure you want to delete contact{" "}
+            <span className="font-semibold text-theme-light">{deleteTarget?.name}</span>?
+            <br />
+            This action cannot be undone.
+          </>
+        }
+        loading={isDeleting}
+        onClose={() => {
+          if (isDeleting) return;
+          setDeleteTarget(null);
+        }}
+        onConfirm={async () => {
+          if (!deleteTarget?.id) return;
+          setIsDeleting(true);
+          await handlers.handleDelete(deleteTarget.id);
+          setIsDeleting(false);
+          setDeleteTarget(null);
+        }}
+      />
       <CustomerCrudModal
         isOpen={modal.isOpen}
         title="Edit Contact"

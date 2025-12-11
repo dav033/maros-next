@@ -2,14 +2,7 @@ import type { LeadDraft, LeadDraftWithExistingContact, LeadDraftWithNewContact, 
 import { BusinessRuleError } from "@/shared/domain";
 
 import { ensureNewContactMinimums } from "./leadContactLinkPolicy";
-
-function normalizeText(s: unknown): string {
-  return String(s ?? "").replace(/\s+/g, " ").trim();
-}
-
-function isIsoLocalDate(s: string): boolean {
-  return /^\d{4}-\d{2}-\d{2}$/.test(s);
-}
+import { normalizeText, isIsoLocalDate } from "@/shared/validation";
 
 export function ensureLeadDraftIntegrity(
   draft: LeadDraft,

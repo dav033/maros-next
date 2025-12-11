@@ -1,58 +1,50 @@
-import { Button, Modal } from "@/shared/ui";
+import { Modal, BasicModalFooter } from "@dav033/dav-components";
 import { CompanyForm } from "../molecules/CompanyForm";
 import { ErrorAlert } from "../molecules/ErrorAlert";
 import type { CompanyFormValue } from "../molecules/CompanyForm";
 import type { Contact } from "@/features/contact/domain/models";
 import type { CompanyService } from "../../domain/models";
 
-interface CompanyModalProps {
+type CompanyModalController = {
   isOpen: boolean;
-  title: string;
+  mode: "create" | "update";
   onClose: () => void;
   onSubmit: () => void;
   formValue: CompanyFormValue;
   onChange: (value: CompanyFormValue) => void;
   isSubmitting: boolean;
   serverError: string | null;
+};
+
+interface CompanyModalProps {
+  controller: CompanyModalController;
   services: CompanyService[];
   contacts: Contact[];
-  submitLabel?: string;
   onCreateNewContact?: () => void;
 }
 
 export function CompanyModal({
-  isOpen,
-  title,
-  onClose,
-  onSubmit,
-  formValue,
-  onChange,
-  isSubmitting,
-  serverError,
+  controller,
   services,
   contacts,
-  submitLabel = "Save",
   onCreateNewContact,
 }: CompanyModalProps) {
+  const { isOpen, mode, onClose, onSubmit, formValue, onChange, isSubmitting, serverError } = controller;
+  const title = mode === "create" ? "New company" : "Edit company";
+
   return (
     <Modal
       isOpen={isOpen}
       title={title}
       onClose={onClose}
       footer={
-        <>
-          <Button variant="secondary" onClick={onClose} disabled={isSubmitting}>
-            Cancel
-          </Button>
-          <Button
-            variant="primary"
-            onClick={onSubmit}
-            loading={isSubmitting}
-            disabled={!formValue.name.trim()}
-          >
-            {submitLabel}
-          </Button>
-        </>
+        <BasicModalFooter
+          onCancel={onClose}
+          onSubmit={onSubmit}
+          isLoading={isSubmitting}
+          canSubmit={formValue.name.trim().length > 0}
+          mode={mode}
+        />
       }
     >
       <CompanyForm

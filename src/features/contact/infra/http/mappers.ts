@@ -119,8 +119,8 @@ export function mapContactPatchToUpdateDTO(
   
   if (patch.name !== undefined) dto.name = patch.name;
   
-  // Map role/occupation changes to occupation field
-  // Prioritize role as it's the primary UI field
+ 
+ 
   if (patch.role !== undefined) {
     dto.occupation = patch.role;
   } else if (patch.occupation !== undefined) {

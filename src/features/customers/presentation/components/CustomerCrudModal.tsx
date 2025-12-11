@@ -1,7 +1,7 @@
 "use client";
 
-import type { ReactNode } from "react";
-import { Button, Modal } from "@/shared/ui";
+import * as React from "react";
+import { Button, Modal } from "@dav033/dav-components";
 
 export interface CustomerCrudModalProps {
   isOpen: boolean;
@@ -10,7 +10,7 @@ export interface CustomerCrudModalProps {
   onSubmit: () => void;
   isSubmitting: boolean;
   serverError: string | null;
-  children: ReactNode;
+  children: React.ReactNode;
 }
 
 export function CustomerCrudModal({
@@ -51,7 +51,7 @@ export function CustomerCrudModal({
           {serverError}
         </div>
       )}
-      {children}
+      {children as any}
     </Modal>
   );
 }

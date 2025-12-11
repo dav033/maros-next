@@ -2,9 +2,8 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import "../styles/globals.css";
 import { AppProviders } from "./AppProviders";
-import Sidebar from "@/components/sidebar/Sidebar";
-import { SidebarProvider } from "@/components/sidebar/SidebarContext";
-import { MobileMenuButton } from "@/components/sidebar/MobileMenuButton";
+import { MobileMenuButton, Sidebar, SidebarProvider } from "@dav033/dav-components";
+import { SIDEBAR_CONFIG } from "@/components/sidebar/sidebarConfig";
 
 declare global {
   interface Window {
@@ -28,17 +27,15 @@ export default function RootLayout({
         <AppProviders>
           <SidebarProvider>
             <MobileMenuButton />
-            <Sidebar />
-            <main className="flex-1 overflow-auto lg:ml-80">{children}</main>
+            <Sidebar config={SIDEBAR_CONFIG} />
+            <main className="flex-1 overflow-auto p-4 lg:p-6 lg:ml-80">{children}</main>
           </SidebarProvider>
         </AppProviders>
 
-        {/* Definir callback global antes de cargar la librería (evita handlers en Server Components) */}
         <Script id="google-maps-init" strategy="beforeInteractive">
           {`window.initMaps = function () { window.dispatchEvent(new Event('google-maps-loaded')); };`}
         </Script>
 
-        {/* Google Maps con Places API (usa callback=initMaps) */}
         <Script
           src={`https://maps.googleapis.com/maps/api/js?key=AIzaSyC-f-9Onj4n6jVVjP9MryKvm3aQgyxx5zM&libraries=places&callback=initMaps`}
           strategy="afterInteractive"

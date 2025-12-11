@@ -1,4 +1,4 @@
-import { Icon, Input, LocationField } from "@/shared/ui";
+import { Icon, Input, LocationField } from "@dav033/dav-components";
 import type { ChangeEvent } from "react";
 
 interface CompanyBasicFieldsProps {

@@ -54,6 +54,13 @@ export class ContactHttpRepository implements ContactRepositoryPort {
     return this.resource.list();
   }
 
+  async listByCompany(companyId: number): Promise<Contact[]> {
+    const { data } = await this.api.get<ApiContactDTO[]>(
+      contactEndpoints.byCompany(companyId)
+    );
+    return Array.isArray(data) ? data.map(mapContactFromApi) : [];
+  }
+
   async findById(id: number): Promise<Contact | null> {
     return this.getById(id);
   }
@@ -63,9 +70,9 @@ export class ContactHttpRepository implements ContactRepositoryPort {
   }
 
   async search(query: string): Promise<Contact[]> {
-    const { data } = await this.api.get<Contact[]>(
+    const { data } = await this.api.get<ApiContactDTO[]>(
       contactEndpoints.search(query)
     );
-    return Array.isArray(data) ? data : [];
+    return Array.isArray(data) ? data.map(mapContactFromApi) : [];
   }
 }

@@ -1,5 +1,4 @@
-import type { ProjectType } from "@/projectType/domain";
-import type { ProjectTypeRepositoryPort } from "../../domain/ports/ProjectTypeRepositoryPort";
+import type { ProjectType, ProjectTypeRepositoryPort } from "@/projectType/domain";
 import { api, optimizedApiClient } from "@/shared/infra";
 
 export class ProjectTypeHttpRepository implements ProjectTypeRepositoryPort {

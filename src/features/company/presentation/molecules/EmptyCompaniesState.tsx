@@ -1,4 +1,4 @@
-import { Icon } from "@/shared/ui";
+import { Icon } from "@dav033/dav-components";
 
 interface EmptyCompaniesStateProps {
   onCreateClick?: () => void;

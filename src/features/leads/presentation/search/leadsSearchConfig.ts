@@ -1,5 +1,5 @@
 import type { Lead } from "@/leads/domain";
-import type { SearchConfig } from "@/shared/search";
+import type { SearchConfig } from "@dav033/dav-components";
 
 export const leadsSearchPlaceholder = "Search leads…";
 

@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Icon, PageContainer } from "@/shared/ui";
+import { Icon } from "@dav033/dav-components";
+import { PageContainer } from "@dav033/dav-components";
 
 export default function NotFound() {
   return (

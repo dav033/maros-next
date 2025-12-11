@@ -8,6 +8,8 @@ import {
 } from "./leadNumberPolicy";
 import { Lead, LeadStatus } from "../models";
 
+import { normalizeText, isIsoLocalDate } from "@/shared/validation";
+
 const DEFAULT_STATUS_ORDER: readonly LeadStatus[] = [
   LeadStatus.NOT_EXECUTED,
   LeadStatus.COMPLETED,
@@ -16,16 +18,6 @@ const DEFAULT_STATUS_ORDER: readonly LeadStatus[] = [
   LeadStatus.POSTPONED,
   LeadStatus.PERMITS,
 ];
-
-function normalizeText(s: unknown): string {
-  return String(s ?? "")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function isIsoLocalDate(s: string): boolean {
-  return /^\d{4}-\d{2}-\d{2}$/.test(s);
-}
 
 export type LeadIntegrityPolicies = Readonly<{
   leadNumberRules?: LeadNumberRules;
@@ -84,8 +76,8 @@ export function ensureLeadIntegrity(
 
   const projectTypeId = lead.projectType?.id;
   if (
-    projectTypeId != null &&             // existe
-    projectTypeId !== 0 &&               // permitimos 0 como "no definido" legacy
+    projectTypeId != null &&            
+    projectTypeId !== 0 &&              
     (typeof projectTypeId !== "number" ||
       !Number.isFinite(projectTypeId) ||
       projectTypeId < 0)
@@ -101,8 +93,8 @@ export function ensureLeadIntegrity(
 
   const contactId = lead.contact?.id;
   if (
-    contactId != null &&                 // existe
-    contactId !== 0 &&                   // permitimos 0 como "no definido" legacy
+    contactId != null &&                
+    contactId !== 0 &&                  
     (typeof contactId !== "number" ||
       !Number.isFinite(contactId) ||
       contactId < 0)

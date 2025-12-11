@@ -33,17 +33,37 @@ export class LeadHttpRepository implements LeadRepositoryPort {
   list = () => this.resource.list();
   delete = (id: number) => this.resource.delete(id);
 
+  async getByLeadNumber(leadNumber: string): Promise<Lead | null> {
+    try {
+      const { data } = await this.api.get<ApiLeadDTO>(
+        leadEndpoints.getByLeadNumber(leadNumber)
+      );
+      return data ? mapLeadFromApi(data) : null;
+    } catch (error: any) {
+      if (error?.response?.status === 404) {
+        return null;
+      }
+      throw error;
+    }
+  }
+
   async findByType(type: LeadType): Promise<Lead[]> {
+    const url = leadEndpoints.listByType();
+    const params = { type: String(type) };
+    
     const { data } = await this.api.get<ApiLeadDTO[]>(
-      leadEndpoints.listByType(String(type))
+      url,
+      { params }
     );
     return mapLeadsFromApi(Array.isArray(data) ? data : []);
   }
 
-  create = async (draft: LeadDraft): Promise<Lead> => {
-    console.log('🔍 LeadHttpRepository.create - draft received:', draft);
+  create = async (draft: LeadDraft, leadTypeForGeneration?: LeadType): Promise<Lead> => {
     const payload: CreateLeadPayload = mapLeadDraftToCreatePayload(draft);
-    console.log('🔍 LeadHttpRepository.create - payload after mapping:', payload);
+    
+    // Si no se proporciona leadNumber y hay leadTypeForGeneration, pasarlo como query param
+    const needsTypeForGeneration = !draft.leadNumber && leadTypeForGeneration;
+    const queryParams = needsTypeForGeneration ? { params: { leadType: String(leadTypeForGeneration) } } : undefined;
     
     if ("contact" in (payload as Record<string, unknown>)) {
       const { contact, projectTypeId, leadNumber, name, ...leadData } =
@@ -54,13 +74,13 @@ export class LeadHttpRepository implements LeadRepositoryPort {
         leadPayload.name = name;
       }
       
-      console.log('🔍 LeadHttpRepository.create WITH NEW CONTACT - leadPayload:', leadPayload);
       const { data } = await this.api.post<ApiLeadDTO>(
         leadEndpoints.createWithNewContact(),
         {
           lead: leadPayload,
           contact,
-        }
+        },
+        queryParams
       );
       if (!data) throw new Error("Empty response creating Lead with new contact");
       return mapLeadFromApi(data);
@@ -73,31 +93,26 @@ export class LeadHttpRepository implements LeadRepositoryPort {
       leadPayload.name = name;
     }
     
-    console.log('🔍 LeadHttpRepository.create WITH EXISTING CONTACT - leadPayload:', leadPayload);
     const { data } = await this.api.post<ApiLeadDTO>(
       leadEndpoints.createWithExistingContact(),
       {
         lead: leadPayload,
         contactId,
-      }
+      },
+      queryParams
     );
     if (!data) throw new Error("Empty response creating Lead with existing contact");
     return mapLeadFromApi(data);
   };
 
-  saveNew = async (draft: LeadDraft): Promise<Lead> => {
-    return this.create(draft);
+  saveNew = async (draft: LeadDraft, leadTypeForGeneration?: LeadType): Promise<Lead> => {
+    return this.create(draft, leadTypeForGeneration);
   };
 
   update = async (id: number, patch: LeadPatch): Promise<Lead> => {
-    console.log('🔍 LeadHttpRepository.update - patch received:', patch);
     const payload = mapLeadPatchToUpdatePayload(patch);
-    console.log('🔍 LeadHttpRepository.update - payload after mapping:', payload);
-
-    console.log('🔍 LeadHttpRepository.update - sending payload as is:', payload);
     const url = leadEndpoints.update(id);
     const body = { lead: payload };
-    console.log('🔍 LeadHttpRepository.update - final body:', JSON.stringify(body, null, 2));
     const { data } = await this.api.put<ApiLeadDTO>(url, body);
     if (!data) throw new Error("Empty response updating Lead");
     return mapLeadFromApi(data);

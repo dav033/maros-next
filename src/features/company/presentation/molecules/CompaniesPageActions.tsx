@@ -1,4 +1,4 @@
-import { Button, Icon } from "@/shared/ui";
+import { Button, Icon } from "@dav033/dav-components";
 
 interface CompaniesPageActionsProps {
   onManageServices: () => void;

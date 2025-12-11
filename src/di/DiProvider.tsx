@@ -6,11 +6,15 @@ import type { ContactsAppContext } from "@/contact";
 import type { LeadsAppContext } from "@/leads";
 import type { ProjectTypesAppContext } from "@/projectType";
 import type { CompanyAppContext } from "@/company";
+import type { ReportsAppContext } from "@/reports";
+import type { ProjectsAppContext } from "@/project";
 import {
   createContactsAppContext,
   createLeadsAppContext,
   createProjectTypesAppContext,
   createCompanyAppContext,
+  createReportsAppContext,
+  createProjectsAppContext,
 } from "./factories";
 
 type DiContextValue = {
@@ -18,6 +22,8 @@ type DiContextValue = {
   leadsApp: LeadsAppContext;
   projectTypesApp: ProjectTypesAppContext;
   companyApp: CompanyAppContext;
+  reportsApp: ReportsAppContext;
+  projectsApp: ProjectsAppContext;
 };
 
 const DiContext = createContext<DiContextValue | null>(null);
@@ -26,20 +32,15 @@ type Props = {
   children: ReactNode;
 };
 
-/**
- * Dependency Injection Provider for the application.
- * 
- * Initializes and provides all feature contexts through modular factories.
- * Each factory encapsulates the creation of its own dependencies.
- * 
- * @see ./factories for individual context creation logic
- */
+
 export function DiProvider({ children }: Props) {
   const value = useMemo(() => ({
     contactsApp: createContactsAppContext(),
     leadsApp: createLeadsAppContext(),
     projectTypesApp: createProjectTypesAppContext(),
     companyApp: createCompanyAppContext(),
+    reportsApp: createReportsAppContext(),
+    projectsApp: createProjectsAppContext(),
   }), []);
 
   return <DiContext.Provider value={value}>{children}</DiContext.Provider>;
@@ -75,4 +76,20 @@ export function useCompanyApp(): CompanyAppContext {
     throw new Error("useCompanyApp must be used within DiProvider");
   }
   return context.companyApp;
+}
+
+export function useReportsApp(): ReportsAppContext {
+  const context = useContext(DiContext);
+  if (!context) {
+    throw new Error("useReportsApp must be used within DiProvider");
+  }
+  return context.reportsApp;
+}
+
+export function useProjectsApp(): ProjectsAppContext {
+  const context = useContext(DiContext);
+  if (!context) {
+    throw new Error("useProjectsApp must be used within DiProvider");
+  }
+  return context.projectsApp;
 }

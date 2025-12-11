@@ -1,5 +1,4 @@
 export * from "./CompanyForm";
-export * from "./CompaniesToolbar";
 export * from "./CompaniesPageActions";
 export * from "./EmptyCompaniesState";
 export * from "./ErrorAlert";

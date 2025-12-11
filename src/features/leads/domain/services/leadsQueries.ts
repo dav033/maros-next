@@ -1,4 +1,5 @@
 import type { Lead, LeadStatus, LeadType } from "../models";
+import { filterLeadsByType as filterByTypeUtil } from "../utils/lead-type.utils";
 
 function effectiveStatus(s: LeadStatus | null | undefined): LeadStatus {
   return (s ?? "NOT_EXECUTED") as LeadStatus;
@@ -17,7 +18,7 @@ export const DEFAULT_STATUS_ORDER: readonly LeadStatus[] =
   STATUS_ORDER as unknown as readonly LeadStatus[];
 
 export function filterByType(leads: readonly Lead[], type: LeadType): Lead[] {
-  return (leads ?? []).filter((l) => l.leadType === type);
+  return filterByTypeUtil([...(leads ?? [])], type);
 }
 
 export function filterByStatus(

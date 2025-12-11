@@ -1,5 +1,6 @@
 import { getMainPages } from "@/components/sidebar/sidebarConfig";
-import { PageContainer } from "@/shared/ui";
+import { PageContainer } from "@dav033/dav-components";
+import { Example } from "@dav033/dav-components";
 
 export default function Page() {
   const pages = getMainPages();
@@ -10,6 +11,10 @@ export default function Page() {
       title="Available Categories"
       className="px-4"
     >
+
+      <div>
+        <Example />
+      </div>
       <ul className="w-full max-w-md space-y-4 mx-auto">
         {pages.map((page) => (
           <li key={page.href} className="rounded-lg border border-theme-gray-subtle bg-theme-dark/70 hover:bg-theme-dark/90 transition-colors">

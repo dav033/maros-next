@@ -9,7 +9,7 @@ export class OptimizedApiClient implements HttpClientLike {
   constructor(baseURL: string = BASE_URL) {
     this.axiosInstance = axios.create({
       baseURL,
-      withCredentials: true, // Match backend CORS credentials: true
+      withCredentials: true,
     });
   }
 
@@ -29,8 +29,40 @@ export class OptimizedApiClient implements HttpClientLike {
       signal: options?.signal,
     };
 
-    const response = await this.axiosInstance.request<T>(config);
-    return { data: response.data, status: response.status };
+    // Log para debugging
+    const fullUrl = `${this.axiosInstance.defaults.baseURL}${url}`;
+    console.log(`🔍 OptimizedApiClient - Method: ${method}, URL: ${fullUrl}, Params:`, options?.params);
+
+    try {
+      const response = await this.axiosInstance.request<T>(config);
+      console.log(`✅ OptimizedApiClient - Success: ${response.status}`, response.data);
+      return { data: response.data, status: response.status };
+    } catch (error: any) {
+      const errorDetails = {
+        url: fullUrl,
+        method,
+        params: options?.params,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        message: error.message,
+        error: error,
+      };
+      console.error(`❌ OptimizedApiClient - Error:`, errorDetails);
+      
+      if (error.response) {
+        // El servidor respondió con un código de estado fuera del rango 2xx
+        throw new Error(
+          `Request failed: ${error.response.status} ${error.response.statusText} - ${error.response.data?.message || error.message}`
+        );
+      } else if (error.request) {
+        // La petición se hizo pero no se recibió respuesta
+        throw new Error(`No response received: ${error.message}`);
+      } else {
+        // Algo pasó al configurar la petición
+        throw new Error(`Request setup error: ${error.message}`);
+      }
+    }
   }
 
   get<T = unknown>(url: string, options?: RequestOptions) {

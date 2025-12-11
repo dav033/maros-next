@@ -1,4 +1,4 @@
-import { Modal } from "@/shared/ui";
+import { Modal } from "@dav033/dav-components";
 import type { Company } from "@/company";
 
 interface CompanyDetailsModalProps {

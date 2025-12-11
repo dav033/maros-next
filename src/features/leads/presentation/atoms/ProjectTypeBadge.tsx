@@ -1,4 +1,4 @@
-import { Badge } from "@/shared/ui";
+import { Badge } from "@dav033/dav-components";
 
 interface ProjectTypeBadgeProps {
   projectType: {
@@ -13,15 +13,15 @@ export function ProjectTypeBadge({ projectType }: ProjectTypeBadgeProps) {
     return <span className="text-gray-400">—</span>;
   }
 
-  // Determine color based on project type name
+ 
   const colorFromName = (name: string): string | null => {
     const n = name.toLowerCase();
-    if (n.includes("roof") || n.includes("techo")) return "#ef4444"; // red-500
-    if (n.includes("plumb") || n.includes("plomer")) return "#3b82f6"; // blue-500
-    if (n.includes("construction") || n.includes("construc")) return "#f59e0b"; // amber-500
-    if (n.includes("electric") || n.includes("eléctric")) return "#10b981"; // emerald-500
-    if (n.includes("hvac") || n.includes("clima")) return "#8b5cf6"; // violet-500
-    if (n.includes("paint") || n.includes("pintura")) return "#6366f1"; // indigo-500
+    if (n.includes("roof") || n.includes("techo")) return "#ef4444";
+    if (n.includes("plumb") || n.includes("plomer")) return "#3b82f6";
+    if (n.includes("construction") || n.includes("construc")) return "#f59e0b";
+    if (n.includes("electric") || n.includes("eléctric")) return "#10b981";
+    if (n.includes("hvac") || n.includes("clima")) return "#8b5cf6";
+    if (n.includes("paint") || n.includes("pintura")) return "#6366f1";
     return null;
   };
 

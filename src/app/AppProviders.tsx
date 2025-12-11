@@ -3,7 +3,7 @@
 import { useState, type ReactNode } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { DiProvider } from "@/di";
-import { ToastProvider } from "@/shared/ui";
+import { ToastProvider } from "@dav033/dav-components";
 import { createQueryClient } from "@/shared/lib/queryClient";
 
 type Props = {

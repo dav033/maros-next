@@ -1,161 +1,114 @@
 "use client";
 
-import { useState } from "react";
-import type { Lead, LeadType } from "@/leads/domain";
-import { useCreateLeadController } from "../hooks/useCreateLeadController";
-import { useUpdateLeadController } from "../hooks/useUpdateLeadController";
+import type { LeadType } from "@/leads/domain";
 import { LEAD_TYPE_CONFIGS } from "../../config/leadTypeConfigs";
-import { useToast } from "@/shared/ui/context/ToastContext";
-import { useLeadsPageByType } from "./useLeadsPageByType";
+import {
+  useLeadCreateModal,
+  useLeadEditModal,
+  useLeadViewContactModal,
+  useLeadsData,
+  useLeadsMutations,
+  useLeadsNotesLogic,
+  useLeadsTableLogic,
+  type UseLeadsDataReturn,
+  type UseLeadsTableLogicReturn,
+} from "../hooks";
+import type { Lead } from "@/leads/domain";
 
 export interface UseLeadsPageLogicOptions {
   leadType: LeadType;
 }
 
 export interface UseLeadsPageLogicReturn {
-  // Configuration
   config: typeof LEAD_TYPE_CONFIGS[LeadType];
-  
-  // Data
-  leads: ReturnType<typeof useLeadsPageByType>["leads"];
-  filteredLeads: ReturnType<typeof useLeadsPageByType>["filteredLeads"];
-  contacts: ReturnType<typeof useLeadsPageByType>["contacts"];
-  projectTypes: ReturnType<typeof useLeadsPageByType>["projectTypes"];
-  
-  // Search
-  searchQuery: string;
-  searchField: string;
-  setSearchQuery: (query: string) => void;
-  setSearchField: (field: string) => void;
-  totalCount: number;
-  filteredCount: number;
-  
-  // Loading
-  showSkeleton: boolean;
-  
-  // Create modal
-  isCreateModalOpen: boolean;
-  openCreateModal: () => void;
-  closeCreateModal: () => void;
-  createController: ReturnType<typeof useCreateLeadController>;
-  
-  // Edit modal
-  isEditModalOpen: boolean;
-  selectedLead: Lead | null;
-  openEditModal: (lead: Lead) => void;
-  closeEditModal: () => void;
-  updateController: ReturnType<typeof useUpdateLeadController>;
+  data: UseLeadsDataReturn;
+  crud: {
+    isCreateModalOpen: boolean;
+    openCreateModal: () => void;
+    closeCreateModal: () => void;
+    createController: ReturnType<typeof useLeadCreateModal>["createController"];
+    isEditModalOpen: boolean;
+    selectedLead: Lead | null;
+    openEditModal: (lead: Lead) => void;
+    closeEditModal: () => void;
+    updateController: ReturnType<typeof useLeadEditModal>["updateController"];
+  };
+  table: UseLeadsTableLogicReturn;
+  notesModal: {
+    isOpen: boolean;
+    title: string;
+    notes: string[];
+    onChangeNotes: (notes: string[]) => void;
+    onClose: () => void;
+    onSave: () => Promise<void>;
+    loading: boolean;
+  };
+  viewContactModal: {
+    isOpen: boolean;
+    contact: ReturnType<typeof useLeadViewContactModal>["contact"];
+    close: () => void;
+  };
 }
 
-/**
- * Custom hook that encapsulates all business logic for LeadsPageByType.
- * 
- * Manages:
- * - Lead type configuration
- * - Search and filtering
- * - Create/Edit lead controllers
- * - Modal state management
- * - Data fetching and refetching
- * 
- * This allows the page component to be a pure presentational component.
- */
-export function useLeadsPageLogic({ leadType }: UseLeadsPageLogicOptions): UseLeadsPageLogicReturn {
+export function useLeadsPageLogic({
+  leadType,
+}: UseLeadsPageLogicOptions): UseLeadsPageLogicReturn {
   const config = LEAD_TYPE_CONFIGS[leadType];
-  const toast = useToast();
 
-  // Modal state
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+  // 1) Datos
+  const data = useLeadsData(leadType);
 
-  // Data and search
-  const {
-    searchQuery,
-    searchField,
-    setSearchQuery,
-    setSearchField,
-    totalCount,
-    filteredCount,
-    leads,
-    showSkeleton,
-    refetch,
-    contacts,
-    projectTypes,
-    filteredLeads,
-  } = useLeadsPageByType(leadType);
-
-  // Create controller
-  const createController = useCreateLeadController({
+  // 2) Modales CRUD
+  const createModal = useLeadCreateModal({
     leadType,
     onCreated: async () => {
-      setIsCreateModalOpen(false);
-      toast.showSuccess("Lead created successfully!");
-      await refetch();
+      await data.refetch();
     },
   });
-
-  // Update controller
-  const updateController = useUpdateLeadController({
-    lead: selectedLead,
+  const editModal = useLeadEditModal({
+    leadType,
     onUpdated: async () => {
-      setIsEditModalOpen(false);
-      setSelectedLead(null);
-      toast.showSuccess("Lead updated successfully!");
-      await refetch();
+      await data.refetch();
     },
   });
 
-  // Modal handlers
-  const openCreateModal = () => {
-    setIsCreateModalOpen(true);
-  };
+  // 3) Negocio
+  const { deleteMutation } = useLeadsMutations();
+  const notesLogic = useLeadsNotesLogic({ leadType });
+  const viewContactModal = useLeadViewContactModal();
 
-  const closeCreateModal = () => {
-    setIsCreateModalOpen(false);
-  };
-
-  const openEditModal = (lead: Lead) => {
-    setSelectedLead(lead);
-    setIsEditModalOpen(true);
-  };
-
-  const closeEditModal = () => {
-    setIsEditModalOpen(false);
-    setSelectedLead(null);
-  };
+  // 4) Tabla (búsqueda, filtrado e interacciones)
+  const table = useLeadsTableLogic({
+    leads: data.leads,
+    onEdit: editModal.open,
+    onDelete: async (id) => {
+      await deleteMutation.mutateAsync(id);
+      await data.refetch();
+    },
+    onViewContact: viewContactModal.open,
+    onOpenNotesModal: notesLogic.openFromLead,
+  });
 
   return {
-    // Configuration
     config,
-    
-    // Data
-    leads,
-    filteredLeads,
-    contacts,
-    projectTypes,
-    
-    // Search
-    searchQuery,
-    searchField,
-    setSearchQuery,
-    setSearchField,
-    totalCount,
-    filteredCount,
-    
-    // Loading
-    showSkeleton,
-    
-    // Create modal
-    isCreateModalOpen,
-    openCreateModal,
-    closeCreateModal,
-    createController,
-    
-    // Edit modal
-    isEditModalOpen,
-    selectedLead,
-    openEditModal,
-    closeEditModal,
-    updateController,
+    data,
+    crud: {
+      isCreateModalOpen: createModal.isOpen,
+      openCreateModal: createModal.open,
+      closeCreateModal: createModal.close,
+      createController: createModal.createController,
+      isEditModalOpen: editModal.isOpen,
+      selectedLead: editModal.selectedLead,
+      openEditModal: editModal.open,
+      closeEditModal: editModal.close,
+      updateController: editModal.updateController,
+    },
+    table,
+    notesModal: notesLogic.modalProps,
+    viewContactModal: {
+      isOpen: viewContactModal.isOpen,
+      contact: viewContactModal.contact,
+      close: viewContactModal.close,
+    },
   };
 }

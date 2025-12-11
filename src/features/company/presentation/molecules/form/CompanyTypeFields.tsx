@@ -1,4 +1,4 @@
-import { Select } from "@/shared/ui";
+import { Select } from "@dav033/dav-components";
 import type { CompanyType, CompanyService } from "../../../domain/models";
 import { COMPANY_TYPE_OPTIONS, isSubcontractorType } from "./companyTypeOptions";
 
@@ -20,7 +20,7 @@ export function CompanyTypeFields({
   onServiceChange,
 }: CompanyTypeFieldsProps) {
   return (
-    <>
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
       <Select
         value={type ?? ""}
         onChange={onTypeChange}
@@ -46,6 +46,6 @@ export function CompanyTypeFields({
           })),
         ]}
       />
-    </>
+    </div>
   );
 }

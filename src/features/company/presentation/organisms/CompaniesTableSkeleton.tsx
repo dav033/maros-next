@@ -1,7 +1,7 @@
 "use client";
 
-import { TableSkeleton } from "@/shared/ui";
-import type { TableSkeletonColumn } from "@/shared/ui";
+import { TableSkeleton } from "@dav033/dav-components";
+import type { TableSkeletonColumn } from "@dav033/dav-components";
 
 const columns: TableSkeletonColumn[] = [
   {
@@ -40,10 +40,18 @@ const columns: TableSkeletonColumn[] = [
     isBadge: true,
   },
   {
-    width: "w-[80px]",
-    header: "",
+    width: "w-[100px]",
+    header: "Customer",
     align: "center",
-    skeletonWidth: "w-5",
+    skeletonWidth: "w-16",
+    isBadge: true,
+  },
+  {
+    width: "w-[100px]",
+    header: "Client",
+    align: "center",
+    skeletonWidth: "w-16",
+    isBadge: true,
   },
 ];
 

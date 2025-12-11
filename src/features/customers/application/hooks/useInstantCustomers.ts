@@ -11,9 +11,7 @@ import { CustomersHttpRepository } from "../../infra/http/CustomersHttpRepositor
 
 const DEFAULT_STALE_TIME = 5 * 60 * 1000;
 
-/**
- * Result type for useInstantCustomers hook
- */
+
 export type UseInstantCustomersResult = {
   contacts: Contact[] | undefined;
   companies: Company[] | undefined;
@@ -26,12 +24,7 @@ export type UseInstantCustomersResult = {
   refetch: () => Promise<unknown>;
 };
 
-/**
- * Hook to fetch customers data with instant query pattern
- * Uses CustomersHttpRepository for data fetching
- * 
- * @returns Aggregated customer data (contacts and companies)
- */
+
 export function useInstantCustomers(): UseInstantCustomersResult {
   const repository = new CustomersHttpRepository();
 

@@ -1,36 +1,32 @@
 "use client";
 
 import type { Lead } from "@/leads/domain";
-import { LeadsToolbar, LeadsTable } from "@/leads/presentation";
-import { TableSkeleton, EmptyState, EntityCrudPageTemplate, Button } from "@/shared/ui";
-import { CreateLeadModal } from "../organisms/CreateLeadModal";
-import { EditLeadModal } from "../organisms/EditLeadModal";
-import { LeadsPageHeader } from "../organisms/LeadsPageComponents";
+import { LeadsTable } from "@/leads/presentation";
+import { DeleteFeedbackModal, NotesEditorModal } from "@dav033/dav-components";
+import { ContactViewModal } from "@/contact";
+import { LeadModal } from "../organisms/LeadModal";
+import { TableToolbar, SimplePageHeader, Icon } from "@dav033/dav-components";
+import { LeadsTableSkeleton } from "../organisms/LeadsTableSkeleton";
+import { EntityCrudPageTemplate } from "@dav033/dav-components";
 import type { UseLeadsPageLogicReturn } from "./useLeadsPageLogic";
+import {
+  useLeadModalController,
+  useLeadsToolbarSearchController,
+  useLeadsNotesModalController,
+} from "../hooks";
 
 export interface LeadsPageViewProps {
   logic: UseLeadsPageLogicReturn;
-  onDelete: () => Promise<void>;
 }
 
-/**
- * Pure presentational component for the Leads page (by type).
- * Manages two modals: Create lead (with contact selection) and Edit lead.
- */
-export function LeadsPageView({ logic, onDelete }: LeadsPageViewProps) {
+export function LeadsPageView({ logic }: LeadsPageViewProps) {
+  const { config, data, crud, table, notesModal, viewContactModal } = logic;
+
+  const { title, description, createModalTitle } = config;
+
+  const { leads, contacts, projectTypes, showSkeleton } = data;
+
   const {
-    config,
-    leads,
-    filteredLeads,
-    contacts,
-    projectTypes,
-    searchQuery,
-    searchField,
-    setSearchQuery,
-    setSearchField,
-    totalCount,
-    filteredCount,
-    showSkeleton,
     isCreateModalOpen,
     openCreateModal,
     closeCreateModal,
@@ -40,95 +36,113 @@ export function LeadsPageView({ logic, onDelete }: LeadsPageViewProps) {
     openEditModal,
     closeEditModal,
     updateController,
-  } = logic;
+  } = crud;
 
-  const { title, description, emptyIconName, emptyTitle, emptySubtitle, createModalTitle } = config;
+  const {
+    rows,
+    totalCount,
+    filteredCount,
+    searchState,
+    deleteModalProps,
+    getContextMenuItems,
+  } = table;
+
+  const { searchQuery, searchField, setSearchQuery, setSearchField } =
+    searchState;
+
+  const { controller: leadModalController, contactsForModal } =
+    useLeadModalController({
+      isCreateModalOpen,
+      isEditModalOpen,
+      closeCreateModal,
+      closeEditModal,
+      createController,
+      updateController,
+      selectedLead,
+      contacts,
+    });
+
+  const notesModalController = useLeadsNotesModalController({
+    isOpen: notesModal.isOpen,
+    title: notesModal.title,
+    notes: notesModal.notes,
+    onChangeNotes: notesModal.onChangeNotes,
+    onClose: notesModal.onClose,
+    onSave: notesModal.onSave,
+    loading: notesModal.loading,
+  });
+
+  const toolbarSearchController = useLeadsToolbarSearchController({
+    searchQuery,
+    searchField,
+    setSearchQuery,
+    setSearchField,
+    filteredCount,
+    totalCount,
+  });
 
   return (
     <EntityCrudPageTemplate
       header={
-        <LeadsPageHeader
+        <SimplePageHeader
           title={title}
           description={description}
-          onNewLead={openCreateModal}
         />
       }
       toolbar={
-        <div className="flex items-center justify-between gap-4">
-          <LeadsToolbar
-            searchQuery={searchQuery}
-            onSearchQueryChange={setSearchQuery}
-            searchField={searchField}
-            onSearchFieldChange={(value) => setSearchField(value as keyof Lead | "all")}
-            totalCount={totalCount}
-            filteredCount={filteredCount}
-          />
-          <Button variant="primary" onClick={openCreateModal}>
-            <span className="mr-2 text-lg leading-none">＋</span>
-            New Lead
-          </Button>
-        </div>
-      }
-      isLoading={showSkeleton}
-      loadingContent={
-        <TableSkeleton
-          columns={[
-            { width: "w-[110px]", header: "Lead Number", skeletonWidth: "w-20" },
-            { width: "w-[200px]", header: "Name", skeletonWidth: "w-3/4" },
-            { width: "w-[180px]", header: "Contact", skeletonWidth: "w-2/3" },
-            { width: "w-[150px]", header: "Project Type", skeletonWidth: "w-3/5" },
-            { width: "w-[200px]", header: "Location", skeletonWidth: "w-4/5" },
-            { width: "w-[120px]", header: "Start Date", skeletonWidth: "w-20" },
-            { width: "w-[120px]", header: "Status", skeletonWidth: "w-24", isBadge: true },
-          ]}
-          rowCount={13}
+        <TableToolbar
+          search={toolbarSearchController}
+          onCreate={openCreateModal}
+          createLabel="New Lead"
+          createIcon={<Icon name="mdi:briefcase-plus-outline" size={18} />}
         />
       }
-      isEmpty={false}
-      emptyContent={null}
+      isLoading={showSkeleton}
+      loadingContent={<LeadsTableSkeleton />}
       tableContent={
         <LeadsTable
-          leads={filteredLeads}
+          leads={rows}
           isLoading={showSkeleton}
           onEdit={openEditModal}
-          onDelete={onDelete}
+          getContextMenuItems={getContextMenuItems}
+          onOpenNotesModal={table.onOpenNotesModal}
+          onViewContact={table.onViewContact}
         />
       }
       modals={
         <>
-          {/* Create Lead Modal */}
-          <CreateLeadModal
-            isOpen={isCreateModalOpen}
-            onClose={closeCreateModal}
-            title={createModalTitle}
-            form={createController.form}
-            onFormChange={createController.setField}
-            onFormBatchChange={createController.setFields}
-            contactMode={createController.contactMode}
-            onContactModeChange={createController.setContactMode}
-            contacts={contacts ?? []}
-            projectTypes={projectTypes}
-            isLoading={createController.isLoading}
-            error={createController.error}
-            canSubmit={createController.canSubmit}
-            onSubmit={createController.submit}
-            ContactMode={createController.ContactMode}
+          <DeleteFeedbackModal
+            isOpen={deleteModalProps.isOpen}
+            title="Delete Lead"
+            description={
+              <>
+                Are you sure you want to delete lead{" "}
+                <span className="font-semibold text-theme-light">
+                  {(deleteModalProps.itemToDelete as any)?.name}
+                </span>
+                ?
+                <br />
+                This action cannot be undone.
+              </>
+            }
+            error={deleteModalProps.error}
+            loading={deleteModalProps.isDeleting}
+            onClose={deleteModalProps.onClose}
+            onConfirm={deleteModalProps.onConfirm}
           />
 
-          {/* Edit Lead Modal */}
-          <EditLeadModal
-            isOpen={isEditModalOpen}
-            onClose={closeEditModal}
-            lead={selectedLead}
-            form={updateController.form}
-            onFormChange={updateController.setField}
-            onFormBatchChange={updateController.setFields}
-            contacts={contacts ?? []}
+          <NotesEditorModal controller={notesModalController} />
+
+          <ContactViewModal
+            isOpen={viewContactModal.isOpen}
+            contact={viewContactModal.contact}
+            onClose={viewContactModal.close}
+          />
+
+          <LeadModal
+            controller={leadModalController}
+            contacts={contactsForModal}
             projectTypes={projectTypes}
-            isLoading={updateController.isLoading}
-            error={updateController.error}
-            canSubmit={updateController.canSubmit}
-            onSubmit={updateController.submit}
           />
         </>
       }

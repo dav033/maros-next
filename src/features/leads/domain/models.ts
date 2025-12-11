@@ -27,7 +27,6 @@ export interface Lead {
   status: LeadStatus;
   contact: Contact;
   projectType: ProjectType;
-  leadType: LeadType;
   notes: string[];
 }
 
@@ -55,7 +54,6 @@ type LeadDraftBase = Readonly<{
   addressLink?: string | null;
   status: LeadStatus | null;
   projectTypeId: ProjectTypeId;
-  leadType: LeadType;
 }>;
 
 export type LeadDraftWithNewContact = LeadDraftBase &

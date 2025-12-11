@@ -8,7 +8,7 @@ export type ApiLeadDTO = {
   location: string;
   addressLink?: string;
   status: string;
-  leadType: string;
+  leadType?: string | null; // Opcional, se calcula desde leadNumber
   contactId?: number;
   projectTypeId?: number;
   notes?: string[];
@@ -24,7 +24,6 @@ export type CreateLeadBasePayload = {
   addressLink?: string | null;
   status: LeadStatus | null;
   projectTypeId: number;
-  leadType: LeadType;
 };
 
 export type CreateLeadWithNewContactPayload = CreateLeadBasePayload & {
@@ -74,7 +73,6 @@ export function mapLeadDraftToCreatePayload(
     addressLink: draft.addressLink,
     status: draft.status,
     projectTypeId: draft.projectTypeId,
-    leadType: draft.leadType,
   };
 
   if (draft.name && draft.name.trim() !== '') {
