@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { Icon } from "@dav033/dav-components";
 import { PageContainer } from "@dav033/dav-components";
