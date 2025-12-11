@@ -7,6 +7,11 @@ const config: Config = {
     "./node_modules/@dav033/dav-components/src/**/*.{js,ts,jsx,tsx}",
     "./node_modules/@dav033/dav-components/dist/**/*.{js,ts,jsx,tsx}",
   ],
+  // Solo escanear davComponents y maros-next
+  // Excluir otros directorios del monorepo
+  theme: {
+    extend: {},
+  },
 };
 
 export default config;

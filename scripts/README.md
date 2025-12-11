@@ -4,8 +4,10 @@
 
 Este script configura automáticamente la dependencia `@dav033/dav-components` según el entorno:
 
-- **Desarrollo**: Si existe el directorio local `../davComponents`, usa el paquete local (`file:../davComponents`)
+- **Desarrollo local**: Si existe el directorio local `../davComponents`, usa el paquete local (`file:../davComponents`)
 - **Producción**: Usa el paquete publicado en npm (`@dav033/dav-components`)
+
+El script escanea únicamente `davComponents` y `maros-next` para optimizar el rendimiento.
 
 ### Detección de Entorno
 

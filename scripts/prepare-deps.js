@@ -27,9 +27,9 @@ let davComponentsVersion;
 let currentVersion = packageJson.dependencies['@dav033/dav-components'];
 
 if (!isProduction && localExists) {
-  // Desarrollo: usar workspace si está configurado, sino file:../davComponents
-  davComponentsVersion = 'workspace:*';
-  console.log('📦 Using local davComponents package via workspace (development mode)');
+  // Desarrollo: usar paquete local con file:../davComponents
+  davComponentsVersion = 'file:../davComponents';
+  console.log('📦 Using local davComponents package (development mode)');
 } else {
   // Producción: SIEMPRE usar npm (el paquete está publicado)
   davComponentsVersion = '@dav033/dav-components';
@@ -41,12 +41,11 @@ if (!isProduction && localExists) {
 }
 
 // Verificar si la versión correcta ya está instalada
-const isLocalVersion = currentVersion.startsWith('file:') || currentVersion.startsWith('workspace:');
-const isNpmVersion = !isLocalVersion && !currentVersion.startsWith('workspace:');
+const isLocalVersion = currentVersion.startsWith('file:');
+const isNpmVersion = !isLocalVersion;
 const isCorrectVersion = 
-  (davComponentsVersion.startsWith('workspace:') && currentVersion.startsWith('workspace:')) ||
   (davComponentsVersion.startsWith('file:') && currentVersion.startsWith('file:')) ||
-  (!davComponentsVersion.startsWith('file:') && !davComponentsVersion.startsWith('workspace:') && isNpmVersion);
+  (!davComponentsVersion.startsWith('file:') && isNpmVersion);
 
 // Verificar si node_modules tiene la versión correcta
 // Para paquetes locales, npm crea un symlink, así que verificamos tanto el symlink como el directorio
