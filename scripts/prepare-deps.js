@@ -4,9 +4,11 @@ const fs = require('fs');
 const path = require('path');
 
 const packageJsonPath = path.join(__dirname, '..', 'package.json');
+const tsconfigPath = path.join(__dirname, '..', 'tsconfig.json');
 const localDavComponentsPath = path.join(__dirname, '..', '..', 'davComponents');
 const nodeModulesPath = path.join(__dirname, '..', 'node_modules', '@dav033', 'dav-components');
 const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+const tsconfig = JSON.parse(fs.readFileSync(tsconfigPath, 'utf8'));
 
 // Detectar si estamos en producción
 // En producción, NODE_ENV generalmente es 'production'
@@ -58,15 +60,55 @@ try {
 const isInstalled = isCorrectVersion && nodeModulesExists;
 
 if (isInstalled) {
-  console.log('✅ Dependencies are correctly configured');
+  // Verificar que tsconfig.json tenga la configuración correcta
+  const needsTsconfigUpdate = isProduction 
+    ? (tsconfig.compilerOptions.paths && (
+        tsconfig.compilerOptions.paths['@dav033/dav-components'] || 
+        tsconfig.compilerOptions.paths['@dav033/dav-components/*']
+      ))
+    : (!tsconfig.compilerOptions.paths || 
+       !tsconfig.compilerOptions.paths['@dav033/dav-components']);
+  
+  if (needsTsconfigUpdate) {
+    if (isProduction && tsconfig.compilerOptions.paths) {
+      delete tsconfig.compilerOptions.paths['@dav033/dav-components'];
+      delete tsconfig.compilerOptions.paths['@dav033/dav-components/*'];
+      fs.writeFileSync(tsconfigPath, JSON.stringify(tsconfig, null, 2) + '\n');
+      console.log('✅ Updated tsconfig.json (removed local aliases)');
+    } else if (!isProduction && localExists && tsconfig.compilerOptions.paths) {
+      tsconfig.compilerOptions.paths['@dav033/dav-components'] = ['../davComponents/src/index.ts'];
+      tsconfig.compilerOptions.paths['@dav033/dav-components/*'] = ['../davComponents/src/*'];
+      fs.writeFileSync(tsconfigPath, JSON.stringify(tsconfig, null, 2) + '\n');
+      console.log('✅ Updated tsconfig.json (added local aliases)');
+    }
+  } else {
+    console.log('✅ Dependencies are correctly configured');
+  }
   process.exit(0);
 }
 
-// Actualizar package.json solo si es necesario
+// Actualizar package.json y tsconfig.json si es necesario
 if (currentVersion !== davComponentsVersion) {
   packageJson.dependencies['@dav033/dav-components'] = davComponentsVersion;
   fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2) + '\n');
   console.log('✅ Updated package.json');
+  
+  // Actualizar tsconfig.json para remover aliases locales en producción
+  if (isProduction && tsconfig.compilerOptions.paths) {
+    // Remover los aliases que apuntan al directorio local
+    delete tsconfig.compilerOptions.paths['@dav033/dav-components'];
+    delete tsconfig.compilerOptions.paths['@dav033/dav-components/*'];
+    fs.writeFileSync(tsconfigPath, JSON.stringify(tsconfig, null, 2) + '\n');
+    console.log('✅ Updated tsconfig.json (removed local aliases)');
+  } else if (!isProduction && localExists && tsconfig.compilerOptions.paths) {
+    // Asegurar que los aliases locales estén presentes en desarrollo
+    if (!tsconfig.compilerOptions.paths['@dav033/dav-components']) {
+      tsconfig.compilerOptions.paths['@dav033/dav-components'] = ['../davComponents/src/index.ts'];
+      tsconfig.compilerOptions.paths['@dav033/dav-components/*'] = ['../davComponents/src/*'];
+      fs.writeFileSync(tsconfigPath, JSON.stringify(tsconfig, null, 2) + '\n');
+      console.log('✅ Updated tsconfig.json (added local aliases)');
+    }
+  }
   
   // En producción/CI, ejecutar npm install automáticamente
   if (isProduction) {
