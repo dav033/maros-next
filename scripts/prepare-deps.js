@@ -31,7 +31,7 @@ if (!isProduction && localExists) {
   davComponentsVersion = 'file:../davComponents';
   console.log('📦 Using local davComponents package (development mode)');
 } else {
-  // Producción o si no existe local: usar npm
+  // Producción: SIEMPRE usar npm (el paquete está publicado)
   davComponentsVersion = '@dav033/dav-components';
   if (isProduction) {
     console.log('📦 Using npm package @dav033/dav-components (production mode)');
@@ -61,26 +61,19 @@ const isInstalled = isCorrectVersion && nodeModulesExists;
 
 if (isInstalled) {
   // Verificar que tsconfig.json tenga la configuración correcta
-  const needsTsconfigUpdate = isProduction 
-    ? (tsconfig.compilerOptions.paths && (
-        tsconfig.compilerOptions.paths['@dav033/dav-components'] || 
-        tsconfig.compilerOptions.paths['@dav033/dav-components/*']
-      ))
-    : (!tsconfig.compilerOptions.paths || 
-       !tsconfig.compilerOptions.paths['@dav033/dav-components']);
+  // Si usamos file:../davComponents, no necesitamos aliases en tsconfig
+  // Si usamos npm, tampoco necesitamos aliases
+  const hasLocalAliases = tsconfig.compilerOptions.paths && (
+    tsconfig.compilerOptions.paths['@dav033/dav-components'] || 
+    tsconfig.compilerOptions.paths['@dav033/dav-components/*']
+  );
   
-  if (needsTsconfigUpdate) {
-    if (isProduction && tsconfig.compilerOptions.paths) {
-      delete tsconfig.compilerOptions.paths['@dav033/dav-components'];
-      delete tsconfig.compilerOptions.paths['@dav033/dav-components/*'];
-      fs.writeFileSync(tsconfigPath, JSON.stringify(tsconfig, null, 2) + '\n');
-      console.log('✅ Updated tsconfig.json (removed local aliases)');
-    } else if (!isProduction && localExists && tsconfig.compilerOptions.paths) {
-      tsconfig.compilerOptions.paths['@dav033/dav-components'] = ['../davComponents/src/index.ts'];
-      tsconfig.compilerOptions.paths['@dav033/dav-components/*'] = ['../davComponents/src/*'];
-      fs.writeFileSync(tsconfigPath, JSON.stringify(tsconfig, null, 2) + '\n');
-      console.log('✅ Updated tsconfig.json (added local aliases)');
-    }
+  // Remover aliases si existen (no son necesarios cuando usamos file: o npm)
+  if (hasLocalAliases) {
+    delete tsconfig.compilerOptions.paths['@dav033/dav-components'];
+    delete tsconfig.compilerOptions.paths['@dav033/dav-components/*'];
+    fs.writeFileSync(tsconfigPath, JSON.stringify(tsconfig, null, 2) + '\n');
+    console.log('✅ Updated tsconfig.json (removed local aliases)');
   } else {
     console.log('✅ Dependencies are correctly configured');
   }
@@ -93,20 +86,15 @@ if (currentVersion !== davComponentsVersion) {
   fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2) + '\n');
   console.log('✅ Updated package.json');
   
-  // Actualizar tsconfig.json para remover aliases locales en producción
-  if (isProduction && tsconfig.compilerOptions.paths) {
-    // Remover los aliases que apuntan al directorio local
+  // Remover aliases de tsconfig.json (no son necesarios cuando usamos file: o npm)
+  if (tsconfig.compilerOptions.paths) {
+    const hadAliases = tsconfig.compilerOptions.paths['@dav033/dav-components'] || 
+                       tsconfig.compilerOptions.paths['@dav033/dav-components/*'];
     delete tsconfig.compilerOptions.paths['@dav033/dav-components'];
     delete tsconfig.compilerOptions.paths['@dav033/dav-components/*'];
-    fs.writeFileSync(tsconfigPath, JSON.stringify(tsconfig, null, 2) + '\n');
-    console.log('✅ Updated tsconfig.json (removed local aliases)');
-  } else if (!isProduction && localExists && tsconfig.compilerOptions.paths) {
-    // Asegurar que los aliases locales estén presentes en desarrollo
-    if (!tsconfig.compilerOptions.paths['@dav033/dav-components']) {
-      tsconfig.compilerOptions.paths['@dav033/dav-components'] = ['../davComponents/src/index.ts'];
-      tsconfig.compilerOptions.paths['@dav033/dav-components/*'] = ['../davComponents/src/*'];
+    if (hadAliases) {
       fs.writeFileSync(tsconfigPath, JSON.stringify(tsconfig, null, 2) + '\n');
-      console.log('✅ Updated tsconfig.json (added local aliases)');
+      console.log('✅ Updated tsconfig.json (removed local aliases)');
     }
   }
   
