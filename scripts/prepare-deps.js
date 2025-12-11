@@ -67,8 +67,23 @@ if (currentVersion !== davComponentsVersion) {
   packageJson.dependencies['@dav033/dav-components'] = davComponentsVersion;
   fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2) + '\n');
   console.log('✅ Updated package.json');
-  console.log('\n⚠️  Please run "npm install" to update dependencies');
-  process.exit(1);
+  
+  // En producción/CI, ejecutar npm install automáticamente
+  if (isProduction) {
+    console.log('📦 Running npm install to update dependencies...');
+    const { execSync } = require('child_process');
+    try {
+      execSync('npm install', { stdio: 'inherit', cwd: path.join(__dirname, '..') });
+      console.log('✅ Dependencies installed successfully');
+      process.exit(0);
+    } catch (error) {
+      console.error('❌ Failed to install dependencies');
+      process.exit(1);
+    }
+  } else {
+    console.log('\n⚠️  Please run "npm install" to update dependencies');
+    process.exit(1);
+  }
 } else {
   // package.json está correcto pero node_modules no tiene la dependencia
   // Solo mostramos un warning pero no fallamos, para permitir que npm install se ejecute después
