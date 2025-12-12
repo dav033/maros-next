@@ -7,13 +7,14 @@ import { getRestorationFinal } from "../../application/usecases/getRestorationFi
 import { submitRestorationFinal } from "../../application/usecases/submitRestorationFinal";
 import type { RestorationFinalReport } from "../../domain/models";
 
-export function useRestorationFinalQuery(leadNumber: string | null) {
+export function useRestorationFinalQuery(projectId: number | null) {
   const ctx = useReportsApp();
 
   // Endpoint no existe en el backend por el momento, deshabilitado
   return useQuery({
-    queryKey: reportsKeys.restorationFinal(leadNumber),
+    queryKey: reportsKeys.restorationFinal(projectId?.toString() || null),
     queryFn: async () => {
+      if (!projectId) return {} as any;
       // No hacer llamada al backend, devolver datos vacíos
       return {} as any;
     },

@@ -7,13 +7,14 @@ import { getRestorationVisit } from "../../application/usecases/getRestorationVi
 import { submitRestorationVisit } from "../../application/usecases/submitRestorationVisit";
 import type { RestorationVisitReport } from "../../domain/models";
 
-export function useRestorationVisitQuery(leadNumber: string | null) {
+export function useRestorationVisitQuery(projectId: number | null) {
   const ctx = useReportsApp();
 
   // Endpoint no existe en el backend por el momento, deshabilitado
   return useQuery({
-    queryKey: reportsKeys.restorationVisit(leadNumber),
+    queryKey: reportsKeys.restorationVisit(projectId?.toString() || null),
     queryFn: async () => {
+      if (!projectId) return {} as any;
       // No hacer llamada al backend, devolver datos vacíos
       return {} as any;
     },

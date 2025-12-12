@@ -3,9 +3,9 @@ import type { RestorationFinalReport } from "../../domain/models";
 
 export async function getRestorationFinal(
   ctx: ReportsAppContext,
-  leadNumber: string
+  projectId: number
 ): Promise<RestorationFinalReport> {
-  return ctx.repos.reports.getRestorationFinal(leadNumber);
+  return ctx.repos.reports.getRestorationFinal(projectId);
 }
 
 

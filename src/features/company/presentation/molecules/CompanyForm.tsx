@@ -22,6 +22,9 @@ export type CompanyFormValue = {
   contactIds: number[];
   notes: string[];
   note?: string;
+  phone?: string;
+  email?: string;
+  submiz?: string;
 };
 
 export type CompanyFormProps = {
@@ -51,11 +54,17 @@ export function CompanyForm({ value, onChange, disabled, services = [], contacts
           name={value.name}
           address={value.address}
           addressLink={value.addressLink}
+          phone={value.phone}
+          email={value.email}
+          submiz={value.submiz}
           disabled={disabled}
           onNameChange={(event) => handleTextChange(event, "name")}
           onAddressChange={(address) => onChange({ ...value, address })}
           onAddressLinkChange={(addressLink) => onChange({ ...value, addressLink })}
           onLocationChange={({ address, link }) => onChange({ ...value, address, addressLink: link })}
+          onPhoneChange={(phone) => onChange({ ...value, phone })}
+          onEmailChange={(email) => onChange({ ...value, email })}
+          onSubmizChange={(submiz) => onChange({ ...value, submiz })}
         />
 
         <CompanyTypeFields

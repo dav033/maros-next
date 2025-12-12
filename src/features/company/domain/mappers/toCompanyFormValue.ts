@@ -18,5 +18,8 @@ export function toCompanyFormValue(company: Company, contacts: Contact[] = []): 
     isClient: company.isClient,
     contactIds: companyContactIds,
     notes: company.notes ?? [],
+    phone: company.phone ?? "",
+    email: company.email ?? "",
+    submiz: company.submiz ?? "",
   };
 }

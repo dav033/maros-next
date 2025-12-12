@@ -17,10 +17,10 @@ import {
 export class ReportsHttpRepository implements ReportsRepositoryPort {
   constructor(private readonly api: HttpClientLike = optimizedApiClient) {}
 
-  async getRestorationVisit(leadNumber: string): Promise<RestorationVisitReport> {
+  async getRestorationVisit(projectId: number): Promise<RestorationVisitReport> {
     try {
       const { data } = await this.api.get<RestorationVisitDTO>(
-        reportEndpoints.restorationVisit.get(leadNumber)
+        reportEndpoints.restorationVisit.get(projectId)
       );
       return mapRestorationVisitFromApi(data ?? {});
     } catch (error: any) {
@@ -44,10 +44,10 @@ export class ReportsHttpRepository implements ReportsRepositoryPort {
     return normalizeSubmitResponse(data);
   }
 
-  async getRestorationFinal(leadNumber: string): Promise<RestorationFinalReport> {
+  async getRestorationFinal(projectId: number): Promise<RestorationFinalReport> {
     try {
       const { data } = await this.api.get<RestorationFinalDTO>(
-        reportEndpoints.restorationFinal.get(leadNumber)
+        reportEndpoints.restorationFinal.get(projectId)
       );
       return mapRestorationFinalFromApi(data ?? {});
     } catch (error: any) {

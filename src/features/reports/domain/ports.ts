@@ -6,10 +6,10 @@ export type ReportSubmitResult = {
 };
 
 export interface ReportsRepositoryPort {
-  getRestorationVisit(leadNumber: string): Promise<RestorationVisitReport>;
+  getRestorationVisit(projectId: number): Promise<RestorationVisitReport>;
   submitRestorationVisit(report: RestorationVisitReport): Promise<ReportSubmitResult>;
 
-  getRestorationFinal(leadNumber: string): Promise<RestorationFinalReport>;
+  getRestorationFinal(projectId: number): Promise<RestorationFinalReport>;
   submitRestorationFinal(report: RestorationFinalReport): Promise<ReportSubmitResult>;
 }
 

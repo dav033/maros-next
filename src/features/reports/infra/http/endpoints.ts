@@ -4,13 +4,13 @@ const BASE = api.resource("reports");
 
 export const reportEndpoints = {
   restorationVisit: {
-    get: (leadNumber: string) =>
-      `${BASE}/restoration-visit?leadNumber=${encodeURIComponent(leadNumber)}`,
+    get: (projectId: number | string) =>
+      `${BASE}/restoration-visit?projectId=${encodeURIComponent(projectId)}`,
     submit: () => `${BASE}/restoration-visit`,
   },
   restorationFinal: {
-    get: (leadNumber: string) =>
-      `${BASE}/restoration-final?leadNumber=${encodeURIComponent(leadNumber)}`,
+    get: (projectId: number | string) =>
+      `${BASE}/restoration-final?projectId=${encodeURIComponent(projectId)}`,
     submit: () => `${BASE}/restoration-final`,
   },
 } as const;

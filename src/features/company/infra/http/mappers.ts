@@ -18,6 +18,9 @@ export type ApiCompanyDTO = {
   isCustomer: boolean;
   isClient: boolean;
   notes?: string[] | null;
+  phone?: string | null;
+  email?: string | null;
+  submiz?: string | null;
 };
 
 
@@ -30,6 +33,9 @@ export type CreateCompanyRequestDTO = {
   isCustomer: boolean;
   isClient: boolean;
   notes?: string[] | null;
+  phone?: string | null;
+  email?: string | null;
+  submiz?: string | null;
 };
 
 
@@ -42,6 +48,9 @@ export type UpdateCompanyRequestDTO = {
   isCustomer: boolean;
   isClient: boolean;
   notes?: string[] | null;
+  phone?: string | null;
+  email?: string | null;
+  submiz?: string | null;
 };
 
 
@@ -62,6 +71,9 @@ export function mapCompanyFromApi(dto: ApiCompanyDTO): Company {
     isCustomer: dto.isCustomer,
     isClient: dto.isClient,
     notes: dto.notes ?? [],
+    phone: dto.phone ?? undefined,
+    email: dto.email ?? undefined,
+    submiz: dto.submiz ?? undefined,
   };
 }
 
@@ -86,6 +98,9 @@ export function mapCompanyDraftToCreateDTO(
       draft.notes && draft.notes.length > 0
         ? draft.notes
         : null,
+    phone: draft.phone ?? null,
+    email: draft.email ?? null,
+    submiz: draft.submiz ?? null,
   };
 }
 
@@ -118,6 +133,15 @@ export function mapCompanyPatchToUpdateDTO(
   }
   if (patch.notes !== undefined) {
     dto.notes = patch.notes;
+  }
+  if (patch.phone !== undefined) {
+    dto.phone = patch.phone;
+  }
+  if (patch.email !== undefined) {
+    dto.email = patch.email;
+  }
+  if (patch.submiz !== undefined) {
+    dto.submiz = patch.submiz;
   }
   
   return dto;

@@ -12,5 +12,8 @@ export function toCompanyDraft(value: CompanyFormValue): CompanyDraft {
     serviceId: value.serviceId,
     isCustomer: value.isCustomer,
     isClient: value.isClient,
+    phone: normalizeEmptyToUndefined(value.phone),
+    email: normalizeEmptyToUndefined(value.email),
+    submiz: normalizeEmptyToUndefined(value.submiz),
   };
 }

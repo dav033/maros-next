@@ -3,9 +3,9 @@ import type { RestorationVisitReport } from "../../domain/models";
 
 export async function getRestorationVisit(
   ctx: ReportsAppContext,
-  leadNumber: string
+  projectId: number
 ): Promise<RestorationVisitReport> {
-  return ctx.repos.reports.getRestorationVisit(leadNumber);
+  return ctx.repos.reports.getRestorationVisit(projectId);
 }
 
 

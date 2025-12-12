@@ -30,6 +30,15 @@ export function toCompanyPatch(current: Company, value: CompanyFormValue): Compa
   if (value.isClient !== current.isClient) {
     patch.isClient = value.isClient;
   }
+  if (normalizeEmptyToUndefined(value.phone) !== normalizeEmptyToUndefined(current.phone)) {
+    patch.phone = normalizeEmptyToUndefined(value.phone);
+  }
+  if (normalizeEmptyToUndefined(value.email) !== normalizeEmptyToUndefined(current.email)) {
+    patch.email = normalizeEmptyToUndefined(value.email);
+  }
+  if (normalizeEmptyToUndefined(value.submiz) !== normalizeEmptyToUndefined(current.submiz)) {
+    patch.submiz = normalizeEmptyToUndefined(value.submiz);
+  }
 
   return patch as CompanyPatch;
 }

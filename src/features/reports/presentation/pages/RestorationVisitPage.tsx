@@ -21,10 +21,11 @@ import {
   useSubmitRestorationVisitMutation,
 } from "../hooks/useRestorationVisit";
 import { DatePicker } from "../components/DatePicker";
-import { useInstantLeadsByType } from "@/features/leads/presentation/hooks/data/useInstantLeadsByType";
-import { useLeadByNumber } from "@/features/leads/presentation/hooks/data/useLeadByNumber";
+import { useInstantProjects } from "@/features/project/presentation/hooks/data/useInstantProjects";
+import { useProjectsApp } from "@/di";
+import { getProjectById } from "@/features/project/application/usecases/queries/getProjectById";
 import { useInstantContacts, useInstantContactsByCompany } from "@/features/contact/presentation/hooks";
-import { LeadType } from "@/leads/domain";
+import { useInstantCompanies } from "@/features/company/presentation/hooks/data/useInstantCompanies";
 import type { Contact } from "@/contact/domain";
 
 const createEmptyActivity = (): ActivityRow => ({
@@ -54,26 +55,44 @@ const EMPTY_VISIT: RestorationVisitReport = {
 
 export function RestorationVisitPage() {
   const toast = useToast();
-  const [leadInput, setLeadInput] = useState("");
-  const [activeLead, setActiveLead] = useState<string | null>(null);
+  const [projectInput, setProjectInput] = useState("");
+  const [activeProjectId, setActiveProjectId] = useState<number | null>(null);
   const [form, setForm] = useState<RestorationVisitReport>(EMPTY_VISIT);
+  const projectsApp = useProjectsApp();
 
-  const { leads: constructionLeads = [], isFetching: leadsLoading } = useInstantLeadsByType(
-    LeadType.CONSTRUCTION
-  );
+  const { projects = [], isFetching: projectsLoading } = useInstantProjects();
   const { contacts: contactsList = [], isFetching: allContactsLoading } = useInstantContacts();
-
+  const { companies = [], isFetching: companiesLoading } = useInstantCompanies();
   const inferClientType = (contact?: Contact | null) =>
     contact?.company?.name ? "company" : "individual";
 
-  // Obtener lead completo desde el backend cuando se selecciona
-  const leadQuery = useLeadByNumber(activeLead);
-  const visitQuery = useRestorationVisitQuery(activeLead);
+  // Obtener proyecto completo desde el backend cuando se selecciona
+  const [project, setProject] = useState<any>(null);
+  const [projectLoading, setProjectLoading] = useState(false);
+  
+  useEffect(() => {
+    if (activeProjectId) {
+      setProjectLoading(true);
+      getProjectById(projectsApp, activeProjectId)
+        .then((proj) => {
+          setProject(proj);
+          setProjectLoading(false);
+        })
+        .catch(() => {
+          setProject(null);
+          setProjectLoading(false);
+        });
+    } else {
+      setProject(null);
+    }
+  }, [activeProjectId, projectsApp]);
+
+  const visitQuery = useRestorationVisitQuery(project?.id || null);
   const submitMutation = useSubmitRestorationVisitMutation();
 
   const activeCompanyId = useMemo(
-    () => leadQuery.data?.contact?.company?.id ?? leadQuery.data?.contact?.companyId ?? null,
-    [leadQuery.data]
+    () => project?.lead?.contact?.company?.id ?? project?.lead?.contact?.companyId ?? null,
+    [project]
   );
 
   const { contacts: companyContacts = [], isFetching: companyContactsLoading } =
@@ -86,41 +105,43 @@ export function RestorationVisitPage() {
     [visitQuery.data]
   );
 
-  // Efecto para rellenar formulario cuando se obtiene el lead desde el backend
-  // El endpoint de reports no existe, solo usamos datos del lead
+  // Efecto para rellenar formulario cuando se obtiene el proyecto desde el backend
   useEffect(() => {
-    if (leadQuery.data) {
-      const lead = leadQuery.data;
-      const clientType = inferClientType(lead.contact);
+    if (project) {
+      const lead = project.lead;
+      const clientType = inferClientType(lead?.contact);
       setForm((prev) => ({
         ...prev,
-        leadNumber: lead.leadNumber || prev.leadNumber,
-        projectNumber: lead.leadNumber || prev.projectNumber,
-        projectName: lead.name || prev.projectName,
-        projectLocation: lead.location || prev.projectLocation,
-        clientName: lead.contact?.isClient
+        leadNumber: lead?.leadNumber || prev.leadNumber,
+        projectNumber: lead?.leadNumber || prev.projectNumber,
+        projectName: lead?.name || project.overview || prev.projectName,
+        projectLocation: lead?.location || prev.projectLocation,
+        clientName: lead?.contact?.company?.name 
+          ? lead.contact.company.name
+          : lead?.contact?.isClient
           ? lead.contact.name
-          : lead.contact?.company?.name || prev.clientName,
-        customerName: lead.contact?.isCustomer
+          : prev.clientName,
+        customerName: lead?.contact?.isCustomer
           ? lead.contact.name
-          : lead.contact?.name || prev.customerName,
-        email: lead.contact?.email || prev.email,
-        phone: lead.contact?.phone || prev.phone,
+          : lead?.contact?.name || prev.customerName,
+        email: lead?.contact?.email || prev.email,
+        phone: lead?.contact?.phone || prev.phone,
         clientType: clientType || prev.clientType,
-        dateStarted: lead.startDate || prev.dateStarted,
+        dateStarted: lead?.startDate || prev.dateStarted,
+        overview: project.overview || prev.overview,
       }));
     }
-  }, [leadQuery.data]);
+  }, [project]);
 
-  const leadOptions = useMemo(
+  const projectOptions = useMemo(
     () =>
-      constructionLeads
-        .filter((lead) => lead.leadNumber && lead.leadNumber.trim())
-        .map((lead) => ({
-          value: lead.leadNumber,
-          label: `${lead.leadNumber} — ${lead.name}`,
+      projects
+        .filter((proj) => proj.lead?.leadNumber && proj.lead.leadNumber.trim())
+        .map((proj) => ({
+          value: String(proj.id),
+          label: `${proj.lead.leadNumber} — ${proj.lead.name || proj.overview || 'Project'}`,
         })),
-    [constructionLeads]
+    [projects]
   );
 
   const isCompanyClient = form.clientType === "company";
@@ -163,11 +184,18 @@ export function RestorationVisitPage() {
     []
   );
 
-  const handleSelectLead = (value: string) => {
-    setLeadInput(value);
-    setActiveLead(value);
-    // El hook useLeadByNumber se encargará de obtener los datos del backend
-    // y el useEffect los mapeará al formulario
+  const companyOptions = useMemo(
+    () =>
+      companies.map((company) => ({
+        value: company.name,
+        label: company.name,
+      })),
+    [companies]
+  );
+
+  const handleSelectProject = (value: string) => {
+    setProjectInput(value);
+    setActiveProjectId(value ? parseInt(value, 10) : null);
   };
 
   const handleSelectContact = (value: string) => {
@@ -231,9 +259,9 @@ export function RestorationVisitPage() {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    const leadNumber = activeLead || form.leadNumber;
+    const leadNumber = project?.lead?.leadNumber || form.leadNumber;
     if (!leadNumber) {
-      toast.showError("Select a lead before submitting.");
+      toast.showError("Select a project before submitting.");
       return;
     }
 
@@ -270,25 +298,25 @@ export function RestorationVisitPage() {
     <PageContainer className="space-y-8">
       <SimplePageHeader
         title="Restoration Report - Visit"
-        description="Load and complete the report information using the lead number."
+        description="Load and complete the report information using the project."
       />
 
       <form onSubmit={handleSubmit} className="space-y-10">
         <section className="rounded-2xl bg-[#1d1d1f] p-6 shadow-sm space-y-4">
           <Typography variant="body" className="font-semibold text-theme-light">
-            Search Lead Information
+            Search Project Information
           </Typography>
           <div className="space-y-2">
             <Typography variant="small" className="text-gray-300">
-              Construction Leads
+              Projects
             </Typography>
             <SearchableSelect
-              options={leadOptions}
-              value={leadInput}
-              onChange={handleSelectLead}
-              placeholder="Search and select lead"
+              options={projectOptions}
+              value={projectInput}
+              onChange={handleSelectProject}
+              placeholder="Search and select project"
               icon="mdi:magnify"
-              disabled={leadsLoading}
+              disabled={projectsLoading || projectLoading}
             />
           </div>
           {visitQuery.error && (
@@ -298,7 +326,7 @@ export function RestorationVisitPage() {
           )}
           {hasRemoteData && (
             <Typography variant="small" className="text-emerald-400">
-              Data preloaded from API for lead {form.leadNumber || activeLead}.
+              Data preloaded from API for project {form.leadNumber || project?.lead?.leadNumber}.
             </Typography>
           )}
         </section>
@@ -323,11 +351,19 @@ export function RestorationVisitPage() {
               value={form.projectLocation}
               onChange={(e) => updateField("projectLocation", e.target.value)}
             />
-            <Input
-              label="Client name"
-              value={form.clientName}
-              onChange={(e) => updateField("clientName", e.target.value)}
-            />
+            <div className="space-y-1">
+              <Typography variant="small" className="text-gray-300">
+                Client name
+              </Typography>
+              <SearchableSelect
+                options={companyOptions}
+                value={form.clientName}
+                onChange={(value) => updateField("clientName", value)}
+                placeholder="Select company"
+                icon="mdi:office-building"
+                disabled={form.clientType === "individual" || companiesLoading}
+              />
+            </div>
             <div className="space-y-1">
               <Typography variant="small" className="text-gray-300">
                 Client type
@@ -335,7 +371,12 @@ export function RestorationVisitPage() {
               <SearchableSelect
                 options={clientTypeOptions}
                 value={form.clientType}
-                onChange={(value) => updateField("clientType", value)}
+                onChange={(value) => {
+                  updateField("clientType", value);
+                  if (value === "individual") {
+                    updateField("clientName", "");
+                  }
+                }}
                 placeholder="Select client type"
                 icon="mdi:account-badge"
               />

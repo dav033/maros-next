@@ -15,6 +15,9 @@ export const initialCompanyFormValue: CompanyFormValue = {
   isClient: false,
   contactIds: [],
   notes: [],
+  phone: "",
+  email: "",
+  submiz: "",
 };
 
 
@@ -27,6 +30,9 @@ export function toDraft(value: CompanyFormValue): CompanyDraft {
     serviceId: value.serviceId,
     isCustomer: value.isCustomer,
     isClient: value.isClient,
+    phone: normalizeEmptyToUndefined(value.phone),
+    email: normalizeEmptyToUndefined(value.email),
+    submiz: normalizeEmptyToUndefined(value.submiz),
   };
 }
 
@@ -45,6 +51,9 @@ export function toPatch(current: Company, value: CompanyFormValue): CompanyPatch
     isCustomer: trimmed.isCustomer,
     isClient: trimmed.isClient,
     notes: trimmed.notes,
+    phone: normalizeEmptyToUndefined(trimmed.phone),
+    email: normalizeEmptyToUndefined(trimmed.email),
+    submiz: normalizeEmptyToUndefined(trimmed.submiz),
   };
 
  
@@ -72,5 +81,8 @@ export function mapCompanyToFormValue(company: Company, contacts: Contact[]): Co
     isClient: company.isClient,
     contactIds: companyContactIds,
     notes: company.notes ?? [],
+    phone: company.phone ?? "",
+    email: company.email ?? "",
+    submiz: company.submiz ?? "",
   };
 }
