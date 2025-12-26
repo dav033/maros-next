@@ -327,7 +327,7 @@ export function RestorationVisitPage() {
               />
               <Button
                 onClick={handleAddEmail}
-                variant="outline"
+                variant="secondary"
                 leftIcon={<Icon name="mdi:plus" size={16} />}
                 className="w-full sm:w-auto whitespace-nowrap"
               >
