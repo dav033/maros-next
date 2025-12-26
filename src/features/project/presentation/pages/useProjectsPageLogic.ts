@@ -40,9 +40,11 @@ export interface UseProjectsPageLogicReturn {
   paymentsModal: ReturnType<typeof usePaymentsModal>;
 }
 
-export function useProjectsPageLogic(): UseProjectsPageLogicReturn {
+import type { ProjectsPageData } from "../data/loadProjectsData";
+
+export function useProjectsPageLogic(initialData?: ProjectsPageData): UseProjectsPageLogicReturn {
   // 1) Datos
-  const data = useProjectsData();
+  const data = useProjectsData(initialData);
 
   // 2) Modales CRUD
   const createModal = useProjectCreateModal({

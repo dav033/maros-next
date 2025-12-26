@@ -71,7 +71,7 @@ export function mapLeadFromDTO(dto: ApiLeadDTO): Lead {
   const name = normalizeText(dto?.name ?? "");
   const location = normalizeText(dto?.location ?? "");
   const addressLink = normalizeText(dto?.addressLink ?? "");
-  const startDate = coerceIsoLocalDate(dto?.startDate ?? "");
+  const startDate = dto?.startDate != null ? coerceIsoLocalDate(dto.startDate) : null;
   const status = resolveStatus(dto?.status ?? null);
   // leadType ya no se almacena en el modelo, se calcula desde leadNumber cuando se necesita
 

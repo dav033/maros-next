@@ -23,7 +23,7 @@ export type UseInstantContactsResult = {
 };
 
 
-export function useInstantContacts(): UseInstantContactsResult {
+export function useInstantContacts(initialData?: Contact[]): UseInstantContactsResult {
   const ctx = useContactsApp();
 
   const query = useQuery<Contact[], Error>({
@@ -32,6 +32,7 @@ export function useInstantContacts(): UseInstantContactsResult {
       const items = await listContacts(ctx);
       return items ?? [];
     },
+    initialData,
     staleTime: DEFAULT_STALE_TIME,
     gcTime: 10 * 60 * 1000,
   });

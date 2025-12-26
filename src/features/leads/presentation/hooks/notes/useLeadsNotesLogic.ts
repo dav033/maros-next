@@ -1,11 +1,11 @@
 "use client";
 
 import { useNotesModal, useToast } from "@dav033/dav-components";
-import { useLeadsApp } from "@/di";
-import { patchLead, leadsKeys } from "@/leads/application";
+import { leadsKeys } from "@/leads/application";
 import type { Lead, LeadType } from "@/leads/domain";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLeadsData } from "../data/useLeadsData";
+import { updateLeadNotesAction } from "../../../actions/notesActions";
 
 export interface UseLeadsNotesLogicOptions {
   leadType: LeadType;
@@ -27,7 +27,6 @@ export interface UseLeadsNotesLogicReturn {
 export function useLeadsNotesLogic({
   leadType,
 }: UseLeadsNotesLogicOptions): UseLeadsNotesLogicReturn {
-  const app = useLeadsApp();
   const queryClient = useQueryClient();
   const toast = useToast();
   const data = useLeadsData(leadType);
@@ -48,7 +47,14 @@ export function useLeadsNotesLogic({
   const handleSaveNotes = async () => {
     await saveNotesBase(async (lead, notes) => {
       if (typeof lead.id !== "number") return;
-      const updated = await patchLead(app, lead.id, { notes: notes ?? [] }, {});
+      
+      const result = await updateLeadNotesAction(lead.id, notes ?? []);
+      
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+
+      const updated = result.data;
 
       queryClient.setQueryData<Lead[]>(leadsKeys.byType(leadType), (oldLeads) => {
         if (!oldLeads) return oldLeads;

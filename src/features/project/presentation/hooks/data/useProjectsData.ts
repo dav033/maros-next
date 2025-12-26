@@ -9,8 +9,10 @@ export type UseProjectsDataReturn = {
   refetch: () => Promise<void>;
 };
 
-export function useProjectsData(): UseProjectsDataReturn {
-  const { projects, showSkeleton, refetch } = useInstantProjects();
+import type { ProjectsPageData } from "../../data/loadProjectsData";
+
+export function useProjectsData(initialData?: ProjectsPageData): UseProjectsDataReturn {
+  const { projects, showSkeleton, refetch } = useInstantProjects(initialData?.projects);
 
   return {
     projects: projects ?? [],

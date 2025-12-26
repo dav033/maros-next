@@ -1,5 +1,17 @@
+import { Suspense } from "react";
 import { CompaniesPage } from "@/company";
+import { CompaniesPageSkeleton } from "@/company/presentation/components/CompaniesPageSkeleton";
+import { loadCompaniesData } from "@/company/presentation/data/loadCompaniesData";
+
+async function CompaniesPageWithData() {
+  const initialData = await loadCompaniesData();
+  return <CompaniesPage initialData={initialData} />;
+}
 
 export default function CompanyPage() {
-  return <CompaniesPage />;
+  return (
+    <Suspense fallback={<CompaniesPageSkeleton />}>
+      <CompaniesPageWithData />
+    </Suspense>
+  );
 }

@@ -18,7 +18,7 @@ export type UseCompanyServicesResult = {
 };
 
 
-export function useCompanyServices(): UseCompanyServicesResult {
+export function useCompanyServices(initialData?: CompanyService[]): UseCompanyServicesResult {
   const app = useCompanyApp();
 
   const query = useQuery<CompanyService[], Error>({
@@ -27,6 +27,7 @@ export function useCompanyServices(): UseCompanyServicesResult {
       const items = await companyServiceCrudUseCases.list(app)();
       return items ?? [];
     },
+    initialData,
     staleTime: DEFAULT_STALE_TIME,
     gcTime: 10 * 60 * 1000,
   });

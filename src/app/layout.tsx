@@ -37,7 +37,7 @@ export default function RootLayout({
         </Script>
 
         <Script
-          src={`https://maps.googleapis.com/maps/api/js?key=AIzaSyC-f-9Onj4n6jVVjP9MryKvm3aQgyxx5zM&libraries=places&callback=initMaps`}
+          src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places&callback=initMaps`}
           strategy="afterInteractive"
         />
       </body>

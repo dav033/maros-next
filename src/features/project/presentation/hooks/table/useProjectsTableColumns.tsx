@@ -40,7 +40,7 @@ export function useProjectsTableColumns(
       },
       {
         key: "leadNumber",
-        header: "Lead Number",
+        header: "Project Number",
         className: "w-[150px]",
         render: (project: Project) => (
           <span className="font-mono text-sm">{project.lead.leadNumber}</span>
@@ -50,7 +50,7 @@ export function useProjectsTableColumns(
       },
       {
         key: "leadName",
-        header: "Lead Name",
+        header: "Project Name",
         className: "w-[200px]",
         render: (project: Project) => (
           <span>{project.lead.name}</span>

@@ -1,16 +1,15 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { CompanyDraft, CompanyPatch } from "../../../domain/models";
-import {
-  companyKeys,
-  companyCrudUseCases,
-  updateCompanyWithContacts,
-} from "../../../application";
-import { useCompanyApp } from "@/di";
+import { companyKeys } from "../../../application";
 import { useToast } from "@dav033/dav-components";
 import { contactsKeys } from "@/contact/application";
+import {
+  createCompanyAction,
+  updateCompanyAction,
+  deleteCompanyAction,
+} from "../../../actions/companyActions";
 
 export function useCompanyMutations() {
-  const app = useCompanyApp();
   const queryClient = useQueryClient();
   const toast = useToast();
 
@@ -28,11 +27,11 @@ export function useCompanyMutations() {
       draft: CompanyDraft;
       contactIds?: number[];
     }) => {
-      const created = await companyCrudUseCases.create(app)(draft);
-      if (contactIds && contactIds.length > 0) {
-        await app.repos.company.assignContacts(created.id, contactIds);
+      const result = await createCompanyAction(draft, contactIds);
+      if (!result.success) {
+        throw new Error(result.error);
       }
-      return created;
+      return result.data;
     },
     onSuccess: () => {
       invalidateQueries();
@@ -56,10 +55,11 @@ export function useCompanyMutations() {
       patch: CompanyPatch;
       contactIds?: number[];
     }) => {
-      return await updateCompanyWithContacts(app, id, {
-        companyPatch: Object.keys(patch).length > 0 ? patch : undefined,
-        contactIds,
-      });
+      const result = await updateCompanyAction(id, patch, contactIds);
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+      return result.data;
     },
     onSuccess: () => {
       invalidateQueries();
@@ -75,7 +75,10 @@ export function useCompanyMutations() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      return await companyCrudUseCases.delete(app)(id);
+      const result = await deleteCompanyAction(id);
+      if (!result.success) {
+        throw new Error(result.error);
+      }
     },
     onSuccess: () => {
       invalidateQueries();

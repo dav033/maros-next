@@ -6,6 +6,8 @@ const isDev = process.env.NODE_ENV === 'development';
 const nextConfig: NextConfig = {
   // Desactivar caché de componentes en desarrollo para hot reload
   cacheComponents: !isDev,
+  // Deshabilitar source maps en producción para evitar errores
+  productionBrowserSourceMaps: false,
   experimental: {
     externalDir: true
   },

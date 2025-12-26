@@ -1,11 +1,11 @@
 "use client";
 
 import { useNotesModal, useToast } from "@dav033/dav-components";
-import { useProjectsApp } from "@/di";
-import { updateProject, projectsKeys } from "@/project/application";
+import { projectsKeys } from "@/project/application";
 import type { Project } from "@/project/domain";
 import { useQueryClient } from "@tanstack/react-query";
 import { useProjectsData } from "../data/useProjectsData";
+import { updateProjectNotesAction } from "../../../actions/notesActions";
 
 export interface UseProjectsNotesLogicReturn {
   openFromProject: (project: Project) => void;
@@ -21,7 +21,6 @@ export interface UseProjectsNotesLogicReturn {
 }
 
 export function useProjectsNotesLogic(): UseProjectsNotesLogicReturn {
-  const app = useProjectsApp();
   const queryClient = useQueryClient();
   const toast = useToast();
   const data = useProjectsData();
@@ -42,7 +41,14 @@ export function useProjectsNotesLogic(): UseProjectsNotesLogicReturn {
   const handleSaveNotes = async () => {
     await saveNotesBase(async (project, notes) => {
       if (typeof project.id !== "number") return;
-      const updated = await updateProject(app, project.id, { notes: notes ?? [] });
+      
+      const result = await updateProjectNotesAction(project.id, notes ?? []);
+      
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+
+      const updated = result.data;
 
       queryClient.setQueryData<Project[]>(projectsKeys.list(), (oldProjects) => {
         if (!oldProjects) return oldProjects;

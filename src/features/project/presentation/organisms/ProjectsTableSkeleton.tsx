@@ -6,12 +6,12 @@ import type { TableSkeletonColumn } from "@dav033/dav-components";
 const columns: TableSkeletonColumn[] = [
   {
     width: "w-[150px]",
-    header: "Lead Number",
+    header: "Project Number",
     skeletonWidth: "w-24",
   },
   {
     width: "w-[200px]",
-    header: "Lead Name",
+    header: "Project Name",
     skeletonWidth: "w-3/4",
   },
   {

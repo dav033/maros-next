@@ -21,7 +21,7 @@ export interface Lead {
   id: number;
   leadNumber: string;
   name: string;
-  startDate: string;
+  startDate: string | null;
   location?: string | undefined;
   addressLink?: string | undefined;
   status: LeadStatus;

@@ -22,7 +22,7 @@ export type UseInstantProjectsResult = {
   refetch: () => Promise<void>;
 };
 
-export function useInstantProjects(): UseInstantProjectsResult {
+export function useInstantProjects(initialData?: Project[]): UseInstantProjectsResult {
   const ctx = useProjectsApp();
 
   const query = useQuery<Project[], Error>({
@@ -31,6 +31,7 @@ export function useInstantProjects(): UseInstantProjectsResult {
       const items = await listProjects(ctx);
       return items ?? [];
     },
+    initialData,
     staleTime: DEFAULT_STALE_TIME,
     gcTime: 10 * 60 * 1000,
   });

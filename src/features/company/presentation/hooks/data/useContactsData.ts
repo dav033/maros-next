@@ -12,8 +12,10 @@ export interface UseContactsDataReturn {
   showSkeleton: boolean;
 }
 
-export function useContactsData(): UseContactsDataReturn {
-  const { contacts, showSkeleton } = useInstantContacts();
+import type { ContactsPageData } from "@/contact/presentation/data/loadContactsData";
+
+export function useContactsData(initialData?: ContactsPageData): UseContactsDataReturn {
+  const { contacts, showSkeleton } = useInstantContacts(initialData?.contacts);
   const { companies } = useInstantCompanies();
   const { services } = useCompanyServices();
 

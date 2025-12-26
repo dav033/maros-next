@@ -1,19 +1,23 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import type { Project, ProjectPatch } from "@/project/domain";
-import { updateProject, deleteProject, projectsKeys } from "@/project/application";
-import { useProjectsApp } from "@/di";
+import type { ProjectPatch } from "@/project/domain";
+import { projectsKeys } from "@/project/application";
 import { useToast } from "@dav033/dav-components";
+import { updateProjectAction, deleteProjectAction } from "../../../actions/projectActions";
 
 export function useProjectsMutations() {
-  const projectsApp = useProjectsApp();
   const queryClient = useQueryClient();
   const toast = useToast();
 
   const updateMutation = useMutation({
-    mutationFn: (input: { id: number; patch: ProjectPatch }) =>
-      updateProject(projectsApp, input.id, input.patch),
+    mutationFn: async (input: { id: number; patch: ProjectPatch }) => {
+      const result = await updateProjectAction(input.id, input.patch);
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+      return result.data;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: projectsKeys.all });
       toast.showSuccess("Project updated successfully!");
@@ -27,7 +31,12 @@ export function useProjectsMutations() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => deleteProject(projectsApp, id),
+    mutationFn: async (id: number) => {
+      const result = await deleteProjectAction(id);
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: projectsKeys.all });
       toast.showSuccess("Project deleted successfully!");

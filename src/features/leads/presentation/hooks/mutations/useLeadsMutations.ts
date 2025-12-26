@@ -1,12 +1,11 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { deleteLead, leadsKeys } from "@/leads/application";
-import { useLeadsApp } from "@/di";
+import { leadsKeys } from "@/leads/application";
 import { useToast } from "@dav033/dav-components";
+import { deleteLeadAction } from "../../../actions/leadActions";
 
 export function useLeadsMutations() {
-  const app = useLeadsApp();
   const queryClient = useQueryClient();
   const toast = useToast();
 
@@ -16,7 +15,10 @@ export function useLeadsMutations() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      return await deleteLead(app, id);
+      const result = await deleteLeadAction(id);
+      if (!result.success) {
+        throw new Error(result.error);
+      }
     },
     onSuccess: () => {
       invalidateQueries();

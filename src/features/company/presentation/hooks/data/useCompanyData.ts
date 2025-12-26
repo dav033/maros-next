@@ -6,6 +6,7 @@ import { useCompanyServices } from "../services/useCompanyServices";
 import { useInstantContacts } from "@/features/contact/presentation/hooks";
 import type { Company } from "../../../domain/models";
 import type { Contact } from "@/contact/domain";
+import type { CompaniesPageData } from "../../data/loadCompaniesData";
 
 interface CompanyService {
   id: number;
@@ -19,10 +20,10 @@ export interface UseCompaniesDataReturn {
   showSkeleton: boolean;
 }
 
-export function useCompaniesData(): UseCompaniesDataReturn {
-  const { companies, showSkeleton } = useInstantCompanies();
-  const { services } = useCompanyServices();
-  const { contacts, showSkeleton: contactsSkeleton } = useInstantContacts();
+export function useCompaniesData(initialData?: CompaniesPageData): UseCompaniesDataReturn {
+  const { companies, showSkeleton } = useInstantCompanies(initialData?.companies);
+  const { services } = useCompanyServices(initialData?.services);
+  const { contacts, showSkeleton: contactsSkeleton } = useInstantContacts(initialData?.contacts);
 
   return {
     companies: companies ?? [],

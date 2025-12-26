@@ -7,12 +7,13 @@ import type { ProjectType } from "@/projectType/domain";
 
 const DEFAULT_STALE_TIME = 10 * 60 * 1000;
 
-export function useProjectTypes() {
+export function useProjectTypes(initialData?: ProjectType[]) {
   const ctx = useProjectTypesApp();
 
   const { data: projectTypes = [], isLoading, error } = useQuery<ProjectType[], Error>({
     queryKey: ["projectTypes"],
     queryFn: () => listProjectTypes(ctx),
+    initialData,
     staleTime: DEFAULT_STALE_TIME,
     gcTime: 15 * 60 * 1000,
   });

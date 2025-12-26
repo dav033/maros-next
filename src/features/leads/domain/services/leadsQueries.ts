@@ -41,7 +41,10 @@ export function partitionByStatus(
 }
 
 export function sortByStartDateDesc(leads: readonly Lead[]): Lead[] {
-  return [...(leads ?? [])].sort((a, b) =>
-    a.startDate > b.startDate ? -1 : a.startDate < b.startDate ? 1 : 0
-  );
+  return [...(leads ?? [])].sort((a, b) => {
+    if (a.startDate === null && b.startDate === null) return 0;
+    if (a.startDate === null) return 1;
+    if (b.startDate === null) return -1;
+    return a.startDate > b.startDate ? -1 : a.startDate < b.startDate ? 1 : 0;
+  });
 }

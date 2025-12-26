@@ -13,10 +13,12 @@ export interface UseLeadsDataReturn {
   refetch: () => Promise<void>;
 }
 
-export function useLeadsData(leadType: LeadType): UseLeadsDataReturn {
-  const { leads, showSkeleton, refetch } = useInstantLeadsByType(leadType);
-  const { contacts } = useInstantContacts();
-  const { projectTypes } = useProjectTypes();
+import type { LeadsPageData } from "../../data/loadLeadsData";
+
+export function useLeadsData(leadType: LeadType, initialData?: LeadsPageData): UseLeadsDataReturn {
+  const { leads, showSkeleton, refetch } = useInstantLeadsByType(leadType, initialData?.leads);
+  const { contacts } = useInstantContacts(initialData?.contacts);
+  const { projectTypes } = useProjectTypes(initialData?.projectTypes);
 
   return {
     leads: leads ?? [],

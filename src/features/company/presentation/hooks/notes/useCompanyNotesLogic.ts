@@ -2,11 +2,11 @@
 "use client";
 
 import { useNotesModal, useToast } from "@dav033/dav-components";
-import { useCompanyApp } from "@/di";
-import { companyCrudUseCases, companyKeys } from "../../../application";
+import { companyKeys } from "../../../application";
 import type { Company } from "../../../domain/models";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCompanyMutations } from "..";
+import { updateCompanyNotesAction } from "../../../actions/notesActions";
 
 export interface UseCompanyNotesLogicReturn {
   openFromCompany: (company: Company) => void;
@@ -22,7 +22,6 @@ export interface UseCompanyNotesLogicReturn {
 }
 
 export function useCompanyNotesLogic(): UseCompanyNotesLogicReturn {
-  const companyApp = useCompanyApp();
   const queryClient = useQueryClient();
   const toast = useToast();
   const { invalidateQueries } = useCompanyMutations();
@@ -43,10 +42,13 @@ export function useCompanyNotesLogic(): UseCompanyNotesLogicReturn {
   const handleSaveNotes = async () => {
     await saveNotesBase(async (company, notes) => {
       try {
-        const updated = await companyCrudUseCases.update(companyApp)(
-          company.id,
-          { notes }
-        );
+        const result = await updateCompanyNotesAction(company.id, notes);
+
+        if (!result.success) {
+          throw new Error(result.error);
+        }
+
+        const updated = result.data;
 
         queryClient.setQueryData<Company[]>(
           companyKeys.lists(),

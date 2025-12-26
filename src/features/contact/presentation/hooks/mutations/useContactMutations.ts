@@ -5,9 +5,9 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { Contact, ContactPatch } from "../../../domain/models";
 import type { ContactFormValue } from "../../../domain/mappers";
 import { toContactPatch } from "../../../domain/mappers";
-import { patchContact, deleteContact, contactsKeys } from "@/contact/application";
-import { useContactsApp } from "@/di";
+import { contactsKeys } from "@/contact/application";
 import { useToast } from "@dav033/dav-components";
+import { updateContactAction, deleteContactAction } from "../../../actions/contactActions";
 
 export const initialContactFormValue: ContactFormValue = {
   name: "",
@@ -22,13 +22,17 @@ export const initialContactFormValue: ContactFormValue = {
 };
 
 export function useContactMutations() {
-  const contactsApp = useContactsApp();
   const queryClient = useQueryClient();
   const toast = useToast();
 
   const updateContactMutation = useMutation({
-    mutationFn: (input: { id: number; patch: ContactPatch }) =>
-      patchContact(contactsApp, input.id, input.patch),
+    mutationFn: async (input: { id: number; patch: ContactPatch }) => {
+      const result = await updateContactAction(input.id, input.patch);
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+      return result.data;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["customers"] });
       queryClient.invalidateQueries({ queryKey: contactsKeys.list });
@@ -44,7 +48,10 @@ export function useContactMutations() {
 
   const handleDeleteContact = async (contactId: number) => {
     try {
-      await deleteContact(contactsApp, contactId);
+      const result = await deleteContactAction(contactId);
+      if (!result.success) {
+        throw new Error(result.error);
+      }
       queryClient.invalidateQueries({ queryKey: ["customers"] });
       queryClient.invalidateQueries({ queryKey: contactsKeys.list });
       toast.showSuccess("Contact deleted successfully!");

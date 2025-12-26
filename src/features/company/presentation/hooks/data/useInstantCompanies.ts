@@ -21,7 +21,7 @@ export type UseInstantCompaniesResult = {
 };
 
 
-export function useInstantCompanies(): UseInstantCompaniesResult {
+export function useInstantCompanies(initialData?: Company[]): UseInstantCompaniesResult {
   const ctx = useCompanyApp();
 
   const query = useQuery<Company[], Error>({
@@ -30,6 +30,7 @@ export function useInstantCompanies(): UseInstantCompaniesResult {
       const items = await companyCrudUseCases.list(ctx)();
       return items ?? [];
     },
+    initialData,
     staleTime: DEFAULT_STALE_TIME,
     gcTime: 10 * 60 * 1000,
   });

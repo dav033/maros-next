@@ -38,9 +38,11 @@ export interface UseContactsPageLogicReturn {
   };
 }
 
-export function useContactsPageLogic(): UseContactsPageLogicReturn {
+import type { ContactsPageData } from "../../data/loadContactsData";
+
+export function useContactsPageLogic(initialData?: ContactsPageData): UseContactsPageLogicReturn {
   // 1) Datos
-  const data = useContactsData();
+  const data = useContactsData(initialData);
 
   // 2) CRUD de contactos
   const crud = useContactsCrud();

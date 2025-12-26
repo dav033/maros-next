@@ -20,7 +20,7 @@ export type UseInstantLeadsByTypeResult = {
 };
 
 
-export function useInstantLeadsByType(type: LeadType): UseInstantLeadsByTypeResult {
+export function useInstantLeadsByType(type: LeadType, initialData?: Lead[]): UseInstantLeadsByTypeResult {
   const ctx = useLeadsApp();
 
   const query = useQuery<Lead[], Error>({
@@ -29,6 +29,7 @@ export function useInstantLeadsByType(type: LeadType): UseInstantLeadsByTypeResu
       const items = await listLeadsByType(ctx, type);
       return items ?? [];
     },
+    initialData,
     staleTime: DEFAULT_STALE_TIME,
     gcTime: 10 * 60 * 1000,
   });

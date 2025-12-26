@@ -7,6 +7,7 @@ export type ActivityRow = {
   activity: string;
   imageUrls?: string[];
   imageFiles?: File[];
+  imageIds?: string[];
 };
 
 export type AdditionalActivityRow = ActivityRow;
@@ -27,7 +28,7 @@ export type RestorationVisitReport = {
   customerName: string;
   email: string;
   phone: string;
-  dateStarted: string;
+  dateStarted: string | null | undefined;
   overview: string;
   language: string;
   activities: ActivityRow[];

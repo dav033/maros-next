@@ -25,12 +25,15 @@ export type UseInstantCustomersResult = {
 };
 
 
-export function useInstantCustomers(): UseInstantCustomersResult {
+import type { CustomersPageData } from "@/customers/presentation/data/loadCustomersData";
+
+export function useInstantCustomers(initialData?: CustomersPageData): UseInstantCustomersResult {
   const repository = new CustomersHttpRepository();
 
   const query = useQuery<CustomersData, Error>({
     queryKey: customersKeys.all,
     queryFn: () => repository.getCustomers(),
+    initialData: initialData ? { contacts: initialData.contacts, companies: initialData.companies } : undefined,
     staleTime: DEFAULT_STALE_TIME,
     gcTime: 10 * 60 * 1000,
   });

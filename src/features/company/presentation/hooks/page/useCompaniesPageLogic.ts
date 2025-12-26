@@ -29,9 +29,11 @@ export interface UseCompaniesPageLogicReturn {
   };
 }
 
-export function useCompaniesPageLogic(): UseCompaniesPageLogicReturn {
+import type { CompaniesPageData } from "../../data/loadCompaniesData";
+
+export function useCompaniesPageLogic(initialData?: CompaniesPageData): UseCompaniesPageLogicReturn {
   // 1) Datos
-  const data = useCompaniesData();
+  const data = useCompaniesData(initialData);
   const { companies, contacts, services } = data;
 
   // 2) Modales “puros”

@@ -50,13 +50,21 @@ export interface UseLeadsPageLogicReturn {
   };
 }
 
+import type { LeadsPageData } from "../data/loadLeadsData";
+
+export interface UseLeadsPageLogicOptions {
+  leadType: LeadType;
+  initialData?: LeadsPageData;
+}
+
 export function useLeadsPageLogic({
   leadType,
+  initialData,
 }: UseLeadsPageLogicOptions): UseLeadsPageLogicReturn {
   const config = LEAD_TYPE_CONFIGS[leadType];
 
   // 1) Datos
-  const data = useLeadsData(leadType);
+  const data = useLeadsData(leadType, initialData);
 
   // 2) Modales CRUD
   const createModal = useLeadCreateModal({

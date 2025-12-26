@@ -5,9 +5,14 @@ import { useCompanyServices } from "@/features/company/presentation/hooks";
 import { CustomerContactsSection } from "../components/CustomerContactsSection";
 import { CustomerCompaniesSection } from "../components/CustomerCompaniesSection";
 import { SimplePageHeader } from "@dav033/dav-components";
+import type { CustomersPageData } from "../data/loadCustomersData";
 
-export function CustomersPage() {
-  const { contacts, companies, showSkeleton } = useInstantCustomers();
+export interface CustomersPageProps {
+  initialData?: CustomersPageData;
+}
+
+export function CustomersPage({ initialData }: CustomersPageProps = {}) {
+  const { contacts, companies, showSkeleton } = useInstantCustomers(initialData);
   const { services } = useCompanyServices();
 
  
