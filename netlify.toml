@@ -4,11 +4,11 @@
 
 # Environment variables for production
 [context.production.environment]
-  NEXT_PUBLIC_API_BASE_URL = "https://maros-nest.onrender.com/api"
+  NEXT_PUBLIC_API_BASE_URL = "https://api.marosconstruction.com/api"
 
 # Environment variables for preview/branch deploys
 [context.deploy-preview.environment]
-  NEXT_PUBLIC_API_BASE_URL = "https://maros-nest.onrender.com/api"
+  NEXT_PUBLIC_API_BASE_URL = "https://marosconstruction.com/api"
 
 # Headers for security and CORS (optional - backend should handle CORS)
 [[headers]]
