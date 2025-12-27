@@ -1,6 +1,7 @@
 import type { Lead } from "@/features/leads/domain";
 import type { InvoiceStatus } from "../models";
 import type { ProjectStatus } from "../types";
+import type { ProjectFinancial } from "./ProjectFinancial";
 
 export interface Project {
   location: string;
@@ -17,4 +18,5 @@ export interface Project {
   startDate?: string;
   lead: Lead;
   endDate?: string;
+  financial?: ProjectFinancial;
 }

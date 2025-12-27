@@ -1,6 +1,7 @@
 import type { Project } from "../models";
 import type { Lead } from "@/leads/domain";
 import { ProjectProgressStatus, InvoiceStatus } from "../models";
+import type { ProjectFinancial } from "../models/ProjectFinancial";
 
 export type ApiProjectDTO = {
   id?: number | null;
@@ -12,6 +13,7 @@ export type ApiProjectDTO = {
   overview?: string | null;
   notes?: string[] | null;
   leadId?: number | null;
+  financial?: ProjectFinancial | null;
   lead?: {
     id?: number | null;
     leadNumber?: string | null;
@@ -81,6 +83,35 @@ export function mapProjectFromDTO(dto: ApiProjectDTO, leadMapper: (dto: any) => 
   const overview = dto?.overview && dto.overview.trim() !== "" ? dto.overview.trim() : undefined;
   const notes = Array.isArray(dto?.notes) ? dto.notes.filter((n): n is string => typeof n === "string") : [];
   
+  // Map financial information if present
+  let financial: ProjectFinancial | undefined = undefined;
+  if (dto?.financial) {
+    const f = dto.financial;
+    if (
+      typeof f.projectNumber === "string" &&
+      typeof f.estimatedAmount === "number" &&
+      typeof f.estimateCount === "number" &&
+      typeof f.invoicedAmount === "number" &&
+      typeof f.invoiceCount === "number" &&
+      typeof f.paidAmount === "number" &&
+      typeof f.outstandingAmount === "number" &&
+      typeof f.paidPercentage === "number" &&
+      typeof f.estimateVsInvoicedDelta === "number"
+    ) {
+      financial = {
+        projectNumber: f.projectNumber,
+        estimatedAmount: f.estimatedAmount,
+        estimateCount: f.estimateCount,
+        invoicedAmount: f.invoicedAmount,
+        invoiceCount: f.invoiceCount,
+        paidAmount: f.paidAmount,
+        outstandingAmount: f.outstandingAmount,
+        paidPercentage: f.paidPercentage,
+        estimateVsInvoicedDelta: f.estimateVsInvoicedDelta,
+      };
+    }
+  }
+  
   const leadId = dto?.leadId ?? dto?.lead?.id ?? 0;
   
   let lead: Lead;
@@ -101,6 +132,7 @@ export function mapProjectFromDTO(dto: ApiProjectDTO, leadMapper: (dto: any) => 
     notes,
     lead,
     leadId,
+    financial,
   };
 }
 

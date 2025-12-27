@@ -81,31 +81,15 @@ export function useProjectsTableColumns(
         sortValue: (project: Project) => project.projectProgressStatus || "",
       },
       {
-        key: "invoiceStatus",
-        header: "Invoice Status",
+        key: "estimate",
+        header: "Estimate",
         className: "w-[150px]",
         render: (project: Project) => {
-          const status = project.invoiceStatus;
-          if (!status) return <span className="text-gray-400">-</span>;
-          
-          const statusLabels: Record<InvoiceStatus, string> = {
-            [InvoiceStatus.PAID]: "Paid",
-            [InvoiceStatus.PENDING]: "Pending",
-            [InvoiceStatus.NOT_EXECUTED]: "Not Executed",
-            [InvoiceStatus.PERMITS]: "Permits",
-          };
-          
-          return <span>{statusLabels[status] || status}</span>;
-        },
-        sortable: true,
-        sortValue: (project: Project) => project.invoiceStatus || "",
-      },
-      {
-        key: "invoiceAmount",
-        header: "Invoice Amount",
-        className: "w-[150px]",
-        render: (project: Project) => {
-          const formatted = formatCurrency(project.invoiceAmount);
+          const estimatedAmount = project.financial?.estimatedAmount;
+          if (estimatedAmount === null || estimatedAmount === undefined) {
+            return <span className="text-gray-400">-</span>;
+          }
+          const formatted = formatCurrency(estimatedAmount);
           if (formatted === "-") {
             return <span className="text-gray-400">-</span>;
           }
@@ -113,22 +97,21 @@ export function useProjectsTableColumns(
         },
         sortable: true,
         sortValue: (project: Project) => {
-          const amount = project.invoiceAmount;
-          if (amount === null || amount === undefined) return 0;
-          return typeof amount === "number" ? amount : parseFloat(String(amount)) || 0;
+          const estimatedAmount = project.financial?.estimatedAmount;
+          if (estimatedAmount === null || estimatedAmount === undefined) return 0;
+          return typeof estimatedAmount === "number" ? estimatedAmount : parseFloat(String(estimatedAmount)) || 0;
         },
       },
       {
-        key: "lastPayment",
-        header: "Last Payment",
+        key: "paidAmount",
+        header: "Paid Amount",
         className: "w-[150px]",
         render: (project: Project) => {
-          const payments = project.payments;
-          if (!payments || !Array.isArray(payments) || payments.length === 0) {
+          const paidAmount = project.financial?.paidAmount;
+          if (paidAmount === null || paidAmount === undefined) {
             return <span className="text-gray-400">-</span>;
           }
-          const lastPayment = payments[payments.length - 1];
-          const formatted = formatCurrency(lastPayment);
+          const formatted = formatCurrency(paidAmount);
           if (formatted === "-") {
             return <span className="text-gray-400">-</span>;
           }
@@ -136,21 +119,32 @@ export function useProjectsTableColumns(
         },
         sortable: true,
         sortValue: (project: Project) => {
-          const payments = project.payments;
-          if (!payments || !Array.isArray(payments) || payments.length === 0) return 0;
-          const lastPayment = payments[payments.length - 1];
-          return typeof lastPayment === "number" ? lastPayment : parseFloat(String(lastPayment)) || 0;
+          const paidAmount = project.financial?.paidAmount;
+          if (paidAmount === null || paidAmount === undefined) return 0;
+          return typeof paidAmount === "number" ? paidAmount : parseFloat(String(paidAmount)) || 0;
         },
       },
       {
-        key: "quickbooks",
-        header: "QuickBooks",
-        className: "w-[120px]",
+        key: "outstandingAmount",
+        header: "Outstanding Amount",
+        className: "w-[150px]",
         render: (project: Project) => {
-          return <StatusBadge status={project.quickbooks ?? false} />;
+          const outstandingAmount = project.financial?.outstandingAmount;
+          if (outstandingAmount === null || outstandingAmount === undefined) {
+            return <span className="text-gray-400">-</span>;
+          }
+          const formatted = formatCurrency(outstandingAmount);
+          if (formatted === "-") {
+            return <span className="text-gray-400">-</span>;
+          }
+          return <span>{formatted}</span>;
         },
         sortable: true,
-        sortValue: (project: Project) => project.quickbooks ? "Yes" : "No",
+        sortValue: (project: Project) => {
+          const outstandingAmount = project.financial?.outstandingAmount;
+          if (outstandingAmount === null || outstandingAmount === undefined) return 0;
+          return typeof outstandingAmount === "number" ? outstandingAmount : parseFloat(String(outstandingAmount)) || 0;
+        },
       },
     ];
   }, [onOpenNotesModal]);

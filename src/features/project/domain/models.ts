@@ -1,4 +1,8 @@
 import type { Lead } from "@/leads/domain";
+import type { ProjectFinancial } from "./models/ProjectFinancial";
+
+// Re-export ProjectFinancial for convenience
+export type { ProjectFinancial } from "./models/ProjectFinancial";
 
 export enum ProjectProgressStatus {
   NOT_EXECUTED = "NOT_EXECUTED",
@@ -29,6 +33,7 @@ export interface Project {
   leadId: number;
   startDate?: string;
   endDate?: string;
+  financial?: ProjectFinancial;
 }
 
 export type ProjectId = number;
