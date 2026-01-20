@@ -1,5 +1,7 @@
+
+import { SearchConfig } from "@/types/components";
 import type { Contact } from "@/contact/domain";
-import type { SearchConfig } from "@dav033/dav-components";
+
 
 export const customerContactsSearchPlaceholder = "Search contacts…";
 

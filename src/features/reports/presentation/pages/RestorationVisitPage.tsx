@@ -1,15 +1,9 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, Plus, X, Loader, Send, Save } from "lucide-react";
+import { toast } from "sonner";
 import { useMemo, useState } from "react";
-import {
-  Button,
-  Icon,
-  IconButton,
-  PageContainer,
-  SimplePageHeader,
-  Spinner,
-  useToast,
-} from "@dav033/dav-components";
 import { sendEmailAction } from "../../actions/reportActions";
 import type { RestorationVisitReport } from "@/reports/domain/models";
 import { useRestorationVisitQuery } from "../hooks/useRestorationVisit";
@@ -29,7 +23,6 @@ const inferClientType = (contact?: Contact | null) =>
   contact?.company?.name ? "company" : "individual";
 
 export function RestorationVisitPage() {
-  const toast = useToast();
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [docUrl, setDocUrl] = useState<string | null>(null);
   const [sendingEmail, setSendingEmail] = useState(false);
@@ -100,7 +93,7 @@ export function RestorationVisitPage() {
     event.preventDefault();
     const leadNumber = project?.lead?.leadNumber || form.leadNumber;
     if (!leadNumber) {
-      toast.showError("Select a project before submitting.");
+      toast.error("Select a project before submitting.");
       return;
     }
 
@@ -167,7 +160,7 @@ export function RestorationVisitPage() {
 
         if (docUrl) {
           console.log("Report submitted successfully, docUrl:", docUrl);
-          toast.showSuccess("Documento actualizado correctamente.");
+          toast.success("Documento actualizado correctamente.");
           window.open(docUrl, "_blank");
           setDocUrl(docUrl);
           setEmailAddresses(form.email ? [form.email] : []);
@@ -176,7 +169,7 @@ export function RestorationVisitPage() {
           console.warn("Report submitted but no docUrl returned");
         }
 
-        toast.showSuccess(
+        toast.success(
           `Successfully uploaded ${filesWithMetadata.length} image(s) to webhook.`
         );
       } else {
@@ -190,7 +183,7 @@ export function RestorationVisitPage() {
 
         if (docUrl) {
           console.log("Report submitted successfully (no images), docUrl:", docUrl);
-          toast.showSuccess("Documento actualizado correctamente.");
+          toast.success("Documento actualizado correctamente.");
           window.open(docUrl, "_blank");
           setDocUrl(docUrl);
           setEmailAddresses(form.email ? [form.email] : []);
@@ -214,7 +207,7 @@ export function RestorationVisitPage() {
           additionalActivitiesCount: form.additionalActivities.length,
         },
       });
-      toast.showError(
+      toast.error(
         "There was a problem uploading images. Please try again."
       );
     } finally {
@@ -225,18 +218,18 @@ export function RestorationVisitPage() {
   const handleAddEmail = () => {
     const email = newEmailInput.trim();
     if (!email) {
-      toast.showError("Please enter an email address.");
+      toast.error("Please enter an email address.");
       return;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      toast.showError("Please enter a valid email address.");
+      toast.error("Please enter a valid email address.");
       return;
     }
 
     if (emailAddresses.includes(email)) {
-      toast.showError("This email is already in the list.");
+      toast.error("This email is already in the list.");
       return;
     }
 
@@ -250,12 +243,12 @@ export function RestorationVisitPage() {
 
   const handleSendEmail = async () => {
     if (emailAddresses.length === 0) {
-      toast.showError("Please add at least one email address.");
+      toast.error("Please add at least one email address.");
       return;
     }
 
     if (!docUrl) {
-      toast.showError("Document URL is missing.");
+      toast.error("Document URL is missing.");
       return;
     }
 
@@ -270,13 +263,13 @@ export function RestorationVisitPage() {
       });
 
       if (result.success) {
-        toast.showSuccess(`Email sent successfully to ${emailAddresses.length} recipient(s).`);
+        toast.success(`Email sent successfully to ${emailAddresses.length} recipient(s).`);
       } else {
-        toast.showError(result.error || "Failed to send email.");
+        toast.error(result.error || "Failed to send email.");
       }
     } catch (error) {
       console.error("Error sending email:", error);
-      toast.showError("Failed to send email. Please try again.");
+      toast.error("Failed to send email. Please try again.");
     } finally {
       setSendingEmail(false);
     }
@@ -291,22 +284,23 @@ export function RestorationVisitPage() {
 
   if (isSubmitted) {
     return (
-      <PageContainer className="space-y-6 md:space-y-8 px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full px-4 py-6 sm:px-6 lg:px-8 max-w-screen-2xl space-y-6 md:space-y-8 px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
-          <IconButton
+          <Button variant="ghost" size="icon" aria-label="Go back"
             onClick={handleBack}
-            icon={<Icon name="mdi:arrow-left" size={20} />}
             className="flex-shrink-0"
-          />
-          <SimplePageHeader
-            title="Send Email"
-            description="Send the report document to the client's email address(es)."
-          />
+          >
+            <ArrowLeft className="size-5" />
+          </Button>
+          <header className="flex flex-col gap-1">
+            <h1 className="text-xl font-semibold text-foreground sm:text-2xl">Send Email</h1>
+            <p className="text-xs text-muted-foreground sm:text-sm">Send the report document to the client's email address(es).</p>
+          </header>
         </div>
 
         <div className="max-w-2xl w-full space-y-4 sm:space-y-6">
           <div className="space-y-4">
-            <label htmlFor="new-email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label htmlFor="new-email" className="block text-sm font-medium text-foreground dark:text-foreground">
               Email Addresses
             </label>
             
@@ -328,9 +322,9 @@ export function RestorationVisitPage() {
               <Button
                 onClick={handleAddEmail}
                 variant="secondary"
-                leftIcon={<Icon name="mdi:plus" size={16} />}
                 className="w-full sm:w-auto whitespace-nowrap"
               >
+                <Plus className="size-4 mr-2" />
                 Add Email
               </Button>
             </div>
@@ -342,16 +336,15 @@ export function RestorationVisitPage() {
                     key={index}
                     className="flex items-center justify-between gap-3 px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700"
                   >
-                    <span className="text-sm sm:text-base text-gray-700 dark:text-gray-300 flex-1 truncate">
+                    <span className="text-sm sm:text-base text-foreground dark:text-foreground flex-1 truncate">
                       {email}
                     </span>
-                    <IconButton
+                    <Button variant="ghost" size="icon" aria-label="Remove email"
                       onClick={() => handleRemoveEmail(index)}
-                      icon={<Icon name="mdi:close" size={18} />}
-                      variant="ghost"
-                      size="sm"
                       className="flex-shrink-0"
-                    />
+                    >
+                      <X className="size-4.5" />
+                    </Button>
                   </div>
                 ))}
               </div>
@@ -360,24 +353,27 @@ export function RestorationVisitPage() {
 
           <Button
             onClick={handleSendEmail}
-            loading={sendingEmail}
-            leftIcon={<Icon name="mdi:email-send" size={16} />}
             className="w-full sm:w-auto"
-            disabled={emailAddresses.length === 0}
+            disabled={emailAddresses.length === 0 || sendingEmail}
           >
-            Send Email{emailAddresses.length > 0 ? ` (${emailAddresses.length})` : ""}
+            {sendingEmail ? (
+              <Loader className="size-4 animate-spin mr-2" />
+            ) : (
+              <Send className="size-4 mr-2" />
+            )}
+            {sendingEmail ? "Sending..." : `Send Email${emailAddresses.length > 0 ? ` (${emailAddresses.length})` : ""}`}
           </Button>
         </div>
-      </PageContainer>
+      </div>
     );
   }
 
   return (
-    <PageContainer className="space-y-8">
-      <SimplePageHeader
-        title="Restoration Report - Visit"
-        description="Load and complete the report information using the project."
-      />
+    <div className="mx-auto w-full px-4 py-6 sm:px-6 lg:px-8 max-w-screen-2xl space-y-8">
+      <header className="flex flex-col gap-1">
+          <h1 className="text-xl font-semibold text-foreground sm:text-2xl">Restoration Report - Visit</h1>
+            <p className="text-xs text-muted-foreground sm:text-sm">Load and complete the report information using the project.</p>
+        </header>
 
       <form onSubmit={handleSubmit} className="space-y-10">
         <ProjectSearchSection
@@ -454,14 +450,18 @@ export function RestorationVisitPage() {
         <div className="flex flex-wrap items-center gap-3">
           <Button
             type="submit"
-            loading={uploading}
-            leftIcon={<Icon name="mdi:content-save" size={16} />}
+            disabled={uploading}
           >
-            Submit Report
+            {uploading ? (
+              <Loader className="size-4 animate-spin mr-2" />
+            ) : (
+              <Save className="size-4 mr-2" />
+            )}
+            {uploading ? "Submitting..." : "Submit Report"}
           </Button>
           {uploading && (
-            <div className="flex items-center gap-2 text-gray-300">
-              <Spinner size="sm" /> Sending information...
+            <div className="flex items-center gap-2 text-foreground">
+              <Loader className="size-4 animate-spin" /> Sending information...
             </div>
           )}
         </div>
@@ -471,6 +471,6 @@ export function RestorationVisitPage() {
         isTranslating={isTranslating}
         progress={translationProgress}
       />
-    </PageContainer>
+    </div>
   );
 }

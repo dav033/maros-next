@@ -16,7 +16,6 @@ export interface UseCompanyContactModalResult {
   mode: 'create' | 'edit' | null;
 }
 
-
 export function useCompanyContactModal({
   setCreateFormValue,
   setEditFormValue,

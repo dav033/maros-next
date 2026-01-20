@@ -1,4 +1,7 @@
-import { Button, Icon, IconButton, Textarea, Typography } from "@dav033/dav-components";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Plus, Trash } from "lucide-react";
 
 interface StringListSectionProps {
   title: string;
@@ -22,29 +25,26 @@ export const StringListSection = ({
   emptyMessage,
 }: StringListSectionProps) => {
   return (
-    <section className="rounded-2xl bg-[#1d1d1f] p-6 shadow-sm space-y-4">
-      <div className="flex items-center justify-between gap-3">
-        <Typography variant="body" className="font-semibold text-theme-light">
-          {title}
-        </Typography>
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+        <CardTitle className="text-base">{title}</CardTitle>
         <Button
           type="button"
           variant="secondary"
           size="sm"
-          leftIcon={<Icon name="mdi:plus" size={16} />}
           onClick={onAdd}
         >
+          <Plus className="size-4 mr-2" />
           Add
         </Button>
-      </div>
-
-      <div className="space-y-4">
+      </CardHeader>
+      <CardContent className="space-y-4">
         {items.map((item, index) => (
           <div key={`item-${index}`} className="flex items-start gap-3">
             <div className="flex-1 space-y-2">
-              <Typography variant="small" className="text-gray-300 font-medium">
+              <p className="text-sm text-muted-foreground font-medium">
                 {itemLabel(index)}
-              </Typography>
+              </p>
               <Textarea
                 value={item}
                 onChange={(e) => onUpdate(index, e.target.value)}
@@ -53,22 +53,23 @@ export const StringListSection = ({
                 className="w-full resize-y"
               />
             </div>
-            <IconButton
-              aria-label="Delete item"
+            <Button
+              type="button"
               variant="ghost"
+              size="icon"
               onClick={() => onDelete(index)}
-              icon={<Icon name="mdi:delete" size={18} />}
-              className="mt-6"
-            />
+              className="mt-6 text-muted-foreground hover:text-destructive"
+              aria-label="Delete item"
+            >
+              <Trash className="size-4.5" />
+            </Button>
           </div>
         ))}
         {items.length === 0 && (
-          <Typography variant="small" className="text-gray-400">
-            {emptyMessage}
-          </Typography>
+          <p className="text-sm text-muted-foreground">{emptyMessage}</p>
         )}
-      </div>
-    </section>
+      </CardContent>
+    </Card>
   );
 };
 

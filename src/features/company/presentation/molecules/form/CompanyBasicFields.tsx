@@ -1,4 +1,8 @@
-import { Icon, Input, LocationField } from "@dav033/dav-components";
+// TODO: LocationField needs to be migrated separately (Google Maps integration)
+
+import { LocationField } from "@/components/custom";
+import { Building, Phone, Mail, FileText } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import type { ChangeEvent } from "react";
 
 interface CompanyBasicFieldsProps {
@@ -36,49 +40,67 @@ export function CompanyBasicFields({
 }: CompanyBasicFieldsProps) {
   return (
     <>
-      <Input
-        value={name}
-        onChange={onNameChange}
-        placeholder="Company name"
-        disabled={disabled}
-        required
-        leftAddon={<Icon name="lucide:building-2" size={16} />}
-      />
+      <div className="relative">
+        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+          <Building className="size-4" />
+        </div>
+        <Input
+          value={name}
+          onChange={onNameChange}
+          placeholder="Company name"
+          disabled={disabled}
+          required
+          className="pl-10"
+        />
+      </div>
       <LocationField
         address={address}
         addressLink={addressLink}
         label="Address"
         placeholder="Company address"
-        googlePlaceholder="Start typing to search address"
         disabled={disabled}
-        showHelperText={false}
         onAddressChange={onAddressChange}
         onAddressLinkChange={onAddressLinkChange}
         onLocationChange={onLocationChange}
       />
-      <Input
-        value={phone ?? ""}
-        onChange={(e) => onPhoneChange(e.target.value)}
-        placeholder="Phone"
-        disabled={disabled}
-        type="tel"
-        leftAddon={<Icon name="lucide:phone" size={16} />}
-      />
-      <Input
-        value={email ?? ""}
-        onChange={(e) => onEmailChange(e.target.value)}
-        placeholder="Email"
-        disabled={disabled}
-        type="email"
-        leftAddon={<Icon name="lucide:mail" size={16} />}
-      />
-      <Input
-        value={submiz ?? ""}
-        onChange={(e) => onSubmizChange(e.target.value)}
-        placeholder="Submiz"
-        disabled={disabled}
-        leftAddon={<Icon name="lucide:file-text" size={16} />}
-      />
+      <div className="relative">
+        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+          <Phone className="size-4" />
+        </div>
+        <Input
+          value={phone ?? ""}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => onPhoneChange(e.target.value)}
+          placeholder="Phone"
+          disabled={disabled}
+          type="tel"
+          className="pl-10"
+        />
+      </div>
+      <div className="relative">
+        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+          <Mail className="size-4" />
+        </div>
+        <Input
+          value={email ?? ""}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => onEmailChange(e.target.value)}
+          placeholder="Email"
+          disabled={disabled}
+          type="email"
+          className="pl-10"
+        />
+      </div>
+      <div className="relative">
+        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+          <FileText className="size-4" />
+        </div>
+        <Input
+          value={submiz ?? ""}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => onSubmizChange(e.target.value)}
+          placeholder="Submiz"
+          disabled={disabled}
+          className="pl-10"
+        />
+      </div>
     </>
   );
 }

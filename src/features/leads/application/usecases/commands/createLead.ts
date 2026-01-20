@@ -21,6 +21,7 @@ export type CreateLeadInput =
       projectTypeId: ProjectTypeId;
       leadType: LeadType; // Solo para generar número si no se proporciona
       contactId: ContactId;
+      inReview?: boolean;
     }>
   | Readonly<{
       leadName?: string;
@@ -29,6 +30,7 @@ export type CreateLeadInput =
       projectTypeId: ProjectTypeId;
       leadType: LeadType; // Solo para generar número si no se proporciona
       contact: NewContact;
+      inReview?: boolean;
     }>;
 
 export type CreateLeadOptions = Readonly<{
@@ -44,8 +46,8 @@ export async function createLead(
   const { policies = {}, checkNumberAvailability = true } = options;
   const draft =
     "contactId" in input
-      ? buildLeadDraftForExistingContact(ctx.clock, input, policies)
-      : buildLeadDraftForNewContact(ctx.clock, input, policies);
+      ? buildLeadDraftForExistingContact(ctx.clock, input, policies, input.inReview)
+      : buildLeadDraftForNewContact(ctx.clock, input, policies, input.inReview);
   if (checkNumberAvailability && draft.leadNumber) {
     await ensureLeadNumberAvailable(draft.leadNumber, async (n) => {
       const available =

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { Project } from "@/project/domain";
-import { useToast } from "@dav033/dav-components";
+import { toast } from "sonner";
 import { useUpdateProjectController } from "../controllers/useUpdateProjectController";
 
 export interface UseProjectEditModalOptions {
@@ -22,14 +22,12 @@ export function useProjectEditModal({
 }: UseProjectEditModalOptions): UseProjectEditModalResult {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const toast = useToast();
-
   const updateController = useUpdateProjectController({
     project: selectedProject,
     onUpdated: async (project: Project) => {
       setIsOpen(false);
       setSelectedProject(null);
-      toast.showSuccess("Project updated successfully!");
+      toast.success("Project updated successfully!");
       await onUpdated?.();
     },
   });

@@ -17,7 +17,6 @@ export type UseCompanyServicesResult = {
   refetch: () => Promise<void>;
 };
 
-
 export function useCompanyServices(initialData?: CompanyService[]): UseCompanyServicesResult {
   const app = useCompanyApp();
 

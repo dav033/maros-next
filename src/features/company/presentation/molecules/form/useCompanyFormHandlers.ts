@@ -29,12 +29,12 @@ export function useCompanyFormHandlers(
     onChange({ ...value, serviceId });
   }
 
-  function handleCustomerChange(event: ChangeEvent<HTMLInputElement>) {
-    onChange({ ...value, isCustomer: event.target.checked });
+  function handleCustomerChange(checked: boolean) {
+    onChange({ ...value, isCustomer: checked });
   }
 
-  function handleClientChange(event: ChangeEvent<HTMLInputElement>) {
-    onChange({ ...value, isClient: event.target.checked });
+  function handleClientChange(checked: boolean) {
+    onChange({ ...value, isClient: checked });
   }
 
   function handleContactToggle(contactId: number) {

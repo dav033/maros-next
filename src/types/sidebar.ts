@@ -2,5 +2,6 @@ export type {
   SidebarItemProps,
   SidebarDropdownProps,
   SidebarDropdownConfig,
+  SidebarSection,
   SidebarConfig,
-} from "@dav033/dav-components";
+} from "@/components/sidebar/sidebarConfig";

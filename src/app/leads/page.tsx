@@ -1,12 +1,12 @@
 "use client";
 
+import { SelectOption } from "@/types/components";
 import { Suspense } from "react";
 import { LeadsPageByType } from "@/features/leads/presentation/pages/LeadsPageByType";
 import { useLeadTypeStorage } from "@/features/leads/presentation/hooks/useLeadTypeStorage";
-import { Select } from "@dav033/dav-components";
-import type { SelectOption } from "@dav033/dav-components";
+
 import { LeadType } from "@/leads/domain";
-import { SimplePageHeader } from "@dav033/dav-components";
+
 import { LeadsPageClient } from "./LeadsPageClient";
 
 const LEAD_TYPE_OPTIONS: SelectOption[] = [

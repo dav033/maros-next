@@ -1,7 +1,19 @@
 "use client";
 
-import { Input, Select, Textarea } from "@dav033/dav-components";
-import type { SelectOption } from "@dav033/dav-components";
+import type { ChangeEvent } from "react";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Briefcase, Receipt, TrendingUp } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  EMPTY_SELECT_VALUE,
+} from "@/components/ui/select";
 import { ProjectProgressStatus, InvoiceStatus } from "@/project/domain";
 import type { Lead } from "@/leads/domain";
 
@@ -26,55 +38,55 @@ type ProjectFormProps = {
   disabled?: boolean;
 };
 
+const PROJECT_PROGRESS_OPTIONS = [
+  { value: ProjectProgressStatus.NOT_EXECUTED, label: "Not Executed" },
+  { value: ProjectProgressStatus.IN_PROGRESS, label: "In Progress" },
+  { value: ProjectProgressStatus.COMPLETED, label: "Completed" },
+  { value: ProjectProgressStatus.LOST, label: "Lost" },
+  { value: ProjectProgressStatus.POSTPONED, label: "Postponed" },
+  { value: ProjectProgressStatus.PERMITS, label: "Permits" },
+];
+
+const INVOICE_STATUS_OPTIONS = [
+  { value: InvoiceStatus.PAID, label: "Paid" },
+  { value: InvoiceStatus.PENDING, label: "Pending" },
+  { value: InvoiceStatus.NOT_EXECUTED, label: "Not Executed" },
+  { value: InvoiceStatus.PERMITS, label: "Permits" },
+];
+
 export function ProjectForm({
   form,
   onChange,
   leads,
   disabled = false,
 }: ProjectFormProps) {
-  const leadOptions: SelectOption[] = leads.map((lead) => ({
-    value: lead.id,
-    label: `${lead.leadNumber} - ${lead.name}`,
-  }));
-
-  const projectProgressStatusOptions: SelectOption[] = [
-    { value: ProjectProgressStatus.NOT_EXECUTED, label: "Not Executed" },
-    { value: ProjectProgressStatus.IN_PROGRESS, label: "In Progress" },
-    { value: ProjectProgressStatus.COMPLETED, label: "Completed" },
-    { value: ProjectProgressStatus.LOST, label: "Lost" },
-    { value: ProjectProgressStatus.POSTPONED, label: "Postponed" },
-    { value: ProjectProgressStatus.PERMITS, label: "Permits" },
-  ];
-
-  const invoiceStatusOptions: SelectOption[] = [
-    { value: InvoiceStatus.PAID, label: "Paid" },
-    { value: InvoiceStatus.PENDING, label: "Pending" },
-    { value: InvoiceStatus.NOT_EXECUTED, label: "Not Executed" },
-    { value: InvoiceStatus.PERMITS, label: "Permits" },
-  ];
-
   return (
     <div className="space-y-3">
       <Select
-        options={leadOptions}
-        value={form.leadId ?? ""}
-        onChange={(val: string) =>
-          onChange("leadId", val ? Number(val) : undefined)
-        }
-        placeholder="Select Lead *"
-        icon="material-symbols:briefcase"
-        searchable={true}
+        value={form.leadId != null ? String(form.leadId) : EMPTY_SELECT_VALUE}
+        onValueChange={(val) => onChange("leadId", val === EMPTY_SELECT_VALUE ? undefined : Number(val))}
         disabled={disabled}
-        allowEmpty={true}
-        emptyLabel="Select Lead"
-      />
+      >
+        <SelectTrigger>
+          <Briefcase className="size-4 text-muted-foreground mr-2" />
+          <SelectValue placeholder="Select Lead *" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value={EMPTY_SELECT_VALUE}>Select Lead</SelectItem>
+          {leads.map((lead) => (
+            <SelectItem key={lead.id} value={String(lead.id)}>
+              {lead.leadNumber} - {lead.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
 
       <div className="grid grid-cols-2 gap-3">
         <Input
           type="number"
           step="0.01"
           value={form.invoiceAmount ?? ""}
-          onChange={(e) =>
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
             onChange("invoiceAmount", e.target.value ? Number(e.target.value) : undefined)
           }
           placeholder="Invoice Amount"
@@ -82,29 +94,43 @@ export function ProjectForm({
         />
 
         <Select
-          options={invoiceStatusOptions}
-          value={form.invoiceStatus ?? ""}
-          onChange={(val: string) => onChange("invoiceStatus", val || undefined)}
-          placeholder="Invoice Status"
-          icon="material-symbols:receipt"
-          searchable={false}
+          value={form.invoiceStatus || EMPTY_SELECT_VALUE}
+          onValueChange={(val) => onChange("invoiceStatus", val === EMPTY_SELECT_VALUE ? undefined : val)}
           disabled={disabled}
-          allowEmpty={true}
-          emptyLabel="Select Invoice Status"
-        />
+        >
+          <SelectTrigger>
+            <Receipt className="size-4 text-muted-foreground mr-2" />
+            <SelectValue placeholder="Invoice Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={EMPTY_SELECT_VALUE}>Select Invoice Status</SelectItem>
+            {INVOICE_STATUS_OPTIONS.map((opt) => (
+              <SelectItem key={opt.value} value={opt.value}>
+                {opt.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <Select
-        options={projectProgressStatusOptions}
-        value={form.projectProgressStatus ?? ""}
-        onChange={(val: string) => onChange("projectProgressStatus", val || undefined)}
-        placeholder="Project Progress Status"
-        icon="material-symbols:trending-up"
-        searchable={false}
+        value={form.projectProgressStatus || EMPTY_SELECT_VALUE}
+        onValueChange={(val) => onChange("projectProgressStatus", val === EMPTY_SELECT_VALUE ? undefined : val)}
         disabled={disabled}
-        allowEmpty={true}
-        emptyLabel="Select Progress Status"
-      />
+      >
+        <SelectTrigger>
+          <TrendingUp className="size-4 text-muted-foreground mr-2" />
+          <SelectValue placeholder="Project Progress Status" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value={EMPTY_SELECT_VALUE}>Select Progress Status</SelectItem>
+          {PROJECT_PROGRESS_OPTIONS.map((opt) => (
+            <SelectItem key={opt.value} value={opt.value}>
+              {opt.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
 
       <Textarea
         value={form.overview ?? ""}
@@ -115,14 +141,13 @@ export function ProjectForm({
       />
 
       <div className="flex items-center gap-2">
-        <input
-          type="checkbox"
+        <Checkbox
+          id="quickbooks"
           checked={form.quickbooks ?? false}
-          onChange={(e) => onChange("quickbooks", e.target.checked)}
+          onCheckedChange={(checked) => onChange("quickbooks", !!checked)}
           disabled={disabled}
-          className="h-4 w-4 rounded border-gray-300 text-theme-primary focus:ring-theme-primary"
         />
-        <label className="text-sm text-gray-700">In QuickBooks</label>
+        <Label htmlFor="quickbooks" className="text-sm text-foreground">In QuickBooks</Label>
       </div>
     </div>
   );

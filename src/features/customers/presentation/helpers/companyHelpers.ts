@@ -1,8 +1,10 @@
+
+import { createPatch, trimStringFields } from "@/lib/patch";
 import type { Company, CompanyPatch } from "@/company/domain";
 import type { Contact } from "@/contact/domain";
 import type { CompanyFormValue } from "@/features/company/presentation/molecules/CompanyForm";
 import { normalizeEmptyToUndefined } from "@/shared/mappers";
-import { createPatch, trimStringFields } from "@dav033/dav-components";
+
 
 export const initialCompanyFormValue: CompanyFormValue = {
   name: "",

@@ -54,7 +54,3 @@ export type RestorationFinalReport = {
   evidenceImages: EvidenceImageRow[];
 };
 
-
-
-
-

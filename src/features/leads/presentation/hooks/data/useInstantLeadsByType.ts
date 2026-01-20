@@ -19,7 +19,6 @@ export type UseInstantLeadsByTypeResult = {
   refetch: () => Promise<void>;
 };
 
-
 export function useInstantLeadsByType(type: LeadType, initialData?: Lead[]): UseInstantLeadsByTypeResult {
   const ctx = useLeadsApp();
 

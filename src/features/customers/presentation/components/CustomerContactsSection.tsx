@@ -1,5 +1,7 @@
 "use client";
 
+import { useTableWithSearch } from "@/common/hooks";
+
 import type { Contact } from "@/contact/domain";
 import type { Company } from "@/company/domain";
 import { ContactsTable, ContactsTableSkeleton } from "@/features/contact/presentation/organisms";
@@ -10,7 +12,17 @@ import { CustomerCrudModal } from "./CustomerCrudModal";
 import { customersKeys } from "../../infra/keys";
 import { initialContactFormValue, toContactPatch, mapContactToFormValue } from "../helpers/contactHelpers";
 import { useCustomerCrudSection } from "../../application/hooks/useCustomerCrudSection";
-import { TableToolbar, useTableWithSearch, DeleteFeedbackModal } from "@dav033/dav-components";
+import { DeleteFeedbackModal } from "@/components/custom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { X, Search } from "lucide-react";
 import { customerContactsSearchConfig, customerContactsSearchPlaceholder } from "../search";
 import { useState } from "react";
 
@@ -76,22 +88,57 @@ export function CustomerContactsSection({
     <>
       <section className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-medium text-theme-light">Contact Customers</h2>
+          <h2 className="text-lg font-medium text-foreground">Contact Customers</h2>
           <span />
         </div>
 
-        <TableToolbar
-          search={{
-            searchTerm: searchQuery,
-            onSearchChange: setSearchQuery,
-            selectedField: searchField,
-            onFieldChange: setSearchField,
-            searchFields: searchFields,
-            placeholder: customerContactsSearchPlaceholder,
-            resultCount: filteredCount,
-            totalCount: totalCount,
-          }}
-        />
+        <div className="flex items-center justify-between gap-3 rounded-xl bg-card p-3">
+          <div className="max-w-3xl flex-1">
+            <div className="flex items-center gap-2 w-full">
+              <div className="w-32 shrink-0">
+                <Select value={searchField} onValueChange={setSearchField}>
+                  <SelectTrigger className="bg-background border-input">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover border-border">
+                    {searchFields.map((field) => (
+                      <SelectItem key={field.value} value={field.value}>
+                        {field.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex-1 min-w-0 relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={customerContactsSearchPlaceholder}
+                  className="pl-9 bg-background border-input"
+                />
+              </div>
+              {searchQuery.trim().length > 0 && (
+                <Button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  aria-label="Clear search"
+                  variant="ghost"
+                  size="sm"
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+              {typeof filteredCount === "number" && typeof totalCount === "number" && (
+                <span className="whitespace-nowrap text-[10px] text-muted-foreground">
+                  Showing {filteredCount} of {totalCount} results
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
 
         {isLoading ? (
           <ContactsTableSkeleton />
@@ -117,7 +164,7 @@ export function CustomerContactsSection({
         description={
           <>
             Are you sure you want to delete contact{" "}
-            <span className="font-semibold text-theme-light">{deleteTarget?.name}</span>?
+            <span className="font-semibold text-foreground">{deleteTarget?.name}</span>?
             <br />
             This action cannot be undone.
           </>

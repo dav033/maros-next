@@ -1,11 +1,14 @@
 "use client";
 
+import { Badge } from "@/components/ui/badge";
+import type { SimpleTableColumn } from "@/types/table";
+import { Check, X } from "lucide-react";
+
 import * as React from "react";
 import type { Contact } from "@/contact";
 import { ContactRoleLabels } from "@/contact/domain";
 import type { Company } from "@/company";
-import type { SimpleTableColumn } from "@dav033/dav-components";
-import { StatusBadge, NotesButton } from "@dav033/dav-components";
+import { NotesButton } from "@/components/custom";
 import { CompanyCell } from "../../atoms/CompanyCell";
 
 interface UseContactsTableColumnsProps {
@@ -43,7 +46,7 @@ export function useContactsTableColumns({
         header: "Name",
         className: "w-[180px]",
         render: (contact: Contact) => (
-          <span className="text-theme-light">{contact.name}</span>
+          <span className="text-foreground">{contact.name}</span>
         ),
         sortable: true,
         sortValue: (contact: Contact) => contact.name ?? "",
@@ -68,7 +71,7 @@ export function useContactsTableColumns({
         header: "Phone",
         className: "w-[180px]",
         render: (contact: Contact) => (
-          <span className="text-gray-300">{contact.phone ?? "—"}</span>
+          <span className="text-foreground">{contact.phone ?? "—"}</span>
         ),
         sortable: true,
         sortValue: (contact: Contact) => contact.phone ?? "",
@@ -78,7 +81,7 @@ export function useContactsTableColumns({
         header: "Email",
         className: "w-[200px]",
         render: (contact: Contact) => (
-          <span className="text-gray-300">{contact.email ?? "—"}</span>
+          <span className="text-foreground">{contact.email ?? "—"}</span>
         ),
         sortable: true,
         sortValue: (contact: Contact) => contact.email ?? "",
@@ -87,9 +90,22 @@ export function useContactsTableColumns({
         key: "isCustomer",
         header: "Customer",
         className: "w-[100px] text-right",
-        render: (contact: Contact) => (
-          <StatusBadge status={contact.isCustomer} />
-        ),
+        render: (contact: Contact) => {
+          if (contact.isCustomer === null || contact.isCustomer === undefined) {
+            return <span className="text-muted-foreground">—</span>;
+          }
+          return contact.isCustomer ? (
+            <Badge variant="outline" className="gap-1" style={{ borderColor: "#22c55e", color: "#22c55e" }}>
+              <Check className="size-3" />
+              Yes
+            </Badge>
+          ) : (
+            <Badge variant="outline" className="gap-1" style={{ borderColor: "#6b7280", color: "#6b7280" }}>
+              <X className="size-3" />
+              No
+            </Badge>
+          );
+        },
         sortable: true,
         sortValue: (contact: Contact) => (contact.isCustomer ? "Yes" : "No"),
       },
@@ -97,7 +113,22 @@ export function useContactsTableColumns({
         key: "isClient",
         header: "Client",
         className: "w-[100px] text-right",
-        render: (contact: Contact) => <StatusBadge status={contact.isClient} />,
+        render: (contact: Contact) => {
+          if (contact.isClient === null || contact.isClient === undefined) {
+            return <span className="text-muted-foreground">—</span>;
+          }
+          return contact.isClient ? (
+            <Badge variant="outline" className="gap-1" style={{ borderColor: "#22c55e", color: "#22c55e" }}>
+              <Check className="size-3" />
+              Yes
+            </Badge>
+          ) : (
+            <Badge variant="outline" className="gap-1" style={{ borderColor: "#6b7280", color: "#6b7280" }}>
+              <X className="size-3" />
+              No
+            </Badge>
+          );
+        },
         sortable: true,
         sortValue: (contact: Contact) => (contact.isClient ? "Yes" : "No"),
       },

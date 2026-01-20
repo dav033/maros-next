@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { Lead } from "@/leads/domain";
 import type { LeadType } from "@/leads/domain";
-import { useToast } from "@dav033/dav-components";
+import { toast } from "sonner";
 import { useUpdateLeadController } from "../controllers/useUpdateLeadController";
 
 export interface UseLeadEditModalOptions {
@@ -25,14 +25,12 @@ export function useLeadEditModal({
 }: UseLeadEditModalOptions): UseLeadEditModalResult {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
-  const toast = useToast();
-
   const updateController = useUpdateLeadController({
     lead: selectedLead,
     onUpdated: async (lead: Lead) => {
       setIsOpen(false);
       setSelectedLead(null);
-      toast.showSuccess("Lead updated successfully!");
+      toast.success("Lead updated successfully!");
       await onUpdated?.();
     },
   });

@@ -1,4 +1,41 @@
-import type { SidebarConfig, SidebarDropdownConfig, SidebarSection } from "@dav033/dav-components";
+import type { LucideIcon } from "lucide-react";
+import {
+  Briefcase,
+  ClipboardList,
+  FolderKanban,
+  Users,
+  Building,
+  UserCog,
+  FileBarChart2,
+  FileCheck2,
+} from "lucide-react";
+
+export type SidebarItemProps = {
+  title: string;
+  href: string;
+  icon?: LucideIcon;
+};
+
+export type SidebarDropdownProps = {
+  trigger: {
+    title: string;
+    icon?: LucideIcon;
+  };
+  items: SidebarDropdownConfig[];
+};
+
+export type SidebarDropdownConfig = SidebarItemProps | SidebarDropdownProps;
+
+export type SidebarSection = {
+  section: string;
+  items: SidebarDropdownConfig[];
+};
+
+export type SidebarConfig = {
+  top: Array<SidebarDropdownConfig | SidebarSection>;
+  bottom?: Array<SidebarDropdownConfig | SidebarSection>;
+  title?: string;
+};
 
 const menuSection: SidebarSection = {
   section: "Business",
@@ -6,12 +43,17 @@ const menuSection: SidebarSection = {
     {
       title: "Leads",
       href: "/leads",
-      icon: "mdi:briefcase-outline",
+      icon: Briefcase,
+    },
+    {
+      title: "Leads in Review",
+      href: "/review/leads",
+      icon: ClipboardList,
     },
     {
       title: "Projects",
       href: "/projects",
-      icon: "mdi:folder-multiple-outline",
+      icon: FolderKanban,
     },
   ],
 };
@@ -22,17 +64,17 @@ const accountSection: SidebarSection = {
     {
       title: "Contacts",
       href: "/contacts",
-      icon: "mdi:account-multiple-outline",
+      icon: Users,
     },
     {
       title: "Company",
       href: "/company",
-      icon: "mdi:office-building-outline",
+      icon: Building,
     },
     {
       title: "Customers",
       href: "/customers",
-      icon: "mdi:account-group-outline",
+      icon: UserCog,
     },
   ],
 };
@@ -43,12 +85,12 @@ const reportsSection: SidebarSection = {
     {
       title: "Restoration Visit",
       href: "/reports/restoration-visit",
-      icon: "mdi:file-chart-outline",
+      icon: FileBarChart2,
     },
     {
       title: "Restoration Final",
       href: "/reports/restoration-final",
-      icon: "mdi:file-check-outline",
+      icon: FileCheck2,
     },
   ],
 };
@@ -60,7 +102,7 @@ export const SIDEBAR_CONFIG: SidebarConfig = {
 };
 
 export function getMainPages() {
-  const pages: Array<{ title: string; href: string; icon?: string }> = [];
+  const pages: Array<{ title: string; href: string; icon?: LucideIcon }> = [];
 
   const extractPages = (entries: Array<SidebarDropdownConfig | SidebarSection>) => {
     for (const entry of entries) {

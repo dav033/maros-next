@@ -1,4 +1,13 @@
-import { Modal, BasicModalFooter } from "@dav033/dav-components";
+
+import { BasicModalFooter } from "@/components/custom";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+
 import { CompanyForm } from "../molecules/CompanyForm";
 import { ErrorAlert } from "../molecules/ErrorAlert";
 import type { CompanyFormValue } from "../molecules/CompanyForm";
@@ -33,29 +42,30 @@ export function CompanyModal({
   const title = mode === "create" ? "New company" : "Edit company";
 
   return (
-    <Modal
-      isOpen={isOpen}
-      title={title}
-      onClose={onClose}
-      footer={
-        <BasicModalFooter
-          onCancel={onClose}
-          onSubmit={onSubmit}
-          isLoading={isSubmitting}
-          canSubmit={formValue.name.trim().length > 0}
-          mode={mode}
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+        </DialogHeader>
+        <CompanyForm
+          value={formValue}
+          onChange={onChange}
+          disabled={isSubmitting}
+          services={services}
+          contacts={contacts}
+          onCreateNewContact={onCreateNewContact}
         />
-      }
-    >
-      <CompanyForm
-        value={formValue}
-        onChange={onChange}
-        disabled={isSubmitting}
-        services={services}
-        contacts={contacts}
-        onCreateNewContact={onCreateNewContact}
-      />
-      {serverError && <ErrorAlert message={serverError} />}
-    </Modal>
+        {serverError && <ErrorAlert message={serverError} />}
+        <DialogFooter>
+          <BasicModalFooter
+            onCancel={onClose}
+            onSubmit={onSubmit}
+            isLoading={isSubmitting}
+            canSubmit={formValue.name.trim().length > 0}
+            mode={mode}
+          />
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

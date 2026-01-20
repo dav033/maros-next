@@ -58,6 +58,12 @@ export class LeadHttpRepository implements LeadRepositoryPort {
     return mapLeadsFromApi(Array.isArray(data) ? data : []);
   }
 
+  async findInReview(): Promise<Lead[]> {
+    const url = leadEndpoints.listInReview();
+    const { data } = await this.api.get<ApiLeadDTO[]>(url);
+    return mapLeadsFromApi(Array.isArray(data) ? data : []);
+  }
+
   create = async (draft: LeadDraft, leadTypeForGeneration?: LeadType): Promise<Lead> => {
     const payload: CreateLeadPayload = mapLeadDraftToCreatePayload(draft);
     

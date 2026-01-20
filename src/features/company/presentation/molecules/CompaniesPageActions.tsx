@@ -1,4 +1,5 @@
-import { Button, Icon } from "@dav033/dav-components";
+import { Wrench, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface CompaniesPageActionsProps {
   onManageServices: () => void;
@@ -12,11 +13,11 @@ export function CompaniesPageActions({
   return (
     <div className="flex items-center justify-end gap-2">
       <Button variant="secondary" onClick={onManageServices}>
-        <Icon name="lucide:wrench" className="mr-2" size={16} />
+        <Wrench className="size-4 mr-2" />
         Manage Services
       </Button>
-      <Button variant="primary" onClick={onNewCompany}>
-        <Icon name="lucide:plus" className="mr-2" size={16} />
+      <Button onClick={onNewCompany}>
+        <Plus className="size-4 mr-2" />
         New Company
       </Button>
     </div>

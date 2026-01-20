@@ -1,10 +1,13 @@
 "use client";
 
+import { useFormController } from "@/common/hooks";
+
+
 import { useEffect } from "react";
 import { useLeadsApp } from "@/di";
 import { leadsKeys, patchLead } from "@/leads/application";
 import type { Lead, LeadPatch } from "@/leads/domain";
-import { useFormController } from "@dav033/dav-components";
+
 
 type LeadEditFormData = {
   leadName: string;

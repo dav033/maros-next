@@ -30,8 +30,8 @@ export type ApiLeadDTO = {
   contact?: ApiContactDTO;
   projectType?: ApiProjectTypeDTO;
   notes?: string[] | null;
+  inReview?: boolean | null;
 } | null;
-
 
 function resolveStatus(status: string | null | undefined): LeadStatus {
   if (!status) {
@@ -50,7 +50,6 @@ function resolveStatus(status: string | null | undefined): LeadStatus {
   ) {
     return upper as LeadStatus;
   }
-
 
   if (upper === "NEW" || upper === "UNDETERMINED" || upper === "TO_DO") {
     return "NOT_EXECUTED" as LeadStatus;
@@ -100,6 +99,7 @@ export function mapLeadFromDTO(dto: ApiLeadDTO): Lead {
   const projectTypeColor = normalizeText(dto?.projectType?.color ?? "");
 
   const notesArray = Array.isArray(dto?.notes) && dto.notes.length > 0 ? dto.notes.map(n => String(n)) : [];
+  const inReview = dto?.inReview ?? false;
   
   return {
     id,
@@ -109,6 +109,7 @@ export function mapLeadFromDTO(dto: ApiLeadDTO): Lead {
     location,
     addressLink,
     status,
+    inReview,
     contact: {
       id: contactId,
       name: contactName,

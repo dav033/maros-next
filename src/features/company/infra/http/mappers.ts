@@ -5,9 +5,6 @@ import {
   CompanyType,
 } from "../../domain/models";
 
-
-
-
 export type ApiCompanyDTO = {
   id: number;
   name: string;
@@ -23,7 +20,6 @@ export type ApiCompanyDTO = {
   submiz?: string | null;
 };
 
-
 export type CreateCompanyRequestDTO = {
   name: string;
   address?: string | null;
@@ -38,7 +34,6 @@ export type CreateCompanyRequestDTO = {
   submiz?: string | null;
 };
 
-
 export type UpdateCompanyRequestDTO = {
   name: string;
   address?: string | null;
@@ -52,7 +47,6 @@ export type UpdateCompanyRequestDTO = {
   email?: string | null;
   submiz?: string | null;
 };
-
 
 export function mapCompanyFromApi(dto: ApiCompanyDTO): Company {
   let type = dto.type;
@@ -77,11 +71,9 @@ export function mapCompanyFromApi(dto: ApiCompanyDTO): Company {
   };
 }
 
-
 export function mapCompaniesFromApi(dtos: ApiCompanyDTO[]): Company[] {
   return dtos.map(mapCompanyFromApi);
 }
-
 
 export function mapCompanyDraftToCreateDTO(
   draft: CompanyDraft,
@@ -103,7 +95,6 @@ export function mapCompanyDraftToCreateDTO(
     submiz: draft.submiz ?? null,
   };
 }
-
 
 export function mapCompanyPatchToUpdateDTO(
   patch: CompanyPatch,
@@ -147,26 +138,19 @@ export function mapCompanyPatchToUpdateDTO(
   return dto;
 }
 
-
-
-
 export type ApiCompanyServiceDTO = any;
-
 
 export function mapCompanyServiceFromApi(dto: ApiCompanyServiceDTO) {
   return dto as any;
 }
 
-
 export function mapCompanyServicesFromApi(dtos: ApiCompanyServiceDTO[]) {
   return dtos.map(mapCompanyServiceFromApi);
 }
 
-
 export function mapCompanyServiceDraftToCreateDTO(draft: any) {
   return draft as any;
 }
-
 
 export function mapCompanyServicePatchToUpdateDTO(patch: any) {
   return patch as any;

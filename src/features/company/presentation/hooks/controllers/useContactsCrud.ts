@@ -1,6 +1,6 @@
 "use client";
 
-import { useCrudPage } from "@dav033/dav-components";
+import { useCrudPage } from "@/common/hooks";
 import { useContactsApp } from "@/di";
 import { toContactDraft, toContactFormValue, toContactPatch, type Contact, type ContactDraft, type ContactFormValue, type ContactPatch } from "@/contact/domain";
 import {

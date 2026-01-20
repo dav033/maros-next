@@ -1,9 +1,11 @@
 "use client";
 
+import { Badge } from "@/components/ui/badge";
+import type { SimpleTableColumn } from "@/types/table";
+
 import * as React from "react";
 import type { Project } from "@/project/domain";
-import type { SimpleTableColumn } from "@dav033/dav-components";
-import { StatusBadge, NotesButton } from "@dav033/dav-components";
+import { NotesButton } from "@/components/custom";
 import { ProjectProgressStatus, InvoiceStatus } from "@/project/domain";
 import { formatCurrency } from "@/shared/utils";
 
@@ -25,7 +27,7 @@ export function useProjectsTableColumns(
         render: (project: Project) => {
           const notesArray = Array.isArray(project.notes) ? project.notes : [];
           if (!onOpenNotesModal) {
-            return <span className="text-gray-400">-</span>;
+            return <span className="text-muted-foreground">-</span>;
           }
           return (
             <NotesButton
@@ -64,7 +66,7 @@ export function useProjectsTableColumns(
         className: "w-[150px]",
         render: (project: Project) => {
           const status = project.projectProgressStatus;
-          if (!status) return <span className="text-gray-400">-</span>;
+          if (!status) return <span className="text-muted-foreground">-</span>;
           
           const statusLabels: Record<ProjectProgressStatus, string> = {
             [ProjectProgressStatus.NOT_EXECUTED]: "Not Executed",
@@ -87,11 +89,11 @@ export function useProjectsTableColumns(
         render: (project: Project) => {
           const estimatedAmount = project.financial?.estimatedAmount;
           if (estimatedAmount === null || estimatedAmount === undefined) {
-            return <span className="text-gray-400">-</span>;
+            return <span className="text-muted-foreground">-</span>;
           }
           const formatted = formatCurrency(estimatedAmount);
           if (formatted === "-") {
-            return <span className="text-gray-400">-</span>;
+            return <span className="text-muted-foreground">-</span>;
           }
           return <span>{formatted}</span>;
         },
@@ -109,11 +111,11 @@ export function useProjectsTableColumns(
         render: (project: Project) => {
           const paidAmount = project.financial?.paidAmount;
           if (paidAmount === null || paidAmount === undefined) {
-            return <span className="text-gray-400">-</span>;
+            return <span className="text-muted-foreground">-</span>;
           }
           const formatted = formatCurrency(paidAmount);
           if (formatted === "-") {
-            return <span className="text-gray-400">-</span>;
+            return <span className="text-muted-foreground">-</span>;
           }
           return <span>{formatted}</span>;
         },
@@ -131,11 +133,11 @@ export function useProjectsTableColumns(
         render: (project: Project) => {
           const outstandingAmount = project.financial?.outstandingAmount;
           if (outstandingAmount === null || outstandingAmount === undefined) {
-            return <span className="text-gray-400">-</span>;
+            return <span className="text-muted-foreground">-</span>;
           }
           const formatted = formatCurrency(outstandingAmount);
           if (formatted === "-") {
-            return <span className="text-gray-400">-</span>;
+            return <span className="text-muted-foreground">-</span>;
           }
           return <span>{formatted}</span>;
         },
@@ -149,6 +151,4 @@ export function useProjectsTableColumns(
     ];
   }, [onOpenNotesModal]);
 }
-
-
 

@@ -1,4 +1,4 @@
-import { Badge } from "@dav033/dav-components";
+import { Badge } from "@/components/ui/badge";
 
 export interface ServiceBadgeProps {
   service: {
@@ -9,15 +9,18 @@ export interface ServiceBadgeProps {
 }
 
 export function ServiceBadge({ service }: ServiceBadgeProps) {
-  const color = service.color || "#000000";
+  const color = service.color || "#9ca3af";
   
   return (
     <Badge
-      size="sm"
-      dot
-      dotColor={color}
-      customColor={color === "#000000" ? "#9ca3af" : color}
+      variant="outline"
+      className="gap-1.5 text-xs"
+      style={{ borderColor: color, color }}
     >
+      <span
+        className="h-2 w-2 rounded-full"
+        style={{ backgroundColor: color }}
+      />
       {service.name}
     </Badge>
   );

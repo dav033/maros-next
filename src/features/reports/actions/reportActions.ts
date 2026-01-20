@@ -4,10 +4,10 @@ import type { ActionResult } from "@/shared/actions/types";
 import { success, failure, handleActionError } from "@/shared/actions/utils";
 
 const IMAGE_UPLOAD_WEBHOOK_URL =
-  "https://n8n-jfl9.onrender.com/webhook/90601da6-4544-471d-8e0c-ecbde6631dc8";
+  "https://n8n.marosconstruction.com/webhook/90601da6-4544-471d-8e0c-ecbde6631dc8";
 
 const DOCUMENT_PROCESSING_WEBHOOK_URL =
-  "https://n8n-jfl9.onrender.com/webhook/87c85188-f421-4725-9b1c-be59a4eabae7";
+  "https://n8n.marosconstruction.com/webhook/87c85188-f421-4725-9b1c-be59a4eabae7";
 
 const SEND_EMAIL_WEBHOOK_URL =
   "https://n8n-jfl9.onrender.com/webhook-test/d421c1ae-4d7e-4ad5-8129-620217cf7c06";
@@ -256,6 +256,4 @@ export async function sendEmailAction(
     return handleActionError(error);
   }
 }
-
-
 

@@ -6,7 +6,7 @@ import type { Contact, ContactPatch } from "../../../domain/models";
 import type { ContactFormValue } from "../../../domain/mappers";
 import { toContactPatch } from "../../../domain/mappers";
 import { contactsKeys } from "@/contact/application";
-import { useToast } from "@dav033/dav-components";
+import { toast } from "sonner";
 import { updateContactAction, deleteContactAction } from "../../../actions/contactActions";
 
 export const initialContactFormValue: ContactFormValue = {
@@ -23,7 +23,6 @@ export const initialContactFormValue: ContactFormValue = {
 
 export function useContactMutations() {
   const queryClient = useQueryClient();
-  const toast = useToast();
 
   const updateContactMutation = useMutation({
     mutationFn: async (input: { id: number; patch: ContactPatch }) => {
@@ -36,12 +35,12 @@ export function useContactMutations() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["customers"] });
       queryClient.invalidateQueries({ queryKey: contactsKeys.list });
-      toast.showSuccess("Contact updated successfully!");
+      toast.success("Contact updated successfully!");
     },
     onError: (error: unknown) => {
       const message =
         error instanceof Error ? error.message : "Could not update contact";
-      toast.showError(message);
+      toast.error(message);
       throw error;
     },
   });
@@ -54,11 +53,11 @@ export function useContactMutations() {
       }
       queryClient.invalidateQueries({ queryKey: ["customers"] });
       queryClient.invalidateQueries({ queryKey: contactsKeys.list });
-      toast.showSuccess("Contact deleted successfully!");
+      toast.success("Contact deleted successfully!");
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : "Could not delete contact";
-      toast.showError(message);
+      toast.error(message);
     }
   };
 

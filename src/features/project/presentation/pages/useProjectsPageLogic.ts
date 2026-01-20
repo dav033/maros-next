@@ -101,5 +101,3 @@ export function useProjectsPageLogic(initialData?: ProjectsPageData): UseProject
   };
 }
 
-
-

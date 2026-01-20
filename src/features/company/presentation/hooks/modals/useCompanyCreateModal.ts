@@ -17,7 +17,6 @@ export interface UseCompanyCreateModalResult {
   isSubmitting: boolean;
 }
 
-
 export function useCompanyCreateModal(): UseCompanyCreateModalResult {
   const { createMutation } = useCompanyMutations();
 

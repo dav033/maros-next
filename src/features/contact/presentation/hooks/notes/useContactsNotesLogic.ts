@@ -1,6 +1,10 @@
 "use client";
 
-import { useNotesModal, useToast } from "@dav033/dav-components";
+import { useNotesModal } from "@/common/hooks";
+
+
+import { toast } from "sonner";
+
 import { useContactsApp } from "@/di";
 import { patchContact } from "@/contact/application";
 import type { Contact } from "@/contact/domain";
@@ -20,8 +24,6 @@ export interface UseContactsNotesLogicReturn {
 
 export function useContactsNotesLogic(): UseContactsNotesLogicReturn {
   const app = useContactsApp();
-  const toast = useToast();
-
   const {
     notesModalState,
     openNotesModal,
@@ -41,7 +43,7 @@ export function useContactsNotesLogic(): UseContactsNotesLogicReturn {
       await patchContact(app, contact.id, {
         notes: notes ?? [],
       });
-      toast.showSuccess("Notes updated successfully!");
+      toast.success("Notes updated successfully!");
     });
   };
 

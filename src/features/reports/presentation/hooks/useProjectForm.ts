@@ -4,12 +4,11 @@ import { useProjectsApp } from "@/di";
 import { getProjectById } from "@/features/project/application/usecases/queries/getProjectById";
 import { useInstantProjects } from "@/features/project/presentation/hooks/data/useInstantProjects";
 import { optimizedApiClient } from "@/shared/infra";
-import { useToast } from "@dav033/dav-components";
+import { toast } from "sonner";
 import { EMPTY_VISIT, mapLanguage, extractProjectFormData } from "../utils/reportFormHelpers";
 import type { RestorationVisitReport } from "@/reports/domain/models";
 
 export const useProjectForm = () => {
-  const toast = useToast();
   const searchParams = useSearchParams();
   const projectsApp = useProjectsApp();
   const { projects = [], isFetching: projectsLoading } = useInstantProjects();
@@ -66,7 +65,7 @@ export const useProjectForm = () => {
       };
 
       if (!decodedData.lead_number) {
-        toast.showError("Invalid data: lead_number is missing.");
+        toast.error("Invalid data: lead_number is missing.");
         return;
       }
 
@@ -113,7 +112,7 @@ export const useProjectForm = () => {
               language: prev.language || "en",
             }));
             setProjectLoading(false);
-            toast.showSuccess("Form pre-filled with data from URL.");
+            toast.success("Form pre-filled with data from URL.");
           })
           .catch(() => {
             setProjectLoading(false);
@@ -140,14 +139,14 @@ export const useProjectForm = () => {
               language: prev.language || "en",
             }));
             setProjectLoading(false);
-            toast.showSuccess("Form pre-filled with data from URL.");
+            toast.success("Form pre-filled with data from URL.");
           })
           .catch(() => {
             setProjectLoading(false);
           });
       }
     } catch (error) {
-      toast.showError("Invalid data in URL. Please select a project manually.");
+      toast.error("Invalid data in URL. Please select a project manually.");
     }
   }, [searchParams, projects, projectsLoading, projectsApp, toast]);
 

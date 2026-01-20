@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { CompanyService, CompanyServiceDraft } from "../../../domain/models";
 import { companyServiceCrudUseCases } from "../../../application/usecases/companyServiceCrud";
 import { useCompanyApp } from "@/di";
-import { useToast } from "@dav033/dav-components";
+import { toast } from "sonner";
 
 type Mode = "list" | "create" | "edit";
 
@@ -17,8 +17,6 @@ type ServiceFormValue = {
 export function useManageServices() {
   const app = useCompanyApp();
   const queryClient = useQueryClient();
-  const toast = useToast();
-
   const [mode, setMode] = useState<Mode>("list");
   const [currentService, setCurrentService] = useState<CompanyService | null>(null);
   const [formValue, setFormValue] = useState<ServiceFormValue>({ name: "", color: "#000000" });
@@ -34,12 +32,12 @@ export function useManageServices() {
       setFormValue({ name: "", color: "#000000" });
       setServerError(null);
       queryClient.invalidateQueries({ queryKey: ["companyServices"] });
-      toast.showSuccess("Service created successfully!");
+      toast.success("Service created successfully!");
     },
     onError: (error: unknown) => {
       const message = error instanceof Error ? error.message : "Could not create service";
       setServerError(message);
-      toast.showError(message);
+      toast.error(message);
     },
   });
 
@@ -52,12 +50,12 @@ export function useManageServices() {
       setCurrentService(null);
       setServerError(null);
       queryClient.invalidateQueries({ queryKey: ["companyServices"] });
-      toast.showSuccess("Service updated successfully!");
+      toast.success("Service updated successfully!");
     },
     onError: (error: unknown) => {
       const message = error instanceof Error ? error.message : "Could not update service";
       setServerError(message);
-      toast.showError(message);
+      toast.error(message);
     },
   });
 
@@ -65,11 +63,11 @@ export function useManageServices() {
     mutationFn: (id: number) => companyServiceCrudUseCases.delete(app)(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["companyServices"] });
-      toast.showSuccess("Service deleted successfully");
+      toast.success("Service deleted successfully");
     },
     onError: (error: unknown) => {
       const message = error instanceof Error ? error.message : "Could not delete service";
-      toast.showError(message);
+      toast.error(message);
     },
   });
 

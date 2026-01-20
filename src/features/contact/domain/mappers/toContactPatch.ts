@@ -1,6 +1,8 @@
+
+import { createPatch, trimStringFields } from "@/lib/patch";
 import type { Contact, ContactPatch } from "../models";
 import { normalizeEmptyToUndefined } from "@/shared/mappers";
-import { createPatch, trimStringFields } from "@dav033/dav-components";
+
 
 import type { ContactRole } from "../ContactRole";
 

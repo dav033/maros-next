@@ -1,9 +1,12 @@
 "use client";
 
+import { Badge } from "@/components/ui/badge";
+import type { SimpleTableColumn } from "@/types/table";
+import { Check, X } from "lucide-react";
+
 import * as React from "react";
 import type { Company } from "../../../domain/models";
-import type { SimpleTableColumn } from "@dav033/dav-components";
-import { StatusBadge, NotesButton } from "@dav033/dav-components";
+import { NotesButton } from "@/components/custom";
 import { CompanyTypeBadge } from "../../atoms/CompanyTypeBadge";
 import { ServiceBadge } from "../../atoms/ServiceBadge";
 
@@ -40,7 +43,7 @@ export function useCompaniesTableColumns({
         header: "Name",
         className: "w-[200px]",
         render: (company: Company) => (
-          <span className="text-theme-light">{company.name}</span>
+          <span className="text-foreground">{company.name}</span>
         ),
         sortable: true,
         sortValue: (company: Company) => company.name ?? "",
@@ -50,7 +53,7 @@ export function useCompaniesTableColumns({
         header: "Address",
         className: "w-[250px]",
         render: (company: Company) => (
-          <span className="text-gray-300">{company.address ?? "—"}</span>
+          <span className="text-foreground">{company.address ?? "—"}</span>
         ),
         sortable: true,
         sortValue: (company: Company) => company.address ?? "",
@@ -70,7 +73,7 @@ export function useCompaniesTableColumns({
         render: (company: Company) => {
           const service = services.find((s) => s.id === company.serviceId);
           if (!service) {
-            return <span className="text-gray-400">—</span>;
+            return <span className="text-muted-foreground">—</span>;
           }
           return <ServiceBadge service={service} />;
         },
@@ -84,9 +87,22 @@ export function useCompaniesTableColumns({
         key: "isCustomer",
         header: "Customer",
         className: "w-[100px] text-right",
-        render: (company: Company) => (
-          <StatusBadge status={company.isCustomer} />
-        ),
+        render: (company: Company) => {
+          if (company.isCustomer === null || company.isCustomer === undefined) {
+            return <span className="text-muted-foreground">—</span>;
+          }
+          return company.isCustomer ? (
+            <Badge variant="outline" className="gap-1" style={{ borderColor: "#22c55e", color: "#22c55e" }}>
+              <Check className="size-3" />
+              Yes
+            </Badge>
+          ) : (
+            <Badge variant="outline" className="gap-1" style={{ borderColor: "#6b7280", color: "#6b7280" }}>
+              <X className="size-3" />
+              No
+            </Badge>
+          );
+        },
         sortable: true,
         sortValue: (company: Company) => (company.isCustomer ? "Yes" : "No"),
       },
@@ -94,9 +110,22 @@ export function useCompaniesTableColumns({
         key: "isClient",
         header: "Client",
         className: "w-[100px] text-right",
-        render: (company: Company) => (
-          <StatusBadge status={company.isClient} />
-        ),
+        render: (company: Company) => {
+          if (company.isClient === null || company.isClient === undefined) {
+            return <span className="text-muted-foreground">—</span>;
+          }
+          return company.isClient ? (
+            <Badge variant="outline" className="gap-1" style={{ borderColor: "#22c55e", color: "#22c55e" }}>
+              <Check className="size-3" />
+              Yes
+            </Badge>
+          ) : (
+            <Badge variant="outline" className="gap-1" style={{ borderColor: "#6b7280", color: "#6b7280" }}>
+              <X className="size-3" />
+              No
+            </Badge>
+          );
+        },
         sortable: true,
         sortValue: (company: Company) => (company.isClient ? "Yes" : "No"),
       },

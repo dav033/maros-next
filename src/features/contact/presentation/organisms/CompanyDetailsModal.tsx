@@ -1,4 +1,10 @@
-import { Modal } from "@dav033/dav-components";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import type { Company } from "@/company";
 
 interface CompanyDetailsModalProps {
@@ -13,37 +19,42 @@ export function CompanyDetailsModal({
   onClose,
 }: CompanyDetailsModalProps) {
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Company Details</DialogTitle>
+        </DialogHeader>
       {company ? (
         <div className="space-y-2 p-4">
           <div>
-            <span className="font-semibold text-theme-light">Name:</span>{" "}
+            <span className="font-semibold text-foreground">Name:</span>{" "}
             {company.name}
           </div>
           <div>
-            <span className="font-semibold text-theme-light">Address:</span>{" "}
+            <span className="font-semibold text-foreground">Address:</span>{" "}
             {company.address || "—"}
           </div>
           <div>
-            <span className="font-semibold text-theme-light">Type:</span>{" "}
+            <span className="font-semibold text-foreground">Type:</span>{" "}
             {company.type || "—"}
           </div>
           <div>
-            <span className="font-semibold text-theme-light">
+            <span className="font-semibold text-foreground">
               Service ID:
             </span>{" "}
             {company.serviceId ?? "—"}
           </div>
           <div>
-            <span className="font-semibold text-theme-light">Customer:</span>{" "}
+            <span className="font-semibold text-foreground">Customer:</span>{" "}
             {company.isCustomer ? "Yes" : "No"}
           </div>
           <div>
-            <span className="font-semibold text-theme-light">Client:</span>{" "}
+            <span className="font-semibold text-foreground">Client:</span>{" "}
             {company.isClient ? "Yes" : "No"}
           </div>
         </div>
       ) : null}
-    </Modal>
+      </DialogContent>
+    </Dialog>
   );
 }

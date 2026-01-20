@@ -11,7 +11,6 @@ import { CustomersHttpRepository } from "../../infra/http/CustomersHttpRepositor
 
 const DEFAULT_STALE_TIME = 5 * 60 * 1000;
 
-
 export type UseInstantCustomersResult = {
   contacts: Contact[] | undefined;
   companies: Company[] | undefined;
@@ -23,7 +22,6 @@ export type UseInstantCustomersResult = {
   fromCache: boolean;
   refetch: () => Promise<unknown>;
 };
-
 
 import type { CustomersPageData } from "@/customers/presentation/data/loadCustomersData";
 

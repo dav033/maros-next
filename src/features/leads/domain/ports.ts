@@ -1,6 +1,5 @@
 import type { Lead, LeadDraft, LeadId, LeadPatch, LeadType } from "./models";
 
-
 export interface LeadRepositoryPort {
   getById(id: LeadId): Promise<Lead | null>;
   getByLeadNumber(leadNumber: string): Promise<Lead | null>;
@@ -9,6 +8,7 @@ export interface LeadRepositoryPort {
   update(id: LeadId, patch: LeadPatch): Promise<Lead>;
   delete(id: LeadId): Promise<void>;
   findByType(type: LeadType): Promise<Lead[]>;
+  findInReview(): Promise<Lead[]>;
   saveNew(draft: LeadDraft, leadTypeForGeneration?: LeadType): Promise<Lead>;
 }
 

@@ -22,7 +22,6 @@ export type UseInstantContactsResult = {
   refetch: () => Promise<void>;
 };
 
-
 export function useInstantContacts(initialData?: Contact[]): UseInstantContactsResult {
   const ctx = useContactsApp();
 

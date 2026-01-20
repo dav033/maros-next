@@ -141,5 +141,3 @@ export function mapProjectsFromDTO(list: ApiProjectDTO[], leadMapper: (dto: any)
   return list.map((dto) => mapProjectFromDTO(dto, leadMapper));
 }
 
-
-

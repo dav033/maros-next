@@ -1,6 +1,8 @@
+
+import { createPatch, trimStringFields } from "@/lib/patch";
 import type { Contact, ContactPatch, ContactFormValue } from "@/contact/domain";
 import { normalizeEmptyToUndefined } from "@/shared/mappers";
-import { createPatch, trimStringFields } from "@dav033/dav-components";
+
 
 export const initialContactFormValue: ContactFormValue = {
   name: "",

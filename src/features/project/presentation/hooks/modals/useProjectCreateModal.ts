@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { Project } from "@/project/domain";
-import { useToast } from "@dav033/dav-components";
+import { toast } from "sonner";
 import { useCreateProjectController } from "../controllers/useCreateProjectController";
 
 export interface UseProjectCreateModalOptions {
@@ -20,12 +20,10 @@ export function useProjectCreateModal({
   onCreated,
 }: UseProjectCreateModalOptions): UseProjectCreateModalResult {
   const [isOpen, setIsOpen] = useState(false);
-  const toast = useToast();
-
   const createController = useCreateProjectController({
     onCreated: async (project: Project) => {
       setIsOpen(false);
-      toast.showSuccess("Project created successfully!");
+      toast.success("Project created successfully!");
       await onCreated?.();
     },
   });

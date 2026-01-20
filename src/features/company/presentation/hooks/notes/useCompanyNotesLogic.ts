@@ -1,7 +1,8 @@
-// useCompanyNotesLogic.ts
 "use client";
 
-import { useNotesModal, useToast } from "@dav033/dav-components";
+import { useNotesModal } from "@/common/hooks";
+// useCompanyNotesLogic.ts
+import { toast } from "sonner";
 import { companyKeys } from "../../../application";
 import type { Company } from "../../../domain/models";
 import { useQueryClient } from "@tanstack/react-query";
@@ -23,7 +24,6 @@ export interface UseCompanyNotesLogicReturn {
 
 export function useCompanyNotesLogic(): UseCompanyNotesLogicReturn {
   const queryClient = useQueryClient();
-  const toast = useToast();
   const { invalidateQueries } = useCompanyMutations();
 
   const {
@@ -59,11 +59,11 @@ export function useCompanyNotesLogic(): UseCompanyNotesLogicReturn {
         );
 
         await invalidateQueries();
-        toast.showSuccess("Notes updated successfully!");
+        toast.success("Notes updated successfully!");
       } catch (error) {
         const message =
           error instanceof Error ? error.message : "Could not update notes";
-        toast.showError(message);
+        toast.error(message);
         throw error;
       }
     });

@@ -20,7 +20,6 @@ export type UseInstantCompaniesResult = {
   refetch: () => Promise<void>;
 };
 
-
 export function useInstantCompanies(initialData?: Company[]): UseInstantCompaniesResult {
   const ctx = useCompanyApp();
 

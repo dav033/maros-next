@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { CompanyDraft, CompanyPatch } from "../../../domain/models";
 import { companyKeys } from "../../../application";
-import { useToast } from "@dav033/dav-components";
+import { toast } from "sonner";
 import { contactsKeys } from "@/contact/application";
 import {
   createCompanyAction,
@@ -11,7 +11,6 @@ import {
 
 export function useCompanyMutations() {
   const queryClient = useQueryClient();
-  const toast = useToast();
 
   const invalidateQueries = () => {
     queryClient.invalidateQueries({ queryKey: companyKeys.all });
@@ -35,12 +34,12 @@ export function useCompanyMutations() {
     },
     onSuccess: () => {
       invalidateQueries();
-      toast.showSuccess("Company created successfully!");
+      toast.success("Company created successfully!");
     },
     onError: (error: unknown) => {
       const message =
         error instanceof Error ? error.message : "Could not create company";
-      toast.showError(message);
+      toast.error(message);
       throw error;
     },
   });
@@ -63,12 +62,12 @@ export function useCompanyMutations() {
     },
     onSuccess: () => {
       invalidateQueries();
-      toast.showSuccess("Company updated successfully!");
+      toast.success("Company updated successfully!");
     },
     onError: (error: unknown) => {
       const message =
         error instanceof Error ? error.message : "Could not update company";
-      toast.showError(message);
+      toast.error(message);
       throw error;
     },
   });
@@ -82,12 +81,12 @@ export function useCompanyMutations() {
     },
     onSuccess: () => {
       invalidateQueries();
-      toast.showSuccess("Company deleted successfully!");
+      toast.success("Company deleted successfully!");
     },
     onError: (error: unknown) => {
       const message =
         error instanceof Error ? error.message : "Could not delete company";
-      toast.showError(message);
+      toast.error(message);
       throw error;
     },
   });

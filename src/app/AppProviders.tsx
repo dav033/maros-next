@@ -3,7 +3,7 @@
 import { useState, type ReactNode } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { DiProvider } from "@/di";
-import { ToastProvider } from "@dav033/dav-components";
+import { Toaster } from "@/components/ui/sonner";
 import { createQueryClient } from "@/shared/lib/queryClient";
 
 type Props = {
@@ -16,7 +16,15 @@ export function AppProviders({ children }: Props) {
   return (
     <QueryClientProvider client={queryClient}>
       <DiProvider>
-        <ToastProvider>{children}</ToastProvider>
+        {children}
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            className: "bg-card border-border text-foreground",
+            duration: 4000,
+          }}
+          richColors
+        />
       </DiProvider>
     </QueryClientProvider>
   );

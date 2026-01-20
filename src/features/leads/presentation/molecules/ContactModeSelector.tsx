@@ -1,6 +1,9 @@
 "use client";
 
-import { Icon, Input, Button } from "@dav033/dav-components";
+import type { ChangeEvent } from "react";
+import { User, Phone, Mail } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 export enum ContactMode {
   NEW_CONTACT = "NEW_CONTACT",
@@ -29,65 +32,64 @@ export function ContactModeSelector({
   disabled = false,
 }: ContactModeSelectorProps) {
   return (
-    <div>
+    <Tabs
+      value={contactMode}
+      onValueChange={(value) => onContactModeChange(value as ContactMode)}
+      className="w-full"
+    >
       <div className="flex justify-center mb-4">
-        <div className="inline-flex rounded-lg border border-theme-gray bg-theme-dark p-1">
-          <Button
-            type="button"
-            size="sm"
-            variant="ghost"
-            onClick={() => onContactModeChange(ContactMode.NEW_CONTACT)}
-            disabled={disabled}
-            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-              contactMode === ContactMode.NEW_CONTACT
-                ? "!bg-[#1ab3a4] !text-white hover:!bg-[#159c94]"
-                : "text-gray-400 hover:text-gray-200"
-            }`}
-          >
+        <TabsList>
+          <TabsTrigger value={ContactMode.NEW_CONTACT} disabled={disabled}>
             New Contact
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            variant="ghost"
-            onClick={() => onContactModeChange(ContactMode.EXISTING_CONTACT)}
-            disabled={disabled}
-            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-              contactMode === ContactMode.EXISTING_CONTACT
-                ? "!bg-[#1ab3a4] !text-white hover:!bg-[#159c94]"
-                : "text-gray-400 hover:text-gray-200"
-            }`}
-          >
+          </TabsTrigger>
+          <TabsTrigger value={ContactMode.EXISTING_CONTACT} disabled={disabled}>
             Existing Contact
-          </Button>
-        </div>
+          </TabsTrigger>
+        </TabsList>
       </div>
 
-      {contactMode === ContactMode.NEW_CONTACT && (
-        <div className="space-y-3">
+      <TabsContent value={ContactMode.NEW_CONTACT} className="space-y-3 mt-0">
+        <div className="relative">
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+            <User className="size-4" />
+          </div>
           <Input
             value={form.contactName}
-            onChange={(e) => onChange("contactName", e.target.value)}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => onChange("contactName", e.target.value)}
             placeholder="Contact Name *"
-            leftAddon={<Icon name="material-symbols:person" />}
             disabled={disabled}
-          />
-          <Input
-            value={form.phone}
-            onChange={(e) => onChange("phone", e.target.value)}
-            placeholder="Phone"
-            leftAddon={<Icon name="material-symbols:settings-phone-sharp" />}
-            disabled={disabled}
-          />
-          <Input
-            value={form.email}
-            onChange={(e) => onChange("email", e.target.value)}
-            placeholder="Email"
-            leftAddon={<Icon name="material-symbols:attach-email-outline" />}
-            disabled={disabled}
+            className="pl-10"
           />
         </div>
-      )}
-    </div>
+        <div className="relative">
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+            <Phone className="size-4" />
+          </div>
+          <Input
+            value={form.phone}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => onChange("phone", e.target.value)}
+            placeholder="Phone"
+            disabled={disabled}
+            className="pl-10"
+          />
+        </div>
+        <div className="relative">
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+            <Mail className="size-4" />
+          </div>
+          <Input
+            value={form.email}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => onChange("email", e.target.value)}
+            placeholder="Email"
+            disabled={disabled}
+            className="pl-10"
+          />
+        </div>
+      </TabsContent>
+
+      <TabsContent value={ContactMode.EXISTING_CONTACT} className="mt-0">
+        {/* Content for existing contact is rendered by parent */}
+      </TabsContent>
+    </Tabs>
   );
 }

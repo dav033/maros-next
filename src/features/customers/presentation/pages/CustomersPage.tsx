@@ -4,7 +4,7 @@ import { useInstantCustomers } from "../../application/hooks/useInstantCustomers
 import { useCompanyServices } from "@/features/company/presentation/hooks";
 import { CustomerContactsSection } from "../components/CustomerContactsSection";
 import { CustomerCompaniesSection } from "../components/CustomerCompaniesSection";
-import { SimplePageHeader } from "@dav033/dav-components";
+
 import type { CustomersPageData } from "../data/loadCustomersData";
 
 export interface CustomersPageProps {
@@ -21,11 +21,11 @@ export function CustomersPage({ initialData }: CustomersPageProps = {}) {
   const safeServices = services ?? [];
 
   return (
-    <main className="flex min-h-[calc(100vh-80px)] w-full flex-col gap-6 bg-theme-dark px-3 py-3 pt-16 sm:gap-6 sm:px-4 sm:py-4 md:px-8 md:py-6 lg:pt-6">
-      <SimplePageHeader
-        title="Customers"
-        description="View and manage all customers (contacts and companies)."
-      />
+    <main className="flex min-h-[calc(100vh-80px)] w-full flex-col gap-6 bg-background px-3 py-3 pt-16 sm:gap-6 sm:px-4 sm:py-4 md:px-8 md:py-6 lg:pt-6">
+      <header className="flex flex-col gap-1">
+          <h1 className="text-xl font-semibold text-foreground sm:text-2xl">Customers</h1>
+            <p className="text-xs text-muted-foreground sm:text-sm">View and manage all customers (contacts and companies).</p>
+        </header>
 
       <div className="flex flex-col gap-6">
         <CustomerContactsSection

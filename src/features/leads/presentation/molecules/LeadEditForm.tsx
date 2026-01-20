@@ -1,8 +1,19 @@
 "use client";
 
-import type { Lead } from "@/leads/domain";
-import { Input, Select, LocationField } from "@dav033/dav-components";
-import type { SelectOption } from "@dav033/dav-components";
+import { LocationField } from "@/components/custom";
+import type { ChangeEvent } from "react";
+
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Wrench, Flag, User } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  EMPTY_SELECT_VALUE,
+} from "@/components/ui/select";
 import type { Contact } from "@/contact/domain";
 import type { ProjectType } from "@/projectType/domain";
 
@@ -25,6 +36,15 @@ type LeadEditFormProps = {
   disabled?: boolean;
 };
 
+const STATUS_OPTIONS = [
+  { value: "NOT_EXECUTED", label: "Not Executed" },
+  { value: "IN_PROGRESS", label: "In Progress" },
+  { value: "COMPLETED", label: "Completed" },
+  { value: "LOST", label: "Lost" },
+  { value: "POSTPONED", label: "Postponed" },
+  { value: "PERMITS", label: "Permits" },
+];
+
 export function LeadEditForm({
   form,
   onChange,
@@ -32,85 +52,89 @@ export function LeadEditForm({
   contacts,
   disabled = false,
 }: LeadEditFormProps) {
-  const projectTypeOptions: SelectOption[] = projectTypes.map((pt) => ({
-    value: pt.id,
-    label: pt.name,
-  }));
-
-  const contactOptions: SelectOption[] = contacts
-    .filter((c): c is Contact & { id: number } => typeof c.id === "number")
-    .map((c) => ({
-      value: c.id,
-      label: c.name,
-    }));
+  const validContacts = contacts.filter(
+    (c): c is Contact & { id: number } => typeof c.id === "number"
+  );
 
   return (
     <div className="space-y-4">
-      <Input
-        label="Lead Name"
-        placeholder="Enter lead name"
-        value={form.leadName}
-        onChange={(e) => onChange("leadName", e.target.value)}
-        disabled={disabled}
-        required
-      />
+      <div className="space-y-2">
+        <Label>Lead Name</Label>
+        <Input
+          placeholder="Enter lead name"
+          value={form.leadName}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => onChange("leadName", e.target.value)}
+          disabled={disabled}
+          required
+        />
+      </div>
 
       <LocationField
         address={form.location}
         addressLink={form.addressLink}
         disabled={disabled}
-        onAddressChange={(value) => onChange("location", value)}
-        onAddressLinkChange={(value) => onChange("addressLink", value)}
+        onAddressChange={(value: string) => onChange("location", value)}
+        onAddressLinkChange={(value: string) => onChange("addressLink", value)}
       />
 
       <div className="grid grid-cols-2 gap-3">
         <Select
-          options={projectTypeOptions}
-          value={form.projectTypeId ?? ""}
-          onChange={(val: string) =>
-            onChange("projectTypeId", val ? Number(val) : undefined)
-          }
-          placeholder="Select Project Type *"
-          icon="material-symbols:design-services"
-          searchable={true}
+          value={form.projectTypeId != null ? String(form.projectTypeId) : EMPTY_SELECT_VALUE}
+          onValueChange={(val) => onChange("projectTypeId", val === EMPTY_SELECT_VALUE ? undefined : Number(val))}
           disabled={disabled}
-          allowEmpty={true}
-          emptyLabel="Select Project Type"
-        />
+        >
+          <SelectTrigger>
+            <Wrench className="size-4 text-muted-foreground mr-2" />
+            <SelectValue placeholder="Select Project Type *" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={EMPTY_SELECT_VALUE}>Select Project Type</SelectItem>
+            {projectTypes.map((pt) => (
+              <SelectItem key={pt.id} value={String(pt.id)}>
+                {pt.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
         <Select
-          options={[
-            { value: "NOT_EXECUTED", label: "Not Executed" },
-            { value: "IN_PROGRESS", label: "In Progress" },
-            { value: "COMPLETED", label: "Completed" },
-            { value: "LOST", label: "Lost" },
-            { value: "POSTPONED", label: "Postponed" },
-            { value: "PERMITS", label: "Permits" },
-          ]}
-          value={form.status ?? ""}
-          onChange={(val: string) => onChange("status", val || undefined)}
-          placeholder="Select Status"
-          icon="material-symbols:flag"
-          searchable={false}
+          value={form.status || EMPTY_SELECT_VALUE}
+          onValueChange={(val) => onChange("status", val === EMPTY_SELECT_VALUE ? undefined : val)}
           disabled={disabled}
-          allowEmpty={true}
-          emptyLabel="Select Status"
-        />
+        >
+          <SelectTrigger>
+            <Flag className="size-4 text-muted-foreground mr-2" />
+            <SelectValue placeholder="Select Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={EMPTY_SELECT_VALUE}>Select Status</SelectItem>
+            {STATUS_OPTIONS.map((opt) => (
+              <SelectItem key={opt.value} value={opt.value}>
+                {opt.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <Select
-        options={contactOptions}
-        value={form.contactId ?? ""}
-        onChange={(val: string) =>
-          onChange("contactId", val ? Number(val) : undefined)
-        }
-        placeholder="Select Contact *"
-        icon="material-symbols:person"
-        searchable={true}
+        value={form.contactId != null ? String(form.contactId) : EMPTY_SELECT_VALUE}
+        onValueChange={(val) => onChange("contactId", val === EMPTY_SELECT_VALUE ? undefined : Number(val))}
         disabled={disabled}
-        allowEmpty={true}
-        emptyLabel="Select Contact"
-      />
+      >
+        <SelectTrigger>
+          <User className="size-4 text-muted-foreground mr-2" />
+          <SelectValue placeholder="Select Contact *" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value={EMPTY_SELECT_VALUE}>Select Contact</SelectItem>
+          {validContacts.map((c) => (
+            <SelectItem key={c.id} value={String(c.id)}>
+              {c.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 }

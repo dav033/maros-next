@@ -126,6 +126,11 @@ const PATCH_HANDLERS: {
     ...acc,
     notes: Array.isArray(v) ? v : [],
   }),
+
+  inReview: (v, _ctx, acc) => ({
+    ...acc,
+    inReview: Boolean(v),
+  }),
 };
 
 export function applyLeadPatch(

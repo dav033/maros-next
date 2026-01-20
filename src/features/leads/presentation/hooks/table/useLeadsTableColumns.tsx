@@ -1,9 +1,9 @@
+import type { SimpleTableColumn } from "@/types/table";
 
 import * as React from "react";
 import type { Lead } from "@/leads/domain";
-import type { SimpleTableColumn } from "@dav033/dav-components";
 import { ContactInfoDisplay } from "@/features/contact/presentation/atoms/ContactInfoDisplay";
-import { NotesButton } from "@dav033/dav-components";
+import { NotesButton } from "@/components/custom";
 import { LeadStatusBadge } from "../../atoms/LeadStatusBadge";
 import { ProjectTypeBadge } from "../../atoms/ProjectTypeBadge";
 
@@ -40,7 +40,7 @@ export function useLeadsTableColumns({
         header: "Lead #",
         className: "w-[110px]",
         render: (lead: Lead) => (
-          <span className="font-mono text-theme-light">{lead.leadNumber}</span>
+          <span className="font-mono text-foreground">{lead.leadNumber}</span>
         ),
         sortable: true,
         sortValue: (lead: Lead) => lead.leadNumber ?? "",
@@ -50,7 +50,7 @@ export function useLeadsTableColumns({
         header: "Name",
         className: "w-[200px]",
         render: (lead: Lead) => (
-          <span className="text-theme-light">{lead.name}</span>
+          <span className="text-foreground">{lead.name}</span>
         ),
         sortable: true,
         sortValue: (lead: Lead) => lead.name ?? "",
@@ -81,7 +81,7 @@ export function useLeadsTableColumns({
         header: "Location",
         className: "w-[200px]",
         render: (lead: Lead) => (
-          <span className="text-gray-300">{lead.location ?? "—"}</span>
+          <span className="text-foreground">{lead.location ?? "—"}</span>
         ),
         sortable: true,
         sortValue: (lead: Lead) => lead.location ?? "",

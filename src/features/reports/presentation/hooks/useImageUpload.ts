@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useToast } from "@dav033/dav-components";
+import { toast } from "sonner";
 import type { ActivityRow } from "@/reports/domain/models";
 import {
   uploadImageToWebhook,
@@ -11,7 +11,6 @@ import {
 import type { RestorationVisitReport } from "@/reports/domain/models";
 
 export const useImageUpload = () => {
-  const toast = useToast();
   const [uploading, setUploading] = useState(false);
 
   const collectFilesWithMetadata = (
@@ -232,5 +231,4 @@ export const useImageUpload = () => {
     submitReport,
   };
 };
-
 

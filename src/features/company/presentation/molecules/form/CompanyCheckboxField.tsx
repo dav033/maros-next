@@ -1,12 +1,12 @@
-import type { ChangeEvent } from "react";
-import { Checkbox, Label } from "@dav033/dav-components";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface CompanyCheckboxFieldProps {
   id: string;
   label: string;
   checked: boolean;
   disabled?: boolean;
-  onChange: (event: ChangeEvent<HTMLInputElement>) => void;
+  onChange: (checked: boolean) => void;
 }
 
 export function CompanyCheckboxField({
@@ -17,8 +17,13 @@ export function CompanyCheckboxField({
   onChange,
 }: CompanyCheckboxFieldProps) {
   return (
-    <div className="flex items-center gap-2 rounded-2xl bg-theme-dark px-3 py-1.5">
-      <Checkbox id={id} checked={checked} onChange={onChange} disabled={disabled} />
+    <div className="flex items-center gap-2 rounded-2xl bg-card px-3 py-1.5">
+      <Checkbox
+        id={id}
+        checked={checked}
+        onCheckedChange={(checked) => onChange(!!checked)}
+        disabled={disabled}
+      />
       <Label htmlFor={id}>{label}</Label>
     </div>
   );

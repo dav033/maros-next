@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { Checkbox, Icon, Input } from "@dav033/dav-components";
+import { useState, useEffect, useRef, type ChangeEvent } from "react";
+import { Users, Search, UserPlus, ChevronUp, ChevronDown } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import type { Contact } from "@/contact";
 
 interface CompanyContactsSelectorProps {
@@ -58,28 +60,33 @@ export function CompanyContactsSelector({
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         disabled={disabled}
-        className="flex h-10 w-full items-center gap-2 rounded-lg border border-theme-gray-subtle bg-theme-dark px-3 text-left text-sm text-theme-light placeholder:text-gray-400 outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent disabled:cursor-not-allowed disabled:opacity-50"
+        className="flex h-9 w-full items-center gap-2 rounded-md border border-input bg-transparent px-3 text-left text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
       >
-        <Icon name="lucide:users" size={16} className="text-gray-400" />
+        <Users className="size-4 text-muted-foreground" />
         <span className="flex-1 truncate">{displayText}</span>
-        <Icon
-          name={isOpen ? "lucide:chevron-up" : "lucide:chevron-down"}
-          size={16}
-          className="text-gray-400"
-        />
+        {isOpen ? (
+          <ChevronUp className="size-4 text-muted-foreground" />
+        ) : (
+          <ChevronDown className="size-4 text-muted-foreground" />
+        )}
       </button>
       {isOpen && (
         <div
           ref={dropdownRef}
-          className="absolute z-10 mt-1 w-full rounded-lg border border-theme-gray bg-theme-dark shadow-lg"
+          className="absolute z-10 mt-1 w-full rounded-md border border-border bg-popover shadow-lg"
         >
-          <div className="border-b border-theme-gray-subtle p-2 space-y-2">
-            <Input
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search contacts..."
-              leftAddon={<Icon name="lucide:search" size={16} />}
-            />
+          <div className="border-b border-border p-2 space-y-2">
+            <div className="relative">
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                <Search className="size-4" />
+              </div>
+              <Input
+                value={searchQuery}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
+                placeholder="Search contacts..."
+                className="pl-10"
+              />
+            </div>
             {onCreateNewContact && (
               <button
                 type="button"
@@ -88,27 +95,27 @@ export function CompanyContactsSelector({
                   setIsOpen(false);
                 }}
                 disabled={disabled}
-                className="flex w-full items-center gap-2 rounded-lg border border-dashed border-[#1ab3a4]/40 bg-[#1ab3a4]/8 px-3 py-2 text-sm text-[#9ff3e7] hover:bg-[#1ab3a4]/14 hover:border-[#1ab3a4]/60 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex w-full items-center gap-2 rounded-md border border-dashed border-primary/40 bg-primary/10 px-3 py-2 text-sm text-primary hover:bg-primary/20 hover:border-primary/60 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <Icon name="lucide:user-plus" size={16} />
+                <UserPlus className="size-4" />
                 <span>Create New Contact</span>
               </button>
             )}
           </div>
           <div className="max-h-52 overflow-auto">
             {filteredContacts.length === 0 ? (
-              <div className="px-3 py-2 text-sm text-gray-400">
+              <div className="px-3 py-2 text-sm text-muted-foreground">
                 {searchQuery ? "No contacts found" : "No contacts available"}
               </div>
             ) : (
               filteredContacts.map((contact) => (
                 <label
                   key={contact.id}
-                  className="flex cursor-pointer items-center gap-2 px-3 py-2 text-sm text-theme-light hover:bg-theme-gray"
+                  className="flex cursor-pointer items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-accent"
                 >
                   <Checkbox
                     checked={selectedContactIds.includes(contact.id)}
-                    onChange={() => onContactToggle(contact.id)}
+                    onCheckedChange={() => onContactToggle(contact.id)}
                     disabled={disabled}
                   />
                   <span className="flex-1 truncate">{contact.name}</span>

@@ -1,6 +1,7 @@
 "use client";
 
-import { useEntityForm } from "@dav033/dav-components";
+import { useEntityForm } from "@/common/hooks";
+
 import type { Contact } from "@/features/contact/domain/models";
 import type { CompanyFormValue } from "../../molecules/CompanyForm";
 import {
@@ -27,7 +28,6 @@ export interface UseCompanyEditModalResult {
   isSubmitting: boolean;
   currentCompany: Company | null;
 }
-
 
 export function useCompanyEditModal({
   contacts,

@@ -1,11 +1,12 @@
 "use client";
 
+import { useFormController } from "@/common/hooks";
+
 import { useState, useCallback } from "react";
 import { useLeadsApp } from "@/di";
 import { leadsKeys, createLead } from "@/leads/application";
 import type { Lead, LeadType } from "@/leads/domain";
 import { contactsKeys } from "@/contact/application";
-import { useFormController } from "@dav033/dav-components";
 
 enum ContactMode {
   NEW_CONTACT = "NEW_CONTACT",
@@ -30,10 +31,11 @@ type LeadFormData = {
 
 type UseCreateLeadControllerOptions = {
   leadType: LeadType;
+  inReview?: boolean;
   onCreated?: (lead: Lead) => void;
 };
 
-export function useCreateLeadController({ leadType, onCreated }: UseCreateLeadControllerOptions) {
+export function useCreateLeadController({ leadType, inReview, onCreated }: UseCreateLeadControllerOptions) {
   const ctx = useLeadsApp();
   const [contactMode, setContactMode] = useState<ContactMode>(ContactMode.NEW_CONTACT);
 
@@ -77,6 +79,7 @@ export function useCreateLeadController({ leadType, onCreated }: UseCreateLeadCo
               phone: (form.phone ?? "").trim(),
               email: (form.email ?? "").trim(),
             },
+            ...(inReview !== undefined && { inReview }),
           }
         : {
             leadName: form.leadName.trim() || "",
@@ -86,6 +89,7 @@ export function useCreateLeadController({ leadType, onCreated }: UseCreateLeadCo
             projectTypeId: form.projectTypeId!,
             leadType: form.leadType,
             contactId: form.contactId!,
+            ...(inReview !== undefined && { inReview }),
           };
 
       return await createLead(ctx, input, {

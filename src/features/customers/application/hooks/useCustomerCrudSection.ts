@@ -1,8 +1,12 @@
 "use client";
 
+import { useEntityForm } from "@/common/hooks";
+
+
 import { useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useEntityForm, useToast } from "@dav033/dav-components";
+import { toast } from "sonner";
+
 
 export type CustomerCrudSectionConfig<TEntity, TFormValue, TPatch> = {
   initialFormValue: TFormValue;
@@ -49,8 +53,6 @@ export function useCustomerCrudSection<TEntity extends { id: number }, TFormValu
   } = config;
 
   const queryClient = useQueryClient();
-  const toast = useToast();
-
   const {
     successUpdate = "Updated successfully!",
     errorUpdate = "Could not update",
@@ -93,11 +95,11 @@ export function useCustomerCrudSection<TEntity extends { id: number }, TFormValu
           queryClient.invalidateQueries({ queryKey: key as any[] });
         });
         
-        toast.showSuccess(successDelete);
+        toast.success(successDelete);
       } catch (error: unknown) {
         const message =
           error instanceof Error ? error.message : errorDelete;
-        toast.showError(message);
+        toast.error(message);
       }
     },
     [deleteFn, invalidateKeys, queryClient, toast, successDelete, errorDelete]

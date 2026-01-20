@@ -1,9 +1,10 @@
 "use client";
 
+import { useEntityTableLogic, useTableWithSearch } from "@/common/hooks";
+
 import type { Contact } from "@/contact/domain";
 import { useContactsApp } from "@/di";
 import { deleteContact } from "@/contact/application";
-import { useEntityTableLogic, useTableWithSearch } from "@dav033/dav-components";
 import { contactsSearchConfig } from "../../search/contactsSearchConfig";
 
 interface UseContactsTableLogicProps {

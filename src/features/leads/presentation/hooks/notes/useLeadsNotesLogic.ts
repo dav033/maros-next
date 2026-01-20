@@ -1,6 +1,8 @@
 "use client";
 
-import { useNotesModal, useToast } from "@dav033/dav-components";
+import { useNotesModal } from "@/common/hooks";
+
+import { toast } from "sonner";
 import { leadsKeys } from "@/leads/application";
 import type { Lead, LeadType } from "@/leads/domain";
 import { useQueryClient } from "@tanstack/react-query";
@@ -28,7 +30,6 @@ export function useLeadsNotesLogic({
   leadType,
 }: UseLeadsNotesLogicOptions): UseLeadsNotesLogicReturn {
   const queryClient = useQueryClient();
-  const toast = useToast();
   const data = useLeadsData(leadType);
 
   const {
@@ -63,7 +64,7 @@ export function useLeadsNotesLogic({
 
       queryClient.invalidateQueries({ queryKey: leadsKeys.all });
       await data.refetch();
-      toast.showSuccess("Notes updated successfully!");
+      toast.success("Notes updated successfully!");
     });
   };
 

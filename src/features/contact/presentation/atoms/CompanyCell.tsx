@@ -1,5 +1,4 @@
 import type { Company } from "@/company";
-import { Badge } from "@dav033/dav-components";
 
 interface CompanyCellProps {
   company: Company | undefined;
@@ -8,20 +7,18 @@ interface CompanyCellProps {
 
 export function CompanyCell({ company, onOpenCompanyModal }: CompanyCellProps) {
   if (!company) {
-    return <span className="text-gray-400">—</span>;
+    return <span className="text-muted-foreground">—</span>;
   }
 
   return (
-    <Badge
-      variant="primary"
-      size="md"
-      interactive
+    <button
+      type="button"
       onClick={() => onOpenCompanyModal(company)}
-      className="w-24"
+      className="inline-flex items-center justify-center rounded-md border border-primary/30 bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary hover:bg-primary/20 transition-colors w-24 cursor-pointer"
     >
       <span className="truncate block w-full text-center">
         {company.name}
       </span>
-    </Badge>
+    </button>
   );
 }

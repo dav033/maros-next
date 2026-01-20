@@ -32,7 +32,6 @@ type Props = {
   children: ReactNode;
 };
 
-
 export function DiProvider({ children }: Props) {
   const value = useMemo(() => ({
     contactsApp: createContactsAppContext(),

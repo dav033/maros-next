@@ -1,14 +1,14 @@
 import { CompaniesTableSkeleton } from "../organisms/CompaniesTableSkeleton";
-import { EntityCrudPageTemplate, SimplePageHeader } from "@dav033/dav-components";
+import { EntityCrudPageTemplate } from "@/components/custom";
 
 export function CompaniesPageSkeleton() {
   return (
     <EntityCrudPageTemplate
       header={
-        <SimplePageHeader
-          title="Companies"
-          description="Manage companies and services."
-        />
+        <header className="flex flex-col gap-1">
+          <h1 className="text-xl font-semibold text-foreground sm:text-2xl">Companies</h1>
+            <p className="text-xs text-muted-foreground sm:text-sm">Manage companies and services.</p>
+        </header>
       }
       toolbar={null}
       isLoading={true}

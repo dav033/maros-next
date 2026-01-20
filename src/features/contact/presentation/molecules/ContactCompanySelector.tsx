@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { Icon, Input } from "@dav033/dav-components";
+import { useState, useEffect, useRef, type ChangeEvent } from "react";
+import { Building, Search, Plus, ChevronUp, ChevronDown } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import type { Company } from "@/company";
 
 interface ContactCompanySelectorProps {
@@ -60,28 +61,33 @@ export function ContactCompanySelector({
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         disabled={disabled}
-        className="flex h-10 w-full items-center gap-2 rounded-lg border border-theme-gray-subtle bg-theme-dark px-3 text-left text-sm text-theme-light placeholder:text-gray-400 outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent disabled:cursor-not-allowed disabled:opacity-50"
+        className="flex h-9 w-full items-center gap-2 rounded-md border border-input bg-transparent px-3 text-left text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
       >
-        <Icon name="lucide:building-2" size={16} className="text-gray-400" />
+        <Building className="size-4 text-muted-foreground" />
         <span className="flex-1 truncate">{displayText}</span>
-        <Icon
-          name={isOpen ? "lucide:chevron-up" : "lucide:chevron-down"}
-          size={16}
-          className="text-gray-400"
-        />
+        {isOpen ? (
+          <ChevronUp className="size-4 text-muted-foreground" />
+        ) : (
+          <ChevronDown className="size-4 text-muted-foreground" />
+        )}
       </button>
       {isOpen && (
         <div
           ref={dropdownRef}
-          className="absolute z-10 mt-1 w-full rounded-lg border border-theme-gray bg-theme-dark shadow-lg"
+          className="absolute z-10 mt-1 w-full rounded-md border border-border bg-popover shadow-lg"
         >
-          <div className="border-b border-theme-gray-subtle p-2 space-y-2">
-            <Input
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search companies..."
-              leftAddon={<Icon name="lucide:search" size={16} />}
-            />
+          <div className="border-b border-border p-2 space-y-2">
+            <div className="relative">
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                <Search className="size-4" />
+              </div>
+              <Input
+                value={searchQuery}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
+                placeholder="Search companies..."
+                className="pl-10"
+              />
+            </div>
             {onCreateNewCompany && (
               <button
                 type="button"
@@ -90,9 +96,9 @@ export function ContactCompanySelector({
                   setIsOpen(false);
                 }}
                 disabled={disabled}
-                className="flex w-full items-center gap-2 rounded-lg border border-dashed border-[#1ab3a4]/40 bg-[#1ab3a4]/8 px-3 py-2 text-sm text-[#9ff3e7] hover:bg-[#1ab3a4]/14 hover:border-[#1ab3a4]/60 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex w-full items-center gap-2 rounded-md border border-dashed border-primary/40 bg-primary/10 px-3 py-2 text-sm text-primary hover:bg-primary/20 hover:border-primary/60 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <Icon name="lucide:plus" size={16} />
+                <Plus className="size-4" />
                 <span>Create New Company</span>
               </button>
             )}
@@ -101,14 +107,14 @@ export function ContactCompanySelector({
             <button
               type="button"
               onClick={() => handleSelectCompany(null)}
-              className={`flex w-full items-center gap-2 px-3 py-2 text-sm text-theme-light hover:bg-theme-gray ${
-                selectedCompanyId === null ? "bg-theme-gray/50" : ""
+              className={`flex w-full items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-accent ${
+                selectedCompanyId === null ? "bg-accent/50" : ""
               }`}
             >
               <span className="flex-1 text-left">No company</span>
             </button>
             {filteredCompanies.length === 0 ? (
-              <div className="px-3 py-2 text-sm text-gray-400">
+              <div className="px-3 py-2 text-sm text-muted-foreground">
                 {searchQuery ? "No companies found" : "No companies available"}
               </div>
             ) : (
@@ -117,8 +123,8 @@ export function ContactCompanySelector({
                   key={company.id}
                   type="button"
                   onClick={() => handleSelectCompany(company.id)}
-                  className={`flex w-full items-center gap-2 px-3 py-2 text-sm text-theme-light hover:bg-theme-gray ${
-                    selectedCompanyId === company.id ? "bg-theme-gray/50" : ""
+                  className={`flex w-full items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-accent ${
+                    selectedCompanyId === company.id ? "bg-accent/50" : ""
                   }`}
                 >
                   <span className="flex-1 truncate text-left">{company.name}</span>

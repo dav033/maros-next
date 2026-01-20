@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Icon, Badge } from "@dav033/dav-components";
+import { User } from "lucide-react";
 
 export interface ContactInfoDisplayProps {
   contact: {
@@ -25,27 +25,23 @@ export function ContactInfoDisplay({
   className = "",
 }: ContactInfoDisplayProps) {
   if (!contact || !contact.name || contact.name.trim() === "") {
-    return <span className="text-gray-300">—</span>;
+    return <span className="text-foreground">—</span>;
   }
 
   if (variant === "text") {
-    return <span className={`text-gray-300 ${className}`}>{contact.name}</span>;
+    return <span className={`text-foreground ${className}`}>{contact.name}</span>;
   }
 
   return (
-    <Badge
-      variant="indigo"
-      size="md"
-      interactive
+    <button
+      type="button"
       onClick={onClick}
-      icon={
-        <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-indigo-500/20 text-indigo-300">
-          <Icon name="lucide:user" size={10} />
-        </div>
-      }
-      className={`w-[160px] ${className}`}
+      className={`inline-flex items-center gap-2 rounded-md border border-indigo-500/30 bg-indigo-500/10 px-2.5 py-1 text-xs font-medium text-indigo-300 hover:bg-indigo-500/20 transition-colors cursor-pointer w-[160px] ${className}`}
     >
-      {contact.name}
-    </Badge>
+      <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-indigo-500/20 text-indigo-300">
+        <User className="size-2.5" />
+      </div>
+      <span className="truncate">{contact.name}</span>
+    </button>
   );
 }

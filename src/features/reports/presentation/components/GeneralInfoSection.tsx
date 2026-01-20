@@ -1,9 +1,9 @@
-import {
-  Input,
-  SearchableSelect,
-  Textarea,
-  Typography,
-} from "@dav033/dav-components";
+import { SearchableSelect } from "@/components/custom";
+import type { ChangeEvent } from "react";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DatePicker } from "./DatePicker";
 import type { RestorationVisitReport } from "@/reports/domain/models";
 import type { Contact } from "@/contact/domain";
@@ -32,51 +32,52 @@ export const GeneralInfoSection = ({
   languageOptions,
   companiesLoading,
   contactsLoading,
-  contactByValue,
-  inferClientType,
 }: GeneralInfoSectionProps) => {
   return (
-    <section className="rounded-2xl bg-[#1d1d1f] p-6 shadow-sm space-y-4">
-      <Typography variant="body" className="font-semibold text-theme-light">
-        General Information
-      </Typography>
+    <Card>
+      <CardHeader className="pb-4">
+        <CardTitle className="text-base">General Information</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <Input
-          label="Project number"
-          value={form.projectNumber ?? ""}
-          onChange={(e) => onUpdateField("projectNumber", e.target.value)}
-        />
-        <Input
-          label="Project name"
-          value={form.projectName}
-          onChange={(e) => onUpdateField("projectName", e.target.value)}
-        />
-        <Input
-          label="Project location"
-          value={form.projectLocation}
-          onChange={(e) => onUpdateField("projectLocation", e.target.value)}
-        />
+        <div className="space-y-2">
+          <Label>Project number</Label>
+          <Input
+            value={form.projectNumber ?? ""}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => onUpdateField("projectNumber", e.target.value)}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label>Project name</Label>
+          <Input
+            value={form.projectName}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => onUpdateField("projectName", e.target.value)}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label>Project location</Label>
+          <Input
+            value={form.projectLocation}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => onUpdateField("projectLocation", e.target.value)}
+          />
+        </div>
         <div className="space-y-1">
-          <Typography variant="small" className="text-gray-300">
-            Client name
-          </Typography>
+          <Label>Client name</Label>
           <SearchableSelect
             options={companyOptions}
             value={form.clientName}
-            onChange={(value) => onUpdateField("clientName", value)}
+            onChange={(value: string) => onUpdateField("clientName", value)}
             placeholder="Select company"
             icon="mdi:office-building"
             disabled={form.clientType === "individual" || companiesLoading}
           />
         </div>
         <div className="space-y-1">
-          <Typography variant="small" className="text-gray-300">
-            Client type
-          </Typography>
+          <Label>Client type</Label>
           <SearchableSelect
             options={clientTypeOptions}
             value={form.clientType}
-            onChange={(value) => {
+            onChange={(value: string) => {
               onUpdateField("clientType", value);
               if (value === "individual") {
                 onUpdateField("clientName", "");
@@ -87,9 +88,7 @@ export const GeneralInfoSection = ({
           />
         </div>
         <div className="space-y-1">
-          <Typography variant="small" className="text-gray-300">
-            Customer contact
-          </Typography>
+          <Label>Customer contact</Label>
           <SearchableSelect
             options={contactOptions}
             value={
@@ -102,48 +101,51 @@ export const GeneralInfoSection = ({
             disabled={contactsLoading}
           />
         </div>
-        <Input
-          label="Email"
-          type="email"
-          value={form.email}
-          onChange={(e) => onUpdateField("email", e.target.value)}
-        />
-        <Input
-          label="Phone"
-          value={form.phone}
-          onChange={(e) => onUpdateField("phone", e.target.value)}
-        />
+        <div className="space-y-2">
+          <Label>Email</Label>
+          <Input
+            type="email"
+            value={form.email}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => onUpdateField("email", e.target.value)}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label>Phone</Label>
+          <Input
+            value={form.phone}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => onUpdateField("phone", e.target.value)}
+          />
+        </div>
         <DatePicker
           label="Date started"
           value={form.dateStarted ?? ""}
           onChange={(value) => onUpdateField("dateStarted", value || null)}
         />
         <div className="space-y-1">
-          <Typography variant="small" className="text-gray-300">
-            Language
-          </Typography>
+          <Label>Language</Label>
           <SearchableSelect
             options={languageOptions}
             value={form.language}
-            onChange={(value) => onUpdateField("language", value)}
+            onChange={(value: string) => onUpdateField("language", value)}
             placeholder="Select language"
             icon="mdi:translate"
           />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div className="flex flex-col gap-2">
-          <label className="text-sm text-gray-300">Overview</label>
-          <Textarea
-            placeholder="General description"
-            value={form.overview}
-            onChange={(e) => onUpdateField("overview", e.target.value)}
-            rows={5}
-          />
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="flex flex-col gap-2">
+            <Label>Overview</Label>
+            <Textarea
+              placeholder="General description"
+              value={form.overview}
+              onChange={(e) => onUpdateField("overview", e.target.value)}
+              rows={5}
+            />
+          </div>
         </div>
-      </div>
-    </section>
+      </CardContent>
+    </Card>
   );
 };
 

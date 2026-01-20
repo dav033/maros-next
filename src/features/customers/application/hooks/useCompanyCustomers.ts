@@ -12,7 +12,7 @@ import {
   type UpdateCompanyWithContactsInput 
 } from "@/company/application";
 import { contactsKeys } from "@/contact/application";
-import { useToast } from "@dav033/dav-components";
+import { toast } from "sonner";
 import { customersKeys } from "../../infra/keys";
 import { 
   initialCompanyFormValue, 
@@ -28,8 +28,6 @@ interface UseCompanyCustomersOptions {
 export function useCompanyCustomers({ contacts }: UseCompanyCustomersOptions) {
   const companyApp = useCompanyApp();
   const queryClient = useQueryClient();
-  const toast = useToast();
-
   const [isOpen, setIsOpen] = useState(false);
   const [currentCompany, setCurrentCompany] = useState<Company | null>(null);
   const [formValue, setFormValue] = useState<CompanyFormValue>(initialCompanyFormValue);
@@ -60,11 +58,11 @@ export function useCompanyCustomers({ contacts }: UseCompanyCustomersOptions) {
         await companyCrudUseCases.delete(companyApp)(companyId);
         queryClient.invalidateQueries({ queryKey: customersKeys.all });
         queryClient.invalidateQueries({ queryKey: companyKeys.all });
-        toast.showSuccess("Company deleted successfully!");
+        toast.success("Company deleted successfully!");
       } catch (error: unknown) {
         const message =
           error instanceof Error ? error.message : "Could not delete company";
-        toast.showError(message);
+        toast.error(message);
       }
     },
     [companyApp, queryClient, toast]
@@ -100,7 +98,7 @@ export function useCompanyCustomers({ contacts }: UseCompanyCustomersOptions) {
         queryClient.invalidateQueries({ queryKey: companyKeys.all });
         queryClient.invalidateQueries({ queryKey: contactsKeys.list });
 
-        toast.showSuccess("Company updated successfully!");
+        toast.success("Company updated successfully!");
         closeModal();
       } catch (error: unknown) {
         const message =
@@ -108,7 +106,7 @@ export function useCompanyCustomers({ contacts }: UseCompanyCustomersOptions) {
             ? error.message
             : "Could not update company";
         setServerError(message);
-        toast.showError(message);
+        toast.error(message);
       } finally {
         setIsSubmitting(false);
       }

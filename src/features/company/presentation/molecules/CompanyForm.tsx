@@ -2,7 +2,8 @@
 
 import type { CompanyType, CompanyService } from "../../domain/models";
 import type { Contact } from "@/contact";
-import { Textarea } from "@dav033/dav-components";
+import { Textarea } from "@/components/ui/textarea";
+
 import {
   CompanyBasicFields,
   CompanyTypeFields,

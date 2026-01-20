@@ -1,6 +1,17 @@
 "use client";
 
-import { Modal, BasicModalFooter } from "@dav033/dav-components";
+
+
+
+import { BasicModalFooter } from "@/components/custom";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+
 import { ContactForm } from "../molecules/ContactForm";
 import type { ContactFormValue } from "../../domain/mappers";
 import type { Company } from "@/company";
@@ -33,33 +44,34 @@ export function ContactModal({
   const footerMode = mode === "create" ? "create" as const : "update" as const;
 
   return (
-    <Modal
-      isOpen={isOpen}
-      title={title}
-      onClose={onClose}
-      footer={
-        <BasicModalFooter
-          onCancel={onClose}
-          onSubmit={onSubmit}
-          isLoading={isLoading}
-          canSubmit={canSubmit}
-          mode={footerMode}
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+        </DialogHeader>
+        <ContactForm
+          value={formValue}
+          onChange={onFormChange}
+          disabled={isLoading}
+          companies={companies}
+          onCreateNewCompany={onCreateNewCompany}
         />
-      }
-    >
-      <ContactForm
-        value={formValue}
-        onChange={onFormChange}
-        disabled={isLoading}
-        companies={companies}
-        onCreateNewCompany={onCreateNewCompany}
-      />
-      {error && (
-        <div className="mt-4 rounded-lg bg-red-500/10 border border-red-500/20 p-3">
-          <p className="text-sm text-red-400">{error}</p>
-        </div>
-      )}
-    </Modal>
+        {error && (
+          <div className="mt-4 rounded-lg bg-red-500/10 border border-red-500/20 p-3">
+            <p className="text-sm text-red-400">{error}</p>
+          </div>
+        )}
+        <DialogFooter>
+          <BasicModalFooter
+            onCancel={onClose}
+            onSubmit={onSubmit}
+            isLoading={isLoading}
+            canSubmit={canSubmit}
+            mode={footerMode}
+          />
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 

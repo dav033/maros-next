@@ -13,9 +13,3 @@ export interface ReportsRepositoryPort {
   submitRestorationFinal(report: RestorationFinalReport): Promise<ReportSubmitResult>;
 }
 
-
-
-
-
-
-

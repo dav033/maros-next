@@ -1,7 +1,18 @@
 "use client";
 
-import { Input, Select, LocationField } from "@dav033/dav-components";
-import type { SelectOption } from "@dav033/dav-components";
+import { LocationField } from "@/components/custom";
+import type { ChangeEvent } from "react";
+
+import { Input } from "@/components/ui/input";
+import { FolderTree, Wrench, Flag, User } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  EMPTY_SELECT_VALUE,
+} from "@/components/ui/select";
 import { LeadType } from "@/leads/domain";
 
 type ProjectType = { id: number; name: string; color?: string };
@@ -32,6 +43,21 @@ type LeadFormProps = {
   disabled?: boolean;
 };
 
+const LEAD_TYPE_OPTIONS = [
+  { value: LeadType.CONSTRUCTION, label: "Construction" },
+  { value: LeadType.ROOFING, label: "Roofing" },
+  { value: LeadType.PLUMBING, label: "Plumbing" },
+];
+
+const STATUS_OPTIONS = [
+  { value: "NOT_EXECUTED", label: "Not Executed" },
+  { value: "IN_PROGRESS", label: "In Progress" },
+  { value: "COMPLETED", label: "Completed" },
+  { value: "LOST", label: "Lost" },
+  { value: "POSTPONED", label: "Postponed" },
+  { value: "PERMITS", label: "Permits" },
+];
+
 export function LeadForm({
   form,
   onChange,
@@ -41,24 +67,7 @@ export function LeadForm({
   showContactSelect,
   disabled = false,
 }: LeadFormProps) {
-  const projectTypeOptions: SelectOption[] = projectTypes.map((pt) => ({
-    value: pt.id,
-    label: pt.name,
-  }));
-
-  const contactOptions: SelectOption[] = contacts.map((c) => ({
-    value: c.id,
-    label: c.name,
-  }));
-
-  const leadTypeOptions: SelectOption[] = [
-    { value: LeadType.CONSTRUCTION, label: "Construction" },
-    { value: LeadType.ROOFING, label: "Roofing" },
-    { value: LeadType.PLUMBING, label: "Plumbing" },
-  ];
-
-  // Asegurar que el valor siempre coincida con una opción válida
-  const validLeadType = leadTypeOptions.some(opt => opt.value === form.leadType) 
+  const validLeadType = LEAD_TYPE_OPTIONS.some(opt => opt.value === form.leadType) 
     ? form.leadType 
     : LeadType.CONSTRUCTION;
 
@@ -66,22 +75,29 @@ export function LeadForm({
     <div className="space-y-3">
       <Select
         value={validLeadType}
-        onChange={(val: string) => {
+        onValueChange={(val) => {
           if (val && val !== "" && Object.values(LeadType).includes(val as LeadType)) {
             onChange("leadType", val as LeadType);
           }
         }}
-        options={leadTypeOptions}
-        placeholder="Select Lead Type *"
-        icon="material-symbols:category"
-        searchable={false}
         disabled={disabled}
-        allowEmpty={false}
-      />
+      >
+        <SelectTrigger>
+          <FolderTree className="size-4 text-muted-foreground mr-2" />
+          <SelectValue placeholder="Select Lead Type *" />
+        </SelectTrigger>
+        <SelectContent>
+          {LEAD_TYPE_OPTIONS.map((opt) => (
+            <SelectItem key={opt.value} value={opt.value}>
+              {opt.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
 
       <Input
         value={form.leadName}
-        onChange={(e) => onChange("leadName", e.target.value)}
+        onChange={(e: ChangeEvent<HTMLInputElement>) => onChange("leadName", e.target.value)}
         placeholder="Lead Name (optional)"
         disabled={disabled}
       />
@@ -90,9 +106,9 @@ export function LeadForm({
         address={form.location}
         addressLink={form.addressLink}
         disabled={disabled}
-        onAddressChange={(value) => onChange("location", value)}
-        onAddressLinkChange={(value) => onChange("addressLink", value)}
-        onLocationChange={({ address, link }) => {
+        onAddressChange={(value: string) => onChange("location", value)}
+        onAddressLinkChange={(value: string) => onChange("addressLink", value)}
+        onLocationChange={({ address, link }: { address: string; link: string }) => {
           if (onBatchChange) {
             onBatchChange({ location: address, addressLink: link || null });
           } else {
@@ -104,58 +120,68 @@ export function LeadForm({
 
       <div className="grid grid-cols-2 gap-3">
         <Select
-          options={projectTypeOptions}
-          value={form.projectTypeId ?? ""}
-          onChange={(val: string) =>
-            onChange("projectTypeId", val ? Number(val) : undefined)
-          }
-          placeholder="Select Project Type *"
-          icon="material-symbols:design-services"
-          searchable={true}
+          value={form.projectTypeId != null ? String(form.projectTypeId) : EMPTY_SELECT_VALUE}
+          onValueChange={(val) => onChange("projectTypeId", val === EMPTY_SELECT_VALUE ? undefined : Number(val))}
           disabled={disabled}
-          allowEmpty={true}
-          emptyLabel="Select Project Type"
-        />
+        >
+          <SelectTrigger>
+            <Wrench className="size-4 text-muted-foreground mr-2" />
+            <SelectValue placeholder="Select Project Type *" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={EMPTY_SELECT_VALUE}>Select Project Type</SelectItem>
+            {projectTypes.map((pt) => (
+              <SelectItem key={pt.id} value={String(pt.id)}>
+                {pt.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
         <Select
-          options={[
-            { value: "NOT_EXECUTED", label: "Not Executed" },
-            { value: "IN_PROGRESS", label: "In Progress" },
-            { value: "COMPLETED", label: "Completed" },
-            { value: "LOST", label: "Lost" },
-            { value: "POSTPONED", label: "Postponed" },
-            { value: "PERMITS", label: "Permits" },
-          ]}
-          value={form.status ?? ""}
-          onChange={(val: string) => onChange("status", val || undefined)}
-          placeholder="Select Status"
-          icon="material-symbols:flag"
-          searchable={false}
+          value={form.status || EMPTY_SELECT_VALUE}
+          onValueChange={(val) => onChange("status", val === EMPTY_SELECT_VALUE ? undefined : val)}
           disabled={disabled}
-          allowEmpty={true}
-          emptyLabel="Select Status"
-        />
+        >
+          <SelectTrigger>
+            <Flag className="size-4 text-muted-foreground mr-2" />
+            <SelectValue placeholder="Select Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={EMPTY_SELECT_VALUE}>Select Status</SelectItem>
+            {STATUS_OPTIONS.map((opt) => (
+              <SelectItem key={opt.value} value={opt.value}>
+                {opt.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {showContactSelect && (
         <Select
-          options={contactOptions}
-          value={form.contactId ?? ""}
-          onChange={(val: string) =>
-            onChange("contactId", val ? Number(val) : undefined)
-          }
-          placeholder="Select Contact *"
-          icon="material-symbols:person"
-          searchable={true}
+          value={form.contactId != null ? String(form.contactId) : EMPTY_SELECT_VALUE}
+          onValueChange={(val) => onChange("contactId", val === EMPTY_SELECT_VALUE ? undefined : Number(val))}
           disabled={disabled}
-          allowEmpty={true}
-          emptyLabel="Select Contact"
-        />
+        >
+          <SelectTrigger>
+            <User className="size-4 text-muted-foreground mr-2" />
+            <SelectValue placeholder="Select Contact *" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={EMPTY_SELECT_VALUE}>Select Contact</SelectItem>
+            {contacts.map((c) => (
+              <SelectItem key={c.id} value={String(c.id)}>
+                {c.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       )}
 
       <Input
         value={form.note ?? ""}
-        onChange={(e) => onChange("note", e.target.value)}
+        onChange={(e: ChangeEvent<HTMLInputElement>) => onChange("note", e.target.value)}
         placeholder="Add a note (optional)"
         disabled={disabled}
       />

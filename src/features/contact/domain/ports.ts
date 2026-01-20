@@ -1,6 +1,5 @@
 import type { Contact, ContactDraft, ContactId, ContactPatch, ContactUniquenessCheck } from "./models";
 
-
 export interface ContactRepositoryPort {
   getById(id: ContactId): Promise<Contact | null>;
   list(): Promise<Contact[]>;

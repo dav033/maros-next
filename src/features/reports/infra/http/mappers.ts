@@ -203,7 +203,3 @@ export const normalizeSubmitResponse = (data: SubmitReportResponse | null | unde
   message: data?.message,
 });
 
-
-
-
-

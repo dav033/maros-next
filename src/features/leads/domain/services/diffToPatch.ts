@@ -1,7 +1,9 @@
+
+import { createPatch } from "@/lib/patch";
 import type { Lead, LeadPatch } from "../models";
 import type { ISODate } from "@/shared/domain";
 import { normalizeEmptyToUndefined } from "@/shared/mappers";
-import { createPatch } from "@dav033/dav-components";
+
 
 export function diffToPatch(current: Lead, updated: Lead): LeadPatch {
   

@@ -14,5 +14,3 @@ export default function ProjectsPage({ initialData }: ProjectsPageProps = {}) {
   return <ProjectsPageView logic={logic} />;
 }
 
-
-

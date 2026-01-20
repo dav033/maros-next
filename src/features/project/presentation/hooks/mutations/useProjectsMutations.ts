@@ -3,12 +3,11 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ProjectPatch } from "@/project/domain";
 import { projectsKeys } from "@/project/application";
-import { useToast } from "@dav033/dav-components";
+import { toast } from "sonner";
 import { updateProjectAction, deleteProjectAction } from "../../../actions/projectActions";
 
 export function useProjectsMutations() {
   const queryClient = useQueryClient();
-  const toast = useToast();
 
   const updateMutation = useMutation({
     mutationFn: async (input: { id: number; patch: ProjectPatch }) => {
@@ -20,12 +19,12 @@ export function useProjectsMutations() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: projectsKeys.all });
-      toast.showSuccess("Project updated successfully!");
+      toast.success("Project updated successfully!");
     },
     onError: (error: unknown) => {
       const message =
         error instanceof Error ? error.message : "Could not update project";
-      toast.showError(message);
+      toast.error(message);
       throw error;
     },
   });
@@ -39,12 +38,12 @@ export function useProjectsMutations() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: projectsKeys.all });
-      toast.showSuccess("Project deleted successfully!");
+      toast.success("Project deleted successfully!");
     },
     onError: (error: unknown) => {
       const message =
         error instanceof Error ? error.message : "Could not delete project";
-      toast.showError(message);
+      toast.error(message);
       throw error;
     },
   });
@@ -54,6 +53,4 @@ export function useProjectsMutations() {
     deleteMutation,
   };
 }
-
-
 

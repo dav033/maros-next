@@ -8,9 +8,3 @@ export async function getRestorationVisit(
   return ctx.repos.reports.getRestorationVisit(projectId);
 }
 
-
-
-
-
-
-

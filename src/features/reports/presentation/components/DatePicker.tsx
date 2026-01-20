@@ -1,5 +1,17 @@
-import { useId, useRef } from "react";
-import { Field, Icon, controlBaseClass } from "@dav033/dav-components";
+"use client";
+
+import { useState, useId } from "react";
+import { format, parse, isValid } from "date-fns";
+import { Calendar as CalendarIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Label } from "@/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 type DatePickerProps = {
   label?: string;
@@ -16,44 +28,52 @@ export function DatePicker({
   placeholder = "Select date",
   disabled = false,
 }: DatePickerProps) {
-  const inputRef = useRef<HTMLInputElement | null>(null);
+  const [open, setOpen] = useState(false);
   const inputId = useId();
 
-  const openPicker = () => {
-    const el = inputRef.current as (HTMLInputElement & { showPicker?: () => void }) | null;
-    if (!el) return;
-    if (typeof el.showPicker === "function") {
-      el.showPicker();
+  // Parse the value string (YYYY-MM-DD) to Date object
+  const selectedDate = value
+    ? parse(value, "yyyy-MM-dd", new Date())
+    : undefined;
+  const isValidDate = selectedDate && isValid(selectedDate);
+
+  const handleSelect = (date: Date | undefined) => {
+    if (date) {
+      onChange(format(date, "yyyy-MM-dd"));
     } else {
-      el.focus();
-      el.click();
+      onChange("");
     }
+    setOpen(false);
   };
 
   return (
-    <Field label={label} htmlFor={inputId}>
-      <div className="relative">
-        <input
-          ref={inputRef}
-          id={inputId}
-          type="date"
-          value={value ?? ""}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          disabled={disabled}
-          className={controlBaseClass({ hasRightAddon: true })}
-        />
-        <button
-          type="button"
-          onClick={openPicker}
-          className="absolute inset-y-0 right-2 flex items-center text-gray-400 hover:text-theme-light focus:outline-none"
-          aria-label="Open calendar"
-          disabled={disabled}
-        >
-          <Icon name="mdi:calendar" size={18} />
-        </button>
-      </div>
-    </Field>
+    <div className="space-y-2">
+      {label && <Label htmlFor={inputId}>{label}</Label>}
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            id={inputId}
+            variant="outline"
+            disabled={disabled}
+            className={cn(
+              "w-full justify-start text-left font-normal",
+              !isValidDate && "text-muted-foreground"
+            )}
+          >
+            <CalendarIcon className="size-4 mr-2" />
+            {isValidDate ? format(selectedDate, "PPP") : placeholder}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0" align="start">
+          <Calendar
+            mode="single"
+            selected={isValidDate ? selectedDate : undefined}
+            onSelect={handleSelect}
+            initialFocus
+          />
+        </PopoverContent>
+      </Popover>
+    </div>
   );
 }
 

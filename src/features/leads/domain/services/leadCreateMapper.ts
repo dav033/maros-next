@@ -10,6 +10,7 @@ type CreateLeadBasePayload = {
   addressLink?: string | null;
   status: LeadStatus | null;
   projectTypeId: number;
+  inReview?: boolean;
 };
 
 type CreateLeadWithNewContactPayload = CreateLeadBasePayload & {
@@ -40,6 +41,7 @@ export function mapLeadDraftToCreatePayload(
     addressLink: draft.addressLink,
     status: draft.status,
     projectTypeId: draft.projectTypeId,
+    inReview: draft.inReview,
   };
 
   if ("contact" in draft) {

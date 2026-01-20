@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from "react";
 import type { Lead, LeadType } from "@/leads/domain";
-import { useToast } from "@dav033/dav-components";
+import { toast } from "sonner";
 import { useCreateLeadController } from "../controllers/useCreateLeadController";
 
 export interface UseLeadCreateModalOptions {
   leadType: LeadType;
+  inReview?: boolean;
   onCreated?: () => Promise<void>;
 }
 
@@ -19,16 +20,16 @@ export interface UseLeadCreateModalResult {
 
 export function useLeadCreateModal({
   leadType,
+  inReview,
   onCreated,
 }: UseLeadCreateModalOptions): UseLeadCreateModalResult {
   const [isOpen, setIsOpen] = useState(false);
-  const toast = useToast();
-
   const createController = useCreateLeadController({
     leadType,
+    inReview,
     onCreated: async (lead: Lead) => {
       setIsOpen(false);
-      toast.showSuccess("Lead created successfully!");
+      toast.success("Lead created successfully!");
       await onCreated?.();
     },
   });

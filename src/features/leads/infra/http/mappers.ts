@@ -12,6 +12,7 @@ export type ApiLeadDTO = {
   contactId?: number;
   projectTypeId?: number;
   notes?: string[];
+  inReview?: boolean;
 };
 import type { LeadStatus, LeadType } from "@/leads/domain";
 import { mapLeadFromDTO, mapLeadsFromDTO } from "@/leads/domain";
@@ -24,6 +25,7 @@ export type CreateLeadBasePayload = {
   addressLink?: string | null;
   status: LeadStatus | null;
   projectTypeId: number;
+  inReview?: boolean;
 };
 
 export type CreateLeadWithNewContactPayload = CreateLeadBasePayload & {
@@ -53,6 +55,7 @@ export type UpdateLeadPayload = {
   startDate?: string;
   leadNumber?: string | null;
   notes?: string[];
+  inReview?: boolean;
 };
 
 export function mapLeadFromApi(dto: ApiLeadDTO): Lead {
@@ -73,6 +76,7 @@ export function mapLeadDraftToCreatePayload(
     addressLink: draft.addressLink,
     status: draft.status,
     projectTypeId: draft.projectTypeId,
+    inReview: draft.inReview,
   };
 
   if (draft.name && draft.name.trim() !== '') {
@@ -110,5 +114,6 @@ export function mapLeadPatchToUpdatePayload(
     startDate: patch.startDate,
     leadNumber: patch.leadNumber,
     notes: patch.notes,
+    inReview: patch.inReview,
   };
 }

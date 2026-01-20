@@ -28,6 +28,7 @@ export interface Lead {
   contact: Contact;
   projectType: ProjectType;
   notes: string[];
+  inReview: boolean;
 }
 
 export type LeadId = number;
@@ -54,6 +55,7 @@ type LeadDraftBase = Readonly<{
   addressLink?: string | null;
   status: LeadStatus | null;
   projectTypeId: ProjectTypeId;
+  inReview?: boolean;
 }>;
 
 export type LeadDraftWithNewContact = LeadDraftBase &
@@ -78,9 +80,8 @@ export type LeadPatch = Readonly<{
   startDate?: ISODate;
   leadNumber?: string | null;
   notes?: string[];
+  inReview?: boolean;
 }>;
-
-
 
 export type ApplyLeadPatchResult = Readonly<{
   lead: Lead;
@@ -91,8 +92,6 @@ export type LeadSection = Readonly<{
   name: string;
   data: Lead[];
 }>;
-
-
 
 export type LeadStatusCount = Record<LeadStatus, number>;
 

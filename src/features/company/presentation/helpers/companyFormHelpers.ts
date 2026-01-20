@@ -1,8 +1,9 @@
+
+import { createPatch, trimStringFields } from "@/lib/patch";
 import type { Company, CompanyDraft, CompanyPatch } from "../../domain/models";
 import type { CompanyFormValue } from "../molecules/CompanyForm";
 import { CompanyType } from "../../domain/models";
 import { normalizeEmptyToUndefined } from "@/shared/mappers";
-import { createPatch, trimStringFields } from "@dav033/dav-components";
 import type { Contact } from "@/contact/domain";
 
 export const initialCompanyFormValue: CompanyFormValue = {
@@ -20,7 +21,6 @@ export const initialCompanyFormValue: CompanyFormValue = {
   submiz: "",
 };
 
-
 export function toDraft(value: CompanyFormValue): CompanyDraft {
   return {
     name: value.name.trim(),
@@ -35,7 +35,6 @@ export function toDraft(value: CompanyFormValue): CompanyDraft {
     submiz: normalizeEmptyToUndefined(value.submiz),
   };
 }
-
 
 export function toPatch(current: Company, value: CompanyFormValue): CompanyPatch {
  

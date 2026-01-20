@@ -1,24 +1,23 @@
-import { Badge } from "@dav033/dav-components";
-import type { BadgeVariant } from "@dav033/dav-components";
+import { Badge } from "@/components/ui/badge";
 
 interface CompanyTypeBadgeProps {
   type: string | null | undefined;
 }
 
-const TYPE_VARIANTS: Record<string, BadgeVariant> = {
-  SUBCONTRACTOR: "primary",
-  GENERAL_CONTRACTOR: "success",
-  SUPPLIER: "warning",
-  HOA: "purple",
-  OTHER: "secondary",
+const TYPE_COLORS: Record<string, string> = {
+  SUBCONTRACTOR: "#3b82f6",
+  GENERAL_CONTRACTOR: "#22c55e",
+  SUPPLIER: "#f59e0b",
+  HOA: "#8b5cf6",
+  OTHER: "#6b7280",
 };
 
 export function CompanyTypeBadge({ type }: CompanyTypeBadgeProps) {
-  const variant = type ? TYPE_VARIANTS[type] ?? "gray" : "gray";
+  const color = type ? TYPE_COLORS[type] ?? "#6b7280" : "#6b7280";
   const label = type ?? "No type";
 
   return (
-    <Badge variant={variant} size="sm">
+    <Badge variant="outline" style={{ borderColor: color, color }}>
       {label}
     </Badge>
   );

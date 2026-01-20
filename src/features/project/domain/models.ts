@@ -61,5 +61,3 @@ export type ProjectPatch = Readonly<{
   leadId?: LeadId;
 }>;
 
-
-

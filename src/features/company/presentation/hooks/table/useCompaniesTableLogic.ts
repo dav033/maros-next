@@ -1,7 +1,8 @@
 "use client";
 
+import { useEntityTableLogic, useTableWithSearch } from "@/common/hooks";
+
 import type { Company } from "../../../domain/models";
-import { useEntityTableLogic, useTableWithSearch } from "@dav033/dav-components";
 
 interface UseCompaniesTableLogicProps {
   companies: Company[];

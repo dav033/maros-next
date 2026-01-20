@@ -1,7 +1,9 @@
 "use client";
 
 import { useRef } from "react";
-import { Badge, Button, Icon, IconButton, Typography } from "@dav033/dav-components";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Upload, X } from "lucide-react";
 
 type FileInputListProps = {
   label: string;
@@ -44,15 +46,13 @@ export function FileInputList({
           type="button"
           variant="secondary"
           size="sm"
-          leftIcon={<Icon name="mdi:upload" size={16} />}
           onClick={() => inputRef.current?.click()}
         >
+          <Upload className="size-4 mr-2" />
           {label}
         </Button>
         {helperText && (
-          <Typography as="span" variant="small" className="text-gray-400">
-            {helperText}
-          </Typography>
+          <span className="text-sm text-muted-foreground">{helperText}</span>
         )}
         <input
           ref={inputRef}
@@ -66,24 +66,26 @@ export function FileInputList({
 
       {existingUrls.length > 0 && (
         <div className="flex flex-col gap-2">
-          <Typography variant="small" className="text-gray-300">
-            Archivos existentes
-          </Typography>
+          <p className="text-sm text-muted-foreground">Archivos existentes</p>
           <div className="flex flex-wrap gap-2">
             {existingUrls.map((url) => (
               <div key={url} className="inline-flex items-center gap-1">
-                <Badge variant="info" size="sm">
+                <Badge variant="outline" style={{ borderColor: "#3b82f6", color: "#3b82f6" }}>
                   <a href={url} target="_blank" rel="noreferrer" className="underline">
                     Ver archivo
                   </a>
                 </Badge>
                 {onRemoveExisting && (
-                  <IconButton
-                    size="sm"
-                    aria-label="Eliminar adjunto existente"
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6"
                     onClick={() => onRemoveExisting(url)}
-                    icon={<Icon name="mdi:close" size={14} />}
-                  />
+                    aria-label="Eliminar adjunto existente"
+                  >
+                    <X className="size-3.5" />
+                  </Button>
                 )}
               </div>
             ))}
@@ -93,26 +95,25 @@ export function FileInputList({
 
       <div className="flex flex-wrap gap-2">
         {files.length === 0 && (
-          <Typography variant="small" className="text-gray-500">
-            No hay archivos seleccionados.
-          </Typography>
+          <p className="text-sm text-muted-foreground">No hay archivos seleccionados.</p>
         )}
         {files.map((file, index) => (
           <div key={`${file.name}-${index}`} className="inline-flex items-center gap-1">
-            <Badge variant="secondary" size="sm">
-              {file.name}
-            </Badge>
-            <IconButton
-              size="sm"
-              aria-label="Quitar archivo"
+            <Badge variant="secondary">{file.name}</Badge>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6"
               onClick={() => handleRemove(index)}
-              icon={<Icon name="mdi:close" size={14} />}
-            />
+              aria-label="Quitar archivo"
+            >
+              <X className="size-3.5" />
+            </Button>
           </div>
         ))}
       </div>
     </div>
   );
 }
-
 

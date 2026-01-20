@@ -1,14 +1,14 @@
 import { ContactsTableSkeleton } from "../organisms/ContactsTableSkeleton";
-import { EntityCrudPageTemplate, SimplePageHeader } from "@dav033/dav-components";
+import { EntityCrudPageTemplate } from "@/components/custom";
 
 export function ContactsPageSkeleton() {
   return (
     <EntityCrudPageTemplate
       header={
-        <SimplePageHeader
-          title="Contacts"
-          description="Manage your contacts."
-        />
+        <header className="flex flex-col gap-1">
+          <h1 className="text-xl font-semibold text-foreground sm:text-2xl">Contacts</h1>
+            <p className="text-xs text-muted-foreground sm:text-sm">Manage your contacts.</p>
+        </header>
       }
       toolbar={null}
       isLoading={true}

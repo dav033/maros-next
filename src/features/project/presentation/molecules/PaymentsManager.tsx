@@ -1,6 +1,9 @@
 "use client";
 
-import { Input, Icon } from "@dav033/dav-components";
+import { Input } from "@/components/ui/input";
+
+
+import { Plus, Trash } from "lucide-react";
 import { formatCurrency } from "@/shared/utils";
 
 type PaymentsManagerProps = {
@@ -38,20 +41,20 @@ export function PaymentsManager({
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <label className="text-sm font-medium text-gray-700">Payments</label>
+        <label className="text-sm font-medium text-foreground">Payments</label>
         <button
           type="button"
           onClick={handleAddPayment}
           disabled={disabled}
-          className="flex items-center gap-1 rounded-md bg-theme-primary px-2 py-1 text-xs text-white transition-colors hover:bg-theme-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center gap-1 rounded-md bg-primary px-2 py-1 text-xs text-white transition-colors hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <Icon name="mdi:plus" size={14} />
+          <Plus className="size-3.5" />
           Add Payment
         </button>
       </div>
 
       {paymentsList.length === 0 ? (
-        <div className="rounded-md border border-gray-200 bg-gray-50 p-3 text-center text-sm text-gray-500">
+        <div className="rounded-md border border-gray-200 bg-gray-50 p-3 text-center text-sm text-muted-foreground">
           No payments added yet
         </div>
       ) : (
@@ -68,7 +71,7 @@ export function PaymentsManager({
                   disabled={disabled}
                 />
               </div>
-              <div className="w-24 text-right text-sm text-gray-600">
+              <div className="w-24 text-right text-sm text-muted-foreground">
                 {formatCurrency(payment)}
               </div>
               <button
@@ -78,7 +81,7 @@ export function PaymentsManager({
                 className="flex items-center justify-center rounded-md p-2 text-red-500 transition-colors hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Remove payment"
               >
-                <Icon name="mdi:delete" size={18} />
+                <Trash className="size-4.5" />
               </button>
             </div>
           ))}
@@ -87,8 +90,8 @@ export function PaymentsManager({
 
       {paymentsList.length > 0 && (
         <div className="flex items-center justify-between rounded-md border border-gray-200 bg-gray-50 px-3 py-2">
-          <span className="text-sm font-medium text-gray-700">Total:</span>
-          <span className="text-sm font-semibold text-gray-900">
+          <span className="text-sm font-medium text-foreground">Total:</span>
+          <span className="text-sm font-semibold text-foreground">
             {formatCurrency(
               paymentsList.reduce((sum, payment) => sum + (payment || 0), 0)
             )}

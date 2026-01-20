@@ -1,9 +1,12 @@
 "use client";
 
+import { useEntityTableLogic, useTableWithSearch } from "@/common/hooks";
+
+
 import type { Project } from "@/project/domain";
 import { useProjectsApp } from "@/di";
 import { deleteProject } from "@/project/application";
-import { useEntityTableLogic, useTableWithSearch } from "@dav033/dav-components";
+
 
 interface UseProjectsTableLogicProps {
   projects: Project[];

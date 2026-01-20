@@ -53,7 +53,8 @@ function validateLeadName(raw: string | undefined, location: string, leadNumber:
 export function buildLeadDraftForNewContact(
   clock: Clock,
   input: CommonInput & { contact: NewContact },
-  policies: LeadPolicies = {}
+  policies: LeadPolicies = {},
+  inReview?: boolean
 ): LeadDraftWithNewContact {
   const numberRules = policies.leadNumberPattern
     ? { pattern: policies.leadNumberPattern }
@@ -73,6 +74,7 @@ export function buildLeadDraftForNewContact(
     status: ((policies as any).defaultStatus ?? null) as LeadStatus | null,
     projectTypeId: input.projectTypeId,
     contact: normalizedContact,
+    ...(inReview !== undefined && { inReview }),
   };
 
   ensureLeadDraftIntegrity(draft, policies);
@@ -82,7 +84,8 @@ export function buildLeadDraftForNewContact(
 export function buildLeadDraftForExistingContact(
   clock: Clock,
   input: CommonInput & { contactId: ContactId },
-  policies: LeadPolicies = {}
+  policies: LeadPolicies = {},
+  inReview?: boolean
 ): LeadDraftWithExistingContact {
   const numberRules = policies.leadNumberPattern
     ? { pattern: policies.leadNumberPattern }
@@ -99,6 +102,7 @@ export function buildLeadDraftForExistingContact(
     status: ((policies as any).defaultStatus ?? null) as LeadStatus | null,
     projectTypeId: input.projectTypeId,
     contactId: input.contactId,
+    ...(inReview !== undefined && { inReview }),
   };
 
   ensureLeadDraftIntegrity(draft, policies);

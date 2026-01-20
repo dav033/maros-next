@@ -5,7 +5,7 @@ import type { Project } from "@/project/domain";
 import { useProjectsApp } from "@/di";
 import { updateProject, projectsKeys } from "@/project/application";
 import { useQueryClient } from "@tanstack/react-query";
-import { useToast } from "@dav033/dav-components";
+import { toast } from "sonner";
 
 export interface UsePaymentsModalOptions {
   onUpdated?: () => Promise<void>;
@@ -35,8 +35,6 @@ export function usePaymentsModal({
   const [error, setError] = useState<string | null>(null);
   const app = useProjectsApp();
   const queryClient = useQueryClient();
-  const toast = useToast();
-
   useEffect(() => {
     if (selectedProject) {
       setPayments(selectedProject.payments ? [...selectedProject.payments] : []);
@@ -95,14 +93,14 @@ export function usePaymentsModal({
       });
 
       queryClient.invalidateQueries({ queryKey: projectsKeys.all });
-      toast.showSuccess("Payments updated successfully!");
+      toast.success("Payments updated successfully!");
       setIsOpen(false);
       setSelectedProject(null);
       await onUpdated?.();
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "Could not update payments";
       setError(msg);
-      toast.showError(msg);
+      toast.error(msg);
     } finally {
       setIsLoading(false);
     }

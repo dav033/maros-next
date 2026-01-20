@@ -1,4 +1,4 @@
-import { Badge } from "@dav033/dav-components";
+import { Badge } from "@/components/ui/badge";
 
 interface ProjectTypeBadgeProps {
   projectType: {
@@ -10,10 +10,9 @@ interface ProjectTypeBadgeProps {
 
 export function ProjectTypeBadge({ projectType }: ProjectTypeBadgeProps) {
   if (!projectType) {
-    return <span className="text-gray-400">—</span>;
+    return <span className="text-muted-foreground">—</span>;
   }
 
- 
   const colorFromName = (name: string): string | null => {
     const n = name.toLowerCase();
     if (n.includes("roof") || n.includes("techo")) return "#ef4444";
@@ -29,11 +28,14 @@ export function ProjectTypeBadge({ projectType }: ProjectTypeBadgeProps) {
 
   return (
     <Badge
-      size="sm"
-      dot
-      dotColor={color}
-      customColor={color}
+      variant="outline"
+      className="gap-1.5 text-xs"
+      style={{ borderColor: color, color }}
     >
+      <span
+        className="h-2 w-2 rounded-full"
+        style={{ backgroundColor: color }}
+      />
       {projectType.name}
     </Badge>
   );

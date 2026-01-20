@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { translateText } from "@/shared/utils/openaiTranslation";
-import { useToast } from "@dav033/dav-components";
+import { toast } from "sonner";
 import type { RestorationVisitReport } from "@/reports/domain/models";
 
 interface Translations {
@@ -15,7 +15,6 @@ export const useReportTranslation = (
   form: RestorationVisitReport,
   setForm: React.Dispatch<React.SetStateAction<RestorationVisitReport>>
 ) => {
-  const toast = useToast();
   const previousLanguageRef = useRef<string>(form.language || "en");
   const [isTranslating, setIsTranslating] = useState(false);
   const [translationProgress, setTranslationProgress] = useState<{
@@ -281,7 +280,7 @@ export const useReportTranslation = (
           });
         }
       } catch (error) {
-        toast.showError("Error translating content. Please try again.");
+        toast.error("Error translating content. Please try again.");
       } finally {
         setIsTranslating(false);
         setTranslationProgress(null);

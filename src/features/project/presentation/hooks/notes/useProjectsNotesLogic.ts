@@ -1,6 +1,8 @@
 "use client";
 
-import { useNotesModal, useToast } from "@dav033/dav-components";
+import { useNotesModal } from "@/common/hooks";
+
+import { toast } from "sonner";
 import { projectsKeys } from "@/project/application";
 import type { Project } from "@/project/domain";
 import { useQueryClient } from "@tanstack/react-query";
@@ -22,7 +24,6 @@ export interface UseProjectsNotesLogicReturn {
 
 export function useProjectsNotesLogic(): UseProjectsNotesLogicReturn {
   const queryClient = useQueryClient();
-  const toast = useToast();
   const data = useProjectsData();
 
   const {
@@ -57,7 +58,7 @@ export function useProjectsNotesLogic(): UseProjectsNotesLogicReturn {
 
       queryClient.invalidateQueries({ queryKey: projectsKeys.all });
       await data.refetch();
-      toast.showSuccess("Notes updated successfully!");
+      toast.success("Notes updated successfully!");
     });
   };
 

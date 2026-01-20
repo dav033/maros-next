@@ -1,6 +1,9 @@
 @config "../../tailwind.config.ts";
 @import "tailwindcss";
 
+@custom-variant dark (&:is(.dark *));
+
+/* Custom theme variables (legacy) */
 :root {
   --color-dark: #161616;
   --color-gray: #273f4f;
@@ -10,6 +13,47 @@
   --color-primary: #041fc4;
   --color-primary-alt: #c44a04;
   --color-light: #efeeea;
+  --sidebar: hsl(0 0% 98%);
+  --sidebar-foreground: hsl(240 5.3% 26.1%);
+  --sidebar-primary: hsl(240 5.9% 10%);
+  --sidebar-primary-foreground: hsl(0 0% 98%);
+  --sidebar-accent: hsl(240 4.8% 95.9%);
+  --sidebar-accent-foreground: hsl(240 5.9% 10%);
+  --sidebar-border: hsl(220 13% 91%);
+  --sidebar-ring: hsl(217.2 91.2% 59.8%);
+}
+
+/* Shadcn UI CSS Variables - Dark theme by default */
+:root {
+  --radius: 0.5rem;
+}
+
+.dark,
+:root {
+  --background: 0 0% 9%;
+  --foreground: 60 9% 93%;
+  --card: 0 0% 9%;
+  --card-foreground: 60 9% 93%;
+  --popover: 0 0% 6%;
+  --popover-foreground: 60 9% 93%;
+  --primary: 230 97% 39%;
+  --primary-foreground: 60 9% 93%;
+  --secondary: 200 20% 23%;
+  --secondary-foreground: 60 9% 93%;
+  --muted: 200 15% 18%;
+  --muted-foreground: 60 5% 64%;
+  --accent: 200 20% 20%;
+  --accent-foreground: 60 9% 93%;
+  --destructive: 0 62% 50%;
+  --destructive-foreground: 60 9% 93%;
+  --border: 200 10% 20%;
+  --input: 200 10% 20%;
+  --ring: 230 97% 39%;
+  --chart-1: 220 70% 50%;
+  --chart-2: 160 60% 45%;
+  --chart-3: 30 80% 55%;
+  --chart-4: 280 65% 60%;
+  --chart-5: 340 75% 55%;
 }
 
 * {
@@ -18,15 +62,15 @@
 
 html {
   font-family: system-ui, sans-serif;
-  background-color: var(--color-dark);
-  color: var(--color-light);
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
 }
 
 body {
   margin: 0;
   padding: 0;
-  background-color: var(--color-dark);
-  color: var(--color-light);
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
   min-height: 100vh;
 }
 
@@ -48,70 +92,28 @@ body {
   background: var(--color-gray-alt);
 }
 
-.bg-theme-dark {
-  background-color: var(--color-dark);
-}
+/* Bridge: mantener clases legacy, pero que ya usen tokens shadcn */
+.bg-theme-dark { background-color: hsl(var(--background)); }
+.bg-theme-gray { background-color: hsl(var(--muted)); }
+.bg-theme-gray-alt { background-color: hsl(var(--accent)); }
+.bg-theme-gray-darker { background-color: hsl(var(--popover)); }
+.bg-theme-darker { background-color: hsl(var(--popover)); }
+.bg-theme-gray-subtle { background-color: hsl(var(--muted)); }
+.bg-theme-primary { background-color: hsl(var(--primary)); }
+.bg-theme-primary-alt { background-color: hsl(var(--primary)); }
 
-.bg-theme-gray {
-  background-color: var(--color-gray);
-}
+/* Text bridge */
+.text-theme-primary { color: hsl(var(--primary)); }
+.text-theme-light { color: hsl(var(--foreground)); }
+.text-theme-muted { color: hsl(var(--muted-foreground)); }
+.text-theme-accent { color: hsl(var(--primary)); }
 
-.bg-theme-gray-alt {
-  background-color: var(--color-gray-alt);
-}
-
-.bg-theme-gray-darker {
-  background-color: var(--color-gray-darker);
-}
-
-.bg-theme-darker {
-  background-color: var(--color-gray-darker);
-}
-
-.bg-theme-gray-subtle {
-  background-color: var(--color-gray-subtle);
-}
-
-.bg-theme-primary {
-  background-color: var(--color-primary);
-}
-
-.bg-theme-primary-alt {
-  background-color: var(--color-primary-alt);
-}
-
-.text-theme-primary {
-  color: var(--color-primary);
-}
-
-.text-theme-light {
-  color: var(--color-light);
-}
-
-.text-theme-muted {
-  color: var(--color-gray);
-  opacity: 0.7;
-}
-
-.border-theme-gray {
-  border-color: var(--color-gray);
-}
-
-.border-theme-border {
-  border-color: var(--color-gray-subtle);
-}
-
-.border-theme-gray-alt {
-  border-color: var(--color-gray-alt);
-}
-
-.border-theme-primary {
-  border-color: var(--color-primary);
-}
-
-.border-theme-gray-subtle {
-  border-color: var(--color-gray-subtle);
-}
+/* Border bridge */
+.border-theme-gray { border-color: hsl(var(--border)); }
+.border-theme-border { border-color: hsl(var(--border)); }
+.border-theme-gray-alt { border-color: hsl(var(--border)); }
+.border-theme-primary { border-color: hsl(var(--ring)); }
+.border-theme-gray-subtle { border-color: hsl(var(--border)); }
 
 .hover\:bg-theme-gray-subtle:hover {
   background-color: var(--color-gray-subtle);
@@ -132,7 +134,6 @@ body {
 .hover\:bg-theme-dark\/60:hover {
   background-color: rgb(0 0 0 / 0.6);
 }
-
 
 .bg-gray-800\/50 {
   background-color: rgb(31 41 55 / 0.5);
@@ -174,7 +175,6 @@ body {
   border-color: rgb(75 85 99 / 0.5);
 }
 
-
 .border-white\/15 {
   border-color: rgb(255 255 255 / 0.15);
 }
@@ -191,7 +191,6 @@ body {
   background-color: rgb(255 255 255 / 0.06);
 }
 
-
 .text-theme-light\/90 {
   color: rgb(239 238 234 / 0.9);
 }
@@ -200,16 +199,13 @@ body {
   color: rgb(239 238 234 / 0.4);
 }
 
-
 .bg-\[\#1c2128\] {
   background-color: #1c2128;
 }
 
-
 .hover\:bg-red-500\/10:hover {
   background-color: rgb(239 68 68 / 0.1);
 }
-
 
 .min-w-\[180px\] {
   min-width: 180px;
@@ -225,11 +221,6 @@ body {
 
 .backdrop-blur-sm {
   backdrop-filter: blur(4px);
-}
-
-
-.text-gray-400 {
-  color: rgb(156 163 175);
 }
 
 .group:hover .group-hover\:text-white {
@@ -285,17 +276,17 @@ table.custom-table * {
   border-color: var(--color-gray-subtle) !important;
 }
 
+/* Evitar que <select> legacy contradiga <Select/> de shadcn */
 select,
 select option {
-  background-color: var(--color-dark);
-  color: var(--color-light);
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
 }
 
 select option:hover,
 select option:focus {
-  background-color: var(--color-gray-subtle);
+  background-color: hsl(var(--muted));
 }
-
 
 @keyframes contextMenuFadeIn {
   from {
@@ -312,3 +303,58 @@ select option:focus {
   animation: contextMenuFadeIn 0.12s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+.dark {
+  --sidebar: hsl(240 5.9% 10%);
+  --sidebar-foreground: hsl(240 4.8% 95.9%);
+  --sidebar-primary: hsl(224.3 76.3% 48%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent: hsl(240 3.7% 15.9%);
+  --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
+  --sidebar-border: hsl(240 3.7% 15.9%);
+  --sidebar-ring: hsl(217.2 91.2% 59.8%);
+}@theme inline {
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}@layer base {
+  :root {
+    --sidebar: 0 0% 98%;
+    --sidebar-foreground: 0 0% 10%;
+    --sidebar-primary: 230 97% 39%;
+    --sidebar-primary-foreground: 60 9% 93%;
+    --sidebar-accent: 0 0% 95%;
+    --sidebar-accent-foreground: 0 0% 10%;
+    --sidebar-border: 0 0% 90%;
+    --sidebar-ring: 230 97% 39%;
+  }  .dark {
+    --sidebar: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}@theme inline {
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}

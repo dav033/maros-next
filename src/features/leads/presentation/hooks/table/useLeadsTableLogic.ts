@@ -1,8 +1,11 @@
 "use client";
 
+import { useEntityTableLogic, useTableWithSearch } from "@/common/hooks";
+
+
 import type { Lead } from "@/leads/domain";
 import type { Contact } from "@/contact/domain";
-import { useEntityTableLogic, useTableWithSearch } from "@dav033/dav-components";
+
 import { leadsSearchConfig } from "../../search/leadsSearchConfig";
 
 export interface UseLeadsTableLogicProps {

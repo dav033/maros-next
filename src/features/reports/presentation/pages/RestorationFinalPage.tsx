@@ -1,19 +1,16 @@
 "use client";
 
+import {  
+  SearchableSelect, 
+  Typography } from "@/components/custom";
+import { Plus, Trash, Loader, Save } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useEffect, useMemo, useState } from "react";
-import {
-  Button,
-  Icon,
-  IconButton,
-  Input,
-  SearchableSelect,
-  PageContainer,
-  SimplePageHeader,
-  Spinner,
-  Textarea,
-  Typography,
-  useToast,
-} from "@dav033/dav-components";
+import { toast } from "sonner";
 import type { EvidenceImageRow, RestorationFinalReport } from "@/reports/domain/models";
 import { FileInputList } from "../components/FileInputList";
 import {
@@ -52,7 +49,6 @@ const EMPTY_FINAL: RestorationFinalReport = {
 };
 
 export function RestorationFinalPage() {
-  const toast = useToast();
   const [projectInput, setProjectInput] = useState("");
   const [activeProjectId, setActiveProjectId] = useState<number | null>(null);
   const [form, setForm] = useState<RestorationFinalReport>(EMPTY_FINAL);
@@ -252,7 +248,7 @@ export function RestorationFinalPage() {
     event.preventDefault();
     const leadNumber = project?.lead?.leadNumber || form.leadNumber;
     if (!leadNumber) {
-      toast.showError("Select a project before submitting.");
+      toast.error("Select a project before submitting.");
       return;
     }
 
@@ -271,183 +267,182 @@ export function RestorationFinalPage() {
 
     try {
       const result = await submitMutation.mutateAsync(sanitized);
-      toast.showSuccess("Final report submitted successfully.");
+      toast.success("Final report submitted successfully.");
       if (result?.redirectUrl) {
         window.open(result.redirectUrl, "_blank");
       }
     } catch (error) {
       console.error(error);
-      toast.showError("There was a problem submitting the final report.");
+      toast.error("There was a problem submitting the final report.");
     }
   };
 
   return (
-    <PageContainer className="space-y-8">
-      <SimplePageHeader
-        title="Restoration Report - Final"
-        description="Complete the final report using data obtained by selecting a project."
-      />
+    <div className="mx-auto w-full px-4 py-6 sm:px-6 lg:px-8 max-w-screen-2xl space-y-8">
+      <header className="flex flex-col gap-1">
+          <h1 className="text-xl font-semibold text-foreground sm:text-2xl">Restoration Report - Final</h1>
+            <p className="text-xs text-muted-foreground sm:text-sm">Complete the final report using data obtained by selecting a project.</p>
+        </header>
 
       <form onSubmit={handleSubmit} className="space-y-10">
-        <section className="rounded-2xl bg-[#1d1d1f] p-6 shadow-sm space-y-4">
-          <Typography variant="body" className="font-semibold text-theme-light">
-            Search Project Information
-          </Typography>
-          <div className="space-y-2">
-            <Typography variant="small" className="text-gray-300">
-              Projects
-            </Typography>
-            <SearchableSelect
-              options={projectOptions}
-              value={projectInput}
-              onChange={handleSelectProject}
-              placeholder="Search and select project"
-              icon="mdi:magnify"
-              disabled={projectsLoading || projectLoading}
-            />
-          </div>
-          {finalQuery.error && (
-            <Typography variant="small" className="text-red-400">
-              {finalQuery.error.message}
-            </Typography>
-          )}
-          {hasRemoteData && (
-            <Typography variant="small" className="text-emerald-400">
-              Data preloaded from API for project {form.leadNumber || project?.lead?.leadNumber || 'N/A'}.
-            </Typography>
-          )}
-        </section>
-
-        <section className="rounded-2xl bg-[#1d1d1f] p-6 shadow-sm space-y-4">
-          <Typography variant="body" className="font-semibold text-theme-light">
-            General Information
-          </Typography>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <Input
-              label="Project name"
-              value={form.projectName}
-              onChange={(e) => updateField("projectName", e.target.value)}
-            />
-            <Input
-              label="Project location"
-              value={form.projectLocation}
-              onChange={(e) => updateField("projectLocation", e.target.value)}
-            />
-            <div className="space-y-1">
-              <Typography variant="small" className="text-gray-300">
-                Client name
-              </Typography>
+        <Card>
+          <CardHeader className="pb-4">
+            <CardTitle className="text-base">Search Project Information</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label>Projects</Label>
               <SearchableSelect
-                options={companyOptions}
-                value={form.clientName}
-                onChange={(value) => updateField("clientName", value)}
-                placeholder="Select company"
-                icon="mdi:office-building"
-                disabled={form.clientType === "individual" || companiesLoading}
+                options={projectOptions}
+                value={projectInput}
+                onChange={handleSelectProject}
+                placeholder="Search and select project"
+                icon="mdi:magnify"
+                disabled={projectsLoading || projectLoading}
               />
             </div>
-            <div className="space-y-1">
-              <Typography variant="small" className="text-gray-300">
-                Client type
+            {finalQuery.error && (
+              <Typography variant="small" className="text-red-400">
+                {finalQuery.error.message}
               </Typography>
-              <SearchableSelect
-                options={clientTypeOptions}
-                value={form.clientType}
-                onChange={(value) => {
-                  updateField("clientType", value);
-                  if (value === "individual") {
-                    updateField("clientName", "");
+            )}
+            {hasRemoteData && (
+              <Typography variant="small" className="text-emerald-400">
+                Data preloaded from API for project {form.leadNumber || project?.lead?.leadNumber || 'N/A'}.
+              </Typography>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-4">
+            <CardTitle className="text-base">General Information</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Project name</Label>
+                <Input
+                  value={form.projectName}
+                  onChange={(e) => updateField("projectName", e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Project location</Label>
+                <Input
+                  value={form.projectLocation}
+                  onChange={(e) => updateField("projectLocation", e.target.value)}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label>Client name</Label>
+                <SearchableSelect
+                  options={companyOptions}
+                  value={form.clientName}
+                  onChange={(value) => updateField("clientName", value)}
+                  placeholder="Select company"
+                  icon="mdi:office-building"
+                  disabled={form.clientType === "individual" || companiesLoading}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label>Client type</Label>
+                <SearchableSelect
+                  options={clientTypeOptions}
+                  value={form.clientType}
+                  onChange={(value) => {
+                    updateField("clientType", value);
+                    if (value === "individual") {
+                      updateField("clientName", "");
+                    }
+                  }}
+                  placeholder="Select client type"
+                  icon="mdi:account-badge"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label>Customer contact</Label>
+                <SearchableSelect
+                  options={contactOptions}
+                  value={
+                    contactOptions.find((c) => c.label === form.customerName)?.value ??
+                    form.customerName
                   }
-                }}
-                placeholder="Select client type"
-                icon="mdi:account-badge"
+                  onChange={handleSelectContact}
+                  placeholder="Select contact"
+                  icon="mdi:account"
+                  disabled={contactsLoading}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Email</Label>
+                <Input
+                  type="email"
+                  value={form.email}
+                  onChange={(e) => updateField("email", e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Phone</Label>
+                <Input
+                  value={form.phone}
+                  onChange={(e) => updateField("phone", e.target.value)}
+                />
+              </div>
+              <DatePicker
+                label="Completion date"
+                value={form.completionDate}
+                onChange={(value) => updateField("completionDate", value)}
               />
+              <div className="space-y-1">
+                <Label>Language</Label>
+                <SearchableSelect
+                  options={languageOptions}
+                  value={form.language}
+                  onChange={(value) => updateField("language", value)}
+                  placeholder="Select language"
+                  icon="mdi:translate"
+                />
+              </div>
             </div>
-            <div className="space-y-1">
-              <Typography variant="small" className="text-gray-300">
-                Customer contact
-              </Typography>
-              <SearchableSelect
-                options={contactOptions}
-                value={
-                  contactOptions.find((c) => c.label === form.customerName)?.value ??
-                  form.customerName
-                }
-                onChange={handleSelectContact}
-                placeholder="Select contact"
-                icon="mdi:account"
-                disabled={contactsLoading}
-              />
-            </div>
-            <Input
-              label="Email"
-              type="email"
-              value={form.email}
-              onChange={(e) => updateField("email", e.target.value)}
-            />
-            <Input
-              label="Phone"
-              value={form.phone}
-              onChange={(e) => updateField("phone", e.target.value)}
-            />
-            <DatePicker
-              label="Completion date"
-              value={form.completionDate}
-              onChange={(value) => updateField("completionDate", value)}
-            />
-            <div className="space-y-1">
-              <Typography variant="small" className="text-gray-300">
-                Language
-              </Typography>
-              <SearchableSelect
-                options={languageOptions}
-                value={form.language}
-                onChange={(value) => updateField("language", value)}
-                placeholder="Select language"
-                icon="mdi:translate"
-              />
-            </div>
-          </div>
 
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div className="flex flex-col gap-2">
-              <label className="text-sm text-gray-300">Final evaluation</label>
-              <Textarea
-                placeholder="Final evaluation summary"
-                value={form.finalEvaluation}
-                onChange={(e) => updateField("finalEvaluation", e.target.value)}
-                rows={5}
-              />
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="flex flex-col gap-2">
+                <Label>Final evaluation</Label>
+                <Textarea
+                  placeholder="Final evaluation summary"
+                  value={form.finalEvaluation}
+                  onChange={(e) => updateField("finalEvaluation", e.target.value)}
+                  rows={5}
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label>Overview</Label>
+                <Textarea
+                  placeholder="General summary"
+                  value={form.overview}
+                  onChange={(e) => updateField("overview", e.target.value)}
+                  rows={5}
+                />
+              </div>
             </div>
-            <div className="flex flex-col gap-2">
-              <label className="text-sm text-gray-300">Overview</label>
-              <Textarea
-                placeholder="General summary"
-                value={form.overview}
-                onChange={(e) => updateField("overview", e.target.value)}
-                rows={5}
-              />
-            </div>
-          </div>
-        </section>
+          </CardContent>
+        </Card>
 
-        <section className="rounded-2xl bg-[#1d1d1f] p-6 shadow-sm space-y-4">
-          <div className="flex items-center justify-between gap-3">
-            <Typography variant="body" className="font-semibold text-theme-light">
-              Completed Activities
-            </Typography>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+            <CardTitle className="text-base">Completed Activities</CardTitle>
             <Button
               type="button"
               variant="secondary"
               size="sm"
-              leftIcon={<Icon name="mdi:plus" size={16} />}
               onClick={addCompletedActivity}
             >
+              <Plus className="size-4 mr-2" />
               Add Activity
             </Button>
-          </div>
-
-          <div className="space-y-3">
+          </CardHeader>
+          <CardContent className="space-y-3">
             {form.completedActivities.map((item, index) => (
               <div key={`completed-${index}`} className="flex items-start gap-2">
                 <Input
@@ -456,98 +451,96 @@ export function RestorationFinalPage() {
                   placeholder="Completed activity"
                   className="flex-1"
                 />
-                <IconButton
-                  aria-label="Delete completed activity"
-                  variant="ghost"
+                <Button variant="ghost" size="icon" aria-label="Delete completed activity"
                   onClick={() => deleteCompletedActivity(index)}
-                  icon={<Icon name="mdi:delete" size={18} />}
-                />
+                >
+                  <Trash className="size-4.5" />
+                </Button>
               </div>
             ))}
             {form.completedActivities.length === 0 && (
-              <Typography variant="small" className="text-gray-400">
+              <p className="text-sm text-muted-foreground">
                 Add at least one completed activity.
-              </Typography>
+              </p>
             )}
-          </div>
-        </section>
+          </CardContent>
+        </Card>
 
-        <section className="rounded-2xl bg-[#1d1d1f] p-6 shadow-sm space-y-4">
-          <div className="flex items-center justify-between gap-3">
-            <Typography variant="body" className="font-semibold text-theme-light">
-              Photographic Evidence
-            </Typography>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+            <CardTitle className="text-base">Photographic Evidence</CardTitle>
             <Button
               type="button"
               variant="secondary"
               size="sm"
-              leftIcon={<Icon name="mdi:plus" size={16} />}
               onClick={addEvidence}
             >
+              <Plus className="size-4 mr-2" />
               Add Evidence
             </Button>
-          </div>
-
-          <div className="space-y-4">
+          </CardHeader>
+          <CardContent className="space-y-4">
             {form.evidenceImages.map((row, index) => (
-              <div
-                key={`evidence-${index}`}
-                className="rounded-xl bg-[#18181b] p-4 space-y-3"
-              >
-                <div className="flex items-start gap-3">
-                  <Input
-                    label={`Description ${index + 1}`}
-                    value={row.description}
-                    onChange={(e) => updateEvidence(index, { description: e.target.value })}
-                    className="flex-1"
-                  />
-                  <IconButton
-                    aria-label="Delete evidence"
-                    variant="ghost"
-                    onClick={() => deleteEvidence(index)}
-                    icon={<Icon name="mdi:delete" size={18} />}
-                  />
-                </div>
+              <Card key={`evidence-${index}`} className="bg-background">
+                <CardContent className="p-4 space-y-3">
+                  <div className="flex items-start gap-3">
+                    <div className="flex-1 space-y-2">
+                      <Label>{`Description ${index + 1}`}</Label>
+                      <Input
+                        value={row.description}
+                        onChange={(e) => updateEvidence(index, { description: e.target.value })}
+                      />
+                    </div>
+                    <Button variant="ghost" size="icon" aria-label="Delete evidence"
+                      onClick={() => deleteEvidence(index)}
+                    >
+                      <Trash className="size-4.5" />
+                    </Button>
+                  </div>
 
-                <FileInputList
-                  label="Add Images"
-                  files={row.imageFiles ?? []}
-                  existingUrls={row.imageUrls ?? []}
-                  onChange={(files) => updateEvidence(index, { imageFiles: files })}
-                  onRemoveExisting={(url) =>
-                    updateEvidence(index, {
-                      imageUrls: (row.imageUrls ?? []).filter((item) => item !== url),
-                    })
-                  }
-                  helperText="Supported formats: images or PDF."
-                />
-              </div>
+                  <FileInputList
+                    label="Add Images"
+                    files={row.imageFiles ?? []}
+                    existingUrls={row.imageUrls ?? []}
+                    onChange={(files) => updateEvidence(index, { imageFiles: files })}
+                    onRemoveExisting={(url) =>
+                      updateEvidence(index, {
+                        imageUrls: (row.imageUrls ?? []).filter((item) => item !== url),
+                      })
+                    }
+                    helperText="Supported formats: images or PDF."
+                  />
+                </CardContent>
+              </Card>
             ))}
             {form.evidenceImages.length === 0 && (
-              <Typography variant="small" className="text-gray-400">
+              <p className="text-sm text-muted-foreground">
                 Add at least one piece of evidence for the final report.
-              </Typography>
+              </p>
             )}
-          </div>
-        </section>
+          </CardContent>
+        </Card>
 
         <div className="flex flex-wrap items-center gap-3">
           <Button
             type="submit"
-            loading={submitting}
-            leftIcon={<Icon name="mdi:content-save" size={16} />}
+            disabled={submitting}
           >
-            Submit Final Report
+            {submitting ? (
+              <Loader className="size-4 animate-spin mr-2" />
+            ) : (
+              <Save className="size-4 mr-2" />
+            )}
+            {submitting ? "Submitting..." : "Submit Final Report"}
           </Button>
           {submitting && (
-            <div className="flex items-center gap-2 text-gray-300">
-              <Spinner size="sm" /> Sending information...
+            <div className="flex items-center gap-2 text-foreground">
+              <Loader className="size-4 animate-spin" /> Sending information...
             </div>
           )}
         </div>
       </form>
-    </PageContainer>
+    </div>
   );
 }
-
 

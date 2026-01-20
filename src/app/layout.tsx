@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import "../styles/globals.css";
 import { AppProviders } from "./AppProviders";
-import { MobileMenuButton, Sidebar, SidebarProvider } from "@dav033/dav-components";
-import { SIDEBAR_CONFIG } from "@/components/sidebar/sidebarConfig";
+import { SidebarWrapper } from "./SidebarWrapper";
 
 declare global {
   interface Window {
@@ -18,18 +17,12 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>): React.JSX.Element {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
-      <body className="flex h-screen">
+    <html lang="en" className="dark">
+      <body className="min-h-svh bg-background text-foreground overflow-hidden">
         <AppProviders>
-          <SidebarProvider>
-            <MobileMenuButton />
-            <Sidebar config={SIDEBAR_CONFIG} />
-            <main className="flex-1 overflow-auto p-4 lg:p-6 lg:ml-80">{children}</main>
-          </SidebarProvider>
+          <SidebarWrapper>{children}</SidebarWrapper>
         </AppProviders>
 
         <Script id="google-maps-init" strategy="beforeInteractive">
@@ -44,3 +37,4 @@ export default function RootLayout({
     </html>
   );
 }
+
