@@ -1,9 +1,7 @@
 "use client";
 
-import { NotesEditorModal } from "@/components/custom";
+import { NotesEditorModal, DeleteFeedbackModal, EntityCrudPageTemplate } from "@/components/shared";
 import type { Contact } from "@/contact";
-import { EntityCrudPageTemplate,
-  DeleteFeedbackModal } from "@/components/custom";
 import { X, UserPlus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -175,10 +173,10 @@ export function ContactsPageView({ logic }: ContactsPageViewProps) {
             <Button
               onClick={crud.openCreate}
               aria-label="New contact"
-              className="whitespace-nowrap text-sm font-medium"
+              size="icon"
+              className="bg-[#2c3637] hover:bg-[#2c3637]/90 text-foreground"
             >
-              <span className="mr-2"><UserPlus className="size-4.5" /></span>
-              New contact
+              <UserPlus className="size-4" />
             </Button>
           </div>
         </div>

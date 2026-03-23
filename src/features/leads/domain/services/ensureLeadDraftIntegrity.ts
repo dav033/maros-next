@@ -2,7 +2,7 @@ import type { LeadDraft, LeadDraftWithExistingContact, LeadDraftWithNewContact, 
 import { BusinessRuleError } from "@/shared/domain";
 
 import { ensureNewContactMinimums } from "./leadContactLinkPolicy";
-import { normalizeText, isIsoLocalDate } from "@/shared/validation";
+import { normalizeText, isIsoLocalDate, coerceIsoLocalDate } from "@/shared/validation";
 
 export function ensureLeadDraftIntegrity(
   draft: LeadDraft,
@@ -14,12 +14,42 @@ export function ensureLeadDraftIntegrity(
       details: { field: "name", length: name.length },
     });
   }
-  const sd = normalizeText((draft as unknown as Record<string, unknown>)["startDate"]);
-  if (!sd || !isIsoLocalDate(sd)) {
+  // startDate es requerido en LeadDraft y debe estar en formato YYYY-MM-DD
+  const startDateValue = (draft as unknown as Record<string, unknown>)["startDate"];
+  if (!startDateValue) {
+    throw new BusinessRuleError(
+      "VALIDATION_ERROR",
+      "startDate is required",
+      { details: { field: "startDate" } }
+    );
+  }
+  
+  const sd = normalizeText(String(startDateValue));
+  if (!sd) {
+    throw new BusinessRuleError(
+      "VALIDATION_ERROR",
+      "startDate cannot be empty",
+      { details: { field: "startDate" } }
+    );
+  }
+  
+  // Intentar normalizar el valor si no está en formato correcto
+  let normalizedDate: string;
+  try {
+    normalizedDate = coerceIsoLocalDate(sd);
+  } catch {
     throw new BusinessRuleError(
       "FORMAT_ERROR",
       "startDate must be in YYYY-MM-DD format",
-      { details: { field: "startDate", value: (draft as unknown as Record<string, unknown>)["startDate"] } }
+      { details: { field: "startDate", value: startDateValue } }
+    );
+  }
+  
+  if (!isIsoLocalDate(normalizedDate)) {
+    throw new BusinessRuleError(
+      "FORMAT_ERROR",
+      "startDate must be in YYYY-MM-DD format",
+      { details: { field: "startDate", value: startDateValue } }
     );
   }
   if ((draft as LeadDraftWithNewContact).contact) {

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import type { Company } from "../../domain/models";
 import { useCompaniesTableColumns } from "../hooks";
 import {
@@ -22,6 +23,7 @@ import { Loader, Building, Edit, Trash, FileText, type LucideIcon } from "lucide
 const iconMap: Record<string, LucideIcon> = {
   "lucide:edit": Edit,
   "lucide:trash-2": Trash,
+  "lucide:trash": Trash,
   "lucide:file-text": FileText,
 };
 import { cn } from "@/lib/utils";
@@ -41,6 +43,7 @@ export function CompaniesTable({
   getContextMenuItems,
   onOpenNotesModal,
 }: CompaniesTableProps) {
+  const router = useRouter();
   const columns = useCompaniesTableColumns({
     services,
     onOpenNotesModal: onOpenNotesModal || (() => {}),
@@ -58,6 +61,28 @@ export function CompaniesTable({
       setContextMenuOpen(true);
     },
     []
+  );
+
+  const handleRowClick = React.useCallback(
+    (event: React.MouseEvent<HTMLTableRowElement>, company: Company) => {
+      if (event.button === 2) {
+        return;
+      }
+      
+      const target = event.target as HTMLElement;
+      if (target.closest('button, a, [role="button"], [role="menuitem"]')) {
+        return;
+      }
+      
+      if (contextMenuOpen) {
+        return;
+      }
+      
+      if (company.id) {
+        router.push(`/company/${company.id}`);
+      }
+    },
+    [router, contextMenuOpen]
   );
 
   const menuItems = React.useMemo(() => {
@@ -106,7 +131,8 @@ export function CompaniesTable({
               <TableRow
                 key={item.id ?? 0}
                 onContextMenu={(event) => handleRowContextMenu(event, item)}
-                className="cursor-default hover:bg-accent/30 transition-colors"
+                onClick={(event) => handleRowClick(event, item)}
+                className="cursor-pointer hover:bg-accent/30 transition-colors"
               >
                 {columns.map((column) => (
                   <TableCell

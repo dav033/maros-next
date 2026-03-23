@@ -1,6 +1,6 @@
 // TODO: ColorPicker needs custom implementation
 
-import { ColorPicker } from "@/components/custom";
+import { ColorPicker } from "@/components/shared";
 import { Wrench, AlertCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import type { ChangeEvent } from "react";

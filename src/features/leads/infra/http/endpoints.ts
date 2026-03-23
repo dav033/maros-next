@@ -11,4 +11,5 @@ export const endpoints = {
   createWithExistingContact: () => `${BASE}/existing-contact`,
   getByLeadNumber: (leadNumber: string) => `${BASE}/number/${encodeURIComponent(leadNumber)}`,
   getRejectionInfo: (id: number) => `${BASE}/${id}/rejection-info`,
+  details: (id: number | string) => `${BASE}/${id}/details`,
 } as const;

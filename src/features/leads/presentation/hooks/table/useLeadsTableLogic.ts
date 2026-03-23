@@ -1,11 +1,10 @@
 "use client";
 
 import { useEntityTableLogic, useTableWithSearch } from "@/common/hooks";
-
-
 import type { Lead } from "@/leads/domain";
 import type { Contact } from "@/contact/domain";
-
+import { FileText, User } from "lucide-react";
+import React from "react";
 import { leadsSearchConfig } from "../../search/leadsSearchConfig";
 
 export interface UseLeadsTableLogicProps {
@@ -38,7 +37,7 @@ export interface UseLeadsTableLogicReturn {
     label: string;
     onClick: () => void;
     variant?: "default" | "danger";
-    icon?: string;
+    icon?: React.ReactNode;
     disabled?: boolean;
   }>;
   onOpenNotesModal?: (lead: Lead) => void;
@@ -69,13 +68,13 @@ export function useLeadsTableLogic({
         items.push({
           label: "Notes",
           onClick: () => onOpenNotesModal(lead),
-          icon: "lucide:file-text",
+          icon: React.createElement(FileText, { className: "size-4" }),
         });
       }
 
       items.push({
         label: "View Contact",
-        icon: "lucide:user",
+        icon: React.createElement(User, { className: "size-4" }),
         onClick: () => {
           if (lead.contact) onViewContact(lead.contact);
         },

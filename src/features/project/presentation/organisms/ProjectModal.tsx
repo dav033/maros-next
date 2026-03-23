@@ -1,6 +1,7 @@
 "use client";
 
-import { BasicModalFooter } from "@/components/custom";
+import { Plus, Save, Loader } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -83,14 +84,15 @@ export function ProjectModal({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
+          <DialogTitle className="text-left">{title}</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4">
+        <div className="space-y-4 w-full">
           <ProjectForm
             form={currentController.form}
             onChange={currentController.setField}
             leads={leads}
             disabled={isLoading}
+            isEditMode={!isCreateMode}
           />
 
           {error && (
@@ -101,13 +103,35 @@ export function ProjectModal({
           )}
         </div>
         <DialogFooter>
-          <BasicModalFooter
-            onCancel={onClose}
-            onSubmit={onSubmit}
-            isLoading={isLoading}
-            canSubmit={canSubmit}
-            mode={mode === "create" ? "create" : "update"}
-          />
+          <Button variant="outline" onClick={onClose} disabled={isLoading}>
+            Cancel
+          </Button>
+          <Button
+            variant="default"
+            onClick={onSubmit}
+            disabled={!canSubmit || isLoading}
+          >
+            {isLoading ? (
+              <>
+                <Loader className="size-4 mr-2 animate-spin" />
+                {mode === "create" ? "Creating..." : "Saving..."}
+              </>
+            ) : (
+              <>
+                {mode === "create" ? (
+                  <>
+                    <Plus className="size-4 mr-2" />
+                    Create
+                  </>
+                ) : (
+                  <>
+                    <Save className="size-4 mr-2" />
+                    Save
+                  </>
+                )}
+              </>
+            )}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

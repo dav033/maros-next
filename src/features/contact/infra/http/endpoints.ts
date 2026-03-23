@@ -7,4 +7,5 @@ export const contactEndpoints = {
   uniquenessCheck: () => `${BASE}/validate`,
   search: (q: string) => `${BASE}/search?q=${encodeURIComponent(q)}`,
   byCompany: (companyId: number | string) => `${BASE}/company/${companyId}`,
+  details: (id: number | string) => `${BASE}/${id}/details`,
 } as const;

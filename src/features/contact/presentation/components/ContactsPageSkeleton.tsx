@@ -1,5 +1,5 @@
 import { ContactsTableSkeleton } from "../organisms/ContactsTableSkeleton";
-import { EntityCrudPageTemplate } from "@/components/custom";
+import { EntityCrudPageTemplate } from "@/components/shared";
 
 export function ContactsPageSkeleton() {
   return (

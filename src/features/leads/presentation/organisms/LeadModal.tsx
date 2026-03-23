@@ -1,6 +1,7 @@
 "use client";
 
-import { BasicModalFooter } from "@/components/custom";
+import { Plus, Save, Loader } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -105,9 +106,9 @@ export function LeadModal({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
+          <DialogTitle className="text-left">{title}</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4">
+        <div className="space-y-5 w-full">
           {isCreateMode && createController && (
             <>
               <ContactModeSelector
@@ -120,6 +121,9 @@ export function LeadModal({
                 }}
                 onChange={(key, value) => createController.setField(key as any, value)}
                 disabled={isLoading}
+                contacts={contactForSelect}
+                selectedContactId={createController.form.contactId}
+                onContactSelect={(contactId) => createController.setField("contactId", contactId)}
               />
               <LeadForm
                 form={createController.form}
@@ -149,14 +153,37 @@ export function LeadModal({
             </div>
           )}
         </div>
-        <DialogFooter>
-          <BasicModalFooter
-            onCancel={onClose}
-            onSubmit={onSubmit}
-            isLoading={isLoading}
-            canSubmit={canSubmit}
-            mode={mode === "create" ? "create" : "update"}
-          />
+        <DialogFooter className="gap-2">
+          <Button variant="outline" onClick={onClose} disabled={isLoading}>
+            Cancel
+          </Button>
+          <Button
+            variant="default"
+            onClick={onSubmit}
+            disabled={!canSubmit || isLoading}
+            className="bg-sidebar-accent text-sidebar-accent-foreground hover:bg-sidebar-accent/90"
+          >
+            {isLoading ? (
+              <>
+                <Loader className="size-4 mr-2 animate-spin" />
+                {mode === "create" ? "Creating..." : "Saving..."}
+              </>
+            ) : (
+              <>
+                {mode === "create" ? (
+                  <>
+                    <Plus className="size-4 mr-2" />
+                    Create
+                  </>
+                ) : (
+                  <>
+                    <Save className="size-4 mr-2" />
+                    Save
+                  </>
+                )}
+              </>
+            )}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -1,4 +1,4 @@
-import { SearchableSelect } from "@/components/custom";
+import { SearchableSelect } from "@/components/shared";
 import type { ChangeEvent } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DatePicker } from "./DatePicker";
 import type { RestorationVisitReport } from "@/reports/domain/models";
 import type { Contact } from "@/contact/domain";
+import { Building, User, Languages } from "lucide-react";
 
 interface GeneralInfoSectionProps {
   form: RestorationVisitReport;
@@ -68,7 +69,7 @@ export const GeneralInfoSection = ({
             value={form.clientName}
             onChange={(value: string) => onUpdateField("clientName", value)}
             placeholder="Select company"
-            icon="mdi:office-building"
+            icon={Building}
             disabled={form.clientType === "individual" || companiesLoading}
           />
         </div>
@@ -84,7 +85,7 @@ export const GeneralInfoSection = ({
               }
             }}
             placeholder="Select client type"
-            icon="mdi:account-badge"
+            icon={User}
           />
         </div>
         <div className="space-y-1">
@@ -97,7 +98,7 @@ export const GeneralInfoSection = ({
             }
             onChange={onSelectContact}
             placeholder="Select contact"
-            icon="mdi:account"
+            icon={User}
             disabled={contactsLoading}
           />
         </div>
@@ -128,7 +129,7 @@ export const GeneralInfoSection = ({
             value={form.language}
             onChange={(value: string) => onUpdateField("language", value)}
             placeholder="Select language"
-            icon="mdi:translate"
+            icon={Languages}
           />
         </div>
       </div>

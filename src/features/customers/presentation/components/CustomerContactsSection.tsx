@@ -12,7 +12,7 @@ import { CustomerCrudModal } from "./CustomerCrudModal";
 import { customersKeys } from "../../infra/keys";
 import { initialContactFormValue, toContactPatch, mapContactToFormValue } from "../helpers/contactHelpers";
 import { useCustomerCrudSection } from "../../application/hooks/useCustomerCrudSection";
-import { DeleteFeedbackModal } from "@/components/custom";
+import { DeleteFeedbackModal } from "@/components/shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {

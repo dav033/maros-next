@@ -6,5 +6,6 @@ export const endpoints = {
   ...buildCrudEndpoints<number>(BASE, {
     listPath: "/all",
   }),
+  details: (id: number | string) => `${BASE}/${id}/details`,
 } as const;
 

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import type { Lead } from "@/leads/domain";
 import { useLeadsInReviewTableColumns } from "../hooks";
 import {
@@ -22,6 +23,7 @@ import { Loader, ClipboardCheck, Edit, Trash, FileText, type LucideIcon } from "
 const iconMap: Record<string, LucideIcon> = {
   "lucide:edit": Edit,
   "lucide:trash-2": Trash,
+  "lucide:trash": Trash,
   "lucide:file-text": FileText,
 };
 import { cn } from "@/lib/utils";
@@ -51,6 +53,7 @@ export function LeadsInReviewTable({
   isAccepting,
   isRejecting,
 }: LeadsInReviewTableProps) {
+  const router = useRouter();
   const columns = useLeadsInReviewTableColumns({
     onOpenContactModal: onViewContact ?? (() => {}),
     onOpenNotesModal: onOpenNotesModal ?? (() => {}),
@@ -72,6 +75,28 @@ export function LeadsInReviewTable({
       setContextMenuOpen(true);
     },
     []
+  );
+
+  const handleRowClick = React.useCallback(
+    (event: React.MouseEvent<HTMLTableRowElement>, lead: Lead) => {
+      if (event.button === 2) {
+        return;
+      }
+      
+      const target = event.target as HTMLElement;
+      if (target.closest('button, a, [role="button"], [role="menuitem"]')) {
+        return;
+      }
+      
+      if (contextMenuOpen) {
+        return;
+      }
+      
+      if (lead.id) {
+        router.push(`/lead/${lead.id}`);
+      }
+    },
+    [router, contextMenuOpen]
   );
 
   const menuItems = React.useMemo(() => {
@@ -120,7 +145,8 @@ export function LeadsInReviewTable({
               <TableRow
                 key={(item.id as number) ?? 0}
                 onContextMenu={(event) => handleRowContextMenu(event, item)}
-                className="cursor-default hover:bg-accent/30 transition-colors"
+                onClick={(event) => handleRowClick(event, item)}
+                className="hover:bg-accent/30 transition-colors"
               >
                 {columns.map((column) => (
                   <TableCell

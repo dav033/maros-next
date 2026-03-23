@@ -1,6 +1,7 @@
 "use client";
 
-import { BasicModalFooter, DeleteFeedbackModal } from "@/components/custom";
+import { DeleteFeedbackModal } from "@/components/shared";
+import { Plus, Save, Loader } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -90,13 +91,37 @@ export function ManageServicesModal({ isOpen, onClose, services }: ManageService
 
         <DialogFooter>
           {isFormMode ? (
-            <BasicModalFooter
-              onCancel={resetForm}
-              onSubmit={mode === "create" ? handleCreateSubmit : handleEditSubmit}
-              isLoading={isPending}
-              canSubmit={formValue.name.trim().length > 0}
-              mode={mode === "create" ? "create" : "update"}
-            />
+            <>
+              <Button variant="outline" onClick={resetForm} disabled={isPending}>
+                Cancel
+              </Button>
+              <Button
+                variant="default"
+                onClick={mode === "create" ? handleCreateSubmit : handleEditSubmit}
+                disabled={formValue.name.trim().length === 0 || isPending}
+              >
+                {isPending ? (
+                  <>
+                    <Loader className="size-4 mr-2 animate-spin" />
+                    {mode === "create" ? "Creating..." : "Saving..."}
+                  </>
+                ) : (
+                  <>
+                    {mode === "create" ? (
+                      <>
+                        <Plus className="size-4 mr-2" />
+                        Create
+                      </>
+                    ) : (
+                      <>
+                        <Save className="size-4 mr-2" />
+                        Save
+                      </>
+                    )}
+                  </>
+                )}
+              </Button>
+            </>
           ) : (
             <Button variant="secondary" onClick={handleClose}>
               Close

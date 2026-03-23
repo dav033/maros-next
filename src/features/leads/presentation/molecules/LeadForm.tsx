@@ -1,6 +1,6 @@
 "use client";
 
-import { LocationField } from "@/components/custom";
+import { LocationField } from "@/components/shared";
 import type { ChangeEvent } from "react";
 
 import { Input } from "@/components/ui/input";
@@ -82,9 +82,11 @@ export function LeadForm({
         }}
         disabled={disabled}
       >
-        <SelectTrigger>
-          <FolderTree className="size-4 text-muted-foreground mr-2" />
-          <SelectValue placeholder="Select Lead Type *" />
+        <SelectTrigger className="w-full">
+          <div className="flex items-center">
+            <FolderTree className="size-4 text-muted-foreground mr-2 shrink-0" />
+            <SelectValue placeholder="Select Lead Type *" />
+          </div>
         </SelectTrigger>
         <SelectContent>
           {LEAD_TYPE_OPTIONS.map((opt) => (
@@ -158,26 +160,6 @@ export function LeadForm({
         </Select>
       </div>
 
-      {showContactSelect && (
-        <Select
-          value={form.contactId != null ? String(form.contactId) : EMPTY_SELECT_VALUE}
-          onValueChange={(val) => onChange("contactId", val === EMPTY_SELECT_VALUE ? undefined : Number(val))}
-          disabled={disabled}
-        >
-          <SelectTrigger>
-            <User className="size-4 text-muted-foreground mr-2" />
-            <SelectValue placeholder="Select Contact *" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={EMPTY_SELECT_VALUE}>Select Contact</SelectItem>
-            {contacts.map((c) => (
-              <SelectItem key={c.id} value={String(c.id)}>
-                {c.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      )}
 
       <Input
         value={form.note ?? ""}

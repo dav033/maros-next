@@ -1,6 +1,7 @@
-import { SearchableSelect } from "@/components/custom";
+import { SearchableSelect } from "@/components/shared";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Search } from "lucide-react";
 
 interface ProjectSearchSectionProps {
   projectOptions: Array<{ value: string; label: string }>;
@@ -34,7 +35,7 @@ export const ProjectSearchSection = ({
             value={projectInput}
             onChange={onSelectProject}
             placeholder="Search and select project"
-            icon="mdi:magnify"
+            icon={Search}
             disabled={projectsLoading}
           />
         </div>

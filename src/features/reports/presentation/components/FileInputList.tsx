@@ -95,7 +95,7 @@ export function FileInputList({
 
       <div className="flex flex-wrap gap-2">
         {files.length === 0 && (
-          <p className="text-sm text-muted-foreground">No hay archivos seleccionados.</p>
+          <p className="text-sm text-muted-foreground">No files selected.</p>
         )}
         {files.map((file, index) => (
           <div key={`${file.name}-${index}`} className="inline-flex items-center gap-1">

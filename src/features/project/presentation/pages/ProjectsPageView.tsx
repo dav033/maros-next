@@ -1,14 +1,12 @@
 "use client";
 
-import { NotesEditorModal } from "@/components/custom";
+import { NotesEditorModal, DeleteFeedbackModal, EntityCrudPageTemplate } from "@/components/shared";
 import type { Project } from "@/project/domain";
 import { ProjectsTable } from "@/project/presentation";
-import { DeleteFeedbackModal } from "@/components/custom";
 import { ProjectModal } from "../organisms/ProjectModal";
 import { PaymentsModal } from "../organisms/PaymentsModal";
 import { X, FolderPlus, Search } from "lucide-react";
 import { ProjectsTableSkeleton } from "../organisms/ProjectsTableSkeleton";
-import { EntityCrudPageTemplate } from "@/components/custom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -155,10 +153,10 @@ export function ProjectsPageView({ logic }: ProjectsPageViewProps) {
             <Button
               onClick={openCreateModal}
               aria-label="New Project"
-              className="whitespace-nowrap text-sm font-medium"
+              size="icon"
+              className="bg-[#2c3637] hover:bg-[#2c3637]/90 text-foreground"
             >
-              <span className="mr-2"><FolderPlus className="size-4.5" /></span>
-              New Project
+              <FolderPlus className="size-4" />
             </Button>
           </div>
         </div>

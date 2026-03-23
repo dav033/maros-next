@@ -3,7 +3,7 @@ import type { SimpleTableColumn } from "@/types/table";
 import * as React from "react";
 import type { Lead } from "@/leads/domain";
 import { ContactInfoDisplay } from "@/features/contact/presentation/atoms/ContactInfoDisplay";
-import { NotesButton } from "@/components/custom";
+import { NotesButton } from "@/components/shared";
 import { LeadStatusBadge } from "../../atoms/LeadStatusBadge";
 import { ProjectTypeBadge } from "../../atoms/ProjectTypeBadge";
 
@@ -62,7 +62,6 @@ export function useLeadsTableColumns({
         render: (lead: Lead) => (
           <ContactInfoDisplay
             contact={lead.contact}
-            onClick={() => lead.contact && onOpenContactModal(lead.contact)}
           />
         ),
         sortable: true,

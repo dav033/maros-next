@@ -1,9 +1,8 @@
 "use client";
 
-import { NotesEditorModal } from "@/components/custom";
+import { NotesEditorModal, DeleteFeedbackModal, EntityCrudPageTemplate } from "@/components/shared";
 import type { Lead } from "@/leads/domain";
 import { LeadsTable } from "@/leads/presentation";
-import { DeleteFeedbackModal } from "@/components/custom";
 import { ContactViewModal } from "@/contact";
 import { LeadModal } from "../organisms/LeadModal";
 import { X, Briefcase, Search } from "lucide-react";
@@ -17,7 +16,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { LeadsTableSkeleton } from "../organisms/LeadsTableSkeleton";
-import { EntityCrudPageTemplate } from "@/components/custom";
 import type { UseLeadsPageLogicReturn } from "./useLeadsPageLogic";
 import {
   useLeadModalController,
@@ -154,10 +152,10 @@ export function LeadsPageView({ logic }: LeadsPageViewProps) {
             <Button
               onClick={openCreateModal}
               aria-label="New Lead"
-              className="whitespace-nowrap text-sm font-medium"
+              size="icon"
+              className="bg-[#2c3637] hover:bg-[#2c3637]/90 text-foreground"
             >
-              <span className="mr-2"><Briefcase className="size-4.5" /></span>
-              New Lead
+              <Briefcase className="size-4" />
             </Button>
           </div>
         </div>

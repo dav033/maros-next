@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import type { Contact } from "@/contact";
 import type { Company } from "@/company";
 import { useContactsTableColumns, type UseContactsTableLogicReturn } from "../hooks";
@@ -23,6 +24,7 @@ import { Loader, Users, Edit, Trash, FileText, type LucideIcon } from "lucide-re
 const iconMap: Record<string, LucideIcon> = {
   "lucide:edit": Edit,
   "lucide:trash-2": Trash,
+  "lucide:trash": Trash,
   "lucide:file-text": FileText,
 };
 import { cn } from "@/lib/utils";
@@ -44,6 +46,7 @@ export function ContactsTable({
   onEdit,
   onDelete,
 }: ContactsTableProps) {
+  const router = useRouter();
   const rows = tableLogic?.rows ?? contacts ?? [];
   const onOpenNotesModal = tableLogic?.onOpenNotesModal ?? (() => {});
   const onOpenCompanyModal = tableLogic?.onOpenCompanyModal ?? (() => {});
@@ -108,6 +111,32 @@ export function ContactsTable({
     [resolvedGetContextMenuItems]
   );
 
+  const handleRowClick = React.useCallback(
+    (event: React.MouseEvent<HTMLTableRowElement>, contact: Contact) => {
+      // No navegar si es click derecho
+      if (event.button === 2) {
+        return;
+      }
+      
+      // No navegar si se está haciendo click en un elemento interactivo
+      const target = event.target as HTMLElement;
+      if (target.closest('button, a, [role="button"], [role="menuitem"]')) {
+        return;
+      }
+      
+      // No navegar si se está abriendo el context menu
+      if (contextMenuOpen) {
+        return;
+      }
+      
+      // Solo navegar si tiene ID
+      if (contact.id) {
+        router.push(`/contact/${contact.id}`);
+      }
+    },
+    [router, contextMenuOpen]
+  );
+
   const menuItems = React.useMemo(() => {
     if (!selectedItem || !resolvedGetContextMenuItems) return [];
     return resolvedGetContextMenuItems(selectedItem);
@@ -154,7 +183,8 @@ export function ContactsTable({
               <TableRow
                 key={item.id ?? 0}
                 onContextMenu={resolvedGetContextMenuItems ? (event) => handleRowContextMenu(event, item) : undefined}
-                className="cursor-default hover:bg-accent/30 transition-colors"
+                onClick={(event) => handleRowClick(event, item)}
+                className="cursor-pointer hover:bg-accent/30 transition-colors"
               >
                 {columns.map((column) => (
                   <TableCell

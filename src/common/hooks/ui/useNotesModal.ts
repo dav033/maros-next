@@ -63,12 +63,19 @@ export function useNotesModal<T>(): UseNotesModalResult<T> {
       setNotesModalState((prev) => ({ ...prev, isLoading: true }));
       try {
         await onSaveFn(notesModalState.item, notesModalState.notes);
-        closeNotesModal();
+        // Cerrar el modal después de guardar exitosamente
+        setNotesModalState({
+          isOpen: false,
+          item: null,
+          title: "",
+          notes: [],
+          isLoading: false,
+        });
       } catch (error: unknown) {
         console.error("Error saving notes:", error);
-        throw error;
-      } finally {
+        // En caso de error, mantener el modal abierto pero quitar el estado de carga
         setNotesModalState((prev) => ({ ...prev, isLoading: false }));
+        throw error;
       }
     },
     [notesModalState.item, notesModalState.notes, closeNotesModal]

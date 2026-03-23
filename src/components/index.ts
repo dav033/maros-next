@@ -1,5 +1,8 @@
-// Re-export custom components (preferred - has compatibility wrappers)
-export * from "./custom";
+// Re-export UI components (shadcn only)
+export * from "./ui";
+
+// Re-export shared business components
+export * from "./shared";
 
 // Re-export only non-conflicting Shadcn UI components
 export {

@@ -1,6 +1,6 @@
 // TODO: LocationField needs to be migrated separately (Google Maps integration)
 
-import { LocationField } from "@/components/custom";
+import { LocationField } from "@/components/shared";
 import { Building, Phone, Mail, FileText } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import type { ChangeEvent } from "react";

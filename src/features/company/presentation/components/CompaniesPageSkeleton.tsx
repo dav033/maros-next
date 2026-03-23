@@ -1,5 +1,5 @@
 import { CompaniesTableSkeleton } from "../organisms/CompaniesTableSkeleton";
-import { EntityCrudPageTemplate } from "@/components/custom";
+import { EntityCrudPageTemplate } from "@/components/shared";
 
 export function CompaniesPageSkeleton() {
   return (

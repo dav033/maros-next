@@ -1,6 +1,6 @@
 "use client";
 
-import { LocationField } from "@/components/custom";
+import { LocationField } from "@/components/shared";
 import * as React from "react";
 import type { ChangeEvent } from "react";
 import { useFormHandlers } from "@/common/hooks";
@@ -146,7 +146,7 @@ export function ContactForm({
             onCheckedChange={(checked) => onChange({ ...value, isClient: !!checked })}
             disabled={disabled}
           />
-          <Label htmlFor="contact-is-client">PROVEEDOR</Label>
+          <Label htmlFor="contact-is-client">Supplier</Label>
         </div>
       </div>
       <div>

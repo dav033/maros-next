@@ -5,7 +5,7 @@ import type { SimpleTableColumn } from "@/types/table";
 
 import * as React from "react";
 import type { Project } from "@/project/domain";
-import { NotesButton } from "@/components/custom";
+import { NotesButton } from "@/components/shared";
 import { ProjectProgressStatus, InvoiceStatus } from "@/project/domain";
 import { formatCurrency } from "@/shared/utils";
 

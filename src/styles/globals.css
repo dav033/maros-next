@@ -13,14 +13,14 @@
   --color-primary: #041fc4;
   --color-primary-alt: #c44a04;
   --color-light: #efeeea;
-  --sidebar: hsl(0 0% 98%);
-  --sidebar-foreground: hsl(240 5.3% 26.1%);
-  --sidebar-primary: hsl(240 5.9% 10%);
-  --sidebar-primary-foreground: hsl(0 0% 98%);
-  --sidebar-accent: hsl(240 4.8% 95.9%);
-  --sidebar-accent-foreground: hsl(240 5.9% 10%);
-  --sidebar-border: hsl(220 13% 91%);
-  --sidebar-ring: hsl(217.2 91.2% 59.8%);
+  --sidebar: 0 0% 12%;
+  --sidebar-foreground: 240 4.8% 95.9%;
+  --sidebar-primary: 224.3 76.3% 48%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 220 3% 16%;
+  --sidebar-accent-foreground: 171 78% 79%;
+  --sidebar-border: 240 3.7% 15.9%;
+  --sidebar-ring: 171 78% 79%;
 }
 
 /* Shadcn UI CSS Variables - Dark theme by default */
@@ -32,13 +32,13 @@
 :root {
   --background: 0 0% 9%;
   --foreground: 60 9% 93%;
-  --card: 0 0% 9%;
+  --card: 0 0% 12%;
   --card-foreground: 60 9% 93%;
-  --popover: 0 0% 6%;
+  --popover: 0 0% 9%;
   --popover-foreground: 60 9% 93%;
-  --primary: 230 97% 39%;
-  --primary-foreground: 60 9% 93%;
-  --secondary: 200 20% 23%;
+  --primary: 171 78% 79%;
+  --primary-foreground: 0 0% 9%;
+  --secondary: 0 0% 12%;
   --secondary-foreground: 60 9% 93%;
   --muted: 200 15% 18%;
   --muted-foreground: 60 5% 64%;
@@ -47,8 +47,8 @@
   --destructive: 0 62% 50%;
   --destructive-foreground: 60 9% 93%;
   --border: 200 10% 20%;
-  --input: 200 10% 20%;
-  --ring: 230 97% 39%;
+  --input: 0 0% 9%;
+  --ring: 171 78% 79%;
   --chart-1: 220 70% 50%;
   --chart-2: 160 60% 45%;
   --chart-3: 30 80% 55%;
@@ -61,7 +61,7 @@
 }
 
 html {
-  font-family: system-ui, sans-serif;
+  font-family: var(--font-work-sans), system-ui, sans-serif;
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
 }
@@ -303,15 +303,47 @@ select option:focus {
   animation: contextMenuFadeIn 0.12s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* Force sidebar background color */
+[data-sidebar="sidebar"],
+.bg-sidebar {
+  background-color: hsl(0 0% 12%) !important;
+}
+
+/* Force sidebar active state colors */
+[data-sidebar="menu-button"][data-active="true"],
+[data-sidebar="menu-sub-button"][data-active="true"] {
+  background-color: hsl(var(--sidebar-accent)) !important;
+  color: hsl(var(--sidebar-accent-foreground)) !important;
+}
+
+/* Force tabs active state colors for ContactModeSelector */
+button[role="tab"][data-state="active"],
+[data-radix-tabs-trigger][data-state="active"] {
+  background-color: hsl(var(--sidebar-accent)) !important;
+  color: hsl(var(--sidebar-accent-foreground)) !important;
+}
+
+/* Force modal content background color to #1f1f1f (only content, not overlay) */
+/* Target elements with fixed, z-50 and specific positioning that are modal content */
+.fixed.left-\[50\%\].top-\[50\%\].z-50,
+.fixed.inset-x-0.z-50,
+.fixed.inset-y-0.z-50,
+[data-radix-dialog-content],
+[data-radix-alert-dialog-content],
+[data-radix-popover-content] {
+  background-color: #1f1f1f !important;
+  background: #1f1f1f !important;
+}
+
 .dark {
-  --sidebar: hsl(240 5.9% 10%);
-  --sidebar-foreground: hsl(240 4.8% 95.9%);
-  --sidebar-primary: hsl(224.3 76.3% 48%);
-  --sidebar-primary-foreground: hsl(0 0% 100%);
-  --sidebar-accent: hsl(240 3.7% 15.9%);
-  --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
-  --sidebar-border: hsl(240 3.7% 15.9%);
-  --sidebar-ring: hsl(217.2 91.2% 59.8%);
+  --sidebar: 0 0% 12%;
+  --sidebar-foreground: 240 4.8% 95.9%;
+  --sidebar-primary: 224.3 76.3% 48%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 220 3% 16%;
+  --sidebar-accent-foreground: 171 78% 79%;
+  --sidebar-border: 240 3.7% 15.9%;
+  --sidebar-ring: 171 78% 79%;
 }@theme inline {
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
@@ -323,23 +355,23 @@ select option:focus {
   --color-sidebar-ring: var(--sidebar-ring);
 }@layer base {
   :root {
-    --sidebar: 0 0% 98%;
-    --sidebar-foreground: 0 0% 10%;
-    --sidebar-primary: 230 97% 39%;
-    --sidebar-primary-foreground: 60 9% 93%;
-    --sidebar-accent: 0 0% 95%;
-    --sidebar-accent-foreground: 0 0% 10%;
-    --sidebar-border: 0 0% 90%;
-    --sidebar-ring: 230 97% 39%;
-  }  .dark {
-    --sidebar: 240 5.9% 10%;
+    --sidebar: 0 0% 12%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-accent: 220 3% 16%;
+    --sidebar-accent-foreground: 171 78% 79%;
     --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-ring: 171 78% 79%;
+  }  .dark {
+    --sidebar: 0 0% 12%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 3% 16%;
+    --sidebar-accent-foreground: 171 78% 79%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 171 78% 79%;
   }
 }@theme inline {
   --color-sidebar: var(--sidebar);

@@ -3,10 +3,11 @@
 import { Badge } from "@/components/ui/badge";
 import type { SimpleTableColumn } from "@/types/table";
 import { Check, X } from "lucide-react";
+import Link from "next/link";
 
 import * as React from "react";
 import type { Company } from "../../../domain/models";
-import { NotesButton } from "@/components/custom";
+import { NotesButton } from "@/components/shared";
 import { CompanyTypeBadge } from "../../atoms/CompanyTypeBadge";
 import { ServiceBadge } from "../../atoms/ServiceBadge";
 
@@ -43,7 +44,12 @@ export function useCompaniesTableColumns({
         header: "Name",
         className: "w-[200px]",
         render: (company: Company) => (
-          <span className="text-foreground">{company.name}</span>
+          <Link 
+            href={`/company/${company.id}`}
+            className="text-foreground hover:underline"
+          >
+            {company.name}
+          </Link>
         ),
         sortable: true,
         sortValue: (company: Company) => company.name ?? "",
@@ -92,12 +98,12 @@ export function useCompaniesTableColumns({
             return <span className="text-muted-foreground">—</span>;
           }
           return company.isCustomer ? (
-            <Badge variant="outline" className="gap-1" style={{ borderColor: "#22c55e", color: "#22c55e" }}>
+            <Badge className="gap-1 bg-green-500/10 text-green-600 border-green-500/20 hover:bg-green-500/20 dark:bg-green-500/20 dark:text-green-400 dark:border-green-500/30">
               <Check className="size-3" />
               Yes
             </Badge>
           ) : (
-            <Badge variant="outline" className="gap-1" style={{ borderColor: "#6b7280", color: "#6b7280" }}>
+            <Badge className="gap-1 bg-red-500/10 text-red-600 border-red-500/20 hover:bg-red-500/20 dark:bg-red-500/20 dark:text-red-400 dark:border-red-500/30">
               <X className="size-3" />
               No
             </Badge>
@@ -115,12 +121,12 @@ export function useCompaniesTableColumns({
             return <span className="text-muted-foreground">—</span>;
           }
           return company.isClient ? (
-            <Badge variant="outline" className="gap-1" style={{ borderColor: "#22c55e", color: "#22c55e" }}>
+            <Badge className="gap-1 bg-green-500/10 text-green-600 border-green-500/20 hover:bg-green-500/20 dark:bg-green-500/20 dark:text-green-400 dark:border-green-500/30">
               <Check className="size-3" />
               Yes
             </Badge>
           ) : (
-            <Badge variant="outline" className="gap-1" style={{ borderColor: "#6b7280", color: "#6b7280" }}>
+            <Badge className="gap-1 bg-red-500/10 text-red-600 border-red-500/20 hover:bg-red-500/20 dark:bg-red-500/20 dark:text-red-400 dark:border-red-500/30">
               <X className="size-3" />
               No
             </Badge>

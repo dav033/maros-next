@@ -1,6 +1,8 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { ArrowLeft, Plus, X, Loader, Send, Save } from "lucide-react";
 import { toast } from "sonner";
 import { useMemo, useState } from "react";
@@ -300,12 +302,12 @@ export function RestorationVisitPage() {
 
         <div className="max-w-2xl w-full space-y-4 sm:space-y-6">
           <div className="space-y-4">
-            <label htmlFor="new-email" className="block text-sm font-medium text-foreground dark:text-foreground">
+            <Label htmlFor="new-email">
               Email Addresses
-            </label>
+            </Label>
             
             <div className="flex flex-col sm:flex-row gap-2">
-              <input
+              <Input
                 id="new-email"
                 type="email"
                 value={newEmailInput}
@@ -317,7 +319,7 @@ export function RestorationVisitPage() {
                   }
                 }}
                 placeholder="client@example.com"
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white text-sm sm:text-base"
+                className="flex-1"
               />
               <Button
                 onClick={handleAddEmail}
@@ -334,7 +336,7 @@ export function RestorationVisitPage() {
                 {emailAddresses.map((email, index) => (
                   <div
                     key={index}
-                    className="flex items-center justify-between gap-3 px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700"
+                    className="flex items-center justify-between gap-3 px-4 py-2 bg-muted rounded-md border border-border"
                   >
                     <span className="text-sm sm:text-base text-foreground dark:text-foreground flex-1 truncate">
                       {email}

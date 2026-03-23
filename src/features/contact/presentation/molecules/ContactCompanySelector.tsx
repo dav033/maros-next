@@ -61,7 +61,7 @@ export function ContactCompanySelector({
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         disabled={disabled}
-        className="flex h-9 w-full items-center gap-2 rounded-md border border-input bg-transparent px-3 text-left text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+        className="flex h-9 w-full items-center gap-2 rounded-md border border-input bg-input px-3 text-left text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
       >
         <Building className="size-4 text-muted-foreground" />
         <span className="flex-1 truncate">{displayText}</span>

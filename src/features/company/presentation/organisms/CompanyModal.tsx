@@ -1,5 +1,7 @@
+"use client";
 
-import { BasicModalFooter } from "@/components/custom";
+import { Plus, Save, Loader } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -57,13 +59,35 @@ export function CompanyModal({
         />
         {serverError && <ErrorAlert message={serverError} />}
         <DialogFooter>
-          <BasicModalFooter
-            onCancel={onClose}
-            onSubmit={onSubmit}
-            isLoading={isSubmitting}
-            canSubmit={formValue.name.trim().length > 0}
-            mode={mode}
-          />
+          <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
+            Cancel
+          </Button>
+          <Button
+            variant="default"
+            onClick={onSubmit}
+            disabled={formValue.name.trim().length === 0 || isSubmitting}
+          >
+            {isSubmitting ? (
+              <>
+                <Loader className="size-4 mr-2 animate-spin" />
+                {mode === "create" ? "Creating..." : "Saving..."}
+              </>
+            ) : (
+              <>
+                {mode === "create" ? (
+                  <>
+                    <Plus className="size-4 mr-2" />
+                    Create
+                  </>
+                ) : (
+                  <>
+                    <Save className="size-4 mr-2" />
+                    Save
+                  </>
+                )}
+              </>
+            )}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

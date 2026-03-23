@@ -8,7 +8,7 @@ import {
 } from "./leadNumberPolicy";
 import { Lead, LeadStatus } from "../models";
 
-import { normalizeText, isIsoLocalDate } from "@/shared/validation";
+import { normalizeText, isIsoLocalDate, coerceIsoLocalDate } from "@/shared/validation";
 
 const DEFAULT_STATUS_ORDER: readonly LeadStatus[] = [
   LeadStatus.NOT_EXECUTED,
@@ -61,15 +61,34 @@ export function ensureLeadIntegrity(
     );
   }
 
-  const sd = normalizeText(lead.startDate);
-  if (!sd || !isIsoLocalDate(sd)) {
-    throw new BusinessRuleError(
-      "FORMAT_ERROR",
-      "startDate must be in YYYY-MM-DD format",
-      {
-        details: { field: "startDate", value: lead.startDate },
+  // startDate puede ser null, pero si tiene un valor, debe estar en formato YYYY-MM-DD
+  if (lead.startDate !== null && lead.startDate !== undefined) {
+    const sd = normalizeText(lead.startDate);
+    if (sd) {
+      // Intentar normalizar el valor si no está en formato correcto
+      let normalizedDate: string;
+      try {
+        normalizedDate = coerceIsoLocalDate(sd);
+      } catch {
+        throw new BusinessRuleError(
+          "FORMAT_ERROR",
+          "startDate must be in YYYY-MM-DD format",
+          {
+            details: { field: "startDate", value: lead.startDate },
+          }
+        );
       }
-    );
+      
+      if (!isIsoLocalDate(normalizedDate)) {
+        throw new BusinessRuleError(
+          "FORMAT_ERROR",
+          "startDate must be in YYYY-MM-DD format",
+          {
+            details: { field: "startDate", value: lead.startDate },
+          }
+        );
+      }
+    }
   }
 
   

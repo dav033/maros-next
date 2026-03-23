@@ -11,7 +11,7 @@ import { BusinessRuleError } from "@/shared/domain";
 import { ensureLeadIntegrity } from "./ensureLeadIntegrity";
 import { makeLeadNumber } from "./leadNumberPolicy";
 import { applyStatus, DEFAULT_TRANSITIONS } from "./leadStatusPolicy";
-import { normalizeText, isIsoLocalDate } from "@/shared/validation";
+import { normalizeText, isIsoLocalDate, coerceIsoLocalDate } from "@/shared/validation";
 
 function validateLeadName(raw: string): string {
   const v = normalizeText(raw);
@@ -30,8 +30,21 @@ function validateLeadName(raw: string): string {
   return v;
 }
 
-function toEffectiveStatus(s: LeadStatus | null | undefined): LeadStatus {
-  return (s ?? "NOT_EXECUTED") as LeadStatus;
+function toEffectiveStatus(
+  s: LeadStatus | null | undefined | string,
+  current: LeadStatus
+): LeadStatus {
+  // undefined => no cambio de estado
+  if (s === undefined) return current;
+
+  // null => volver al estado por defecto
+  if (s === null) return "NOT_EXECUTED" as LeadStatus;
+
+  // Strings vacíos (por ejemplo, selects HTML sin valor) => no cambio
+  const normalized = String(s).trim();
+  if (!normalized) return current;
+
+  return normalized as LeadStatus;
 }
 
 function resolveTransitions(
@@ -89,14 +102,38 @@ const PATCH_HANDLERS: {
   },
 
   startDate: (v, _ctx, acc) => {
-    const d = normalizeText(String(v));
-    if (d && !isIsoLocalDate(d)) {
+    // Manejar null, undefined, o valores vacíos
+    if (v === null || v === undefined || v === "") {
+      return { ...acc, startDate: null };
+    }
+    
+    // Si el valor es un string, normalizarlo
+    const strValue = String(v);
+    const d = normalizeText(strValue);
+    
+    // Si después de normalizar está vacío, establecer a null
+    if (!d) {
+      return { ...acc, startDate: null };
+    }
+    
+    // Validar formato YYYY-MM-DD
+    if (!isIsoLocalDate(d)) {
+      // Intentar normalizar usando coerceIsoLocalDate como fallback
+      try {
+        const coerced = coerceIsoLocalDate(d);
+        if (isIsoLocalDate(coerced)) {
+          return { ...acc, startDate: coerced as ISODate };
+        }
+      } catch {
+        // Si falla la coerción, lanzar error
+      }
       throw new BusinessRuleError(
         "FORMAT_ERROR",
         "startDate must be in YYYY-MM-DD format",
         { details: { field: "startDate", value: v } }
       );
     }
+    
     return { ...acc, startDate: d as ISODate };
   },
 
@@ -111,7 +148,10 @@ const PATCH_HANDLERS: {
   }),
 
   status: (s, ctx, acc) => {
-    const to = toEffectiveStatus(s as LeadStatus | null | undefined);
+    const to = toEffectiveStatus(
+      s as LeadStatus | null | undefined | string,
+      acc.status
+    );
     const transitions = resolveTransitions(ctx.policies.allowedTransitions);
     const { lead: withStatus, events } = applyStatus(
       ctx.clock,

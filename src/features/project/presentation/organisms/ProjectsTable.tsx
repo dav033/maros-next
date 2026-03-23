@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import type { Project } from "@/project/domain";
 import { useProjectsTableColumns } from "../hooks/table/useProjectsTableColumns";
 import type { UseProjectsTableLogicReturn } from "../hooks/table/useProjectsTableLogic";
@@ -17,13 +18,18 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { Loader, FolderX, Edit, Trash, FileText, type LucideIcon } from "lucide-react";
+import { Loader, FolderX, Edit, Trash, FileText, StickyNote, DollarSign, type LucideIcon } from "lucide-react";
 
 // Mapeo de iconos de Iconify a lucide-react
 const iconMap: Record<string, LucideIcon> = {
   "lucide:edit": Edit,
   "lucide:trash-2": Trash,
+  "lucide:trash": Trash,
   "lucide:file-text": FileText,
+  "lucide:sticky-note": StickyNote,
+  "lucide:dollar-sign": DollarSign,
+  "mdi:note-text": StickyNote,
+  "mdi:cash-multiple": DollarSign,
 };
 import { cn } from "@/lib/utils";
 
@@ -44,6 +50,7 @@ export function ProjectsTable({
   onDelete,
   onOpenNotesModal,
 }: ProjectsTableProps) {
+  const router = useRouter();
   const rows = tableLogic?.rows ?? projects ?? [];
   const columns = useProjectsTableColumns({ onOpenNotesModal });
   
@@ -101,6 +108,28 @@ export function ProjectsTable({
     [resolvedGetContextMenuItems]
   );
 
+  const handleRowClick = React.useCallback(
+    (event: React.MouseEvent<HTMLTableRowElement>, project: Project) => {
+      if (event.button === 2) {
+        return;
+      }
+      
+      const target = event.target as HTMLElement;
+      if (target.closest('button, a, [role="button"], [role="menuitem"]')) {
+        return;
+      }
+      
+      if (contextMenuOpen) {
+        return;
+      }
+      
+      if (project.id) {
+        router.push(`/project/${project.id}`);
+      }
+    },
+    [router, contextMenuOpen]
+  );
+
   const menuItems = React.useMemo(() => {
     if (!selectedItem || !resolvedGetContextMenuItems) return [];
     return resolvedGetContextMenuItems(selectedItem);
@@ -147,7 +176,8 @@ export function ProjectsTable({
               <TableRow
                 key={item.id}
                 onContextMenu={resolvedGetContextMenuItems ? (event) => handleRowContextMenu(event, item) : undefined}
-                className="cursor-default hover:bg-accent/30 transition-colors"
+                onClick={(event) => handleRowClick(event, item)}
+                className="cursor-pointer hover:bg-accent/30 transition-colors"
               >
                 {columns.map((column) => (
                   <TableCell

@@ -8,7 +8,7 @@ import * as React from "react";
 import type { Contact } from "@/contact";
 import { ContactRoleLabels } from "@/contact/domain";
 import type { Company } from "@/company";
-import { NotesButton } from "@/components/custom";
+import { NotesButton } from "@/components/shared";
 import { CompanyCell } from "../../atoms/CompanyCell";
 
 interface UseContactsTableColumnsProps {

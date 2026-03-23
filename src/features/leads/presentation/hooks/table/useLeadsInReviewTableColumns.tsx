@@ -4,7 +4,7 @@ import type { Lead } from "@/leads/domain";
 import { getLeadTypeFromNumber } from "@/leads/domain";
 
 import { ContactInfoDisplay } from "@/features/contact/presentation/atoms/ContactInfoDisplay";
-import { NotesButton } from "@/components/custom";
+import { NotesButton } from "@/components/shared";
 import { Loader, Check, X } from "lucide-react";
 import { LeadStatusBadge } from "../../atoms/LeadStatusBadge";
 import { LeadTypeBadge } from "../../atoms/LeadTypeBadge";
@@ -135,7 +135,6 @@ export function useLeadsInReviewTableColumns({
         render: (lead: Lead) => (
           <ContactInfoDisplay
             contact={lead.contact}
-            onClick={() => lead.contact && onOpenContactModal(lead.contact)}
           />
         ),
         sortable: true,

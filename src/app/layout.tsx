@@ -1,8 +1,17 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import { Work_Sans } from "next/font/google";
 import "../styles/globals.css";
 import { AppProviders } from "./AppProviders";
-import { SidebarWrapper } from "./SidebarWrapper";
+import { AppShell } from "./AppShell";
+import { Toaster } from "@/components/ui/sonner";
+
+const workSans = Work_Sans({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700", "800"],
+  variable: "--font-work-sans",
+  display: "swap",
+});
 
 declare global {
   interface Window {
@@ -19,10 +28,11 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className="dark">
-      <body className="min-h-svh bg-background text-foreground overflow-hidden">
+    <html lang="en" className={`dark ${workSans.variable}`}>
+      <body className="min-h-svh bg-background text-foreground font-sans">
         <AppProviders>
-          <SidebarWrapper>{children}</SidebarWrapper>
+          <AppShell>{children}</AppShell>
+          <Toaster />
         </AppProviders>
 
         <Script id="google-maps-init" strategy="beforeInteractive">

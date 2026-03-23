@@ -3,14 +3,14 @@
 
 
 
-import { NotesEditorModal } from "@/components/custom";
+import { NotesEditorModal } from "@/components/shared";
 import type { Lead } from "@/leads/domain";
 import { LeadsInReviewTable } from "../organisms/LeadsInReviewTable";
 import {
   DeleteFeedbackModal,
   EntityCrudPageTemplate,
-} from "@/components/custom";
-import { X, Briefcase, Loader, Search } from "lucide-react";
+} from "@/components/shared";
+import { X, Briefcase, Loader, Search, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -166,10 +166,10 @@ export function LeadsInReviewPageView({ logic }: LeadsInReviewPageViewProps) {
             <Button
               onClick={openCreateModal}
               aria-label="New Lead"
-              className="whitespace-nowrap text-sm font-medium"
+              size="icon"
+              className="bg-[#2c3637] hover:bg-[#2c3637]/90 text-foreground"
             >
-              <span className="mr-2"><Briefcase className="size-4.5" /></span>
-              New Lead
+              <Briefcase className="size-4" />
             </Button>
           </div>
         </div>
@@ -254,7 +254,7 @@ export function LeadsInReviewPageView({ logic }: LeadsInReviewPageViewProps) {
                         type="checkbox"
                         checked={rejectConfirmModal.deleteContact}
                         onChange={(e) => rejectConfirmModal.setDeleteContact(e.target.checked)}
-                        className="mt-0.5 w-4 h-4 rounded border-gray-600 bg-gray-800 text-red-500 focus:ring-red-500/50"
+                        className="mt-0.5 w-4 h-4 rounded border-border bg-background text-red-500 focus:ring-red-500/50"
                       />
                       <div className="flex-1">
                         <span className="text-sm text-foreground group-hover:text-foreground">
@@ -276,7 +276,7 @@ export function LeadsInReviewPageView({ logic }: LeadsInReviewPageViewProps) {
                         type="checkbox"
                         checked={rejectConfirmModal.deleteCompany}
                         onChange={(e) => rejectConfirmModal.setDeleteCompany(e.target.checked)}
-                        className="mt-0.5 w-4 h-4 rounded border-gray-600 bg-gray-800 text-red-500 focus:ring-red-500/50"
+                        className="mt-0.5 w-4 h-4 rounded border-border bg-background text-red-500 focus:ring-red-500/50"
                       />
                       <div className="flex-1">
                         <span className="text-sm text-foreground group-hover:text-foreground">

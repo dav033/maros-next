@@ -11,6 +11,7 @@ import { updateLeadNotesAction } from "../../../actions/notesActions";
 
 export interface UseLeadsNotesLogicOptions {
   leadType: LeadType;
+  onUpdated?: (updatedLead: Lead) => void | Promise<void>;
 }
 
 export interface UseLeadsNotesLogicReturn {
@@ -28,6 +29,7 @@ export interface UseLeadsNotesLogicReturn {
 
 export function useLeadsNotesLogic({
   leadType,
+  onUpdated,
 }: UseLeadsNotesLogicOptions): UseLeadsNotesLogicReturn {
   const queryClient = useQueryClient();
   const data = useLeadsData(leadType);
@@ -65,6 +67,11 @@ export function useLeadsNotesLogic({
       queryClient.invalidateQueries({ queryKey: leadsKeys.all });
       await data.refetch();
       toast.success("Notes updated successfully!");
+      
+      // Call onUpdated callback if provided, passing the updated lead
+      if (onUpdated) {
+        await onUpdated(updated);
+      }
     });
   };
 

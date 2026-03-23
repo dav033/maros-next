@@ -1,8 +1,8 @@
 "use client";
 
 import { Input } from "@/components/ui/input";
-
-
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { Plus, Trash } from "lucide-react";
 import { formatCurrency } from "@/shared/utils";
 
@@ -41,20 +41,20 @@ export function PaymentsManager({
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <label className="text-sm font-medium text-foreground">Payments</label>
-        <button
+        <Label>Payments</Label>
+        <Button
           type="button"
+          size="sm"
           onClick={handleAddPayment}
           disabled={disabled}
-          className="flex items-center gap-1 rounded-md bg-primary px-2 py-1 text-xs text-white transition-colors hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <Plus className="size-3.5" />
+          <Plus className="size-3.5 mr-1.5" />
           Add Payment
-        </button>
+        </Button>
       </div>
 
       {paymentsList.length === 0 ? (
-        <div className="rounded-md border border-gray-200 bg-gray-50 p-3 text-center text-sm text-muted-foreground">
+        <div className="rounded-md border border-border bg-muted p-3 text-center text-sm text-muted-foreground">
           No payments added yet
         </div>
       ) : (
@@ -74,22 +74,24 @@ export function PaymentsManager({
               <div className="w-24 text-right text-sm text-muted-foreground">
                 {formatCurrency(payment)}
               </div>
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="icon"
                 onClick={() => handleRemovePayment(index)}
                 disabled={disabled}
-                className="flex items-center justify-center rounded-md p-2 text-red-500 transition-colors hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="text-red-500 hover:text-red-600 hover:bg-red-500/10"
                 title="Remove payment"
               >
-                <Trash className="size-4.5" />
-              </button>
+                <Trash className="size-4" />
+              </Button>
             </div>
           ))}
         </div>
       )}
 
       {paymentsList.length > 0 && (
-        <div className="flex items-center justify-between rounded-md border border-gray-200 bg-gray-50 px-3 py-2">
+        <div className="flex items-center justify-between rounded-md border border-border bg-muted px-3 py-2">
           <span className="text-sm font-medium text-foreground">Total:</span>
           <span className="text-sm font-semibold text-foreground">
             {formatCurrency(

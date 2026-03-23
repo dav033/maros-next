@@ -3,6 +3,7 @@
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 const PRESET_COLORS = [
   "#ef4444", // red
@@ -43,17 +44,18 @@ export function ColorPicker({
       {label && <Label>{label}</Label>}
       <div className="flex flex-wrap gap-2">
         {PRESET_COLORS.map((color) => (
-          <button
+          <Button
             key={color}
             type="button"
+            variant="ghost"
+            size="icon"
             disabled={disabled}
             onClick={() => onChange(color)}
             className={cn(
-              "h-8 w-8 rounded-md border-2 transition-all hover:scale-110 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+              "h-8 w-8 rounded-md border-2 transition-all hover:scale-110",
               value === color
                 ? "border-foreground ring-2 ring-ring ring-offset-2"
-                : "border-transparent",
-              disabled && "cursor-not-allowed opacity-50"
+                : "border-transparent"
             )}
             style={{ backgroundColor: color }}
             aria-label={`Select color ${color}`}

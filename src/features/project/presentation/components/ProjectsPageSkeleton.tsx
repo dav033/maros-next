@@ -1,5 +1,5 @@
 import { ProjectsTableSkeleton } from "../organisms/ProjectsTableSkeleton";
-import { EntityCrudPageTemplate } from "@/components/custom";
+import { EntityCrudPageTemplate } from "@/components/shared";
 
 export function ProjectsPageSkeleton() {
   return (

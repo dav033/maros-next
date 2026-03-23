@@ -1,12 +1,10 @@
 "use client";
 
-import { NotesEditorModal } from "@/components/custom";
+import { NotesEditorModal, DeleteFeedbackModal, EntityCrudPageTemplate } from "@/components/shared";
 import { CompaniesTable } from "../organisms/CompaniesTable";
 import { CompaniesTableSkeleton } from "../organisms/CompaniesTableSkeleton";
 import { CompanyModal } from "../organisms/CompanyModal";
 import { ManageServicesModal } from "../organisms/ManageServicesModal";
-import { EntityCrudPageTemplate } from "@/components/custom";
-import { DeleteFeedbackModal } from "@/components/custom";
 import { X, Building, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -170,10 +168,10 @@ export function CompaniesPageView({ logic }: CompaniesPageViewProps) {
             <Button
               onClick={createModal.open}
               aria-label="New company"
-              className="whitespace-nowrap text-sm font-medium"
+              size="icon"
+              className="bg-[#2c3637] hover:bg-[#2c3637]/90 text-foreground"
             >
-              <span className="mr-2"><Building className="size-4.5" /></span>
-              New company
+              <Building className="size-4" />
             </Button>
           </div>
         </div>

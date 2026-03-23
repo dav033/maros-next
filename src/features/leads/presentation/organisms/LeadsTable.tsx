@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import type { Lead } from "@/leads/domain";
 import { useLeadsTableColumns } from "../hooks";
 import {
@@ -16,15 +17,16 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { Loader, FileText, Edit, Trash, FileText as FileTextIcon, type LucideIcon } from "lucide-react";
+import { Loader, Edit, Trash, FileText, type LucideIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 // Mapeo de iconos de Iconify a lucide-react
 const iconMap: Record<string, LucideIcon> = {
   "lucide:edit": Edit,
   "lucide:trash-2": Trash,
-  "lucide:file-text": FileTextIcon,
+  "lucide:trash": Trash,
+  "lucide:file-text": FileText,
 };
-import { cn } from "@/lib/utils";
 
 export interface LeadsTableProps {
   leads: Lead[];
@@ -43,6 +45,7 @@ export function LeadsTable({
   onOpenNotesModal,
   onViewContact,
 }: LeadsTableProps) {
+  const router = useRouter();
   const columns = useLeadsTableColumns({
     onOpenContactModal: onViewContact ?? (() => {}),
     onOpenNotesModal: onOpenNotesModal ?? (() => {}),
@@ -60,6 +63,28 @@ export function LeadsTable({
       setContextMenuOpen(true);
     },
     []
+  );
+
+  const handleRowClick = React.useCallback(
+    (event: React.MouseEvent<HTMLTableRowElement>, lead: Lead) => {
+      if (event.button === 2) {
+        return;
+      }
+      
+      const target = event.target as HTMLElement;
+      if (target.closest('button, a, [role="button"], [role="menuitem"]')) {
+        return;
+      }
+      
+      if (contextMenuOpen) {
+        return;
+      }
+      
+      if (lead.id) {
+        router.push(`/lead/${lead.id}`);
+      }
+    },
+    [router, contextMenuOpen]
   );
 
   const menuItems = React.useMemo(() => {
@@ -108,7 +133,8 @@ export function LeadsTable({
               <TableRow
                 key={(item.id as number) ?? 0}
                 onContextMenu={(event) => handleRowContextMenu(event, item)}
-                className="cursor-default hover:bg-accent/30 transition-colors"
+                onClick={(event) => handleRowClick(event, item)}
+                className="cursor-pointer hover:bg-accent/30 transition-colors"
               >
                 {columns.map((column) => (
                   <TableCell

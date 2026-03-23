@@ -1,10 +1,9 @@
 "use client";
 
-import { LocationField } from "@/components/custom";
+import { LocationField } from "@/components/shared";
 import type { ChangeEvent } from "react";
 
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Wrench, Flag, User } from "lucide-react";
 import {
   Select,
@@ -57,17 +56,15 @@ export function LeadEditForm({
   );
 
   return (
-    <div className="space-y-4">
-      <div className="space-y-2">
-        <Label>Lead Name</Label>
-        <Input
-          placeholder="Enter lead name"
-          value={form.leadName}
-          onChange={(e: ChangeEvent<HTMLInputElement>) => onChange("leadName", e.target.value)}
-          disabled={disabled}
-          required
-        />
-      </div>
+    <div className="space-y-4 w-full">
+      <Input
+        placeholder="Enter lead name"
+        value={form.leadName}
+        onChange={(e: ChangeEvent<HTMLInputElement>) => onChange("leadName", e.target.value)}
+        disabled={disabled}
+        required
+        className="w-full"
+      />
 
       <LocationField
         address={form.location}
@@ -75,6 +72,7 @@ export function LeadEditForm({
         disabled={disabled}
         onAddressChange={(value: string) => onChange("location", value)}
         onAddressLinkChange={(value: string) => onChange("addressLink", value)}
+        className="w-full"
       />
 
       <div className="grid grid-cols-2 gap-3">
@@ -83,9 +81,11 @@ export function LeadEditForm({
           onValueChange={(val) => onChange("projectTypeId", val === EMPTY_SELECT_VALUE ? undefined : Number(val))}
           disabled={disabled}
         >
-          <SelectTrigger>
-            <Wrench className="size-4 text-muted-foreground mr-2" />
-            <SelectValue placeholder="Select Project Type *" />
+          <SelectTrigger className="w-full">
+            <div className="flex items-center">
+              <Wrench className="size-4 text-muted-foreground mr-2 shrink-0" />
+              <SelectValue placeholder="Select Project Type *" />
+            </div>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value={EMPTY_SELECT_VALUE}>Select Project Type</SelectItem>
@@ -102,9 +102,11 @@ export function LeadEditForm({
           onValueChange={(val) => onChange("status", val === EMPTY_SELECT_VALUE ? undefined : val)}
           disabled={disabled}
         >
-          <SelectTrigger>
-            <Flag className="size-4 text-muted-foreground mr-2" />
-            <SelectValue placeholder="Select Status" />
+          <SelectTrigger className="w-full">
+            <div className="flex items-center">
+              <Flag className="size-4 text-muted-foreground mr-2 shrink-0" />
+              <SelectValue placeholder="Select Status" />
+            </div>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value={EMPTY_SELECT_VALUE}>Select Status</SelectItem>
@@ -122,9 +124,11 @@ export function LeadEditForm({
         onValueChange={(val) => onChange("contactId", val === EMPTY_SELECT_VALUE ? undefined : Number(val))}
         disabled={disabled}
       >
-        <SelectTrigger>
-          <User className="size-4 text-muted-foreground mr-2" />
-          <SelectValue placeholder="Select Contact *" />
+        <SelectTrigger className="w-full">
+          <div className="flex items-center">
+            <User className="size-4 text-muted-foreground mr-2 shrink-0" />
+            <SelectValue placeholder="Select Contact" />
+          </div>
         </SelectTrigger>
         <SelectContent>
           <SelectItem value={EMPTY_SELECT_VALUE}>Select Contact</SelectItem>

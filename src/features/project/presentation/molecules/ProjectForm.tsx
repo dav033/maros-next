@@ -5,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Briefcase, Receipt, TrendingUp } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Briefcase, Receipt, TrendingUp, DollarSign, Plus, Trash2 } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -36,6 +37,7 @@ type ProjectFormProps = {
   ) => void;
   leads: Lead[];
   disabled?: boolean;
+  isEditMode?: boolean;
 };
 
 const PROJECT_PROGRESS_OPTIONS = [
@@ -59,27 +61,32 @@ export function ProjectForm({
   onChange,
   leads,
   disabled = false,
+  isEditMode = false,
 }: ProjectFormProps) {
   return (
-    <div className="space-y-3">
-      <Select
-        value={form.leadId != null ? String(form.leadId) : EMPTY_SELECT_VALUE}
-        onValueChange={(val) => onChange("leadId", val === EMPTY_SELECT_VALUE ? undefined : Number(val))}
-        disabled={disabled}
-      >
-        <SelectTrigger>
-          <Briefcase className="size-4 text-muted-foreground mr-2" />
-          <SelectValue placeholder="Select Lead *" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value={EMPTY_SELECT_VALUE}>Select Lead</SelectItem>
-          {leads.map((lead) => (
-            <SelectItem key={lead.id} value={String(lead.id)}>
-              {lead.leadNumber} - {lead.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+    <div className="space-y-3 w-full">
+      {!isEditMode && (
+        <Select
+          value={form.leadId != null ? String(form.leadId) : EMPTY_SELECT_VALUE}
+          onValueChange={(val) => onChange("leadId", val === EMPTY_SELECT_VALUE ? undefined : Number(val))}
+          disabled={disabled}
+        >
+          <SelectTrigger className="w-full">
+            <div className="flex items-center">
+              <Briefcase className="size-4 text-muted-foreground mr-2 shrink-0" />
+              <SelectValue placeholder="Select Lead *" />
+            </div>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={EMPTY_SELECT_VALUE}>Select Lead</SelectItem>
+            {leads.map((lead) => (
+              <SelectItem key={lead.id} value={String(lead.id)}>
+                {lead.leadNumber} - {lead.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
 
       <div className="grid grid-cols-2 gap-3">
         <Input
@@ -91,6 +98,7 @@ export function ProjectForm({
           }
           placeholder="Invoice Amount"
           disabled={disabled}
+          className="w-full"
         />
 
         <Select
@@ -98,9 +106,11 @@ export function ProjectForm({
           onValueChange={(val) => onChange("invoiceStatus", val === EMPTY_SELECT_VALUE ? undefined : val)}
           disabled={disabled}
         >
-          <SelectTrigger>
-            <Receipt className="size-4 text-muted-foreground mr-2" />
-            <SelectValue placeholder="Invoice Status" />
+          <SelectTrigger className="w-full">
+            <div className="flex items-center">
+              <Receipt className="size-4 text-muted-foreground mr-2 shrink-0" />
+              <SelectValue placeholder="Select Invoice Status" />
+            </div>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value={EMPTY_SELECT_VALUE}>Select Invoice Status</SelectItem>
@@ -113,14 +123,75 @@ export function ProjectForm({
         </Select>
       </div>
 
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label className="text-sm flex items-center gap-1.5">
+            <DollarSign className="size-4 text-muted-foreground" />
+            Payments
+          </Label>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => onChange("payments", [...(form.payments ?? []), 0])}
+            disabled={disabled}
+            className="shrink-0"
+          >
+            <Plus className="size-4 mr-1" />
+            Add payment
+          </Button>
+        </div>
+        {(form.payments?.length ?? 0) > 0 ? (
+          <ul className="space-y-2">
+            {(form.payments ?? []).map((amount, index) => (
+              <li key={index} className="flex items-center gap-2">
+                <Input
+                  type="number"
+                  step="0.01"
+                  min={0}
+                  value={amount}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                    const value = e.target.value ? Number(e.target.value) : 0;
+                    const next = [...(form.payments ?? [])];
+                    next[index] = value;
+                    onChange("payments", next);
+                  }}
+                  placeholder="Amount"
+                  disabled={disabled}
+                  className="flex-1"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    const next = (form.payments ?? []).filter((_, i) => i !== index);
+                    onChange("payments", next);
+                  }}
+                  disabled={disabled}
+                  className="text-muted-foreground hover:text-destructive shrink-0"
+                  aria-label="Remove payment"
+                >
+                  <Trash2 className="size-4" />
+                </Button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-muted-foreground">No payments recorded</p>
+        )}
+      </div>
+
       <Select
         value={form.projectProgressStatus || EMPTY_SELECT_VALUE}
         onValueChange={(val) => onChange("projectProgressStatus", val === EMPTY_SELECT_VALUE ? undefined : val)}
         disabled={disabled}
       >
-        <SelectTrigger>
-          <TrendingUp className="size-4 text-muted-foreground mr-2" />
-          <SelectValue placeholder="Project Progress Status" />
+        <SelectTrigger className="w-full">
+          <div className="flex items-center">
+            <TrendingUp className="size-4 text-muted-foreground mr-2 shrink-0" />
+            <SelectValue placeholder="Select Progress Status" />
+          </div>
         </SelectTrigger>
         <SelectContent>
           <SelectItem value={EMPTY_SELECT_VALUE}>Select Progress Status</SelectItem>
@@ -138,6 +209,7 @@ export function ProjectForm({
         placeholder="Project Overview (optional)"
         disabled={disabled}
         rows={4}
+        className="w-full"
       />
 
       <div className="flex items-center gap-2">

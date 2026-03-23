@@ -10,7 +10,7 @@ import { CompaniesTableSkeleton } from "@/features/company/presentation/organism
 import { CompanyForm } from "@/features/company/presentation/molecules/CompanyForm";
 import { CustomerCrudModal } from "./CustomerCrudModal";
 import { useCompanyCustomers } from "../../application/hooks/useCompanyCustomers";
-import { DeleteFeedbackModal } from "@/components/custom";
+import { DeleteFeedbackModal } from "@/components/shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {

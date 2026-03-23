@@ -37,7 +37,7 @@ export interface UseContactsTableLogicReturn {
     label: string;
     onClick: () => void;
     variant?: "default" | "danger";
-    icon?: string;
+    icon?: string | React.ReactNode;
     disabled?: boolean;
   }>;
   onOpenNotesModal?: (contact: Contact) => void;

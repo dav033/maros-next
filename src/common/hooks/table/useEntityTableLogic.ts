@@ -1,12 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import React from "react";
 
 export interface ContextMenuItem {
   label: string;
   onClick: () => void;
   variant?: "default" | "danger";
-  icon?: string;
+  icon?: string | React.ReactNode;
   disabled?: boolean;
 }
 

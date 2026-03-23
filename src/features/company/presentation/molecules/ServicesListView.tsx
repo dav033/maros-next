@@ -56,7 +56,7 @@ export function ServicesListView({
                     style={{ backgroundColor: service.color }}
                   />
                 ) : (
-                  <div className="h-3.5 w-3.5 rounded-full shrink-0 border border-gray-500" />
+                  <div className="h-3.5 w-3.5 rounded-full shrink-0 border border-border" />
                 )}
                 <span className="text-sm text-foreground truncate">
                   {service.name}

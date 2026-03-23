@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import React from "react";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -18,23 +19,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import type { LucideIcon } from "lucide-react";
-import {
-  Building,
-  User,
-  Languages,
-  Briefcase,
-  Search,
-  type LucideIcon as IconType,
-} from "lucide-react";
-
-// Mapeo de iconos comunes de Iconify a lucide-react
-const iconMap: Record<string, LucideIcon> = {
-  "mdi:office-building": Building,
-  "mdi:account": User,
-  "mdi:translate": Languages,
-  "mdi:account-badge": User,
-  "mdi:magnify": Search,
-};
 
 export interface SearchableSelectOption {
   value: string;
@@ -47,7 +31,7 @@ interface SearchableSelectProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
-  icon?: string;
+  icon?: LucideIcon;
   disabled?: boolean;
   className?: string;
   emptyText?: string;
@@ -87,12 +71,7 @@ export function SearchableSelect({
           )}
         >
           <span className="flex items-center gap-2 truncate">
-            {icon && iconMap[icon] ? (
-              (() => {
-                const IconComponent = iconMap[icon];
-                return <IconComponent className="size-4 shrink-0" />;
-              })()
-            ) : null}
+            {icon ? React.createElement(icon, { className: "size-4 shrink-0" }) : null}
             {selectedOption?.label || placeholder}
           </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />

@@ -1,6 +1,6 @@
 "use client";
 
-import { AddressAutocompleteInput } from "@/components/custom";
+import { AddressAutocompleteInput } from "@/components/shared";
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

@@ -123,4 +123,14 @@ export class LeadHttpRepository implements LeadRepositoryPort {
     if (!data) throw new Error("Empty response updating Lead");
     return mapLeadFromApi(data);
   };
+
+  async getDetails(id: number): Promise<any> {
+    try {
+      const { data } = await this.api.get(leadEndpoints.details(id));
+      return data;
+    } catch (error: any) {
+      console.error("Error fetching lead details:", error);
+      throw error;
+    }
+  }
 }

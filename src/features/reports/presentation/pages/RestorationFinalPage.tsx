@@ -2,8 +2,8 @@
 
 import {  
   SearchableSelect, 
-  Typography } from "@/components/custom";
-import { Plus, Trash, Loader, Save } from "lucide-react";
+  Typography } from "@/components/shared";
+import { Plus, Trash, Loader, Save, Search, Building, User, Languages } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -297,7 +297,7 @@ export function RestorationFinalPage() {
                 value={projectInput}
                 onChange={handleSelectProject}
                 placeholder="Search and select project"
-                icon="mdi:magnify"
+                icon={Search}
                 disabled={projectsLoading || projectLoading}
               />
             </div>
@@ -341,7 +341,7 @@ export function RestorationFinalPage() {
                   value={form.clientName}
                   onChange={(value) => updateField("clientName", value)}
                   placeholder="Select company"
-                  icon="mdi:office-building"
+                  icon={Building}
                   disabled={form.clientType === "individual" || companiesLoading}
                 />
               </div>
@@ -357,7 +357,7 @@ export function RestorationFinalPage() {
                     }
                   }}
                   placeholder="Select client type"
-                  icon="mdi:account-badge"
+                  icon={User}
                 />
               </div>
               <div className="space-y-1">
@@ -370,7 +370,7 @@ export function RestorationFinalPage() {
                   }
                   onChange={handleSelectContact}
                   placeholder="Select contact"
-                  icon="mdi:account"
+                  icon={User}
                   disabled={contactsLoading}
                 />
               </div>
@@ -401,7 +401,7 @@ export function RestorationFinalPage() {
                   value={form.language}
                   onChange={(value) => updateField("language", value)}
                   placeholder="Select language"
-                  icon="mdi:translate"
+                  icon={Languages}
                 />
               </div>
             </div>

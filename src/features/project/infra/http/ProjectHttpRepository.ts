@@ -48,5 +48,15 @@ export class ProjectHttpRepository implements ProjectRepositoryPort {
     if (!data) throw new Error("Empty response updating Project");
     return mapProjectFromApi(data);
   };
+
+  async getDetails(id: number): Promise<any> {
+    try {
+      const { data } = await this.api.get(projectEndpoints.details(id));
+      return data;
+    } catch (error: any) {
+      console.error("Error fetching project details:", error);
+      throw error;
+    }
+  }
 }
 

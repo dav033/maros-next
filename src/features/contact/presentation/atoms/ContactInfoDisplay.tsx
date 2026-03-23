@@ -1,10 +1,12 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import { User } from "lucide-react";
 
 export interface ContactInfoDisplayProps {
   contact: {
+    id?: number;
     name: string;
     phone?: string | null;
     email?: string | null;
@@ -24,6 +26,8 @@ export function ContactInfoDisplay({
   variant = "button",
   className = "",
 }: ContactInfoDisplayProps) {
+  const router = useRouter();
+
   if (!contact || !contact.name || contact.name.trim() === "") {
     return <span className="text-foreground">—</span>;
   }
@@ -32,10 +36,25 @@ export function ContactInfoDisplay({
     return <span className={`text-foreground ${className}`}>{contact.name}</span>;
   }
 
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    // Si hay un onClick personalizado, usarlo
+    if (onClick) {
+      onClick();
+      return;
+    }
+    
+    // Si el contacto tiene ID, navegar a la página de detalles
+    if (contact.id) {
+      router.push(`/contact/${contact.id}`);
+    }
+  };
+
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={handleClick}
       className={`inline-flex items-center gap-2 rounded-md border border-indigo-500/30 bg-indigo-500/10 px-2.5 py-1 text-xs font-medium text-indigo-300 hover:bg-indigo-500/20 transition-colors cursor-pointer w-[160px] ${className}`}
     >
       <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-indigo-500/20 text-indigo-300">

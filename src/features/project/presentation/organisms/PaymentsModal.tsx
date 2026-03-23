@@ -1,8 +1,8 @@
 "use client";
 
-import { BasicModalFooter } from "@/components/custom";
-import { Plus, Wallet, Trash, AlertCircle } from "lucide-react";
+import { Plus, Wallet, Trash, AlertCircle, Save, Loader } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -45,15 +45,14 @@ export function PaymentsModal({ controller }: PaymentsModalProps) {
         <div className="space-y-5">
         <div className="flex items-center justify-between">
           <label className="text-sm font-medium text-foreground">Payments</label>
-          <button
+          <Button
             type="button"
             onClick={addPayment}
             disabled={isLoading}
-            className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-lg shadow-theme-primary/20 transition-all hover:bg-primary/90 hover:shadow-xl hover:shadow-theme-primary/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-lg"
           >
-            <Plus className="size-4.5" />
+            <Plus className="size-4 mr-2" />
             Add Payment
-          </button>
+          </Button>
         </div>
 
         {payments.length === 0 ? (
@@ -85,15 +84,17 @@ export function PaymentsModal({ controller }: PaymentsModalProps) {
                     {formatCurrency(payment)}
                   </span>
                 </div>
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="icon"
                   onClick={() => removePayment(index)}
                   disabled={isLoading}
-                  className="flex items-center justify-center rounded-lg p-2.5 text-red-400 transition-all hover:bg-red-500/10 hover:text-red-300 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                  className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
                   title="Remove payment"
                 >
-                  <Trash className="size-5" />
-                </button>
+                  <Trash className="size-4" />
+                </Button>
               </div>
             ))}
           </div>
@@ -122,13 +123,26 @@ export function PaymentsModal({ controller }: PaymentsModalProps) {
         )}
         </div>
         <DialogFooter>
-          <BasicModalFooter
-            onCancel={close}
-            onSubmit={save}
-            isLoading={isLoading}
-            canSubmit={!isLoading}
-            mode="update"
-          />
+          <Button variant="outline" onClick={close} disabled={isLoading}>
+            Cancel
+          </Button>
+          <Button
+            variant="default"
+            onClick={save}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <>
+                <Loader className="size-4 mr-2 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save className="size-4 mr-2" />
+                Save
+              </>
+            )}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

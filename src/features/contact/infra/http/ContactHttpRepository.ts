@@ -75,4 +75,14 @@ export class ContactHttpRepository implements ContactRepositoryPort {
     );
     return Array.isArray(data) ? data.map(mapContactFromApi) : [];
   }
+
+  async getDetails(id: number): Promise<any> {
+    try {
+      const { data } = await this.api.get(contactEndpoints.details(id));
+      return data;
+    } catch (error: any) {
+      console.error("Error fetching contact details:", error);
+      throw error;
+    }
+  }
 }

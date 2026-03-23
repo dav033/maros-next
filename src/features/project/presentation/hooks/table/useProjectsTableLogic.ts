@@ -1,6 +1,7 @@
 "use client";
 
 import { useEntityTableLogic, useTableWithSearch } from "@/common/hooks";
+import React from "react";
 
 
 import type { Project } from "@/project/domain";
@@ -38,7 +39,7 @@ export interface UseProjectsTableLogicReturn {
     label: string;
     onClick: () => void;
     variant?: "default" | "danger";
-    icon?: string;
+    icon?: string | React.ReactNode;
     disabled?: boolean;
   }>;
 }
@@ -70,14 +71,14 @@ export function useProjectsTableLogic({
         items.push({
           label: "Notes",
           onClick: () => onOpenNotesModal(project),
-          icon: "mdi:note-text",
+          icon: "lucide:sticky-note",
         });
       }
       if (onOpenPaymentsModal) {
         items.push({
           label: "Payments",
           onClick: () => onOpenPaymentsModal(project),
-          icon: "mdi:cash-multiple",
+          icon: "lucide:dollar-sign",
         });
       }
       return items;

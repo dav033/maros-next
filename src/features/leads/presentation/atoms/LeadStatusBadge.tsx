@@ -6,9 +6,9 @@ interface LeadStatusBadgeProps {
 
 const STATUS_COLORS: Record<string, string> = {
   NOT_EXECUTED: "#6b7280",
-  COMPLETED: "#3b82f6",
-  IN_PROGRESS: "#22c55e",
-  LOST: "#ef4444",
+  COMPLETED: "#22c55e", // Verde para completado
+  IN_PROGRESS: "#3b82f6",
+  LOST: "#6b7280", // Gris en lugar de rojo
   POSTPONED: "#f59e0b",
   PERMITS: "#8b5cf6",
 };
