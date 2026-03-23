@@ -24,7 +24,13 @@ type NewContactForm = {
   email: string;
 };
 
-type Contact = { id: number; name: string; phone?: string; email?: string };
+/** Mínimo para la lista (compatible con Contact del dominio y DTOs ligeros como ContactForSelect). */
+export type ContactOption = {
+  id?: number;
+  name: string;
+  phone?: string;
+  email?: string;
+};
 
 type ContactModeSelectorProps = {
   contactMode: ContactMode;
@@ -33,7 +39,7 @@ type ContactModeSelectorProps = {
   onChange: <K extends keyof NewContactForm>(key: K, value: NewContactForm[K]) => void;
   disabled?: boolean;
   // Props for existing contact
-  contacts?: Contact[];
+  contacts?: ContactOption[];
   selectedContactId?: number;
   onContactSelect?: (contactId: number | undefined) => void;
 };
@@ -134,11 +140,13 @@ export function ContactModeSelector({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value={EMPTY_SELECT_VALUE}>Select Contact</SelectItem>
-              {contacts.map((c) => (
-                <SelectItem key={c.id} value={String(c.id)}>
-                  {c.name}
-                </SelectItem>
-              ))}
+              {contacts
+                .filter((c): c is ContactOption & { id: number } => typeof c.id === "number")
+                .map((c) => (
+                  <SelectItem key={c.id} value={String(c.id)}>
+                    {c.name}
+                  </SelectItem>
+                ))}
             </SelectContent>
           </Select>
         ) : (
