@@ -188,6 +188,7 @@ export function LeadsInReviewPageView({ logic }: LeadsInReviewPageViewProps) {
           onReject={reviewActions.onRejectClick}
           isAccepting={reviewActions.isAccepting}
           isRejecting={reviewActions.isRejecting}
+          pagination={{ enabled: true }}
         />
       }
       modals={

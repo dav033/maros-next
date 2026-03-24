@@ -17,7 +17,6 @@ export async function loadContactDetailsData(contactId: number) {
     
     return { contactDetails };
   } catch (error: any) {
-    console.error("Error loading contact details:", error);
     
     // Extraer mensaje de error más específico
     let errorMessage = "Unknown error";

@@ -32,6 +32,8 @@ const iconMap: Record<string, LucideIcon> = {
   "mdi:cash-multiple": DollarSign,
 };
 import { cn } from "@/lib/utils";
+import { usePagination } from "@/common/hooks/table/usePagination";
+import { TablePagination } from "@/components/shared/TablePagination";
 
 export interface ProjectsTableProps {
   tableLogic?: UseProjectsTableLogicReturn;
@@ -40,6 +42,8 @@ export interface ProjectsTableProps {
   onEdit?: (project: Project) => void;
   onDelete?: (project: Project) => void;
   onOpenNotesModal?: (project: Project) => void;
+  /** When enabled and items > pageSize, shows pagination controls below the table. */
+  pagination?: { enabled?: boolean };
 }
 
 export function ProjectsTable({
@@ -49,11 +53,12 @@ export function ProjectsTable({
   onEdit,
   onDelete,
   onOpenNotesModal,
+  pagination,
 }: ProjectsTableProps) {
   const router = useRouter();
   const rows = tableLogic?.rows ?? projects ?? [];
   const columns = useProjectsTableColumns({ onOpenNotesModal });
-  
+
   const resolvedGetContextMenuItems = React.useMemo<((project: Project) => Array<{label: string; onClick: () => void; icon?: string; variant?: "default" | "danger"; disabled?: boolean}>) | undefined>(() => {
     if (tableLogic?.getContextMenuItems) {
       return (project: Project) => {
@@ -93,6 +98,20 @@ export function ProjectsTable({
     return undefined;
   }, [onDelete, onEdit, tableLogic?.getContextMenuItems]);
 
+  const {
+    pagedData,
+    page,
+    pageSize,
+    totalPages,
+    totalItems,
+    isPaginated,
+    setPage,
+    setPageSize,
+  } = usePagination({
+    data: rows,
+    enabled: pagination?.enabled ?? false,
+  });
+
   const [contextMenuOpen, setContextMenuOpen] = React.useState(false);
   const [selectedItem, setSelectedItem] = React.useState<Project | null>(null);
   const [menuPosition, setMenuPosition] = React.useState({ x: 0, y: 0 });
@@ -113,16 +132,16 @@ export function ProjectsTable({
       if (event.button === 2) {
         return;
       }
-      
+
       const target = event.target as HTMLElement;
       if (target.closest('button, a, [role="button"], [role="menuitem"]')) {
         return;
       }
-      
+
       if (contextMenuOpen) {
         return;
       }
-      
+
       if (project.id) {
         router.push(`/project/${project.id}`);
       }
@@ -172,7 +191,7 @@ export function ProjectsTable({
             </TableRow>
           </TableHeader>
           <TableBody className="divide-y divide-border">
-            {rows.map((item) => (
+            {pagedData.map((item) => (
               <TableRow
                 key={item.id}
                 onContextMenu={resolvedGetContextMenuItems ? (event) => handleRowContextMenu(event, item) : undefined}
@@ -194,6 +213,17 @@ export function ProjectsTable({
           </TableBody>
         </Table>
       </section>
+
+      {isPaginated && (
+        <TablePagination
+          page={page}
+          pageSize={pageSize}
+          totalPages={totalPages}
+          totalItems={totalItems}
+          onPageChange={setPage}
+          onPageSizeChange={setPageSize}
+        />
+      )}
 
       <DropdownMenu open={contextMenuOpen} onOpenChange={setContextMenuOpen}>
         <DropdownMenuContent

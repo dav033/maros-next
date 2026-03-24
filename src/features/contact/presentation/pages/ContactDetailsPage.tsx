@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useCallback, useEffect } from "react";
-import { ArrowLeft, User, Phone, Mail, MapPin, Building, Briefcase, FolderTree, FileText, StickyNote, DollarSign, TrendingUp, Receipt, Edit, Plus, Save, X } from "lucide-react";
+import { ArrowLeft, User, Phone, Mail, MapPin, Building, Briefcase, FolderTree, StickyNote, TrendingUp, Receipt, Edit, Plus, Save, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";

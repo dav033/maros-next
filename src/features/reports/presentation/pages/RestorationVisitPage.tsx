@@ -161,21 +161,17 @@ export function RestorationVisitPage() {
         );
 
         if (docUrl) {
-          console.log("Report submitted successfully, docUrl:", docUrl);
           toast.success("Documento actualizado correctamente.");
           window.open(docUrl, "_blank");
           setDocUrl(docUrl);
           setEmailAddresses(form.email ? [form.email] : []);
           setIsSubmitted(true);
-        } else {
-          console.warn("Report submitted but no docUrl returned");
         }
 
         toast.success(
           `Successfully uploaded ${filesWithMetadata.length} image(s) to webhook.`
         );
       } else {
-        console.log("No images to upload, submitting report without images");
         const docUrl = await submitReport(
           form,
           leadNumber,
@@ -184,31 +180,14 @@ export function RestorationVisitPage() {
         );
 
         if (docUrl) {
-          console.log("Report submitted successfully (no images), docUrl:", docUrl);
           toast.success("Documento actualizado correctamente.");
           window.open(docUrl, "_blank");
           setDocUrl(docUrl);
           setEmailAddresses(form.email ? [form.email] : []);
           setIsSubmitted(true);
-        } else {
-          console.warn("Report submitted but no docUrl returned");
         }
       }
-    } catch (error) {
-      console.error("Error in handleSubmit:", {
-        error: error,
-        errorMessage: error instanceof Error ? error.message : String(error),
-        errorStack: error instanceof Error ? error.stack : undefined,
-        leadNumber: leadNumber,
-        projectNumber: form.projectNumber,
-        formData: {
-          projectName: form.projectName,
-          clientName: form.clientName,
-          customerName: form.customerName,
-          activitiesCount: form.activities.length,
-          additionalActivitiesCount: form.additionalActivities.length,
-        },
-      });
+    } catch {
       toast.error(
         "There was a problem uploading images. Please try again."
       );
@@ -269,8 +248,7 @@ export function RestorationVisitPage() {
       } else {
         toast.error(result.error || "Failed to send email.");
       }
-    } catch (error) {
-      console.error("Error sending email:", error);
+    } catch {
       toast.error("Failed to send email. Please try again.");
     } finally {
       setSendingEmail(false);

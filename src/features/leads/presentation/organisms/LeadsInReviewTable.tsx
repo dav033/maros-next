@@ -27,6 +27,8 @@ const iconMap: Record<string, LucideIcon> = {
   "lucide:file-text": FileText,
 };
 import { cn } from "@/lib/utils";
+import { usePagination } from "@/common/hooks/table/usePagination";
+import { TablePagination } from "@/components/shared/TablePagination";
 
 export interface LeadsInReviewTableProps {
   leads: Lead[];
@@ -39,6 +41,8 @@ export interface LeadsInReviewTableProps {
   onReject: (lead: Lead) => void;
   isAccepting?: number | null;
   isRejecting?: number | null;
+  /** When enabled and items > pageSize, shows pagination controls below the table. */
+  pagination?: { enabled?: boolean };
 }
 
 export function LeadsInReviewTable({
@@ -52,6 +56,7 @@ export function LeadsInReviewTable({
   onReject,
   isAccepting,
   isRejecting,
+  pagination,
 }: LeadsInReviewTableProps) {
   const router = useRouter();
   const columns = useLeadsInReviewTableColumns({
@@ -61,6 +66,20 @@ export function LeadsInReviewTable({
     onReject,
     isAccepting,
     isRejecting,
+  });
+
+  const {
+    pagedData,
+    page,
+    pageSize,
+    totalPages,
+    totalItems,
+    isPaginated,
+    setPage,
+    setPageSize,
+  } = usePagination({
+    data: leads,
+    enabled: pagination?.enabled ?? false,
   });
 
   const [contextMenuOpen, setContextMenuOpen] = React.useState(false);
@@ -82,16 +101,16 @@ export function LeadsInReviewTable({
       if (event.button === 2) {
         return;
       }
-      
+
       const target = event.target as HTMLElement;
       if (target.closest('button, a, [role="button"], [role="menuitem"]')) {
         return;
       }
-      
+
       if (contextMenuOpen) {
         return;
       }
-      
+
       if (lead.id) {
         router.push(`/lead/${lead.id}`);
       }
@@ -141,7 +160,7 @@ export function LeadsInReviewTable({
             </TableRow>
           </TableHeader>
           <TableBody className="divide-y divide-border">
-            {leads.map((item) => (
+            {pagedData.map((item) => (
               <TableRow
                 key={(item.id as number) ?? 0}
                 onContextMenu={(event) => handleRowContextMenu(event, item)}
@@ -163,6 +182,17 @@ export function LeadsInReviewTable({
           </TableBody>
         </Table>
       </section>
+
+      {isPaginated && (
+        <TablePagination
+          page={page}
+          pageSize={pageSize}
+          totalPages={totalPages}
+          totalItems={totalItems}
+          onPageChange={setPage}
+          onPageSizeChange={setPageSize}
+        />
+      )}
 
       <DropdownMenu open={contextMenuOpen} onOpenChange={setContextMenuOpen}>
         <DropdownMenuContent

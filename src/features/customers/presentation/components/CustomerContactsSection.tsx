@@ -155,6 +155,7 @@ export function CustomerContactsSection({
                 setDeleteTarget(contact);
               }
             }}
+            pagination={{ enabled: true }}
           />
         )}
       </section>

@@ -112,8 +112,8 @@ export function LocationField({
             }, 0);
           }
         });
-      } catch (error) {
-        console.error("Error initializing Google Places Autocomplete:", error);
+      } catch {
+        // Autocomplete initialization failed, continue without it
       }
     } else if (!useGoogleMapsAutocomplete && autocompleteRef.current) {
       // Clean up autocomplete

@@ -51,7 +51,6 @@ export type UpdateCompanyRequestDTO = {
 export function mapCompanyFromApi(dto: ApiCompanyDTO): Company {
   let type = dto.type;
   if (!Object.values(CompanyType).includes(type as CompanyType)) {
-    console.warn(`Unknown company type "${dto.type}" for company ${dto.id}, defaulting to OTHER`);
     type = CompanyType.OTHER;
   }
   

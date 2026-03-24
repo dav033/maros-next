@@ -158,6 +158,7 @@ export function CustomerCompaniesSection({
                 onClick: () => setDeleteTargetId(company.id),
               },
             ]}
+            pagination={{ enabled: true }}
           />
         )}
       </section>

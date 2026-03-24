@@ -19,14 +19,10 @@ async function translateWithRetry(
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      // Agregar delay antes de cada intento (excepto el primero)
       if (attempt > 0) {
         // Delay exponencial: 3s, 6s, 12s, 24s, 48s
         const delay =
           initialDelay * Math.pow(2, attempt - 1) + Math.random() * 2000;
-        console.warn(
-          `Rate limit hit for batch translation, waiting ${Math.round(delay)}ms before retry (attempt ${attempt + 1}/${maxRetries})`
-        );
         await new Promise((resolve) => setTimeout(resolve, delay));
       }
 
@@ -54,7 +50,7 @@ async function translateWithRetry(
         },
         {
           headers,
-          timeout: 30000, // 30 segundos timeout
+          timeout: 30000,
         }
       );
 
@@ -65,19 +61,15 @@ async function translateWithRetry(
       const isLastAttempt = attempt === maxRetries - 1;
 
       if (isRateLimit && !isLastAttempt) {
-        // Continuar al siguiente intento
         continue;
       }
 
-      // Si no es rate limit o es el último intento, lanzar el error
       if (!isRateLimit || isLastAttempt) {
         throw error;
       }
     }
   }
 
-  // Si llegamos aquí, todos los intentos fallaron con rate limit
-  console.error("All retry attempts failed with rate limit");
   throw lastError || new Error("Failed to translate after multiple retries");
 }
 
@@ -93,7 +85,6 @@ export async function POST(request: NextRequest) {
     const apiKey = process.env.OPENAI_KEY;
 
     if (!apiKey) {
-      console.warn("OPENAI_API_KEY is not configured");
       return NextResponse.json(
         { error: "Translation service is not configured" },
         { status: 500 }
@@ -103,9 +94,8 @@ export async function POST(request: NextRequest) {
     const sourceLang =
       sourceLanguage || (targetLanguage === "en" ? "es" : "en");
 
-    // Traducir textos secuencialmente con delay para evitar rate limits
     const translatedTexts: string[] = [];
-    const delayBetweenRequests = 2000; // 2 segundos entre cada solicitud para evitar rate limits
+    const delayBetweenRequests = 2000;
 
     for (let i = 0; i < texts.length; i++) {
       const text = texts[i];
@@ -124,23 +114,16 @@ export async function POST(request: NextRequest) {
         );
         translatedTexts.push(translated);
 
-        // Agregar delay entre solicitudes (excepto en la última)
         if (i < texts.length - 1) {
           await new Promise((resolve) =>
             setTimeout(resolve, delayBetweenRequests)
           );
         }
       } catch (error: any) {
-        console.error(`Error translating text at index ${i}:`, error);
-        // Si es rate limit después de todos los reintentos, retornar texto original
-        // pero continuar con los demás textos
+        // Si falla (incluyendo rate limit tras todos los reintentos), usar texto original
         translatedTexts.push(text);
 
-        // Si es rate limit, agregar un delay adicional antes de continuar
         if (error.response?.status === 429) {
-          console.warn(
-            error.response?.data
-          );
           await new Promise((resolve) => setTimeout(resolve, 5000));
         }
       }
@@ -148,7 +131,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ translatedTexts }, { status: 200 });
   } catch (error: any) {
-    console.error("Error in batch translation:", error);
     return NextResponse.json(
       {
         error:

@@ -16,7 +16,6 @@ export async function loadLeadDetailsData(leadId: number) {
     
     return { leadDetails };
   } catch (error: any) {
-    console.error("Error loading lead details:", error);
     
     let errorMessage = "Unknown error";
     if (error?.response?.data?.message) {

@@ -7,4 +7,5 @@ export * from "./LocationField";
 export * from "./NotesButton";
 export * from "./NotesEditorModal";
 export * from "./SearchableSelect";
+export * from "./TablePagination";
 export * from "./Typography";

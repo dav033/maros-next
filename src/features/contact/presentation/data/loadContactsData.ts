@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import { serverApiClient } from "@/shared/infra/http";
 import { ContactHttpRepository, makeContactsAppContext } from "@/contact";
 import { listContacts } from "@/contact/application";
@@ -7,7 +8,7 @@ export interface ContactsPageData {
   contacts: Contact[];
 }
 
-export async function loadContactsData(): Promise<ContactsPageData> {
+async function fetchContactsData(): Promise<ContactsPageData> {
   const ctx = makeContactsAppContext({
     repos: {
       contact: new ContactHttpRepository(serverApiClient),
@@ -21,5 +22,8 @@ export async function loadContactsData(): Promise<ContactsPageData> {
   };
 }
 
-
-
+export const loadContactsData = unstable_cache(
+  fetchContactsData,
+  ["contacts-page-data"],
+  { revalidate: 60 }
+);

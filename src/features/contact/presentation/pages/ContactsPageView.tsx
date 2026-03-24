@@ -188,6 +188,7 @@ export function ContactsPageView({ logic }: ContactsPageViewProps) {
           tableLogic={table}
           companies={companies}
           isLoading={showSkeleton}
+          pagination={{ enabled: true }}
         />
       }
       modals={

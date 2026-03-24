@@ -170,6 +170,7 @@ export function LeadsPageView({ logic }: LeadsPageViewProps) {
           getContextMenuItems={getContextMenuItems}
           onOpenNotesModal={table.onOpenNotesModal}
           onViewContact={table.onViewContact}
+          pagination={{ enabled: true }}
         />
       }
       modals={

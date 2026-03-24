@@ -27,6 +27,8 @@ const iconMap: Record<string, LucideIcon> = {
   "lucide:file-text": FileText,
 };
 import { cn } from "@/lib/utils";
+import { usePagination } from "@/common/hooks/table/usePagination";
+import { TablePagination } from "@/components/shared/TablePagination";
 
 export interface CompaniesTableProps {
   companies: Company[];
@@ -34,6 +36,8 @@ export interface CompaniesTableProps {
   services?: Array<{ id: number; name: string; color?: string | null }>;
   getContextMenuItems: (row: Company) => Array<{label: string; onClick: () => void; icon?: string | React.ReactNode; variant?: "default" | "danger"; disabled?: boolean}>;
   onOpenNotesModal?: (company: Company) => void;
+  /** When enabled and items > pageSize, shows pagination controls below the table. */
+  pagination?: { enabled?: boolean };
 }
 
 export function CompaniesTable({
@@ -42,11 +46,26 @@ export function CompaniesTable({
   services = [],
   getContextMenuItems,
   onOpenNotesModal,
+  pagination,
 }: CompaniesTableProps) {
   const router = useRouter();
   const columns = useCompaniesTableColumns({
     services,
     onOpenNotesModal: onOpenNotesModal || (() => {}),
+  });
+
+  const {
+    pagedData,
+    page,
+    pageSize,
+    totalPages,
+    totalItems,
+    isPaginated,
+    setPage,
+    setPageSize,
+  } = usePagination({
+    data: companies,
+    enabled: pagination?.enabled ?? false,
   });
 
   const [contextMenuOpen, setContextMenuOpen] = React.useState(false);
@@ -68,16 +87,16 @@ export function CompaniesTable({
       if (event.button === 2) {
         return;
       }
-      
+
       const target = event.target as HTMLElement;
       if (target.closest('button, a, [role="button"], [role="menuitem"]')) {
         return;
       }
-      
+
       if (contextMenuOpen) {
         return;
       }
-      
+
       if (company.id) {
         router.push(`/company/${company.id}`);
       }
@@ -127,7 +146,7 @@ export function CompaniesTable({
             </TableRow>
           </TableHeader>
           <TableBody className="divide-y divide-border">
-            {companies.map((item) => (
+            {pagedData.map((item) => (
               <TableRow
                 key={item.id ?? 0}
                 onContextMenu={(event) => handleRowContextMenu(event, item)}
@@ -149,6 +168,17 @@ export function CompaniesTable({
           </TableBody>
         </Table>
       </section>
+
+      {isPaginated && (
+        <TablePagination
+          page={page}
+          pageSize={pageSize}
+          totalPages={totalPages}
+          totalItems={totalItems}
+          onPageChange={setPage}
+          onPageSizeChange={setPageSize}
+        />
+      )}
 
       <DropdownMenu open={contextMenuOpen} onOpenChange={setContextMenuOpen}>
         <DropdownMenuContent

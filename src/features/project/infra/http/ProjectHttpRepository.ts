@@ -54,7 +54,6 @@ export class ProjectHttpRepository implements ProjectRepositoryPort {
       const { data } = await this.api.get(projectEndpoints.details(id));
       return data;
     } catch (error: any) {
-      console.error("Error fetching project details:", error);
       throw error;
     }
   }

@@ -81,7 +81,6 @@ export class ContactHttpRepository implements ContactRepositoryPort {
       const { data } = await this.api.get(contactEndpoints.details(id));
       return data;
     } catch (error: any) {
-      console.error("Error fetching contact details:", error);
       throw error;
     }
   }

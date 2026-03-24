@@ -19,6 +19,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Loader, Edit, Trash, FileText, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { usePagination } from "@/common/hooks/table/usePagination";
+import { TablePagination } from "@/components/shared/TablePagination";
 
 // Mapeo de iconos de Iconify a lucide-react
 const iconMap: Record<string, LucideIcon> = {
@@ -35,6 +37,8 @@ export interface LeadsTableProps {
   getContextMenuItems: (row: Lead) => Array<{label: string; onClick: () => void; icon?: string | React.ReactNode; variant?: "default" | "danger"; disabled?: boolean}>;
   onOpenNotesModal?: (lead: Lead) => void;
   onViewContact?: (contact: any) => void;
+  /** When enabled and items > pageSize, shows pagination controls below the table. */
+  pagination?: { enabled?: boolean };
 }
 
 export function LeadsTable({
@@ -44,11 +48,26 @@ export function LeadsTable({
   getContextMenuItems,
   onOpenNotesModal,
   onViewContact,
+  pagination,
 }: LeadsTableProps) {
   const router = useRouter();
   const columns = useLeadsTableColumns({
     onOpenContactModal: onViewContact ?? (() => {}),
     onOpenNotesModal: onOpenNotesModal ?? (() => {}),
+  });
+
+  const {
+    pagedData,
+    page,
+    pageSize,
+    totalPages,
+    totalItems,
+    isPaginated,
+    setPage,
+    setPageSize,
+  } = usePagination({
+    data: leads,
+    enabled: pagination?.enabled ?? false,
   });
 
   const [contextMenuOpen, setContextMenuOpen] = React.useState(false);
@@ -70,16 +89,16 @@ export function LeadsTable({
       if (event.button === 2) {
         return;
       }
-      
+
       const target = event.target as HTMLElement;
       if (target.closest('button, a, [role="button"], [role="menuitem"]')) {
         return;
       }
-      
+
       if (contextMenuOpen) {
         return;
       }
-      
+
       if (lead.id) {
         router.push(`/lead/${lead.id}`);
       }
@@ -129,7 +148,7 @@ export function LeadsTable({
             </TableRow>
           </TableHeader>
           <TableBody className="divide-y divide-border">
-            {leads.map((item) => (
+            {pagedData.map((item) => (
               <TableRow
                 key={(item.id as number) ?? 0}
                 onContextMenu={(event) => handleRowContextMenu(event, item)}
@@ -151,6 +170,17 @@ export function LeadsTable({
           </TableBody>
         </Table>
       </section>
+
+      {isPaginated && (
+        <TablePagination
+          page={page}
+          pageSize={pageSize}
+          totalPages={totalPages}
+          totalItems={totalItems}
+          onPageChange={setPage}
+          onPageSizeChange={setPageSize}
+        />
+      )}
 
       <DropdownMenu open={contextMenuOpen} onOpenChange={setContextMenuOpen}>
         <DropdownMenuContent

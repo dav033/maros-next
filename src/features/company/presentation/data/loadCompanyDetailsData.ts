@@ -47,8 +47,7 @@ export async function loadCompanyDetailsData(companyId: number) {
         `/contacts/company/${companyId}`
       );
       contacts = contactsResponse.data || [];
-    } catch (error) {
-      console.warn("Could not load contacts for company:", error);
+    } catch {
       // Continue without contacts
     }
     
@@ -59,7 +58,6 @@ export async function loadCompanyDetailsData(companyId: number) {
     
     return { companyDetails: companyDetailsWithContacts };
   } catch (error: any) {
-    console.error("Error loading company details:", error);
     
     let errorMessage = "Unknown error";
     if (error?.response?.data?.message) {

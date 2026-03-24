@@ -168,6 +168,7 @@ export function ProjectsPageView({ logic }: ProjectsPageViewProps) {
           tableLogic={table}
           isLoading={showSkeleton}
           onOpenNotesModal={openNotesModal}
+          pagination={{ enabled: true }}
         />
       }
       modals={

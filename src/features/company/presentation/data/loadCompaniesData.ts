@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import { serverApiClient } from "@/shared/infra/http";
 import { CompanyHttpRepository, CompanyServiceHttpRepository, makeCompanyAppContext } from "@/company";
 import { companyCrudUseCases, companyServiceCrudUseCases } from "@/company/application";
@@ -12,8 +13,7 @@ export interface CompaniesPageData {
   services: CompanyService[];
 }
 
-export async function loadCompaniesData(): Promise<CompaniesPageData> {
-  // Create server-side contexts
+async function fetchCompaniesData(): Promise<CompaniesPageData> {
   const companyCtx = makeCompanyAppContext({
     repos: {
       company: new CompanyHttpRepository(serverApiClient),
@@ -27,7 +27,6 @@ export async function loadCompaniesData(): Promise<CompaniesPageData> {
     },
   });
 
-  // Load data in parallel
   const [companies, services, contacts] = await Promise.all([
     companyCrudUseCases.list(companyCtx)().catch(() => []),
     companyServiceCrudUseCases.list(companyCtx)().catch(() => []),
@@ -41,3 +40,8 @@ export async function loadCompaniesData(): Promise<CompaniesPageData> {
   };
 }
 
+export const loadCompaniesData = unstable_cache(
+  fetchCompaniesData,
+  ["companies-page-data"],
+  { revalidate: 60 }
+);

@@ -184,6 +184,7 @@ export function CompaniesPageView({ logic }: CompaniesPageViewProps) {
           services={services ?? []}
           getContextMenuItems={getContextMenuItems}
           onOpenNotesModal={table.onOpenNotesModal}
+          pagination={{ enabled: true }}
         />
       }
       modals={

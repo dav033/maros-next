@@ -24,7 +24,6 @@ export async function patchLead(
 
     return result;
   } catch (error) {
-    console.error('patchLead - ERROR:', error);
     throw error;
   }
 }

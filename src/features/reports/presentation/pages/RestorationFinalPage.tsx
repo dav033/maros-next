@@ -271,8 +271,7 @@ export function RestorationFinalPage() {
       if (result?.redirectUrl) {
         window.open(result.redirectUrl, "_blank");
       }
-    } catch (error) {
-      console.error(error);
+    } catch {
       toast.error("There was a problem submitting the final report.");
     }
   };

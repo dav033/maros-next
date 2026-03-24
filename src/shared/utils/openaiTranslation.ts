@@ -36,7 +36,6 @@ export async function translateText(
     const result = await translateTextAction(text, targetLanguage, sourceLanguage);
     
     if (!result.success) {
-      console.error('Error translating text:', result.error);
       return text;
     }
 
@@ -53,9 +52,8 @@ export async function translateText(
     }
 
     return translatedText;
-  } catch (error: any) {
-    console.error('Error translating text:', error);
-    return text; // Retornar texto original en caso de error
+  } catch {
+    return text;
   }
 }
 
@@ -81,7 +79,6 @@ export async function translateMultipleTexts(
     const result = await translateBatchAction(texts, targetLanguage, sourceLanguage);
     
     if (!result.success) {
-      console.error('Error translating texts:', result.error);
       return texts;
     }
 
@@ -105,9 +102,8 @@ export async function translateMultipleTexts(
     });
 
     return translatedTexts;
-  } catch (error: any) {
-    console.error('Error translating texts:', error);
-    return texts; // Retornar textos originales en caso de error
+  } catch {
+    return texts;
   }
 }
 

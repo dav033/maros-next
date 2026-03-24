@@ -16,7 +16,6 @@ export async function loadProjectDetailsData(projectId: number) {
     
     return { projectDetails };
   } catch (error: any) {
-    console.error("Error loading project details:", error);
     
     let errorMessage = "Unknown error";
     if (error?.response?.data?.message) {

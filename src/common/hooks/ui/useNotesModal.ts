@@ -72,8 +72,6 @@ export function useNotesModal<T>(): UseNotesModalResult<T> {
           isLoading: false,
         });
       } catch (error: unknown) {
-        console.error("Error saving notes:", error);
-        // En caso de error, mantener el modal abierto pero quitar el estado de carga
         setNotesModalState((prev) => ({ ...prev, isLoading: false }));
         throw error;
       }

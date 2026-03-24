@@ -28,6 +28,8 @@ const iconMap: Record<string, LucideIcon> = {
   "lucide:file-text": FileText,
 };
 import { cn } from "@/lib/utils";
+import { usePagination } from "@/common/hooks/table/usePagination";
+import { TablePagination } from "@/components/shared/TablePagination";
 
 export interface ContactsTableProps {
   tableLogic?: UseContactsTableLogicReturn;
@@ -36,6 +38,8 @@ export interface ContactsTableProps {
   contacts?: Contact[];
   onEdit?: (contact: Contact) => void;
   onDelete?: (contact: Contact) => void;
+  /** When enabled and items > pageSize, shows pagination controls below the table. */
+  pagination?: { enabled?: boolean };
 }
 
 export function ContactsTable({
@@ -45,6 +49,7 @@ export function ContactsTable({
   contacts,
   onEdit,
   onDelete,
+  pagination,
 }: ContactsTableProps) {
   const router = useRouter();
   const rows = tableLogic?.rows ?? contacts ?? [];
@@ -96,6 +101,20 @@ export function ContactsTable({
     return undefined;
   }, [onDelete, onEdit, tableLogic?.getContextMenuItems]);
 
+  const {
+    pagedData,
+    page,
+    pageSize,
+    totalPages,
+    totalItems,
+    isPaginated,
+    setPage,
+    setPageSize,
+  } = usePagination({
+    data: rows,
+    enabled: pagination?.enabled ?? false,
+  });
+
   const [contextMenuOpen, setContextMenuOpen] = React.useState(false);
   const [selectedItem, setSelectedItem] = React.useState<Contact | null>(null);
   const [menuPosition, setMenuPosition] = React.useState({ x: 0, y: 0 });
@@ -113,23 +132,19 @@ export function ContactsTable({
 
   const handleRowClick = React.useCallback(
     (event: React.MouseEvent<HTMLTableRowElement>, contact: Contact) => {
-      // No navegar si es click derecho
       if (event.button === 2) {
         return;
       }
-      
-      // No navegar si se está haciendo click en un elemento interactivo
+
       const target = event.target as HTMLElement;
       if (target.closest('button, a, [role="button"], [role="menuitem"]')) {
         return;
       }
-      
-      // No navegar si se está abriendo el context menu
+
       if (contextMenuOpen) {
         return;
       }
-      
-      // Solo navegar si tiene ID
+
       if (contact.id) {
         router.push(`/contact/${contact.id}`);
       }
@@ -179,7 +194,7 @@ export function ContactsTable({
             </TableRow>
           </TableHeader>
           <TableBody className="divide-y divide-border">
-            {rows.map((item) => (
+            {pagedData.map((item) => (
               <TableRow
                 key={item.id ?? 0}
                 onContextMenu={resolvedGetContextMenuItems ? (event) => handleRowContextMenu(event, item) : undefined}
@@ -201,6 +216,17 @@ export function ContactsTable({
           </TableBody>
         </Table>
       </section>
+
+      {isPaginated && (
+        <TablePagination
+          page={page}
+          pageSize={pageSize}
+          totalPages={totalPages}
+          totalItems={totalItems}
+          onPageChange={setPage}
+          onPageSizeChange={setPageSize}
+        />
+      )}
 
       <DropdownMenu open={contextMenuOpen} onOpenChange={setContextMenuOpen}>
         <DropdownMenuContent

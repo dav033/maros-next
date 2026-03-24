@@ -129,7 +129,6 @@ export class LeadHttpRepository implements LeadRepositoryPort {
       const { data } = await this.api.get(leadEndpoints.details(id));
       return data;
     } catch (error: any) {
-      console.error("Error fetching lead details:", error);
       throw error;
     }
   }
