@@ -4,7 +4,7 @@ import { useFormController } from "@/common/hooks";
 
 
 import { useCompanyApp } from "@/di";
-import { companyKeys } from "../../../application/keys";
+import { companyKeys } from "../../../application/keys/companyKeys";
 import { companyCrudUseCases } from "../../../application/usecases/companyCrud";
 import type { Company, CompanyPatch, CompanyType } from "../../../domain/models";
 

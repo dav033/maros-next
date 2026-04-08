@@ -1,2 +1,2 @@
 export * from "./context";
-export * from "./usecases/queries";
+export * from "./usecases/queries/listProjectTypes";

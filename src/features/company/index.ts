@@ -20,4 +20,4 @@ export { makeCompanyAppContext } from "./application/context";
 
 export { CompanyHttpRepository, CompanyServiceHttpRepository } from "./infra/index";
 
-export { CompaniesPage } from "./presentation/pages";
+export { default as CompaniesPage } from "./presentation/pages/CompaniesPage";

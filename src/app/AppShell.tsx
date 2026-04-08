@@ -1,10 +1,17 @@
 "use client";
 
 import * as React from "react";
+import { usePathname } from "next/navigation";
 import { SidebarProvider, SidebarInset, SidebarTrigger, SidebarRail } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/sidebar/AppSidebar";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+
+  if (pathname === "/login") {
+    return <>{children}</>;
+  }
+
   return (
     <SidebarProvider defaultOpen={true}>
       <AppSidebar />

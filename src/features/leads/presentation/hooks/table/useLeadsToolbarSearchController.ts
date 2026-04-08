@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import type { Lead } from "@/leads/domain";
-import { leadsSearchConfig, leadsSearchPlaceholder } from "../../search";
+import { leadsSearchConfig, leadsSearchPlaceholder } from "../../search/leadsSearchConfig";
 
 export interface UseLeadsToolbarSearchControllerOptions {
   searchQuery: string;

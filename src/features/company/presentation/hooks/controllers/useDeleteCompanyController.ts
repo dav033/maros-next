@@ -3,7 +3,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 import { useCompanyApp } from "@/di";
-import { companyKeys } from "../../../application/keys";
+import { companyKeys } from "../../../application/keys/companyKeys";
 import { companyCrudUseCases } from "../../../application/usecases/companyCrud";
 
 type UseDeleteCompanyControllerOptions = {

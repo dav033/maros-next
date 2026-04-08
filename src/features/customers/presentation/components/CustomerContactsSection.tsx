@@ -23,7 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { X, Search } from "lucide-react";
-import { customerContactsSearchConfig, customerContactsSearchPlaceholder } from "../search";
+import { customerContactsSearchConfig, customerContactsSearchPlaceholder } from "../search/customerContactsSearchConfig";
 import { useState } from "react";
 
 export interface CustomerContactsSectionProps {

@@ -11,7 +11,7 @@ export { makeContactsAppContext } from "./application/context";
 
 export { ContactHttpRepository } from "./infra/index";
 
-export { ContactsPage } from "./presentation/pages";
+export { default as ContactsPage } from "./presentation/pages/ContactsPage";
 
 export { ContactViewModal } from "./presentation/organisms";
 export type { ContactViewModalProps } from "./presentation/organisms";

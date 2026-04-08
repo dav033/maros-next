@@ -1,4 +1,4 @@
 
 export type { ProjectTypesAppContext } from "./application/context";
 
-export { ProjectTypeHttpRepository } from "./infra/index";
+export { ProjectTypeHttpRepository } from "./infra/http/ProjectTypeHttpRepository";
