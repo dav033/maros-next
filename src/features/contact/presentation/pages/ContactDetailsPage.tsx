@@ -782,7 +782,7 @@ export function ContactDetailsPage({ contactId, initialData }: ContactDetailsPag
                             </div>
                           )}
                         </div>
-                        {lead.notes && lead.notes.length > 0 && (
+                        {Array.isArray(lead.notes) && lead.notes.length > 0 && (
                           <>
                             <Separator />
                             <div>
@@ -884,7 +884,7 @@ export function ContactDetailsPage({ contactId, initialData }: ContactDetailsPag
                               </div>
                             </>
                           )}
-                          {lead.project?.notes && lead.project.notes.length > 0 && (
+                          {Array.isArray(lead.project?.notes) && lead.project.notes.length > 0 && (
                             <>
                               <Separator />
                               <div>
