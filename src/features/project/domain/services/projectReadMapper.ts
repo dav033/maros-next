@@ -138,6 +138,14 @@ export function mapProjectFromDTO(dto: ApiProjectDTO, leadMapper: (dto: any) => 
 
 export function mapProjectsFromDTO(list: ApiProjectDTO[], leadMapper: (dto: any) => Lead): Project[] {
   if (!Array.isArray(list)) return [];
-  return list.map((dto) => mapProjectFromDTO(dto, leadMapper));
+  const results: Project[] = [];
+  for (const dto of list) {
+    try {
+      results.push(mapProjectFromDTO(dto, leadMapper));
+    } catch (err) {
+      console.warn("[mapProjectsFromDTO] Skipping project due to mapping error:", err);
+    }
+  }
+  return results;
 }
 

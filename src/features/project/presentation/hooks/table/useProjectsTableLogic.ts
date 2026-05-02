@@ -1,13 +1,15 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import { useEntityTableLogic, useTableWithSearch } from "@/common/hooks";
 import React from "react";
 
-
 import type { Project } from "@/project/domain";
+import { ProjectProgressStatus, InvoiceStatus } from "@/project/domain";
 import { useProjectsApp } from "@/di";
 import { deleteProject } from "@/project/application";
 
+export type ProjectGroupBy = "none" | "progressStatus" | "invoiceStatus" | "projectType";
 
 interface UseProjectsTableLogicProps {
   projects: Project[];
@@ -26,6 +28,14 @@ export interface UseProjectsTableLogicReturn {
     searchField: string;
     setSearchQuery: (q: string) => void;
     setSearchField: (f: string) => void;
+  };
+  filterState: {
+    progressFilter: ProjectProgressStatus | "all";
+    setProgressFilter: (v: ProjectProgressStatus | "all") => void;
+    invoiceFilter: InvoiceStatus | "all";
+    setInvoiceFilter: (v: InvoiceStatus | "all") => void;
+    groupBy: ProjectGroupBy;
+    setGroupBy: (v: ProjectGroupBy) => void;
   };
   deleteModalProps: {
     isOpen: boolean;
@@ -52,6 +62,10 @@ export function useProjectsTableLogic({
   onOpenPaymentsModal,
 }: UseProjectsTableLogicProps): UseProjectsTableLogicReturn {
   const app = useProjectsApp();
+
+  const [progressFilter, setProgressFilter] = useState<ProjectProgressStatus | "all">("all");
+  const [invoiceFilter, setInvoiceFilter] = useState<InvoiceStatus | "all">("all");
+  const [groupBy, setGroupBy] = useState<ProjectGroupBy>("none");
 
   const {
     rows: localProjects,
@@ -86,13 +100,12 @@ export function useProjectsTableLogic({
   });
 
   const {
-    filteredData,
+    filteredData: searchFiltered,
     searchQuery,
     searchField,
     setSearchQuery,
     setSearchField,
     totalCount,
-    filteredCount,
   } = useTableWithSearch<Project>({
     data: localProjects,
     searchableFields: ["all"] as any,
@@ -102,14 +115,12 @@ export function useProjectsTableLogic({
       if (!normalizedQuery) return true;
 
       if (field === "all" || field === "") {
-        // Search across all relevant fields
         const leadName = project.lead?.name?.toLowerCase() || "";
         const leadNumber = project.lead?.leadNumber?.toLowerCase() || "";
         const invoiceAmount = project.invoiceAmount?.toString() || "";
-        const lastPayment = project.payments && project.payments.length > 0 
-          ? project.payments[project.payments.length - 1].toString() 
+        const lastPayment = project.payments && project.payments.length > 0
+          ? project.payments[project.payments.length - 1].toString()
           : "";
-        
         return (
           leadName.includes(normalizedQuery) ||
           leadNumber.includes(normalizedQuery) ||
@@ -118,7 +129,6 @@ export function useProjectsTableLogic({
         );
       }
 
-      // Field-specific search
       switch (field) {
         case "lead.name":
           return project.lead?.name?.toLowerCase().includes(normalizedQuery) ?? false;
@@ -131,15 +141,30 @@ export function useProjectsTableLogic({
     normalize: (text: string) => text.toLowerCase().trim(),
   });
 
+  const filteredData = useMemo(() => {
+    let result = searchFiltered;
+    if (progressFilter !== "all") result = result.filter((p) => p.projectProgressStatus === progressFilter);
+    if (invoiceFilter !== "all") result = result.filter((p) => p.invoiceStatus === invoiceFilter);
+    return result;
+  }, [searchFiltered, progressFilter, invoiceFilter]);
+
   return {
     rows: filteredData,
     totalCount,
-    filteredCount,
+    filteredCount: filteredData.length,
     searchState: {
       searchQuery,
       searchField,
       setSearchQuery,
       setSearchField,
+    },
+    filterState: {
+      progressFilter,
+      setProgressFilter,
+      invoiceFilter,
+      setInvoiceFilter,
+      groupBy,
+      setGroupBy,
     },
     deleteModalProps,
     getContextMenuItems,

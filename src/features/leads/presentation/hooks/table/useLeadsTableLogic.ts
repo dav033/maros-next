@@ -1,11 +1,15 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import { useEntityTableLogic, useTableWithSearch } from "@/common/hooks";
 import type { Lead } from "@/leads/domain";
+import { LeadStatus } from "@/leads/domain";
 import type { Contact } from "@/contact/domain";
 import { FileText, User } from "lucide-react";
 import React from "react";
 import { leadsSearchConfig } from "../../search/leadsSearchConfig";
+
+export type LeadGroupBy = "none" | "status" | "projectType";
 
 export interface UseLeadsTableLogicProps {
   leads: Lead[];
@@ -24,6 +28,12 @@ export interface UseLeadsTableLogicReturn {
     searchField: string;
     setSearchQuery: (q: string) => void;
     setSearchField: (f: string) => void;
+  };
+  filterState: {
+    statusFilter: LeadStatus | "all";
+    setStatusFilter: (v: LeadStatus | "all") => void;
+    groupBy: LeadGroupBy;
+    setGroupBy: (v: LeadGroupBy) => void;
   };
   deleteModalProps: {
     isOpen: boolean;
@@ -51,6 +61,9 @@ export function useLeadsTableLogic({
   onViewContact,
   onOpenNotesModal,
 }: UseLeadsTableLogicProps): UseLeadsTableLogicReturn {
+  const [statusFilter, setStatusFilter] = useState<LeadStatus | "all">("all");
+  const [groupBy, setGroupBy] = useState<LeadGroupBy>("none");
+
   // 1) Estado de selección / delete modal / acciones base
   const {
     rows: localLeads,
@@ -85,15 +98,14 @@ export function useLeadsTableLogic({
     },
   });
 
-  // 2) Estado de búsqueda y conteos
+  // 2) Estado de búsqueda
   const {
-    filteredData: filteredLeads,
+    filteredData: searchFilteredLeads,
     searchQuery,
     searchField,
     setSearchQuery,
     setSearchField,
     totalCount,
-    filteredCount,
   } = useTableWithSearch<Lead>({
     data: localLeads,
     searchableFields: leadsSearchConfig.fields.map((f) => f.key),
@@ -101,15 +113,27 @@ export function useLeadsTableLogic({
     normalize: leadsSearchConfig.normalize,
   });
 
+  // 3) Filtro por status
+  const filteredLeads = useMemo(() => {
+    if (statusFilter === "all") return searchFilteredLeads;
+    return searchFilteredLeads.filter((l) => l.status === statusFilter);
+  }, [searchFilteredLeads, statusFilter]);
+
   return {
     rows: filteredLeads,
     totalCount,
-    filteredCount,
+    filteredCount: filteredLeads.length,
     searchState: {
       searchQuery,
       searchField,
       setSearchQuery,
       setSearchField,
+    },
+    filterState: {
+      statusFilter,
+      setStatusFilter,
+      groupBy,
+      setGroupBy,
     },
     deleteModalProps,
     getContextMenuItems,

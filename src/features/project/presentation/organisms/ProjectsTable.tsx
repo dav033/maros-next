@@ -4,7 +4,7 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import type { Project } from "@/project/domain";
 import { useProjectsTableColumns } from "../hooks/table/useProjectsTableColumns";
-import type { UseProjectsTableLogicReturn } from "../hooks/table/useProjectsTableLogic";
+import type { UseProjectsTableLogicReturn, ProjectGroupBy } from "../hooks/table/useProjectsTableLogic";
 import {
   Table,
   TableBody,
@@ -18,7 +18,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { Loader, FolderX, Edit, Trash, FileText, StickyNote, DollarSign, type LucideIcon } from "lucide-react";
+import { Loader, FolderX, Edit, Trash, FileText, StickyNote, DollarSign, ChevronUp, ChevronDown, ChevronsUpDown, type LucideIcon } from "lucide-react";
 
 // Mapeo de iconos de Iconify a lucide-react
 const iconMap: Record<string, LucideIcon> = {
@@ -35,6 +35,98 @@ import { cn } from "@/lib/utils";
 import { usePagination } from "@/common/hooks/table/usePagination";
 import { TablePagination } from "@/components/shared/TablePagination";
 
+type SortDir = "asc" | "desc";
+
+function naturalCompare(a: string | number | null | undefined, b: string | number | null | undefined): number {
+  const sa = String(a ?? "");
+  const sb = String(b ?? "");
+  return sa.localeCompare(sb, undefined, { numeric: true, sensitivity: "base" });
+}
+
+function sortRows<T>(rows: T[], columns: import("@/types/table").SimpleTableColumn<T>[], sortKey: string | null, sortDir: SortDir): T[] {
+  if (!sortKey) return rows;
+  const col = columns.find((c) => String(c.key) === sortKey);
+  if (!col?.sortValue) return rows;
+  const dir = sortDir === "asc" ? 1 : -1;
+  return [...rows].sort((a, b) => dir * naturalCompare(col.sortValue!(a), col.sortValue!(b)));
+}
+
+const PROGRESS_LABELS: Record<string, string> = {
+  NOT_EXECUTED: "Not Executed",
+  IN_PROGRESS: "In Progress",
+  COMPLETED: "Completed",
+  LOST: "Lost",
+  POSTPONED: "Postponed",
+  PERMITS: "Permits",
+};
+
+const PROGRESS_COLORS: Record<string, string> = {
+  NOT_EXECUTED: "#6b7280",
+  IN_PROGRESS: "#3b82f6",
+  COMPLETED: "#22c55e",
+  LOST: "#6b7280",
+  POSTPONED: "#f59e0b",
+  PERMITS: "#8b5cf6",
+};
+
+const INVOICE_LABELS: Record<string, string> = {
+  PAID: "Paid",
+  PENDING: "Pending",
+  NOT_EXECUTED: "Not Executed",
+  PERMITS: "Permits",
+};
+
+const INVOICE_COLORS: Record<string, string> = {
+  PAID: "#22c55e",
+  PENDING: "#f59e0b",
+  NOT_EXECUTED: "#6b7280",
+  PERMITS: "#8b5cf6",
+};
+
+const PROGRESS_ORDER = ["IN_PROGRESS", "NOT_EXECUTED", "PERMITS", "POSTPONED", "COMPLETED", "LOST"];
+
+function groupProjects(projects: Project[], groupBy: ProjectGroupBy): Array<{ key: string; label: string; color?: string; items: Project[] }> {
+  if (groupBy === "none") return [{ key: "all", label: "", items: projects }];
+
+  const map = new Map<string, Project[]>();
+  for (const p of projects) {
+    let key: string;
+    if (groupBy === "progressStatus") key = p.projectProgressStatus ?? "NOT_EXECUTED";
+    else if (groupBy === "invoiceStatus") key = p.invoiceStatus ?? "NOT_EXECUTED";
+    else key = p.lead?.projectType?.name ?? "Unclassified";
+    const existing = map.get(key) ?? [];
+    existing.push(p);
+    map.set(key, existing);
+  }
+
+  const entries = [...map.entries()];
+
+  if (groupBy === "progressStatus") {
+    entries.sort(([a], [b]) => {
+      const ia = PROGRESS_ORDER.indexOf(a);
+      const ib = PROGRESS_ORDER.indexOf(b);
+      return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
+    });
+  } else {
+    entries.sort(([a], [b]) => a.localeCompare(b));
+  }
+
+  return entries.map(([key, items]) => ({
+    key,
+    label: groupBy === "progressStatus"
+      ? (PROGRESS_LABELS[key] ?? key)
+      : groupBy === "invoiceStatus"
+      ? (INVOICE_LABELS[key] ?? key)
+      : key,
+    color: groupBy === "progressStatus"
+      ? PROGRESS_COLORS[key]
+      : groupBy === "invoiceStatus"
+      ? INVOICE_COLORS[key]
+      : undefined,
+    items,
+  }));
+}
+
 export interface ProjectsTableProps {
   tableLogic?: UseProjectsTableLogicReturn;
   isLoading?: boolean;
@@ -42,6 +134,7 @@ export interface ProjectsTableProps {
   onEdit?: (project: Project) => void;
   onDelete?: (project: Project) => void;
   onOpenNotesModal?: (project: Project) => void;
+  groupBy?: ProjectGroupBy;
   /** When enabled and items > pageSize, shows pagination controls below the table. */
   pagination?: { enabled?: boolean };
 }
@@ -53,11 +146,32 @@ export function ProjectsTable({
   onEdit,
   onDelete,
   onOpenNotesModal,
+  groupBy = "none",
   pagination,
 }: ProjectsTableProps) {
   const router = useRouter();
   const rows = tableLogic?.rows ?? projects ?? [];
   const columns = useProjectsTableColumns({ onOpenNotesModal });
+  const isGrouped = groupBy !== "none";
+
+  const [sortKey, setSortKey] = React.useState<string | null>("leadNumber");
+  const [sortDir, setSortDir] = React.useState<SortDir>("asc");
+
+  const handleSortClick = React.useCallback((key: string) => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+  }, [sortKey]);
+
+  const sortedRows = React.useMemo(
+    () => sortRows(rows, columns, sortKey, sortDir),
+    [rows, columns, sortKey, sortDir]
+  );
+
+  const groups = React.useMemo(() => groupProjects(sortedRows, groupBy), [sortedRows, groupBy]);
 
   const resolvedGetContextMenuItems = React.useMemo<((project: Project) => Array<{label: string; onClick: () => void; icon?: string; variant?: "default" | "danger"; disabled?: boolean}>) | undefined>(() => {
     if (tableLogic?.getContextMenuItems) {
@@ -108,8 +222,8 @@ export function ProjectsTable({
     setPage,
     setPageSize,
   } = usePagination({
-    data: rows,
-    enabled: pagination?.enabled ?? false,
+    data: sortedRows,
+    enabled: !isGrouped && (pagination?.enabled ?? false),
   });
 
   const [contextMenuOpen, setContextMenuOpen] = React.useState(false);
@@ -174,47 +288,74 @@ export function ProjectsTable({
     );
   }
 
+  const renderRow = (item: Project) => (
+    <TableRow
+      key={item.id}
+      onContextMenu={resolvedGetContextMenuItems ? (event) => handleRowContextMenu(event, item) : undefined}
+      onClick={(event) => handleRowClick(event, item)}
+      className="cursor-pointer hover:bg-accent/30 transition-colors"
+    >
+      {columns.map((column) => (
+        <TableCell key={String(column.key)} className={cn("px-4 py-3", column.className)}>
+          {column.render ? column.render(item) : (item as any)[column.key as string]}
+        </TableCell>
+      ))}
+    </TableRow>
+  );
+
   return (
     <>
       <section className="rounded-2xl bg-card shadow-sm overflow-x-auto">
         <Table>
           <TableHeader className="bg-muted/50">
             <TableRow className="text-left text-xs uppercase tracking-wide text-muted-foreground h-12 border-b border-border">
-              {columns.map((column) => (
-                <TableHead
-                  key={String(column.key)}
-                  className={cn("px-4 py-3 h-full align-middle", column.className)}
-                >
-                  <span>{column.header}</span>
-                </TableHead>
-              ))}
+              {columns.map((column) => {
+                const key = String(column.key);
+                const isActive = sortKey === key;
+                return (
+                  <TableHead
+                    key={key}
+                    className={cn("px-4 py-3 h-full align-middle", column.className, column.sortable && "cursor-pointer select-none")}
+                    onClick={column.sortable ? () => handleSortClick(key) : undefined}
+                  >
+                    <span className="inline-flex items-center gap-1">
+                      {column.header}
+                      {column.sortable && (
+                        isActive
+                          ? sortDir === "asc"
+                            ? <ChevronUp className="h-3 w-3 text-foreground" />
+                            : <ChevronDown className="h-3 w-3 text-foreground" />
+                          : <ChevronsUpDown className="h-3 w-3 opacity-40" />
+                      )}
+                    </span>
+                  </TableHead>
+                );
+              })}
             </TableRow>
           </TableHeader>
           <TableBody className="divide-y divide-border">
-            {pagedData.map((item) => (
-              <TableRow
-                key={item.id}
-                onContextMenu={resolvedGetContextMenuItems ? (event) => handleRowContextMenu(event, item) : undefined}
-                onClick={(event) => handleRowClick(event, item)}
-                className="cursor-pointer hover:bg-accent/30 transition-colors"
-              >
-                {columns.map((column) => (
-                  <TableCell
-                    key={String(column.key)}
-                    className={cn("px-4 py-3", column.className)}
-                  >
-                    {column.render
-                      ? column.render(item)
-                      : (item as any)[column.key as string]}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))}
+            {isGrouped
+              ? groups.map((group) => (
+                  <React.Fragment key={group.key}>
+                    <TableRow className="bg-muted/20 hover:bg-muted/20">
+                      <TableCell
+                        colSpan={columns.length}
+                        className="px-4 py-2 text-xs font-semibold uppercase tracking-wider"
+                        style={group.color ? { color: group.color } : undefined}
+                      >
+                        {group.label}
+                        <span className="ml-2 font-normal text-muted-foreground">({group.items.length})</span>
+                      </TableCell>
+                    </TableRow>
+                    {group.items.map(renderRow)}
+                  </React.Fragment>
+                ))
+              : pagedData.map(renderRow)}
           </TableBody>
         </Table>
       </section>
 
-      {isPaginated && (
+      {!isGrouped && isPaginated && (
         <TablePagination
           page={page}
           pageSize={pageSize}

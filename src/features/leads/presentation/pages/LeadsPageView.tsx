@@ -2,10 +2,11 @@
 
 import { NotesEditorModal, DeleteFeedbackModal, EntityCrudPageTemplate } from "@/components/shared";
 import type { Lead } from "@/leads/domain";
+import { LeadStatus } from "@/leads/domain";
 import { LeadsTable } from "@/leads/presentation";
 import { ContactViewModal } from "@/contact";
 import { LeadModal } from "../organisms/LeadModal";
-import { X, Briefcase, Search } from "lucide-react";
+import { X, Briefcase, Search, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -17,11 +18,28 @@ import {
 } from "@/components/ui/select";
 import { LeadsTableSkeleton } from "../organisms/LeadsTableSkeleton";
 import type { UseLeadsPageLogicReturn } from "./useLeadsPageLogic";
+import type { LeadGroupBy } from "../hooks/table/useLeadsTableLogic";
 import {
   useLeadModalController,
   useLeadsToolbarSearchController,
   useLeadsNotesModalController,
 } from "../hooks";
+
+const LEAD_STATUS_OPTIONS: Array<{ value: LeadStatus | "all"; label: string }> = [
+  { value: "all", label: "All statuses" },
+  { value: LeadStatus.NOT_EXECUTED, label: "Not Executed" },
+  { value: LeadStatus.IN_PROGRESS, label: "In Progress" },
+  { value: LeadStatus.COMPLETED, label: "Completed" },
+  { value: LeadStatus.POSTPONED, label: "Postponed" },
+  { value: LeadStatus.PERMITS, label: "Permits" },
+  { value: LeadStatus.LOST, label: "Lost" },
+];
+
+const LEAD_GROUP_OPTIONS: Array<{ value: LeadGroupBy; label: string }> = [
+  { value: "none", label: "No grouping" },
+  { value: "status", label: "By status" },
+  { value: "projectType", label: "By type" },
+];
 
 export interface LeadsPageViewProps {
   logic: UseLeadsPageLogicReturn;
@@ -51,12 +69,13 @@ export function LeadsPageView({ logic }: LeadsPageViewProps) {
     totalCount,
     filteredCount,
     searchState,
+    filterState,
     deleteModalProps,
     getContextMenuItems,
   } = table;
 
-  const { searchQuery, searchField, setSearchQuery, setSearchField } =
-    searchState;
+  const { searchQuery, searchField, setSearchQuery, setSearchField } = searchState;
+  const { statusFilter, setStatusFilter, groupBy, setGroupBy } = filterState;
 
   const { controller: leadModalController, contactsForModal } =
     useLeadModalController({
@@ -100,63 +119,81 @@ export function LeadsPageView({ logic }: LeadsPageViewProps) {
         </header>
       }
       toolbar={
-        <div className="flex items-center justify-between gap-3 rounded-xl bg-card p-3">
-          <div className="max-w-3xl flex-1">
-            <div className="flex items-center gap-2 w-full">
-              <div className="w-32 shrink-0">
+        <div className="flex flex-col gap-2 rounded-xl bg-card p-3">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex flex-1 items-center gap-2 flex-wrap">
+              {/* Search field selector */}
+              <div className="w-28 shrink-0">
                 <Select value={toolbarSearchController.selectedField} onValueChange={toolbarSearchController.onFieldChange}>
-                  <SelectTrigger className="bg-background border-input">
+                  <SelectTrigger className="bg-background border-input h-9 text-xs">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-popover border-border">
                     {toolbarSearchController.searchFields.map((field) => (
-                      <SelectItem key={field.value} value={field.value}>
-                        {field.label}
-                      </SelectItem>
+                      <SelectItem key={field.value} value={field.value}>{field.label}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex-1 min-w-0 relative">
-                <Search
-                  className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"
-                />
+
+              {/* Search input */}
+              <div className="flex-1 min-w-[160px] relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="text"
                   value={toolbarSearchController.searchTerm}
                   onChange={(e) => toolbarSearchController.onSearchChange(e.target.value)}
                   placeholder={toolbarSearchController.placeholder}
-                  className="pl-9 bg-background border-input"
+                  className="pl-9 bg-background border-input h-9"
                 />
               </div>
               {toolbarSearchController.searchTerm.trim().length > 0 && (
-                <Button
-                  type="button"
-                  onClick={() => toolbarSearchController.onSearchChange("")}
-                  aria-label="Clear search"
-                  variant="ghost"
-                  size="sm"
-                  className="text-muted-foreground hover:text-foreground"
-                >
+                <Button type="button" onClick={() => toolbarSearchController.onSearchChange("")} aria-label="Clear search" variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground h-9 px-2">
                   <X className="h-4 w-4" />
                 </Button>
               )}
-              {typeof toolbarSearchController.resultCount === "number" && typeof toolbarSearchController.totalCount === "number" && (
+
+              {/* Status filter */}
+              <div className="w-36 shrink-0">
+                <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as LeadStatus | "all")}>
+                  <SelectTrigger className="bg-background border-input h-9 text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover border-border">
+                    {LEAD_STATUS_OPTIONS.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Group by */}
+              <div className="w-32 shrink-0">
+                <Select value={groupBy} onValueChange={(v) => setGroupBy(v as LeadGroupBy)}>
+                  <SelectTrigger className="bg-background border-input h-9 text-xs">
+                    <Layers className="h-3.5 w-3.5 mr-1.5 shrink-0 text-muted-foreground" />
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover border-border">
+                    {LEAD_GROUP_OPTIONS.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {typeof toolbarSearchController.resultCount === "number" && (
                 <span className="whitespace-nowrap text-[10px] text-muted-foreground">
-                  Showing {toolbarSearchController.resultCount} of {toolbarSearchController.totalCount} results
+                  {toolbarSearchController.resultCount} of {toolbarSearchController.totalCount}
                 </span>
               )}
             </div>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <Button
-              onClick={openCreateModal}
-              aria-label="New Lead"
-              size="icon"
-              className="bg-[#2c3637] hover:bg-[#2c3637]/90 text-foreground"
-            >
-              <Briefcase className="size-4" />
-            </Button>
+
+            <div className="flex items-center gap-2 shrink-0">
+              <Button onClick={openCreateModal} aria-label="New Lead" size="icon" className="bg-[#2c3637] hover:bg-[#2c3637]/90 text-foreground">
+                <Briefcase className="size-4" />
+              </Button>
+            </div>
           </div>
         </div>
       }
@@ -170,6 +207,7 @@ export function LeadsPageView({ logic }: LeadsPageViewProps) {
           getContextMenuItems={getContextMenuItems}
           onOpenNotesModal={table.onOpenNotesModal}
           onViewContact={table.onViewContact}
+          groupBy={groupBy}
           pagination={{ enabled: true }}
         />
       }

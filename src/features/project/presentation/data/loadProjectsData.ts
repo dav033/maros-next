@@ -17,7 +17,10 @@ async function fetchProjectsData(): Promise<ProjectsPageData> {
     },
   });
 
-  const projects = await listProjects(ctx).catch(() => []);
+  const projects = await listProjects(ctx).catch((err) => {
+    console.error("[loadProjectsData] Failed to fetch projects:", err);
+    return [];
+  });
 
   return {
     projects: projects ?? [],
