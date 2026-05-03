@@ -5,7 +5,7 @@ import { CompaniesTable } from "../organisms/CompaniesTable";
 import { CompaniesTableSkeleton } from "../organisms/CompaniesTableSkeleton";
 import { CompanyModal } from "../organisms/CompanyModal";
 import { ManageServicesModal } from "../organisms/ManageServicesModal";
-import { X, Building, Search } from "lucide-react";
+import { X, Building, Search, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -50,8 +50,8 @@ export function CompaniesPageView({ logic }: CompaniesPageViewProps) {
     filteredCount,
     deleteModalProps,
     getContextMenuItems,
-    // 🔴 OJO: aquí usamos searchState, NO search
     searchState,
+    filterState,
   } = table;
 
   const {
@@ -60,6 +60,17 @@ export function CompaniesPageView({ logic }: CompaniesPageViewProps) {
     setSearchQuery,
     setSearchField,
   } = searchState;
+
+  const {
+    typeFilter,
+    setTypeFilter,
+    customerFilter,
+    setCustomerFilter,
+    clientFilter,
+    setClientFilter,
+    groupBy,
+    setGroupBy,
+  } = filterState;
 
   // 5) Quick contact
   const {
@@ -118,9 +129,9 @@ export function CompaniesPageView({ logic }: CompaniesPageViewProps) {
         </header>
       }
       toolbar={
-        <div className="flex items-center justify-between gap-3 rounded-xl bg-card p-3">
-          <div className="max-w-3xl flex-1">
-            <div className="flex items-center gap-2 w-full">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-card p-3">
+          <div className="max-w-4xl flex-1">
+            <div className="flex flex-wrap items-center gap-2 w-full">
               <div className="w-32 shrink-0">
                 <Select value={toolbarSearchController.selectedField} onValueChange={toolbarSearchController.onFieldChange}>
                   <SelectTrigger className="bg-background border-input">
@@ -162,6 +173,52 @@ export function CompaniesPageView({ logic }: CompaniesPageViewProps) {
                   Showing {toolbarSearchController.resultCount} of {toolbarSearchController.totalCount} results
                 </span>
               )}
+              <Select value={String(typeFilter)} onValueChange={(v) => setTypeFilter(v as any)}>
+                <SelectTrigger className="w-44 bg-background border-input">
+                  <SelectValue placeholder="Type" />
+                </SelectTrigger>
+                <SelectContent className="bg-popover border-border">
+                  <SelectItem value="all">All types</SelectItem>
+                  <SelectItem value="DESIGN">Design</SelectItem>
+                  <SelectItem value="HOA">HOA</SelectItem>
+                  <SelectItem value="GENERAL_CONTRACTOR">General Contractor</SelectItem>
+                  <SelectItem value="SUPPLIER">Supplier</SelectItem>
+                  <SelectItem value="SUBCONTRACTOR">Subcontractor</SelectItem>
+                  <SelectItem value="OTHER">Other</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={String(customerFilter)} onValueChange={(v) => setCustomerFilter(v === "all" ? "all" : v === "true")}>
+                <SelectTrigger className="w-36 bg-background border-input">
+                  <SelectValue placeholder="Customer" />
+                </SelectTrigger>
+                <SelectContent className="bg-popover border-border">
+                  <SelectItem value="all">All customers</SelectItem>
+                  <SelectItem value="true">Customer: Yes</SelectItem>
+                  <SelectItem value="false">Customer: No</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={String(clientFilter)} onValueChange={(v) => setClientFilter(v === "all" ? "all" : v === "true")}>
+                <SelectTrigger className="w-32 bg-background border-input">
+                  <SelectValue placeholder="Client" />
+                </SelectTrigger>
+                <SelectContent className="bg-popover border-border">
+                  <SelectItem value="all">All clients</SelectItem>
+                  <SelectItem value="true">Client: Yes</SelectItem>
+                  <SelectItem value="false">Client: No</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={groupBy} onValueChange={(v) => setGroupBy(v as any)}>
+                <SelectTrigger className="w-40 bg-background border-input">
+                  <Layers className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-popover border-border">
+                  <SelectItem value="none">No grouping</SelectItem>
+                  <SelectItem value="type">By type</SelectItem>
+                  <SelectItem value="customer">By customer</SelectItem>
+                  <SelectItem value="client">By client</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <div className="flex items-center gap-2 shrink-0">
@@ -184,6 +241,7 @@ export function CompaniesPageView({ logic }: CompaniesPageViewProps) {
           services={services ?? []}
           getContextMenuItems={getContextMenuItems}
           onOpenNotesModal={table.onOpenNotesModal}
+          groupBy={groupBy}
           pagination={{ enabled: true }}
         />
       }

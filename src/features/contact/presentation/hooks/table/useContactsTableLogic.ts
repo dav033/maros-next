@@ -1,11 +1,14 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import { useEntityTableLogic, useTableWithSearch } from "@/common/hooks";
 
 import type { Contact } from "@/contact/domain";
 import { useContactsApp } from "@/di";
 import { deleteContact } from "@/contact/application";
 import { contactsSearchConfig } from "../../search/contactsSearchConfig";
+
+export type ContactGroupBy = "none" | "customer" | "client" | "company";
 
 interface UseContactsTableLogicProps {
   contacts: Contact[];
@@ -24,6 +27,14 @@ export interface UseContactsTableLogicReturn {
     searchField: string;
     setSearchQuery: (q: string) => void;
     setSearchField: (f: string) => void;
+  };
+  filterState: {
+    customerFilter: boolean | "all";
+    setCustomerFilter: (v: boolean | "all") => void;
+    clientFilter: boolean | "all";
+    setClientFilter: (v: boolean | "all") => void;
+    groupBy: ContactGroupBy;
+    setGroupBy: (v: ContactGroupBy) => void;
   };
   deleteModalProps: {
     isOpen: boolean;
@@ -53,7 +64,10 @@ export function useContactsTableLogic({
 }: UseContactsTableLogicProps): UseContactsTableLogicReturn {
   const app = useContactsApp();
 
-  // 1) Estado de selección / delete modal / acciones base
+  const [customerFilter, setCustomerFilter] = useState<boolean | "all">("all");
+  const [clientFilter, setClientFilter] = useState<boolean | "all">("all");
+  const [groupBy, setGroupBy] = useState<ContactGroupBy>("none");
+
   const {
     rows: localContacts,
     deleteModalProps,
@@ -90,15 +104,13 @@ export function useContactsTableLogic({
     },
   });
 
-  // 2) Estado de búsqueda y conteos
   const {
-    filteredData: filteredContacts,
+    filteredData: searchFiltered,
     searchQuery,
     searchField,
     setSearchQuery,
     setSearchField,
     totalCount,
-    filteredCount,
   } = useTableWithSearch<Contact>({
     data: localContacts,
     searchableFields: contactsSearchConfig.fields.map((f) => f.key),
@@ -106,15 +118,30 @@ export function useContactsTableLogic({
     normalize: contactsSearchConfig.normalize,
   });
 
+  const filteredContacts = useMemo(() => {
+    let result = searchFiltered;
+    if (customerFilter !== "all") result = result.filter((c) => c.isCustomer === customerFilter);
+    if (clientFilter !== "all") result = result.filter((c) => c.isClient === clientFilter);
+    return result;
+  }, [searchFiltered, customerFilter, clientFilter]);
+
   return {
     rows: filteredContacts,
     totalCount,
-    filteredCount,
+    filteredCount: filteredContacts.length,
     searchState: {
       searchQuery,
       searchField,
       setSearchQuery,
       setSearchField,
+    },
+    filterState: {
+      customerFilter,
+      setCustomerFilter,
+      clientFilter,
+      setClientFilter,
+      groupBy,
+      setGroupBy,
     },
     deleteModalProps,
     getContextMenuItems,

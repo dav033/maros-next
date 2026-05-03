@@ -2,7 +2,7 @@
 
 import { NotesEditorModal, DeleteFeedbackModal, EntityCrudPageTemplate } from "@/components/shared";
 import type { Contact } from "@/contact";
-import { X, UserPlus, Search } from "lucide-react";
+import { X, UserPlus, Search, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -52,6 +52,7 @@ export function ContactsPageView({ logic }: ContactsPageViewProps) {
     totalCount,
     filteredCount,
     searchState,
+    filterState,
   } = table;
 
   const {
@@ -60,6 +61,15 @@ export function ContactsPageView({ logic }: ContactsPageViewProps) {
     setSearchQuery,
     setSearchField,
   } = searchState;
+
+  const {
+    customerFilter,
+    setCustomerFilter,
+    clientFilter,
+    setClientFilter,
+    groupBy,
+    setGroupBy,
+  } = filterState;
 
   const {
     isCompanyModalOpen,
@@ -121,9 +131,9 @@ export function ContactsPageView({ logic }: ContactsPageViewProps) {
         </header>
       }
       toolbar={
-        <div className="flex items-center justify-between gap-3 rounded-xl bg-card p-3">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-card p-3">
           <div className="max-w-3xl flex-1">
-            <div className="flex items-center gap-2 w-full">
+            <div className="flex flex-wrap items-center gap-2 w-full">
               <div className="w-32 shrink-0">
                 <Select value={toolbarSearchController.selectedField} onValueChange={toolbarSearchController.onFieldChange}>
                   <SelectTrigger className="bg-background border-input">
@@ -139,9 +149,7 @@ export function ContactsPageView({ logic }: ContactsPageViewProps) {
                 </Select>
               </div>
               <div className="flex-1 min-w-0 relative">
-                <Search
-                  className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"
-                />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="text"
                   value={toolbarSearchController.searchTerm}
@@ -167,6 +175,38 @@ export function ContactsPageView({ logic }: ContactsPageViewProps) {
                   Showing {toolbarSearchController.resultCount} of {toolbarSearchController.totalCount} results
                 </span>
               )}
+              <Select value={String(customerFilter)} onValueChange={(v) => setCustomerFilter(v === "all" ? "all" : v === "true")}>
+                <SelectTrigger className="w-36 bg-background border-input">
+                  <SelectValue placeholder="Customer" />
+                </SelectTrigger>
+                <SelectContent className="bg-popover border-border">
+                  <SelectItem value="all">All customers</SelectItem>
+                  <SelectItem value="true">Customer: Yes</SelectItem>
+                  <SelectItem value="false">Customer: No</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={String(clientFilter)} onValueChange={(v) => setClientFilter(v === "all" ? "all" : v === "true")}>
+                <SelectTrigger className="w-32 bg-background border-input">
+                  <SelectValue placeholder="Client" />
+                </SelectTrigger>
+                <SelectContent className="bg-popover border-border">
+                  <SelectItem value="all">All clients</SelectItem>
+                  <SelectItem value="true">Client: Yes</SelectItem>
+                  <SelectItem value="false">Client: No</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={groupBy} onValueChange={(v) => setGroupBy(v as any)}>
+                <SelectTrigger className="w-40 bg-background border-input">
+                  <Layers className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-popover border-border">
+                  <SelectItem value="none">No grouping</SelectItem>
+                  <SelectItem value="customer">By customer</SelectItem>
+                  <SelectItem value="client">By client</SelectItem>
+                  <SelectItem value="company">By company</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <div className="flex items-center gap-2 shrink-0">
@@ -188,6 +228,7 @@ export function ContactsPageView({ logic }: ContactsPageViewProps) {
           tableLogic={table}
           companies={companies}
           isLoading={showSkeleton}
+          groupBy={groupBy}
           pagination={{ enabled: true }}
         />
       }

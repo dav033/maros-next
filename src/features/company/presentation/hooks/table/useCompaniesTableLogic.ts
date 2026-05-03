@@ -1,8 +1,12 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import { useEntityTableLogic, useTableWithSearch } from "@/common/hooks";
 
 import type { Company } from "../../../domain/models";
+import { CompanyType } from "../../../domain/models";
+
+export type CompanyGroupBy = "none" | "type" | "customer" | "client";
 
 interface UseCompaniesTableLogicProps {
   companies: Company[];
@@ -12,14 +16,56 @@ interface UseCompaniesTableLogicProps {
   onOpenNotes?: (company: Company) => void;
 }
 
+export interface UseCompaniesTableLogicReturn {
+  rows: Company[];
+  totalCount: number;
+  filteredCount: number;
+  searchState: {
+    searchQuery: string;
+    searchField: string;
+    setSearchQuery: (q: string) => void;
+    setSearchField: (f: string) => void;
+  };
+  filterState: {
+    typeFilter: CompanyType | "all";
+    setTypeFilter: (v: CompanyType | "all") => void;
+    customerFilter: boolean | "all";
+    setCustomerFilter: (v: boolean | "all") => void;
+    clientFilter: boolean | "all";
+    setClientFilter: (v: boolean | "all") => void;
+    groupBy: CompanyGroupBy;
+    setGroupBy: (v: CompanyGroupBy) => void;
+  };
+  deleteModalProps: {
+    isOpen: boolean;
+    onClose: () => void;
+    onConfirm: () => void;
+    itemToDelete: Company | null;
+    isDeleting: boolean;
+    error: string | null;
+  };
+  getContextMenuItems: (company: Company) => Array<{
+    label: string;
+    onClick: () => void;
+    variant?: "default" | "danger";
+    icon?: string | React.ReactNode;
+    disabled?: boolean;
+  }>;
+  onOpenNotesModal?: (company: Company) => void;
+}
+
 export function useCompaniesTableLogic({
   companies,
   onEdit,
   onDelete,
   services,
   onOpenNotes,
-}: UseCompaniesTableLogicProps) {
-  // Estado de selección / delete modal / acciones base
+}: UseCompaniesTableLogicProps): UseCompaniesTableLogicReturn {
+  const [typeFilter, setTypeFilter] = useState<CompanyType | "all">("all");
+  const [customerFilter, setCustomerFilter] = useState<boolean | "all">("all");
+  const [clientFilter, setClientFilter] = useState<boolean | "all">("all");
+  const [groupBy, setGroupBy] = useState<CompanyGroupBy>("none");
+
   const {
     rows: localCompanies,
     deleteModalProps,
@@ -42,15 +88,13 @@ export function useCompaniesTableLogic({
     },
   });
 
-  // Estado de búsqueda y conteos
   const {
-    filteredData: filteredCompanies,
+    filteredData: searchFiltered,
     searchQuery,
     searchField,
     setSearchQuery,
     setSearchField,
     totalCount,
-    filteredCount,
   } = useTableWithSearch<Company>({
     data: localCompanies,
     searchableFields: ["name", "address", "type"],
@@ -83,15 +127,33 @@ export function useCompaniesTableLogic({
     },
   });
 
+  const filteredCompanies = useMemo(() => {
+    let result = searchFiltered;
+    if (typeFilter !== "all") result = result.filter((c) => c.type === typeFilter);
+    if (customerFilter !== "all") result = result.filter((c) => c.isCustomer === customerFilter);
+    if (clientFilter !== "all") result = result.filter((c) => c.isClient === clientFilter);
+    return result;
+  }, [searchFiltered, typeFilter, customerFilter, clientFilter]);
+
   return {
     rows: filteredCompanies,
     totalCount,
-    filteredCount,
+    filteredCount: filteredCompanies.length,
     searchState: {
       searchQuery,
       searchField,
       setSearchQuery,
       setSearchField,
+    },
+    filterState: {
+      typeFilter,
+      setTypeFilter,
+      customerFilter,
+      setCustomerFilter,
+      clientFilter,
+      setClientFilter,
+      groupBy,
+      setGroupBy,
     },
     deleteModalProps,
     getContextMenuItems,

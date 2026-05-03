@@ -4,6 +4,7 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import type { Company } from "../../domain/models";
 import { useCompaniesTableColumns } from "../hooks";
+import type { CompanyGroupBy } from "../hooks/table/useCompaniesTableLogic";
 import {
   Table,
   TableBody,
@@ -17,18 +18,65 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { Loader, Building, Edit, Trash, FileText, type LucideIcon } from "lucide-react";
+import { Loader, Building, Edit, Trash, FileText, ChevronUp, ChevronDown, ChevronsUpDown, type LucideIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { usePagination } from "@/common/hooks/table/usePagination";
+import { TablePagination } from "@/components/shared/TablePagination";
 
-// Mapeo de iconos de Iconify a lucide-react
 const iconMap: Record<string, LucideIcon> = {
   "lucide:edit": Edit,
   "lucide:trash-2": Trash,
   "lucide:trash": Trash,
   "lucide:file-text": FileText,
 };
-import { cn } from "@/lib/utils";
-import { usePagination } from "@/common/hooks/table/usePagination";
-import { TablePagination } from "@/components/shared/TablePagination";
+
+type SortDir = "asc" | "desc";
+
+function naturalCompare(a: string | number | null | undefined, b: string | number | null | undefined): number {
+  const sa = String(a ?? "");
+  const sb = String(b ?? "");
+  return sa.localeCompare(sb, undefined, { numeric: true, sensitivity: "base" });
+}
+
+function sortRows<T>(rows: T[], columns: import("@/types/table").SimpleTableColumn<T>[], sortKey: string | null, sortDir: SortDir): T[] {
+  if (!sortKey) return rows;
+  const col = columns.find((c) => String(c.key) === sortKey);
+  if (!col?.sortValue) return rows;
+  const dir = sortDir === "asc" ? 1 : -1;
+  return [...rows].sort((a, b) => dir * naturalCompare(col.sortValue!(a), col.sortValue!(b)));
+}
+
+const TYPE_LABELS: Record<string, string> = {
+  DESIGN: "Design",
+  HOA: "HOA",
+  GENERAL_CONTRACTOR: "General Contractor",
+  SUPPLIER: "Supplier",
+  SUBCONTRACTOR: "Subcontractor",
+  OTHER: "Other",
+};
+
+function groupCompanies(companies: Company[], groupBy: CompanyGroupBy): Array<{ key: string; label: string; items: Company[] }> {
+  if (groupBy === "none") return [{ key: "all", label: "", items: companies }];
+
+  const map = new Map<string, Company[]>();
+  for (const c of companies) {
+    let key: string;
+    if (groupBy === "type") key = c.type ?? "OTHER";
+    else if (groupBy === "customer") key = c.isCustomer ? "Yes" : "No";
+    else key = c.isClient ? "Yes" : "No";
+    const existing = map.get(key) ?? [];
+    existing.push(c);
+    map.set(key, existing);
+  }
+
+  const entries = [...map.entries()].sort(([a], [b]) => a.localeCompare(b));
+
+  return entries.map(([key, items]) => ({
+    key,
+    label: groupBy === "type" ? (TYPE_LABELS[key] ?? key) : key,
+    items,
+  }));
+}
 
 export interface CompaniesTableProps {
   companies: Company[];
@@ -36,6 +84,7 @@ export interface CompaniesTableProps {
   services?: Array<{ id: number; name: string; color?: string | null }>;
   getContextMenuItems: (row: Company) => Array<{label: string; onClick: () => void; icon?: string | React.ReactNode; variant?: "default" | "danger"; disabled?: boolean}>;
   onOpenNotesModal?: (company: Company) => void;
+  groupBy?: CompanyGroupBy;
   /** When enabled and items > pageSize, shows pagination controls below the table. */
   pagination?: { enabled?: boolean };
 }
@@ -46,13 +95,35 @@ export function CompaniesTable({
   services = [],
   getContextMenuItems,
   onOpenNotesModal,
+  groupBy = "none",
   pagination,
 }: CompaniesTableProps) {
   const router = useRouter();
+  const isGrouped = groupBy !== "none";
+
   const columns = useCompaniesTableColumns({
     services,
     onOpenNotesModal: onOpenNotesModal || (() => {}),
   });
+
+  const [sortKey, setSortKey] = React.useState<string | null>("name");
+  const [sortDir, setSortDir] = React.useState<SortDir>("asc");
+
+  const handleSortClick = React.useCallback((key: string) => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+  }, [sortKey]);
+
+  const sortedRows = React.useMemo(
+    () => sortRows(companies, columns, sortKey, sortDir),
+    [companies, columns, sortKey, sortDir]
+  );
+
+  const groups = React.useMemo(() => groupCompanies(sortedRows, groupBy), [sortedRows, groupBy]);
 
   const {
     pagedData,
@@ -64,8 +135,8 @@ export function CompaniesTable({
     setPage,
     setPageSize,
   } = usePagination({
-    data: companies,
-    enabled: pagination?.enabled ?? false,
+    data: sortedRows,
+    enabled: !isGrouped && (pagination?.enabled ?? false),
   });
 
   const [contextMenuOpen, setContextMenuOpen] = React.useState(false);
@@ -84,22 +155,11 @@ export function CompaniesTable({
 
   const handleRowClick = React.useCallback(
     (event: React.MouseEvent<HTMLTableRowElement>, company: Company) => {
-      if (event.button === 2) {
-        return;
-      }
-
+      if (event.button === 2) return;
       const target = event.target as HTMLElement;
-      if (target.closest('button, a, [role="button"], [role="menuitem"]')) {
-        return;
-      }
-
-      if (contextMenuOpen) {
-        return;
-      }
-
-      if (company.id) {
-        router.push(`/company/${company.id}`);
-      }
+      if (target.closest('button, a, [role="button"], [role="menuitem"]')) return;
+      if (contextMenuOpen) return;
+      if (company.id) router.push(`/company/${company.id}`);
     },
     [router, contextMenuOpen]
   );
@@ -129,47 +189,73 @@ export function CompaniesTable({
     );
   }
 
+  const renderRow = (item: Company) => (
+    <TableRow
+      key={item.id ?? 0}
+      onContextMenu={(event) => handleRowContextMenu(event, item)}
+      onClick={(event) => handleRowClick(event, item)}
+      className="cursor-pointer hover:bg-accent/30 transition-colors"
+    >
+      {columns.map((column) => (
+        <TableCell key={String(column.key)} className={cn("px-4 py-3", column.className)}>
+          {column.render ? column.render(item) : (item as any)[column.key as string]}
+        </TableCell>
+      ))}
+    </TableRow>
+  );
+
   return (
     <>
       <section className="rounded-2xl bg-card shadow-sm overflow-x-auto">
         <Table>
           <TableHeader className="bg-muted/50">
             <TableRow className="text-left text-xs uppercase tracking-wide text-muted-foreground h-12 border-b border-border">
-              {columns.map((column) => (
-                <TableHead
-                  key={String(column.key)}
-                  className={cn("px-4 py-3 h-full align-middle", column.className)}
-                >
-                  <span>{column.header}</span>
-                </TableHead>
-              ))}
+              {columns.map((column) => {
+                const key = String(column.key);
+                const isActive = sortKey === key;
+                return (
+                  <TableHead
+                    key={key}
+                    className={cn("px-4 py-3 h-full align-middle", column.className, column.sortable && "cursor-pointer select-none")}
+                    onClick={column.sortable ? () => handleSortClick(key) : undefined}
+                  >
+                    <span className="inline-flex items-center gap-1">
+                      {column.header}
+                      {column.sortable && (
+                        isActive
+                          ? sortDir === "asc"
+                            ? <ChevronUp className="h-3 w-3 text-foreground" />
+                            : <ChevronDown className="h-3 w-3 text-foreground" />
+                          : <ChevronsUpDown className="h-3 w-3 opacity-40" />
+                      )}
+                    </span>
+                  </TableHead>
+                );
+              })}
             </TableRow>
           </TableHeader>
           <TableBody className="divide-y divide-border">
-            {pagedData.map((item) => (
-              <TableRow
-                key={item.id ?? 0}
-                onContextMenu={(event) => handleRowContextMenu(event, item)}
-                onClick={(event) => handleRowClick(event, item)}
-                className="cursor-pointer hover:bg-accent/30 transition-colors"
-              >
-                {columns.map((column) => (
-                  <TableCell
-                    key={String(column.key)}
-                    className={cn("px-4 py-3", column.className)}
-                  >
-                    {column.render
-                      ? column.render(item)
-                      : (item as any)[column.key as string]}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))}
+            {isGrouped
+              ? groups.map((group) => (
+                  <React.Fragment key={group.key}>
+                    <TableRow className="bg-muted/20 hover:bg-muted/20">
+                      <TableCell
+                        colSpan={columns.length}
+                        className="px-4 py-2 text-xs font-semibold uppercase tracking-wider"
+                      >
+                        {group.label}
+                        <span className="ml-2 font-normal text-muted-foreground">({group.items.length})</span>
+                      </TableCell>
+                    </TableRow>
+                    {group.items.map(renderRow)}
+                  </React.Fragment>
+                ))
+              : pagedData.map(renderRow)}
           </TableBody>
         </Table>
       </section>
 
-      {isPaginated && (
+      {!isGrouped && isPaginated && (
         <TablePagination
           page={page}
           pageSize={pageSize}
@@ -183,11 +269,7 @@ export function CompaniesTable({
       <DropdownMenu open={contextMenuOpen} onOpenChange={setContextMenuOpen}>
         <DropdownMenuContent
           className="min-w-[160px]"
-          style={{
-            position: "fixed",
-            left: menuPosition.x,
-            top: menuPosition.y,
-          }}
+          style={{ position: "fixed", left: menuPosition.x, top: menuPosition.y }}
         >
           {menuItems.map((item, index) => (
             <DropdownMenuItem
@@ -199,11 +281,7 @@ export function CompaniesTable({
                 }
               }}
               disabled={item.disabled}
-              className={
-                item.variant === "danger"
-                  ? "text-destructive focus:text-destructive focus:bg-destructive/10"
-                  : undefined
-              }
+              className={item.variant === "danger" ? "text-destructive focus:text-destructive focus:bg-destructive/10" : undefined}
             >
               {item.icon && (
                 <span className="mr-2">
