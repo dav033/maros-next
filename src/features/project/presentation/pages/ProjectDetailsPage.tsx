@@ -20,14 +20,25 @@ import { useProjectsApp } from "@/di";
 import { updateProject } from "@/project/application";
 import type { ProjectPatch } from "@/project/domain";
 import { toast } from "sonner";
+import { formatCurrency } from "@/shared/utils";
 
 interface ProjectDetails {
   id: number;
-  invoiceAmount?: number;
-  payments?: number[];
   projectProgressStatus?: string;
   invoiceStatus?: string;
-  quickbooks?: boolean;
+  financial?: {
+    estimatedAmount?: number;
+    paidAmount?: number;
+    outstandingAmount?: number;
+    payments?: Array<{
+      id?: string;
+      date?: string;
+      amount: number;
+      method?: string;
+      reference?: string;
+      linkedInvoice?: string;
+    }>;
+  } | null;
   overview?: string;
   notes?: string[];
   lead?: {
@@ -76,11 +87,7 @@ interface ProjectDetailsPageProps {
 }
 
 type ProjectFormData = {
-  invoiceAmount?: number;
-  payments?: number[];
   projectProgressStatus?: string;
-  invoiceStatus?: string;
-  quickbooks?: boolean;
   overview?: string;
   notes?: string[];
   leadId?: number;
@@ -114,16 +121,16 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
   });
 
   // Notes logic
-  const notesLogic = useProjectsNotesLogic();
+  const notesLogic = useProjectsNotesLogic({
+    refetch: async () => {
+      router.refresh();
+    },
+  });
 
   const handleStartEditingProject = useCallback(() => {
     if (projectDetails) {
       setEditingProject({
-        invoiceAmount: projectDetails.invoiceAmount,
-        payments: projectDetails.payments,
         projectProgressStatus: projectDetails.projectProgressStatus,
-        invoiceStatus: projectDetails.invoiceStatus,
-        quickbooks: projectDetails.quickbooks,
         overview: projectDetails.overview ?? "",
         notes: projectDetails.notes,
         leadId: projectDetails.lead?.id,
@@ -143,11 +150,7 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
     setIsSavingProject(true);
     try {
       const patch: ProjectPatch = {
-        invoiceAmount: editingProject.invoiceAmount,
-        payments: editingProject.payments,
         projectProgressStatus: editingProject.projectProgressStatus as ProjectPatch["projectProgressStatus"],
-        invoiceStatus: editingProject.invoiceStatus as ProjectPatch["invoiceStatus"],
-        quickbooks: editingProject.quickbooks,
         overview: editingProject.overview?.trim() || undefined,
         notes: editingProject.notes,
         leadId: editingProject.leadId ?? projectDetails.lead?.id,
@@ -229,6 +232,7 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
   }
 
   const lead = projectDetails.lead;
+  const paymentRows = projectDetails.financial?.payments ?? [];
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -313,89 +317,95 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
               ) : (
                 <>
                   <div className="grid grid-cols-2 gap-4">
-                    {projectDetails.invoiceAmount ? (
+                    {typeof projectDetails.financial?.estimatedAmount === "number" ? (
                       <div>
                         <p className="text-sm text-muted-foreground flex items-center gap-1">
                           <Receipt className="size-3" />
-                          Invoice Amount
+                          Estimate Amount
                         </p>
                         <p className="text-foreground font-semibold text-lg">
-                          ${projectDetails.invoiceAmount.toLocaleString()}
+                          {formatCurrency(projectDetails.financial.estimatedAmount)}
                         </p>
                       </div>
                     ) : (
                       <div className="flex items-center justify-between p-3 rounded-md border border-dashed border-muted-foreground/30">
                         <div className="flex items-center gap-3">
-                          <Receipt className="size-4 text-muted-foreground" />
-                          <div>
-                            <p className="text-sm text-muted-foreground">Invoice Amount</p>
-                            <p className="text-xs text-muted-foreground">Not available</p>
+                            <Receipt className="size-4 text-muted-foreground" />
+                            <div>
+                              <p className="text-sm text-muted-foreground">Estimate Amount</p>
+                              <p className="text-xs text-muted-foreground">Not available</p>
+                            </div>
                           </div>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={handleEditProject}
-                        >
-                          <Plus className="size-3 mr-1" />
-                          Add
-                        </Button>
                       </div>
                     )}
-                    {projectDetails.quickbooks !== undefined ? (
+                    {typeof projectDetails.financial?.paidAmount === "number" ? (
                       <div>
-                        <p className="text-sm text-muted-foreground">In QuickBooks</p>
-                        <Badge variant={projectDetails.quickbooks ? "default" : "outline"}>
-                          {projectDetails.quickbooks ? "Yes" : "No"}
-                        </Badge>
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-between p-3 rounded-md border border-dashed border-muted-foreground/30">
-                        <div>
-                          <p className="text-sm text-muted-foreground">In QuickBooks</p>
-                          <p className="text-xs text-muted-foreground">Not available</p>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={handleEditProject}
-                        >
-                          <Plus className="size-3 mr-1" />
-                          Add
-                        </Button>
-                      </div>
-                    )}
-                    {projectDetails.payments && projectDetails.payments.length > 0 ? (
-                      <div className="col-span-2">
-                        <p className="text-sm text-muted-foreground flex items-center gap-1 mb-2">
+                        <p className="text-sm text-muted-foreground flex items-center gap-1">
                           <DollarSign className="size-3" />
                           Payments
                         </p>
-                        <div className="space-y-1">
-                          {projectDetails.payments.map((payment, index) => (
-                            <p key={index} className="text-foreground">
-                              ${payment.toLocaleString()}
-                            </p>
-                          ))}
-                        </div>
+                        <p className="text-foreground font-semibold text-lg">
+                          {formatCurrency(projectDetails.financial.paidAmount)}
+                        </p>
                       </div>
                     ) : (
-                      <div className="col-span-2 flex items-center justify-between p-3 rounded-md border border-dashed border-muted-foreground/30">
+                      <div className="flex items-center justify-between p-3 rounded-md border border-dashed border-muted-foreground/30">
                         <div className="flex items-center gap-3">
                           <DollarSign className="size-4 text-muted-foreground" />
                           <div>
                             <p className="text-sm text-muted-foreground">Payments</p>
-                            <p className="text-xs text-muted-foreground">No payments recorded</p>
+                            <p className="text-xs text-muted-foreground">Not available</p>
                           </div>
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={handleEditProject}
-                        >
-                          <Plus className="size-3 mr-1" />
-                          Add
-                        </Button>
+                      </div>
+                    )}
+                  </div>
+
+                  <Separator />
+                  <div>
+                    <p className="text-muted-foreground text-sm mb-2 flex items-center gap-1">
+                      <DollarSign className="size-3" />
+                      Payments List (QuickBooks)
+                    </p>
+
+                    {paymentRows.length > 0 ? (
+                      <div className="overflow-hidden rounded-md border">
+                        <div className="max-h-64 overflow-auto">
+                          <table className="w-full text-sm">
+                            <thead className="bg-muted/30">
+                              <tr>
+                                <th className="px-3 py-2 text-left font-medium">Date</th>
+                                <th className="px-3 py-2 text-left font-medium">Method</th>
+                                <th className="px-3 py-2 text-left font-medium">Reference</th>
+                                <th className="px-3 py-2 text-left font-medium">Invoice</th>
+                                <th className="px-3 py-2 text-right font-medium">Amount</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {paymentRows.map((payment, index) => (
+                                <tr key={payment.id ?? `${index}-${payment.amount}`} className="border-t">
+                                  <td className="px-3 py-2">{payment.date || "-"}</td>
+                                  <td className="px-3 py-2">{payment.method || "-"}</td>
+                                  <td className="px-3 py-2">{payment.reference || "-"}</td>
+                                  <td className="px-3 py-2">{payment.linkedInvoice || "-"}</td>
+                                  <td className="px-3 py-2 text-right">{formatCurrency(payment.amount)}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between p-3 rounded-md border border-dashed border-muted-foreground/30">
+                        <div className="flex items-center gap-3">
+                          <DollarSign className="size-4 text-muted-foreground" />
+                          <div>
+                            <p className="text-sm text-muted-foreground">Payments List</p>
+                            <p className="text-xs text-muted-foreground">
+                              No payment rows received from QuickBooks
+                            </p>
+                          </div>
+                        </div>
                       </div>
                     )}
                   </div>

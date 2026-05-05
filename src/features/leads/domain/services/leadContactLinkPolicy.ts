@@ -2,12 +2,27 @@ import type { ContactId, NewContact } from "../models";
 import { BusinessRuleError } from "@/shared/domain";
 import { normalizeText } from "@/shared/validation";
 
+function normalizeCompanyId(companyId: NewContact["companyId"]): number | undefined {
+  if (
+    typeof companyId !== "number" ||
+    !Number.isFinite(companyId) ||
+    !Number.isInteger(companyId) ||
+    companyId <= 0
+  ) {
+    return undefined;
+  }
+
+  return companyId;
+}
+
 export function normalizeNewContact(input: NewContact): NewContact {
+  const companyId = normalizeCompanyId(input.companyId);
+
   return {
-    companyName: normalizeText(input.companyName),
     name: normalizeText(input.name),
     phone: normalizeText(input.phone),
     email: normalizeText(input.email),
+    ...(companyId !== undefined ? { companyId } : {}),
   };
 }
 

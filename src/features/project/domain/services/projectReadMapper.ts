@@ -1,15 +1,12 @@
 import type { Project } from "../models";
 import type { Lead } from "@/leads/domain";
 import { ProjectProgressStatus, InvoiceStatus } from "../models";
-import type { ProjectFinancial } from "../models/ProjectFinancial";
+import type { ProjectFinancial, ProjectFinancialPayment } from "../models/ProjectFinancial";
 
 export type ApiProjectDTO = {
   id?: number | null;
-  invoiceAmount?: number | string | null; // Can be string from decimal type in DB
-  payments?: number[] | null;
   projectProgressStatus?: string | null;
   invoiceStatus?: string | null;
-  quickbooks?: boolean | null;
   overview?: string | null;
   notes?: string[] | null;
   leadId?: number | null;
@@ -56,30 +53,47 @@ function resolveInvoiceStatus(input: unknown): InvoiceStatus | undefined {
   return undefined;
 }
 
+function normalizeFinancialPayments(input: unknown): ProjectFinancialPayment[] | undefined {
+  if (!Array.isArray(input)) return undefined;
+
+  const normalized: ProjectFinancialPayment[] = [];
+  for (const row of input) {
+    if (!row || typeof row !== "object") continue;
+    const rec = row as Record<string, unknown>;
+
+    const amountRaw = rec.amount;
+    const amount =
+      typeof amountRaw === "number"
+        ? amountRaw
+        : typeof amountRaw === "string"
+          ? parseFloat(amountRaw)
+          : NaN;
+
+    if (!Number.isFinite(amount)) continue;
+
+    normalized.push({
+      id: typeof rec.id === "string" ? rec.id : undefined,
+      date: typeof rec.date === "string" ? rec.date : undefined,
+      amount,
+      method: typeof rec.method === "string" ? rec.method : undefined,
+      reference: typeof rec.reference === "string" ? rec.reference : undefined,
+      linkedInvoice:
+        typeof rec.linkedInvoice === "string" ? rec.linkedInvoice : undefined,
+    });
+  }
+
+  return normalized.length > 0 ? normalized : undefined;
+}
+
 export function mapProjectFromDTO(dto: ApiProjectDTO, leadMapper: (dto: any) => Lead): Project {
   if (!dto) {
     throw new Error("Project DTO is required");
   }
 
   const id = dto?.id ?? 0;
-  
-  // Handle invoiceAmount - can be number or string (from decimal type in DB)
-  let invoiceAmount: number | undefined = undefined;
-  if (dto?.invoiceAmount !== null && dto?.invoiceAmount !== undefined) {
-    if (typeof dto.invoiceAmount === "number") {
-      invoiceAmount = dto.invoiceAmount;
-    } else if (typeof dto.invoiceAmount === "string") {
-      const parsed = parseFloat(dto.invoiceAmount);
-      if (!isNaN(parsed)) {
-        invoiceAmount = parsed;
-      }
-    }
-  }
-  
-  const payments = Array.isArray(dto?.payments) ? dto.payments.filter((p): p is number => typeof p === "number") : undefined;
+
   const projectProgressStatus = resolveProjectProgressStatus(dto?.projectProgressStatus);
   const invoiceStatus = resolveInvoiceStatus(dto?.invoiceStatus);
-  const quickbooks = dto?.quickbooks ?? undefined;
   const overview = dto?.overview && dto.overview.trim() !== "" ? dto.overview.trim() : undefined;
   const notes = Array.isArray(dto?.notes) ? dto.notes.filter((n): n is string => typeof n === "string") : [];
   
@@ -108,6 +122,7 @@ export function mapProjectFromDTO(dto: ApiProjectDTO, leadMapper: (dto: any) => 
         outstandingAmount: f.outstandingAmount,
         paidPercentage: f.paidPercentage,
         estimateVsInvoicedDelta: f.estimateVsInvoicedDelta,
+        payments: normalizeFinancialPayments((f as { payments?: unknown }).payments),
       };
     }
   }
@@ -123,11 +138,8 @@ export function mapProjectFromDTO(dto: ApiProjectDTO, leadMapper: (dto: any) => 
 
   return {
     id,
-    invoiceAmount,
-    payments,
     projectProgressStatus,
     invoiceStatus,
-    quickbooks,
     overview,
     notes,
     lead,

@@ -24,6 +24,8 @@ import {
   useLeadsToolbarSearchController,
   useLeadsNotesModalController,
 } from "../hooks";
+import { LeadTypeSwitcher } from "@/components/shared/LeadTypeSwitcher";
+import type { LeadType } from "@/leads/domain";
 
 const LEAD_STATUS_OPTIONS: Array<{ value: LeadStatus | "all"; label: string }> = [
   { value: "all", label: "All statuses" },
@@ -43,10 +45,11 @@ const LEAD_GROUP_OPTIONS: Array<{ value: LeadGroupBy; label: string }> = [
 
 export interface LeadsPageViewProps {
   logic: UseLeadsPageLogicReturn;
+  leadType: LeadType;
 }
 
-export function LeadsPageView({ logic }: LeadsPageViewProps) {
-  const { config, data, crud, table, notesModal, viewContactModal } = logic;
+export function LeadsPageView({ logic, leadType }: LeadsPageViewProps) {
+  const { config, data, crud, table, notesModal, viewContactModal, convertProjectModal } = logic;
 
   const { title, description, createModalTitle } = config;
 
@@ -111,19 +114,22 @@ export function LeadsPageView({ logic }: LeadsPageViewProps) {
   return (
     <EntityCrudPageTemplate
       header={
-        <header className="flex flex-col gap-1">
-          <h1 className="text-xl font-semibold text-foreground sm:text-2xl">{title}</h1>
-          {description && (
-            <p className="text-xs text-muted-foreground sm:text-sm">{description}</p>
-          )}
-        </header>
+        <div className="flex flex-col gap-3">
+          <header className="flex flex-col gap-1">
+            <h1 className="text-xl font-semibold text-foreground sm:text-2xl">{title}</h1>
+            {description && (
+              <p className="text-xs text-muted-foreground sm:text-sm">{description}</p>
+            )}
+          </header>
+          <LeadTypeSwitcher currentType={leadType} basePath="/leads" />
+        </div>
       }
       toolbar={
         <div className="flex flex-col gap-2 rounded-xl bg-card p-3">
           <div className="flex items-center justify-between gap-3">
             <div className="flex flex-1 items-center gap-2 flex-wrap">
               {/* Search field selector */}
-              <div className="w-28 shrink-0">
+              <div className="w-32 shrink-0">
                 <Select value={toolbarSearchController.selectedField} onValueChange={toolbarSearchController.onFieldChange}>
                   <SelectTrigger className="bg-background border-input h-9 text-xs">
                     <SelectValue />
@@ -168,7 +174,7 @@ export function LeadsPageView({ logic }: LeadsPageViewProps) {
               </div>
 
               {/* Group by */}
-              <div className="w-32 shrink-0">
+              <div className="w-36 shrink-0">
                 <Select value={groupBy} onValueChange={(v) => setGroupBy(v as LeadGroupBy)}>
                   <SelectTrigger className="bg-background border-input h-9 text-xs">
                     <Layers className="h-3.5 w-3.5 mr-1.5 shrink-0 text-muted-foreground" />
@@ -231,6 +237,27 @@ export function LeadsPageView({ logic }: LeadsPageViewProps) {
             loading={deleteModalProps.isDeleting}
             onClose={deleteModalProps.onClose}
             onConfirm={deleteModalProps.onConfirm}
+          />
+
+          <DeleteFeedbackModal
+            isOpen={convertProjectModal.isOpen}
+            title="Convert Lead to Project"
+            description={
+              <>
+                Are you sure you want to convert lead{" "}
+                <span className="font-semibold text-foreground">
+                  {convertProjectModal.leadToConvert?.leadNumber
+                    ? `#${convertProjectModal.leadToConvert.leadNumber}`
+                    : convertProjectModal.leadToConvert?.name}
+                </span>{" "}
+                into a project?
+              </>
+            }
+            loading={convertProjectModal.loading}
+            onClose={convertProjectModal.onClose}
+            onConfirm={convertProjectModal.onConfirm}
+            confirmLabel="Convert"
+            loadingLabel="Converting..."
           />
 
           <NotesEditorModal controller={notesModalController} />

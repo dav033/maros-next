@@ -59,9 +59,13 @@ export type UpdateContactRequestDTO = {
 
 
 export function mapContactFromApi(dto: ApiContactDTO): Contact {
+  const normalizedName = typeof dto.name === "string" ? dto.name : "";
+  const normalizedCompanyName =
+    dto.company && typeof dto.company.name === "string" ? dto.company.name : "";
+
   return {
     id: dto.id,
-    name: dto.name,
+    name: normalizedName,
     role: dto.occupation ?? undefined,
     occupation: dto.occupation ?? undefined,
     phone: dto.phone ?? undefined,
@@ -73,7 +77,7 @@ export function mapContactFromApi(dto: ApiContactDTO): Contact {
     companyId: dto.company?.id ?? dto.companyId ?? undefined,
     company: dto.company ? {
       id: dto.company.id,
-      name: dto.company.name,
+      name: normalizedCompanyName,
       address: dto.company.address ?? undefined,
       type: dto.company.type as any,
       serviceId: dto.company.serviceId ?? undefined,

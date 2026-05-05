@@ -19,11 +19,10 @@ type LeadFormData = {
   leadType: LeadType;
   projectTypeId?: number;
   contactId?: number;
+  companyId?: number | null;
   location: string;
   addressLink?: string | null;
-  status?: string;
   note?: string;
-  customerName?: string;
   contactName?: string;
   phone?: string;
   email?: string;
@@ -48,9 +47,8 @@ export function useCreateLeadController({ leadType, inReview, onCreated }: UseCr
       addressLink: null,
       projectTypeId: undefined,
       contactId: undefined,
-      status: "NOT_EXECUTED",
+      companyId: null,
       note: "",
-      customerName: "",
       contactName: "",
       phone: "",
       email: "",
@@ -74,10 +72,12 @@ export function useCreateLeadController({ leadType, inReview, onCreated }: UseCr
             projectTypeId: form.projectTypeId!,
             leadType: form.leadType,
             contact: {
-              companyName: (form.customerName ?? "").trim() || "N/A",
               name: (form.contactName ?? "").trim(),
               phone: (form.phone ?? "").trim(),
               email: (form.email ?? "").trim(),
+              ...(typeof form.companyId === "number" && form.companyId > 0
+                ? { companyId: form.companyId }
+                : {}),
             },
             ...(inReview !== undefined && { inReview }),
           }
@@ -104,6 +104,15 @@ export function useCreateLeadController({ leadType, inReview, onCreated }: UseCr
   const handleContactModeChange = useCallback((mode: ContactMode) => {
     setContactMode(mode);
     controller.setError(null);
+    if (mode === ContactMode.NEW_CONTACT) {
+      controller.setField("contactId", undefined);
+      return;
+    }
+
+    controller.setField("contactName", "");
+    controller.setField("phone", "");
+    controller.setField("email", "");
+    controller.setField("companyId", null);
   }, [controller]);
 
   return {

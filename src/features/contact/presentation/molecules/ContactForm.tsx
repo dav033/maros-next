@@ -48,7 +48,7 @@ export function ContactForm({
             <User className="size-4" />
           </div>
           <Input
-            value={value.name}
+            value={value.name ?? ""}
             onChange={(event: ChangeEvent<HTMLInputElement>) => handleTextChange(event, "name")}
             placeholder="Contact name"
             disabled={disabled}
@@ -83,7 +83,7 @@ export function ContactForm({
             <Phone className="size-4" />
           </div>
           <Input
-            value={value.phone}
+            value={value.phone ?? ""}
             onChange={(event: ChangeEvent<HTMLInputElement>) => handleTextChange(event, "phone")}
             placeholder="Phone number"
             disabled={disabled}
@@ -96,7 +96,7 @@ export function ContactForm({
           </div>
           <Input
             type="email"
-            value={value.email}
+            value={value.email ?? ""}
             onChange={(event: ChangeEvent<HTMLInputElement>) => handleTextChange(event, "email")}
             placeholder="email@example.com"
             disabled={disabled}

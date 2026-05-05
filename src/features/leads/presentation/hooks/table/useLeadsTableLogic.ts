@@ -5,7 +5,7 @@ import { useEntityTableLogic, useTableWithSearch } from "@/common/hooks";
 import type { Lead } from "@/leads/domain";
 import { LeadStatus } from "@/leads/domain";
 import type { Contact } from "@/contact/domain";
-import { FileText, User } from "lucide-react";
+import { FileText, FolderPlus, User } from "lucide-react";
 import React from "react";
 import { leadsSearchConfig } from "../../search/leadsSearchConfig";
 
@@ -17,6 +17,7 @@ export interface UseLeadsTableLogicProps {
   onDelete: (leadId: number) => Promise<void>;
   onViewContact: (contact: Contact) => void;
   onOpenNotesModal?: (lead: Lead) => void;
+  onConvertToProject?: (lead: Lead) => Promise<void> | void;
 }
 
 export interface UseLeadsTableLogicReturn {
@@ -60,6 +61,7 @@ export function useLeadsTableLogic({
   onDelete,
   onViewContact,
   onOpenNotesModal,
+  onConvertToProject,
 }: UseLeadsTableLogicProps): UseLeadsTableLogicReturn {
   const [statusFilter, setStatusFilter] = useState<LeadStatus | "all">("all");
   const [groupBy, setGroupBy] = useState<LeadGroupBy>("none");
@@ -82,6 +84,16 @@ export function useLeadsTableLogic({
           label: "Notes",
           onClick: () => onOpenNotesModal(lead),
           icon: React.createElement(FileText, { className: "size-4" }),
+        });
+      }
+
+      if (onConvertToProject) {
+        items.push({
+          label: "Convert to Project",
+          onClick: () => {
+            void onConvertToProject(lead);
+          },
+          icon: React.createElement(FolderPlus, { className: "size-4" }),
         });
       }
 

@@ -93,23 +93,22 @@ export function LocationField({
 
         autocompleteRef.current.addListener("place_changed", () => {
           const place = autocompleteRef.current.getPlace();
-          if (place.formatted_address) {
-            const addressText = place.formatted_address;
+          const addressText =
+            place?.formatted_address?.trim() || inputRef.current?.value?.trim() || "";
+
+          if (addressText) {
             
             // Generate Google Maps link
             const encodedAddress = encodeURIComponent(addressText);
             const mapsLink = `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
             
             // Update both address and link together to ensure synchronization
-            // Use setTimeout to ensure React state updates happen after DOM update
-            setTimeout(() => {
-              onAddressChange?.(addressText);
-              onAddressLinkChange?.(mapsLink);
-              
-              if (onLocationChange) {
-                onLocationChange({ address: addressText, link: mapsLink });
-              }
-            }, 0);
+            onAddressChange?.(addressText);
+            onAddressLinkChange?.(mapsLink);
+
+            if (onLocationChange) {
+              onLocationChange({ address: addressText, link: mapsLink });
+            }
           }
         });
       } catch {

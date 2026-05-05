@@ -23,6 +23,7 @@ export interface DeleteFeedbackModalProps {
   onClose: () => void;
   onConfirm: () => void;
   confirmLabel?: string;
+  loadingLabel?: string;
   cancelLabel?: string;
 }
 
@@ -35,6 +36,7 @@ export function DeleteFeedbackModal({
   onClose,
   onConfirm,
   confirmLabel = "Delete",
+  loadingLabel = "Deleting...",
   cancelLabel = "Cancel",
 }: DeleteFeedbackModalProps) {
   return (
@@ -73,7 +75,7 @@ export function DeleteFeedbackModal({
             {loading ? (
               <span className="flex items-center gap-2">
                 <Loader className="size-4 animate-spin" />
-                Deleting...
+                {loadingLabel}
               </span>
             ) : (
               confirmLabel

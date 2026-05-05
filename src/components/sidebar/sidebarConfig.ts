@@ -1,10 +1,11 @@
 import type { LucideIcon } from "lucide-react";
 import {
   Briefcase,
-  ClipboardList,
   FolderKanban,
+  House,
   Users,
   Building,
+  Wrench,
   UserCog,
   FileBarChart2,
   FileCheck2,
@@ -41,19 +42,50 @@ const menuSection: SidebarSection = {
   section: "Business",
   items: [
     {
-      title: "Leads",
-      href: "/leads",
-      icon: Briefcase,
+      trigger: {
+        title: "Leads",
+        icon: Briefcase,
+      },
+      items: [
+        {
+          title: "Construction",
+          href: "/leads/construction",
+          icon: FolderKanban,
+        },
+        {
+          title: "Roofing",
+          href: "/leads/roofing",
+          icon: House,
+        },
+        {
+          title: "Plumbing",
+          href: "/leads/plumbing",
+          icon: Wrench,
+        },
+      ],
     },
     {
-      title: "Leads in Review",
-      href: "/review/leads",
-      icon: ClipboardList,
-    },
-    {
-      title: "Projects",
-      href: "/projects",
-      icon: FolderKanban,
+      trigger: {
+        title: "Projects",
+        icon: FolderKanban,
+      },
+      items: [
+        {
+          title: "Construction",
+          href: "/projects/construction",
+          icon: FolderKanban,
+        },
+        {
+          title: "Roofing",
+          href: "/projects/roofing",
+          icon: House,
+        },
+        {
+          title: "Plumbing",
+          href: "/projects/plumbing",
+          icon: Wrench,
+        },
+      ],
     },
   ],
 };

@@ -7,13 +7,14 @@ import {
   useProjectsMutations,
   useProjectsTableLogic,
   useProjectsNotesLogic,
-  usePaymentsModal,
   type UseProjectsDataReturn,
   type UseProjectsTableLogicReturn,
 } from "../hooks";
 import type { Project } from "@/project/domain";
+import { LeadType } from "@/leads/domain";
 
 export interface UseProjectsPageLogicReturn {
+  leadType: LeadType;
   data: UseProjectsDataReturn;
   crud: {
     isCreateModalOpen: boolean;
@@ -37,14 +38,19 @@ export interface UseProjectsPageLogicReturn {
     loading: boolean;
   };
   openNotesModal: (project: Project) => void;
-  paymentsModal: ReturnType<typeof usePaymentsModal>;
 }
 
 import type { ProjectsPageData } from "../data/loadProjectsData";
 
-export function useProjectsPageLogic(initialData?: ProjectsPageData): UseProjectsPageLogicReturn {
+export function useProjectsPageLogic({
+  initialData,
+  leadType,
+}: {
+  initialData?: ProjectsPageData;
+  leadType: LeadType;
+}): UseProjectsPageLogicReturn {
   // 1) Datos
-  const data = useProjectsData(initialData);
+  const data = useProjectsData({ initialData, leadType });
 
   // 2) Modales CRUD
   const createModal = useProjectCreateModal({
@@ -58,12 +64,9 @@ export function useProjectsPageLogic(initialData?: ProjectsPageData): UseProject
     },
   });
 
-  // 3) Notes y Payments modals
-  const notesLogic = useProjectsNotesLogic();
-  const paymentsModal = usePaymentsModal({
-    onUpdated: async () => {
-      await data.refetch();
-    },
+  // 3) Notes modal
+  const notesLogic = useProjectsNotesLogic({
+    refetch: data.refetch,
   });
 
   // 4) Negocio
@@ -78,10 +81,10 @@ export function useProjectsPageLogic(initialData?: ProjectsPageData): UseProject
       await data.refetch();
     },
     onOpenNotesModal: notesLogic.openFromProject,
-    onOpenPaymentsModal: paymentsModal.open,
   });
 
   return {
+    leadType,
     data,
     crud: {
       isCreateModalOpen: createModal.isOpen,
@@ -97,7 +100,6 @@ export function useProjectsPageLogic(initialData?: ProjectsPageData): UseProject
     table,
     notesModal: notesLogic.modalProps,
     openNotesModal: notesLogic.openFromProject,
-    paymentsModal,
   };
 }
 

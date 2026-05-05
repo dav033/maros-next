@@ -59,7 +59,7 @@ export function LeadEditForm({
     <div className="space-y-4 w-full">
       <Input
         placeholder="Enter lead name"
-        value={form.leadName}
+        value={form.leadName ?? ""}
         onChange={(e: ChangeEvent<HTMLInputElement>) => onChange("leadName", e.target.value)}
         disabled={disabled}
         required

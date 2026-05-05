@@ -27,6 +27,9 @@ export interface Lead {
   status: LeadStatus;
   contact: Contact;
   projectType: ProjectType;
+  project?: {
+    id: number;
+  } | null;
   notes: string[];
   inReview: boolean;
 }
@@ -36,10 +39,10 @@ export type ContactId = number;
 export type ProjectTypeId = number;
 
 export type NewContact = Readonly<{
-  companyName: string;
   name: string;
   phone: string;
   email: string;
+  companyId?: number;
 }>;
 
 export type LeadPolicies = Readonly<{

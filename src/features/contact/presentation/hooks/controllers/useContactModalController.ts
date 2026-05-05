@@ -3,6 +3,20 @@
 import { useMemo } from "react";
 import type { ContactFormValue } from "@/contact/domain/mappers";
 
+const EMPTY_CONTACT_FORM_VALUE: ContactFormValue = {
+  name: "",
+  phone: "",
+  email: "",
+  occupation: "",
+  role: undefined,
+  address: "",
+  addressLink: undefined,
+  isCustomer: false,
+  isClient: false,
+  companyId: null,
+  note: "",
+};
+
 export interface UseContactModalControllerOptions {
   mode: "create" | "edit" | "list";
   closeModal: () => void;
@@ -30,7 +44,7 @@ export function useContactModalController({
       mode: (mode === "create" ? "create" : "edit") as "create" | "edit",
       onClose: closeModal,
       onSubmit: mode === "create" ? handleCreateSubmit : handleEditSubmit,
-      formValue: formValue ?? ({} as ContactFormValue),
+      formValue: formValue ?? EMPTY_CONTACT_FORM_VALUE,
       onFormChange: handleFormChange,
       isLoading: isPending,
       error: serverError,

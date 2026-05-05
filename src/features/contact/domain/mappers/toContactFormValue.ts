@@ -3,7 +3,7 @@ import type { ContactFormValue } from "./toContactPatch";
 
 export function toContactFormValue(contact: Contact): ContactFormValue {
   return {
-    name: contact.name,
+    name: contact.name ?? "",
     phone: contact.phone ?? "",
     email: contact.email ?? "",
     occupation: contact.occupation ?? "",

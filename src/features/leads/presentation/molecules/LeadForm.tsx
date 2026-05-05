@@ -4,7 +4,7 @@ import { LocationField } from "@/components/shared";
 import type { ChangeEvent } from "react";
 
 import { Input } from "@/components/ui/input";
-import { FolderTree, Wrench, Flag, User } from "lucide-react";
+import { FolderTree, Wrench, User } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -26,7 +26,6 @@ type LeadFormData = {
   contactId?: number;
   location: string;
   addressLink?: string | null;
-  status?: string;
   note?: string;
 };
 
@@ -47,15 +46,6 @@ const LEAD_TYPE_OPTIONS = [
   { value: LeadType.CONSTRUCTION, label: "Construction" },
   { value: LeadType.ROOFING, label: "Roofing" },
   { value: LeadType.PLUMBING, label: "Plumbing" },
-];
-
-const STATUS_OPTIONS = [
-  { value: "NOT_EXECUTED", label: "Not Executed" },
-  { value: "IN_PROGRESS", label: "In Progress" },
-  { value: "COMPLETED", label: "Completed" },
-  { value: "LOST", label: "Lost" },
-  { value: "POSTPONED", label: "Postponed" },
-  { value: "PERMITS", label: "Permits" },
 ];
 
 export function LeadForm({
@@ -82,7 +72,7 @@ export function LeadForm({
         }}
         disabled={disabled}
       >
-        <SelectTrigger className="w-full">
+        <SelectTrigger className="w-full bg-background/95">
           <div className="flex items-center">
             <FolderTree className="size-4 text-muted-foreground mr-2 shrink-0" />
             <SelectValue placeholder="Select Lead Type *" />
@@ -98,10 +88,11 @@ export function LeadForm({
       </Select>
 
       <Input
-        value={form.leadName}
+        value={form.leadName ?? ""}
         onChange={(e: ChangeEvent<HTMLInputElement>) => onChange("leadName", e.target.value)}
         placeholder="Lead Name (optional)"
         disabled={disabled}
+        className="bg-background/95"
       />
 
       <LocationField
@@ -120,13 +111,13 @@ export function LeadForm({
         }}
       />
 
-      <div className="grid grid-cols-2 gap-3">
+      <div>
         <Select
           value={form.projectTypeId != null ? String(form.projectTypeId) : EMPTY_SELECT_VALUE}
           onValueChange={(val) => onChange("projectTypeId", val === EMPTY_SELECT_VALUE ? undefined : Number(val))}
           disabled={disabled}
         >
-          <SelectTrigger>
+          <SelectTrigger className="bg-background/95">
             <Wrench className="size-4 text-muted-foreground mr-2" />
             <SelectValue placeholder="Select Project Type *" />
           </SelectTrigger>
@@ -139,25 +130,6 @@ export function LeadForm({
             ))}
           </SelectContent>
         </Select>
-
-        <Select
-          value={form.status || EMPTY_SELECT_VALUE}
-          onValueChange={(val) => onChange("status", val === EMPTY_SELECT_VALUE ? undefined : val)}
-          disabled={disabled}
-        >
-          <SelectTrigger>
-            <Flag className="size-4 text-muted-foreground mr-2" />
-            <SelectValue placeholder="Select Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={EMPTY_SELECT_VALUE}>Select Status</SelectItem>
-            {STATUS_OPTIONS.map((opt) => (
-              <SelectItem key={opt.value} value={opt.value}>
-                {opt.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
       </div>
 
 
@@ -166,6 +138,7 @@ export function LeadForm({
         onChange={(e: ChangeEvent<HTMLInputElement>) => onChange("note", e.target.value)}
         placeholder="Add a note (optional)"
         disabled={disabled}
+        className="bg-background/95"
       />
     </div>
   );

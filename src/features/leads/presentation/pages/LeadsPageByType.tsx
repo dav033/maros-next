@@ -4,6 +4,7 @@ import type { LeadType } from "@/leads/domain";
 import { useLeadsPageLogic } from "./useLeadsPageLogic";
 import { LeadsPageView } from "./LeadsPageView";
 import type { LeadsPageData } from "../data/loadLeadsData";
+import { LeadTypeSwitcher } from "@/components/shared/LeadTypeSwitcher";
 
 export type LeadsPageByTypeProps = {
   leadType: LeadType;
@@ -13,5 +14,7 @@ export type LeadsPageByTypeProps = {
 export function LeadsPageByType({ leadType, initialData }: LeadsPageByTypeProps) {
   const logic = useLeadsPageLogic({ leadType, initialData });
 
-  return <LeadsPageView logic={logic} />;
+  return (
+    <LeadsPageView logic={logic} leadType={leadType} />
+  );
 }

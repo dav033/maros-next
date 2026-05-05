@@ -53,10 +53,12 @@ export function mapCompanyFromApi(dto: ApiCompanyDTO): Company {
   if (!Object.values(CompanyType).includes(type as CompanyType)) {
     type = CompanyType.OTHER;
   }
+
+  const normalizedName = typeof dto.name === "string" ? dto.name : "";
   
   return {
     id: dto.id,
-    name: dto.name,
+    name: normalizedName,
     address: dto.address ?? undefined,
     addressLink: dto.addressLink ?? undefined,
     type: type as CompanyType,

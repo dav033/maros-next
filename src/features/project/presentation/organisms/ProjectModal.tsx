@@ -15,11 +15,7 @@ import type { Project } from "@/project/domain";
 
 type CreateProjectController = {
   form: {
-    invoiceAmount?: number;
-    payments?: number[];
     projectProgressStatus?: string;
-    invoiceStatus?: string;
-    quickbooks?: boolean;
     overview?: string;
     leadId?: number;
   };
@@ -32,11 +28,7 @@ type CreateProjectController = {
 
 type UpdateProjectController = {
   form: {
-    invoiceAmount?: number;
-    payments?: number[];
     projectProgressStatus?: string;
-    invoiceStatus?: string;
-    quickbooks?: boolean;
     overview?: string;
     leadId?: number;
   };

@@ -77,7 +77,7 @@ export function useUpdateLeadController({ lead, onUpdated }: UseUpdateLeadContro
   useEffect(() => {
     if (lead) {
       controller.setForm({
-        leadName: lead.name,
+        leadName: lead.name ?? "",
         location: lead.location ?? "",
         addressLink: lead.addressLink ?? "",
         projectTypeId: lead.projectType?.id,

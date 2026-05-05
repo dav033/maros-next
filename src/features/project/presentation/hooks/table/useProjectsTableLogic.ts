@@ -16,7 +16,6 @@ interface UseProjectsTableLogicProps {
   onEdit: (project: Project) => void;
   onDelete: (projectId: number) => Promise<void>;
   onOpenNotesModal?: (project: Project) => void;
-  onOpenPaymentsModal?: (project: Project) => void;
 }
 
 export interface UseProjectsTableLogicReturn {
@@ -59,7 +58,6 @@ export function useProjectsTableLogic({
   onEdit,
   onDelete,
   onOpenNotesModal,
-  onOpenPaymentsModal,
 }: UseProjectsTableLogicProps): UseProjectsTableLogicReturn {
   const app = useProjectsApp();
 
@@ -88,13 +86,6 @@ export function useProjectsTableLogic({
           icon: "lucide:sticky-note",
         });
       }
-      if (onOpenPaymentsModal) {
-        items.push({
-          label: "Payments",
-          onClick: () => onOpenPaymentsModal(project),
-          icon: "lucide:dollar-sign",
-        });
-      }
       return items;
     },
   });
@@ -117,15 +108,13 @@ export function useProjectsTableLogic({
       if (field === "all" || field === "") {
         const leadName = project.lead?.name?.toLowerCase() || "";
         const leadNumber = project.lead?.leadNumber?.toLowerCase() || "";
-        const invoiceAmount = project.invoiceAmount?.toString() || "";
-        const lastPayment = project.payments && project.payments.length > 0
-          ? project.payments[project.payments.length - 1].toString()
-          : "";
+        const estimatedAmount = project.financial?.estimatedAmount?.toString() || "";
+        const paidAmount = project.financial?.paidAmount?.toString() || "";
         return (
           leadName.includes(normalizedQuery) ||
           leadNumber.includes(normalizedQuery) ||
-          invoiceAmount.includes(normalizedQuery) ||
-          lastPayment.includes(normalizedQuery)
+          estimatedAmount.includes(normalizedQuery) ||
+          paidAmount.includes(normalizedQuery)
         );
       }
 

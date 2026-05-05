@@ -11,11 +11,7 @@ import type { Project, ProjectPatch } from "@/project/domain";
 
 
 type ProjectFormData = {
-  invoiceAmount?: number;
-  payments?: number[];
   projectProgressStatus?: string;
-  invoiceStatus?: string;
-  quickbooks?: boolean;
   overview?: string;
   notes?: string[];
   leadId?: number;
@@ -32,11 +28,7 @@ export function useUpdateProjectController({ project, onUpdated }: UseUpdateProj
 
   const controller = useFormController<ProjectFormData, Project>({
     initialForm: {
-      invoiceAmount: project?.invoiceAmount,
-      payments: project?.payments,
       projectProgressStatus: project?.projectProgressStatus,
-      invoiceStatus: project?.invoiceStatus,
-      quickbooks: project?.quickbooks,
       overview: project?.overview,
       notes: project?.notes,
       leadId: project?.leadId,
@@ -50,11 +42,7 @@ export function useUpdateProjectController({ project, onUpdated }: UseUpdateProj
       }
       
       const patch: ProjectPatch = {
-        invoiceAmount: form.invoiceAmount,
-        payments: form.payments,
         projectProgressStatus: form.projectProgressStatus as any,
-        invoiceStatus: form.invoiceStatus as any,
-        quickbooks: form.quickbooks,
         overview: form.overview,
         notes: form.notes,
         leadId: form.leadId,
@@ -77,11 +65,7 @@ export function useUpdateProjectController({ project, onUpdated }: UseUpdateProj
   useEffect(() => {
     if (project) {
       controller.setForm({
-        invoiceAmount: project.invoiceAmount,
-        payments: project.payments,
         projectProgressStatus: project.projectProgressStatus,
-        invoiceStatus: project.invoiceStatus,
-        quickbooks: project.quickbooks,
         overview: project.overview,
         notes: project.notes,
         leadId: project.leadId,

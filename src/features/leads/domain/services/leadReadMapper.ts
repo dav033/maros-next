@@ -29,6 +29,9 @@ export type ApiLeadDTO = {
   leadType?: string | number | null;
   contact?: ApiContactDTO;
   projectType?: ApiProjectTypeDTO;
+  project?: {
+    id?: number | null;
+  } | null;
   notes?: string[] | null;
   inReview?: boolean | null;
 } | null;
@@ -126,6 +129,10 @@ export function mapLeadFromDTO(dto: ApiLeadDTO): Lead {
       name: projectTypeName || "Unclassified",
       color: projectTypeColor || "#cccccc",
     },
+    project:
+      typeof dto?.project?.id === "number"
+        ? { id: dto.project.id }
+        : null,
     notes: notesArray,
   };
 }

@@ -5,7 +5,6 @@ import type { Project } from "@/project/domain";
 import { ProjectProgressStatus, InvoiceStatus } from "@/project/domain";
 import { ProjectsTable } from "@/project/presentation";
 import { ProjectModal } from "../organisms/ProjectModal";
-import { PaymentsModal } from "../organisms/PaymentsModal";
 import { X, FolderPlus, Search, Layers } from "lucide-react";
 import { ProjectsTableSkeleton } from "../organisms/ProjectsTableSkeleton";
 import { Button } from "@/components/ui/button";
@@ -22,7 +21,7 @@ import type { ProjectGroupBy } from "../hooks/table/useProjectsTableLogic";
 import { useProjectsToolbarSearchController } from "../hooks/table/useProjectsToolbarSearchController";
 import { useProjectsNotesModalController } from "../hooks/modals/useProjectsNotesModalController";
 import { useInstantLeadsByType } from "@/leads/presentation";
-import { LeadType } from "@/leads/domain";
+import { LeadTypeSwitcher } from "@/components/shared/LeadTypeSwitcher";
 
 const PROGRESS_OPTIONS: Array<{ value: ProjectProgressStatus | "all"; label: string }> = [
   { value: "all", label: "All progress" },
@@ -54,7 +53,7 @@ export interface ProjectsPageViewProps {
 }
 
 export function ProjectsPageView({ logic }: ProjectsPageViewProps) {
-  const { data, crud, table, notesModal, openNotesModal, paymentsModal } = logic;
+  const { leadType, data, crud, table, notesModal, openNotesModal } = logic;
 
   const { projects, showSkeleton } = data;
 
@@ -83,16 +82,8 @@ export function ProjectsPageView({ logic }: ProjectsPageViewProps) {
   const { searchQuery, searchField, setSearchQuery, setSearchField } = searchState;
   const { progressFilter, setProgressFilter, invoiceFilter, setInvoiceFilter, groupBy, setGroupBy } = filterState;
 
-  // Obtener todos los leads para el select
-  const allLeads = useInstantLeadsByType(LeadType.CONSTRUCTION);
-  const plumbingLeads = useInstantLeadsByType(LeadType.PLUMBING);
-  const roofingLeads = useInstantLeadsByType(LeadType.ROOFING);
-  
-  const leads = [
-    ...(allLeads.leads ?? []),
-    ...(plumbingLeads.leads ?? []),
-    ...(roofingLeads.leads ?? []),
-  ];
+  const leadsByType = useInstantLeadsByType(leadType);
+  const leads = leadsByType.leads ?? [];
 
   const toolbarSearchController = useProjectsToolbarSearchController({
     searchQuery,
@@ -125,10 +116,13 @@ export function ProjectsPageView({ logic }: ProjectsPageViewProps) {
   return (
     <EntityCrudPageTemplate
       header={
-        <header className="flex flex-col gap-1">
-          <h1 className="text-xl font-semibold text-foreground sm:text-2xl">Projects</h1>
+        <div className="flex flex-col gap-3">
+          <header className="flex flex-col gap-1">
+            <h1 className="text-xl font-semibold text-foreground sm:text-2xl">Projects</h1>
             <p className="text-xs text-muted-foreground sm:text-sm">Manage your projects</p>
-        </header>
+          </header>
+          <LeadTypeSwitcher currentType={leadType} basePath="/projects" />
+        </div>
       }
       toolbar={
         <div className="flex flex-col gap-2 rounded-xl bg-card p-3">
@@ -262,8 +256,6 @@ export function ProjectsPageView({ logic }: ProjectsPageViewProps) {
           />
 
           <NotesEditorModal controller={notesModalController} />
-
-          <PaymentsModal controller={paymentsModal} />
         </>
       }
     />

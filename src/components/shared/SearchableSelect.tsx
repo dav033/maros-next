@@ -56,6 +56,18 @@ export function SearchableSelect({
     [options, value]
   );
 
+  const safeOptions = useMemo(
+    () =>
+      options
+        .filter((opt): opt is SearchableSelectOption => !!opt && typeof opt.value === "string")
+        .map((opt) => ({
+          ...opt,
+          label: typeof opt.label === "string" && opt.label.trim().length > 0 ? opt.label : "Unnamed",
+          value: opt.value,
+        })),
+    [options],
+  );
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -83,10 +95,10 @@ export function SearchableSelect({
           <CommandList>
             <CommandEmpty>{emptyText}</CommandEmpty>
             <CommandGroup>
-              {options.map((opt) => (
+              {safeOptions.map((opt) => (
                 <CommandItem
                   key={opt.value}
-                  value={opt.label}
+                  value={`${opt.label} ${opt.value}`.trim()}
                   disabled={opt.disabled}
                   onSelect={() => {
                     onChange(opt.value === value ? "" : opt.value);

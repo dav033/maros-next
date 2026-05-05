@@ -30,10 +30,10 @@ export type CreateLeadBasePayload = {
 
 export type CreateLeadWithNewContactPayload = CreateLeadBasePayload & {
   contact: {
-    companyName: string;
     name: string;
     phone: string;
     email: string;
+    companyId?: number;
   };
 };
 
@@ -84,14 +84,23 @@ export function mapLeadDraftToCreatePayload(
   }
 
   if ("contact" in draft) {
+    const contactPayload: CreateLeadWithNewContactPayload["contact"] = {
+      name: draft.contact.name,
+      phone: draft.contact.phone,
+      email: draft.contact.email,
+    };
+
+    if (
+      typeof draft.contact.companyId === "number" &&
+      Number.isInteger(draft.contact.companyId) &&
+      draft.contact.companyId > 0
+    ) {
+      contactPayload.companyId = draft.contact.companyId;
+    }
+
     return {
       ...base,
-      contact: {
-        companyName: draft.contact.companyName,
-        name: draft.contact.name,
-        phone: draft.contact.phone,
-        email: draft.contact.email,
-      },
+      contact: contactPayload,
     };
   }
 

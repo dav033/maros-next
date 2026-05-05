@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, useState, useEffect } from "react";
-import { ArrowLeft, Briefcase, User, Phone, Mail, MapPin, Building, FolderTree, FileText, StickyNote, TrendingUp, Receipt, Calendar, Edit, Plus, Save, X } from "lucide-react";
+import { ArrowLeft, Briefcase, User, Phone, Mail, MapPin, Building, FolderTree, FileText, StickyNote, TrendingUp, Receipt, Calendar, Edit, Plus, Save, X, FolderPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -14,7 +14,7 @@ import { useLeadEditModal } from "../hooks/modals/useLeadEditModal";
 import { useLeadsNotesLogic } from "../hooks/notes/useLeadsNotesLogic";
 import { useLeadModalController } from "../hooks/modals/useLeadModalController";
 import { useLeadsNotesModalController } from "../hooks/modals/useLeadsNotesModalController";
-import { NotesEditorModal } from "@/components/shared";
+import { DeleteFeedbackModal, NotesEditorModal } from "@/components/shared";
 import { getLeadTypeFromNumber, LeadType, type Lead } from "@/leads/domain";
 import { useInstantContacts } from "@/features/contact/presentation/hooks";
 import { useProjectTypes } from "@/projectType/presentation";
@@ -23,7 +23,7 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { leadsKeys, patchLead } from "@/leads/application";
 import { useLeadsData } from "../hooks/data/useLeadsData";
-import { useLeadsApp, useContactsApp } from "@/di";
+import { useLeadsApp, useContactsApp, useProjectsApp } from "@/di";
 import type { LeadPatch } from "@/leads/domain";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, EMPTY_SELECT_VALUE } from "@/components/ui/select";
@@ -36,6 +36,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { ContactModeSelector, ContactMode } from "@/leads/presentation";
 import { toContactDraft, type ContactFormValue } from "@/features/contact/domain/mappers";
+import { CompanyModal } from "@/features/company/presentation/organisms/CompanyModal";
+import { useContactCompanyModalController } from "@/features/contact/presentation/hooks/controllers/useContactCompanyModalController";
+import { useCompanyMutations } from "@/features/company/presentation/hooks";
+import { initialCompanyFormValue, toDraft as toCompanyDraft } from "@/features/company/presentation/helpers/companyFormHelpers";
+import type { CompanyFormValue } from "@/features/company/presentation/molecules/CompanyForm";
+import { createProject } from "@/project/application";
 
 interface LeadDetails {
   id: number;
@@ -77,6 +83,9 @@ interface LeadDetails {
   projectType?: {
     id: number;
     name: string;
+  } | null;
+  project?: {
+    id: number;
   } | null;
 }
 
@@ -142,8 +151,38 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
   const queryClient = useQueryClient();
   const data = useLeadsData(leadType);
   const ctx = useLeadsApp();
+  const projectsApp = useProjectsApp();
   const contactCtx = useContactsApp();
-  const { companies } = useContactsData();
+  const { companies, services } = useContactsData();
+  const { createMutation: createCompanyMutation } = useCompanyMutations();
+
+  const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
+  const [companyFormValue, setCompanyFormValue] = useState<CompanyFormValue>(
+    initialCompanyFormValue,
+  );
+  const [companyServerError, setCompanyServerError] = useState<string | null>(
+    null,
+  );
+  const [companyAssignTarget, setCompanyAssignTarget] = useState<
+    "existingContact" | "editingContact" | "newContactDraft"
+  >("newContactDraft");
+
+  const openCompanyModal = useCallback(
+    (target: "existingContact" | "editingContact" | "newContactDraft") => {
+      setCompanyAssignTarget(target);
+      setCompanyFormValue(initialCompanyFormValue);
+      setCompanyServerError(null);
+      setIsCompanyModalOpen(true);
+    },
+    [],
+  );
+
+  const closeCompanyModal = useCallback(() => {
+    if (createCompanyMutation.isPending) return;
+    setIsCompanyModalOpen(false);
+    setCompanyServerError(null);
+    setCompanyFormValue(initialCompanyFormValue);
+  }, [createCompanyMutation.isPending]);
 
   // Estado para edición inline del contacto
   const [isEditingContact, setIsEditingContact] = useState(false);
@@ -176,6 +215,45 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
   const [newContactCompanyId, setNewContactCompanyId] = useState<number | null>(null);
   const [isLinkingContact, setIsLinkingContact] = useState(false);
   const [contactError, setContactError] = useState<string | null>(null);
+  const [isConvertingToProject, setIsConvertingToProject] = useState(false);
+  const [isConvertProjectModalOpen, setIsConvertProjectModalOpen] = useState(false);
+
+  const handleConvertToProject = useCallback(async () => {
+    if (!leadDetails || typeof leadDetails.id !== "number") return;
+
+    if (leadDetails.project?.id) {
+      router.push(`/project/${leadDetails.project.id}`);
+      return;
+    }
+
+    setIsConvertProjectModalOpen(true);
+  }, [leadDetails, router]);
+
+  const closeConvertProjectModal = useCallback(() => {
+    if (!isConvertingToProject) {
+      setIsConvertProjectModalOpen(false);
+    }
+  }, [isConvertingToProject]);
+
+  const confirmConvertToProject = useCallback(async () => {
+    if (!leadDetails || typeof leadDetails.id !== "number") return;
+
+    setIsConvertingToProject(true);
+    try {
+      const created = await createProject(projectsApp, { leadId: leadDetails.id });
+      toast.success("Lead converted to project successfully!");
+      setIsConvertProjectModalOpen(false);
+      router.push(`/project/${created.id}`);
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Could not convert lead to project";
+      toast.error(message);
+    } finally {
+      setIsConvertingToProject(false);
+    }
+  }, [leadDetails, projectsApp, router]);
 
   const handleStartEditingLead = useCallback(() => {
     if (leadDetails) {
@@ -462,6 +540,93 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
       setIsLinkingContact(false);
     }
   };
+
+  const assignCompanyToExistingContact = useCallback(
+    async (companyId: number | null) => {
+      if (!leadDetails?.contact?.id) return;
+      await patchContact(contactCtx, leadDetails.contact.id, { companyId });
+      const selectedCompany =
+        companyId != null
+          ? (companies || []).find((company) => company.id === companyId)
+          : null;
+
+      setLeadDetails((prev) => {
+        if (!prev?.contact) return prev;
+
+        return {
+          ...prev,
+          contact: {
+                    ...prev.contact,
+                    company:
+                      selectedCompany && selectedCompany.id
+                        ? {
+                            id: selectedCompany.id,
+                            name: selectedCompany.name,
+                            address: selectedCompany.address,
+                            addressLink: selectedCompany.addressLink,
+                            phone: selectedCompany.phone,
+                            email: selectedCompany.email,
+                            submiz: selectedCompany.submiz,
+                            type: selectedCompany.type,
+                            serviceId: selectedCompany.serviceId ?? undefined,
+                            isCustomer: selectedCompany.isCustomer,
+                            isClient: selectedCompany.isClient,
+                            notes: selectedCompany.notes,
+                          }
+                        : null,
+          },
+        };
+      });
+      toast.success("Company linked successfully.");
+      router.refresh();
+    },
+    [leadDetails, contactCtx, companies, router],
+  );
+
+  const handleCompanySubmit = useCallback(async () => {
+    const draft = toCompanyDraft(companyFormValue);
+
+    if (!draft.name) {
+      setCompanyServerError("Name is required");
+      return;
+    }
+
+    try {
+      const created = await createCompanyMutation.mutateAsync({ draft });
+      const createdCompanyId = (created as { id?: unknown }).id;
+
+      if (typeof createdCompanyId === "number" && createdCompanyId > 0) {
+        if (companyAssignTarget === "editingContact") {
+          setEditingContact((prev) => ({ ...prev, companyId: createdCompanyId }));
+        } else if (companyAssignTarget === "existingContact") {
+          await assignCompanyToExistingContact(createdCompanyId);
+        } else {
+          setNewContactCompanyId(createdCompanyId);
+        }
+      }
+
+      setIsCompanyModalOpen(false);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Could not create company";
+      setCompanyServerError(message);
+    }
+  }, [
+    companyFormValue,
+    createCompanyMutation,
+    companyAssignTarget,
+    assignCompanyToExistingContact,
+  ]);
+
+  const companyModalController = useContactCompanyModalController({
+    isOpen: isCompanyModalOpen,
+    onClose: closeCompanyModal,
+    onSubmit: handleCompanySubmit,
+    formValue: companyFormValue,
+    onChange: setCompanyFormValue,
+    isSubmitting: createCompanyMutation.isPending,
+    serverError: companyServerError,
+  });
   
   const { controller: leadModalController, contactsForModal } = useLeadModalController({
     isCreateModalOpen: false,
@@ -544,6 +709,19 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleConvertToProject}
+            disabled={isConvertingToProject}
+          >
+            <FolderPlus className="size-4 mr-2" />
+            {isConvertingToProject
+              ? "Converting..."
+              : leadDetails.project?.id
+                ? "Go to Project"
+                : "Convert to Project"}
+          </Button>
           {leadDetails.status && (
             <Badge variant="outline">{leadDetails.status}</Badge>
           )}
@@ -944,6 +1122,7 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
                           selectedCompanyId={editingContact.companyId ?? null}
                           companies={companies || []}
                           onCompanyChange={(companyId) => setEditingContact({ ...editingContact, companyId })}
+                          onCreateNewCompany={() => openCompanyModal("editingContact")}
                         />
                       </div>
                       <div className="grid grid-cols-2 gap-3">
@@ -1068,12 +1247,7 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
                           <Building className="size-4 text-muted-foreground mt-0.5 shrink-0" />
                           <div>
                             <p className="text-sm text-muted-foreground">Company</p>
-                            <Link
-                              href={`/company`}
-                              className="text-foreground hover:underline"
-                            >
-                              {leadDetails.contact.company.name}
-                            </Link>
+                            <p className="text-foreground">{leadDetails.contact.company.name}</p>
                           </div>
                         </div>
                       ) : (
@@ -1111,21 +1285,18 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => router.push(`/company`)}
+                      onClick={() => openCompanyModal("existingContact")}
                       className="text-muted-foreground hover:text-foreground"
                     >
                       <Edit className="size-4 mr-2" />
-                      Edit
+                      Change
                     </Button>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div>
-                      <Link
-                        href={`/company`}
-                        className="text-lg font-semibold text-foreground hover:underline"
-                      >
+                      <p className="text-lg font-semibold text-foreground">
                         {leadDetails.contact.company.name}
-                      </Link>
+                      </p>
                       {leadDetails.contact.company.type && (
                         <p className="text-sm text-muted-foreground mt-1">
                           Type: {typeof leadDetails.contact.company.type === 'string' 
@@ -1154,7 +1325,7 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => router.push(`/company`)}
+                          onClick={() => openCompanyModal("existingContact")}
                         >
                           <Plus className="size-3 mr-1" />
                           Add
@@ -1183,7 +1354,7 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => router.push(`/company`)}
+                          onClick={() => openCompanyModal("existingContact")}
                         >
                           <Plus className="size-3 mr-1" />
                           Add
@@ -1220,7 +1391,7 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => router.push(`/company`)}
+                          onClick={() => openCompanyModal("existingContact")}
                         >
                           <Plus className="size-3 mr-1" />
                           Add
@@ -1278,7 +1449,7 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => router.push(`/company`)}
+                            onClick={() => openCompanyModal("existingContact")}
                           >
                             <Plus className="size-3 mr-1" />
                             Add
@@ -1299,15 +1470,15 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
                       This contact does not have an associated company
                     </CardDescription>
                   </CardHeader>
-                  <CardContent>
-                    <Button
-                      variant="outline"
-                      onClick={() => router.push(`/company?create`)}
-                      className="w-full"
-                    >
-                      <Plus className="size-4 mr-2" />
-                      Create Company
-                    </Button>
+                  <CardContent className="space-y-3">
+                    <ContactCompanySelector
+                      selectedCompanyId={null}
+                      companies={companies || []}
+                      onCompanyChange={(companyId) => {
+                        void assignCompanyToExistingContact(companyId);
+                      }}
+                      onCreateNewCompany={() => openCompanyModal("existingContact")}
+                    />
                   </CardContent>
                 </Card>
               ) : null}
@@ -1353,16 +1524,8 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
                     selectedCompanyId={newContactCompanyId}
                     companies={companies || []}
                     onCompanyChange={(companyId) => setNewContactCompanyId(companyId)}
+                    onCreateNewCompany={() => openCompanyModal("newContactDraft")}
                   />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => router.push(`/company?create`)}
-                    className="mt-1"
-                  >
-                    <Plus className="size-4 mr-2" />
-                    Create new company
-                  </Button>
                 </div>
 
                 {contactError && (
@@ -1396,8 +1559,33 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
         contacts={contactsForModal}
         projectTypes={projectTypes}
       />
+
+      <CompanyModal
+        controller={companyModalController}
+        services={services || []}
+        contacts={[]}
+      />
       
       <NotesEditorModal controller={notesModalController} />
+
+      <DeleteFeedbackModal
+        isOpen={isConvertProjectModalOpen}
+        title="Convert Lead to Project"
+        description={
+          <>
+            Are you sure you want to convert lead{" "}
+            <span className="font-semibold text-foreground">
+              {leadDetails.leadNumber ? `#${leadDetails.leadNumber}` : leadDetails.name}
+            </span>{" "}
+            into a project?
+          </>
+        }
+        loading={isConvertingToProject}
+        onClose={closeConvertProjectModal}
+        onConfirm={confirmConvertToProject}
+        confirmLabel="Convert"
+        loadingLabel="Converting..."
+      />
     </div>
   );
 }

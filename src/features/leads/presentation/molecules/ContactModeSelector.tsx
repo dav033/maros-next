@@ -4,14 +4,7 @@ import type { ChangeEvent } from "react";
 import { User, Phone, Mail } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  EMPTY_SELECT_VALUE,
-} from "@/components/ui/select";
+import { SearchableSelect } from "@/components/shared/SearchableSelect";
 
 export enum ContactMode {
   NEW_CONTACT = "NEW_CONTACT",
@@ -129,26 +122,21 @@ export function ContactModeSelector({
 
       <TabsContent value={ContactMode.EXISTING_CONTACT} className="space-y-3 mt-0">
         {contacts.length > 0 && onContactSelect ? (
-          <Select
-            value={selectedContactId != null ? String(selectedContactId) : EMPTY_SELECT_VALUE}
-            onValueChange={(val) => onContactSelect(val === EMPTY_SELECT_VALUE ? undefined : Number(val))}
+          <SearchableSelect
+            options={contacts
+              .filter((c): c is ContactOption & { id: number } => typeof c.id === "number")
+              .map((c) => ({
+                value: String(c.id),
+                label: c.name,
+              }))}
+            value={selectedContactId != null ? String(selectedContactId) : ""}
+            onChange={(value) => onContactSelect(value ? Number(value) : undefined)}
+            placeholder="Select Contact *"
+            searchPlaceholder="Search contact..."
+            emptyText="No contacts found"
+            icon={User}
             disabled={disabled}
-          >
-            <SelectTrigger>
-              <User className="size-4 text-muted-foreground mr-2" />
-              <SelectValue placeholder="Select Contact *" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={EMPTY_SELECT_VALUE}>Select Contact</SelectItem>
-              {contacts
-                .filter((c): c is ContactOption & { id: number } => typeof c.id === "number")
-                .map((c) => (
-                  <SelectItem key={c.id} value={String(c.id)}>
-                    {c.name}
-                  </SelectItem>
-                ))}
-            </SelectContent>
-          </Select>
+          />
         ) : (
           <div className="text-sm text-muted-foreground">No contacts available</div>
         )}

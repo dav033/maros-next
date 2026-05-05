@@ -28,6 +28,7 @@ export function useLeadCreateModal({
     leadType,
     inReview,
     onCreated: async (lead: Lead) => {
+      createController.reset();
       setIsOpen(false);
       toast.success("Lead created successfully!");
       await onCreated?.();
@@ -48,6 +49,7 @@ export function useLeadCreateModal({
 
   const close = () => {
     if (!createController.isLoading) {
+      createController.reset();
       setIsOpen(false);
     }
   };

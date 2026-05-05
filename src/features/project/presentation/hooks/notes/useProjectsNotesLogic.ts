@@ -6,7 +6,6 @@ import { toast } from "sonner";
 import { projectsKeys } from "@/project/application";
 import type { Project } from "@/project/domain";
 import { useQueryClient } from "@tanstack/react-query";
-import { useProjectsData } from "../data/useProjectsData";
 import { updateProjectNotesAction } from "../../../actions/notesActions";
 
 export interface UseProjectsNotesLogicReturn {
@@ -22,9 +21,12 @@ export interface UseProjectsNotesLogicReturn {
   };
 }
 
-export function useProjectsNotesLogic(): UseProjectsNotesLogicReturn {
+export function useProjectsNotesLogic({
+  refetch,
+}: {
+  refetch: () => Promise<void>;
+}): UseProjectsNotesLogicReturn {
   const queryClient = useQueryClient();
-  const data = useProjectsData();
 
   const {
     notesModalState,
@@ -57,7 +59,7 @@ export function useProjectsNotesLogic(): UseProjectsNotesLogicReturn {
       });
 
       queryClient.invalidateQueries({ queryKey: projectsKeys.all });
-      await data.refetch();
+      await refetch();
       toast.success("Notes updated successfully!");
     });
   };

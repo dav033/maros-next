@@ -22,11 +22,8 @@ export enum InvoiceStatus {
 
 export interface Project {
   id: number;
-  invoiceAmount?: number;
-  payments?: number[];
   projectProgressStatus?: ProjectProgressStatus;
   invoiceStatus?: InvoiceStatus;
-  quickbooks?: boolean;
   overview?: string;
   notes: string[];
   lead: Lead;
@@ -40,22 +37,14 @@ export type ProjectId = number;
 export type LeadId = number;
 
 export type ProjectDraft = Readonly<{
-  invoiceAmount?: number;
-  payments?: number[];
   projectProgressStatus?: ProjectProgressStatus;
-  invoiceStatus?: InvoiceStatus;
-  quickbooks?: boolean;
   overview?: string;
   notes?: string[];
   leadId: LeadId;
 }>;
 
 export type ProjectPatch = Readonly<{
-  invoiceAmount?: number;
-  payments?: number[];
   projectProgressStatus?: ProjectProgressStatus;
-  invoiceStatus?: InvoiceStatus;
-  quickbooks?: boolean;
   overview?: string;
   notes?: string[];
   leadId?: LeadId;

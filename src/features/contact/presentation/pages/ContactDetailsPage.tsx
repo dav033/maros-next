@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useCallback, useEffect } from "react";
-import { ArrowLeft, User, Phone, Mail, MapPin, Building, Briefcase, FolderTree, StickyNote, TrendingUp, Receipt, Edit, Plus, Save, X } from "lucide-react";
+import { ArrowLeft, User, Phone, Mail, MapPin, Building, Briefcase, FolderTree, StickyNote, TrendingUp, Edit, Plus, Save, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -75,11 +75,7 @@ interface ContactDetails {
     } | null;
     project?: {
       id: number;
-      invoiceAmount?: number;
-      payments?: number[];
       projectProgressStatus?: string;
-      invoiceStatus?: string;
-      quickbooks?: boolean;
       overview?: string;
       notes?: string[];
     } | null;
@@ -847,34 +843,10 @@ export function ContactDetailsPage({ contactId, initialData }: ContactDetailsPag
                               {lead.project?.projectProgressStatus && (
                                 <Badge variant="outline">{lead.project.projectProgressStatus}</Badge>
                               )}
-                              {lead.project?.invoiceStatus && (
-                                <Badge variant="outline">{lead.project.invoiceStatus}</Badge>
-                              )}
                             </div>
                           </div>
                         </CardHeader>
                         <CardContent className="space-y-3">
-                          <div className="grid grid-cols-2 gap-4 text-sm">
-                            {lead.project?.invoiceAmount && (
-                              <div>
-                                <p className="text-muted-foreground flex items-center gap-1">
-                                  <Receipt className="size-3" />
-                                  Invoice Amount
-                                </p>
-                                <p className="text-foreground font-semibold">
-                                  ${lead.project.invoiceAmount.toLocaleString()}
-                                </p>
-                              </div>
-                            )}
-                            {lead.project?.quickbooks !== undefined && (
-                              <div>
-                                <p className="text-muted-foreground">In QuickBooks</p>
-                                <Badge variant={lead.project.quickbooks ? "default" : "outline"}>
-                                  {lead.project.quickbooks ? "Yes" : "No"}
-                                </Badge>
-                              </div>
-                            )}
-                          </div>
                           {lead.project?.overview && (
                             <>
                               <Separator />

@@ -11,10 +11,8 @@ export interface Project {
   id: number;
   projectName: string;
   overview?: string;
-  payments?: number[];
   projectStatus: ProjectStatus;
   invoiceStatus: InvoiceStatus;
-  quickbooks?: boolean;
   startDate?: string;
   lead: Lead;
   endDate?: string;
