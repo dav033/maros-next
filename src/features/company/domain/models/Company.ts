@@ -54,3 +54,29 @@ export type CompanyPatch = Readonly<{
 
 export interface CompanyPolicies {}
 export interface CompanyPatchPolicies {}
+
+export interface CompanyDetails {
+  id: number;
+  name: string;
+  address?: string;
+  addressLink?: string;
+  type: CompanyType;
+  serviceId?: number | null;
+  isCustomer: boolean;
+  isClient: boolean;
+  notes: string[];
+  phone?: string;
+  email?: string;
+  submiz?: string;
+  contacts?: Array<{
+    id: number;
+    name?: string;
+    phone?: string;
+    email?: string;
+    address?: string;
+    addressLink?: string;
+    isCustomer: boolean;
+    isClient: boolean;
+    notes: string[];
+  }>;
+}

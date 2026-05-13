@@ -117,3 +117,54 @@ export type ApplyContactPatchResult = Readonly<{
     payload: { id: number; changed: string[]; notes?: string[] };
   }>;
 }>;
+
+export interface ContactDetails {
+  id: number;
+  name: string;
+  role?: string;
+  phone?: string;
+  email?: string;
+  occupation?: string;
+  address?: string;
+  addressLink?: string;
+  isCustomer: boolean;
+  isClient: boolean;
+  notes: string[];
+  company?: {
+    id: number;
+    name: string;
+    address?: string;
+    type: any;
+    serviceId?: number;
+    isCustomer: boolean;
+    isClient: boolean;
+    notes: string[];
+  };
+  leads: Array<{
+    id: number;
+    leadNumber?: string;
+    name?: string;
+    startDate?: string;
+    location?: string;
+    addressLink?: string;
+    status?: string;
+    notes?: string[];
+    inReview: boolean;
+    projectType?: {
+      id: number;
+      name: string;
+    } | null;
+    project?: {
+      id: number;
+      projectProgressStatus?: string;
+      overview?: string;
+      notes?: string[];
+    } | null;
+  }>;
+  stats: {
+    totalLeads: number;
+    totalProjects: number;
+    activeProjects: number;
+    completedProjects: number;
+  };
+}

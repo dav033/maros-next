@@ -23,12 +23,19 @@ declare global {
   interface Window {
     google?: {
       maps: {
+        [key: string]: any;
         places: {
           Autocomplete: new (input: HTMLInputElement, options?: any) => {
             addListener: (event: string, callback: () => void) => void;
             getPlace: () => {
               formatted_address: string;
               place_id?: string;
+              geometry?: {
+                location?: {
+                  lat: () => number;
+                  lng: () => number;
+                };
+              };
             };
           };
         };
@@ -52,10 +59,44 @@ export function LocationField({
   onLocationChange,
   className,
 }: LocationFieldProps) {
-  const [useGoogleMapsAutocomplete, setUseGoogleMapsAutocomplete] = useState(false);
+  const [useGoogleMapsAutocomplete, setUseGoogleMapsAutocomplete] = useState(
+    Boolean(addressLink?.trim())
+  );
   const [isGoogleMapsLoaded, setIsGoogleMapsLoaded] = useState(false);
+  const [selectedCoordinates, setSelectedCoordinates] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
   const autocompleteRef = useRef<any>(null);
+  const mapRef = useRef<any>(null);
+  const markerRef = useRef<any>(null);
+  const geocoderRef = useRef<any>(null);
+  const onAddressChangeRef = useRef(onAddressChange);
+  const onAddressLinkChangeRef = useRef(onAddressLinkChange);
+  const onLocationChangeRef = useRef(onLocationChange);
+
+  useEffect(() => {
+    onAddressChangeRef.current = onAddressChange;
+    onAddressLinkChangeRef.current = onAddressLinkChange;
+    onLocationChangeRef.current = onLocationChange;
+  });
+
+  const centerMap = (lat: number, lng: number, zoom = 16) => {
+    if (!mapRef.current || !markerRef.current) return;
+
+    const position = { lat, lng };
+    mapRef.current.setCenter(position);
+    mapRef.current.setZoom(zoom);
+    markerRef.current.setPosition(position);
+  };
+
+  useEffect(() => {
+    if (addressLink?.trim()) {
+      setUseGoogleMapsAutocomplete(true);
+    }
+  }, [addressLink]);
 
   // Listen for Google Maps API load
   useEffect(() => {
@@ -87,7 +128,7 @@ export function LocationField({
           inputRef.current,
           {
             types: ["address"],
-            fields: ["formatted_address", "place_id"],
+            fields: ["formatted_address", "place_id", "geometry"],
           }
         );
 
@@ -95,6 +136,14 @@ export function LocationField({
           const place = autocompleteRef.current.getPlace();
           const addressText =
             place?.formatted_address?.trim() || inputRef.current?.value?.trim() || "";
+          const lat = place?.geometry?.location?.lat?.();
+          const lng = place?.geometry?.location?.lng?.();
+
+          if (typeof lat === "number" && typeof lng === "number") {
+            setSelectedCoordinates({ lat, lng });
+          } else {
+            setSelectedCoordinates(null);
+          }
 
           if (addressText) {
             
@@ -103,11 +152,11 @@ export function LocationField({
             const mapsLink = `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
             
             // Update both address and link together to ensure synchronization
-            onAddressChange?.(addressText);
-            onAddressLinkChange?.(mapsLink);
+            onAddressChangeRef.current?.(addressText);
+            onAddressLinkChangeRef.current?.(mapsLink);
 
-            if (onLocationChange) {
-              onLocationChange({ address: addressText, link: mapsLink });
+            if (onLocationChangeRef.current) {
+              onLocationChangeRef.current({ address: addressText, link: mapsLink });
             }
           }
         });
@@ -127,13 +176,61 @@ export function LocationField({
         window.google.maps.event.clearInstanceListeners(autocompleteRef.current);
       }
     };
-  }, [useGoogleMapsAutocomplete, isGoogleMapsLoaded, disabled, onAddressChange, onAddressLinkChange, onLocationChange]);
+  }, [useGoogleMapsAutocomplete, isGoogleMapsLoaded, disabled]);
+
+  useEffect(() => {
+    if (!useGoogleMapsAutocomplete || !isGoogleMapsLoaded || !mapContainerRef.current) return;
+
+    const mapsApi = window.google?.maps as any;
+    if (!mapsApi?.Map || !mapsApi?.Marker) return;
+
+    if (!mapRef.current) {
+      mapRef.current = new mapsApi.Map(mapContainerRef.current, {
+        center: { lat: 20, lng: 0 },
+        zoom: 2,
+        mapTypeControl: false,
+        streetViewControl: false,
+        fullscreenControl: false,
+      });
+      markerRef.current = new mapsApi.Marker({ map: mapRef.current });
+    }
+
+    if (!geocoderRef.current && mapsApi?.Geocoder) {
+      geocoderRef.current = new mapsApi.Geocoder();
+    }
+  }, [useGoogleMapsAutocomplete, isGoogleMapsLoaded]);
+
+  useEffect(() => {
+    if (!useGoogleMapsAutocomplete || !selectedCoordinates) return;
+    centerMap(selectedCoordinates.lat, selectedCoordinates.lng);
+  }, [useGoogleMapsAutocomplete, selectedCoordinates]);
+
+  useEffect(() => {
+    if (!useGoogleMapsAutocomplete || !isGoogleMapsLoaded || !address.trim()) return;
+    if (selectedCoordinates) return;
+
+    const geocoder = geocoderRef.current;
+    if (!geocoder?.geocode) return;
+
+    geocoder.geocode({ address: address.trim() }, (results: any[], status: string) => {
+      if (status !== "OK" || !results?.[0]?.geometry?.location) return;
+
+      const location = results[0].geometry.location;
+      const lat = typeof location.lat === "function" ? location.lat() : location.lat;
+      const lng = typeof location.lng === "function" ? location.lng() : location.lng;
+
+      if (typeof lat === "number" && typeof lng === "number") {
+        centerMap(lat, lng, 14);
+      }
+    });
+  }, [address, useGoogleMapsAutocomplete, isGoogleMapsLoaded, selectedCoordinates]);
 
   const handleToggleGoogleMaps = (checked: boolean) => {
     setUseGoogleMapsAutocomplete(checked);
   };
 
   const handleAddressChange = (value: string) => {
+    setSelectedCoordinates(null);
     // Always update the address value
     onAddressChange?.(value);
     // Only update location change if autocomplete is not active (autocomplete handles it)
@@ -141,34 +238,6 @@ export function LocationField({
       onLocationChange({ address: value, link: addressLink || "" });
     }
   };
-
-  // Generate Google Maps embed URL
-  const getMapsEmbedUrl = (addressText: string, link?: string | null) => {
-    // If we have a link from autocomplete, convert it to embed format
-    if (link && link.includes('google.com/maps')) {
-      // Convert search link to embed format
-      try {
-        const url = new URL(link);
-        const query = url.searchParams.get('query');
-        if (query) {
-          return `https://www.google.com/maps?q=${encodeURIComponent(query)}&output=embed`;
-        }
-      } catch (e) {
-        // If URL parsing fails, continue with address text
-      }
-    }
-    
-    // If we have address text, use it
-    if (addressText.trim()) {
-      const encodedAddress = encodeURIComponent(addressText.trim());
-      return `https://www.google.com/maps?q=${encodedAddress}&output=embed`;
-    }
-    
-    // Default: show a blank map (world view)
-    return `https://www.google.com/maps?output=embed`;
-  };
-
-  const mapsEmbedUrl = useGoogleMapsAutocomplete ? getMapsEmbedUrl(address, addressLink) : null;
 
   return (
     <div className={cn("space-y-3", className)}>
@@ -201,19 +270,10 @@ export function LocationField({
         </Label>
       </div>
 
-      {useGoogleMapsAutocomplete && mapsEmbedUrl && (
+      {useGoogleMapsAutocomplete && (
         <div className="space-y-2">
-          <div className="w-full h-64 rounded-md overflow-hidden border border-border">
-            <iframe
-              width="100%"
-              height="100%"
-              style={{ border: 0 }}
-              loading="lazy"
-              allowFullScreen
-              referrerPolicy="no-referrer-when-downgrade"
-              src={mapsEmbedUrl}
-              title="Google Maps"
-            />
+          <div className="w-full h-64 rounded-md overflow-hidden border border-border bg-muted/30">
+            <div ref={mapContainerRef} className="h-full w-full" />
           </div>
           {address ? (
             <p className="text-xs text-muted-foreground">

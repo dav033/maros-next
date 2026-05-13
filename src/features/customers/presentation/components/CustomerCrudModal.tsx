@@ -40,7 +40,7 @@ export function CustomerCrudModal({
             {serverError}
           </div>
         )}
-        {children as any}
+        {children}
         <DialogFooter>
           <div className="flex gap-2">
             <Button

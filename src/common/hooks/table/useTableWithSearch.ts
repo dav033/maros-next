@@ -3,19 +3,19 @@
 import { useCallback, useMemo, useState } from "react";
 
 export interface SearchField<T> {
-  key: keyof T & string;
+  key: keyof T & string | "all";
   label: string;
 }
 
 export interface SearchConfig<T> {
   fields: SearchField<T>[];
-  defaultField: keyof T & string;
+  defaultField: keyof T & string | "all";
   normalize?: (value: string) => string;
 }
 
 export interface UseTableWithSearchOptions<T> {
   data: T[];
-  searchableFields?: (keyof T)[];
+  searchableFields?: (keyof T | "all")[];
   defaultSearchField?: string;
   customSearchFn?: (item: T, query: string, field: string) => boolean;
   normalize?: (value: string) => string;
@@ -75,7 +75,7 @@ export function useTableWithSearch<T extends Record<string, any>>({
         label: String(key),
       })),
       defaultField:
-        (defaultSearchField as keyof T & string) ?? (searchableFields[0] as keyof T & string),
+        (defaultSearchField as keyof T & string) ?? (searchableFields[0] as keyof T & string | "all"),
       normalize,
     }),
     [searchableFields, normalize, defaultSearchField]

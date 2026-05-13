@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import type { EvidenceImageRow, RestorationFinalReport } from "@/reports/domain/models";
 import { FileInputList } from "../components/FileInputList";
@@ -61,25 +62,11 @@ export function RestorationFinalPage() {
     contact?.company?.name ? "company" : "individual";
 
   // Obtener proyecto completo desde el backend cuando se selecciona
-  const [project, setProject] = useState<any>(null);
-  const [projectLoading, setProjectLoading] = useState(false);
-  
-  useEffect(() => {
-    if (activeProjectId) {
-      setProjectLoading(true);
-      getProjectById(projectsApp, activeProjectId)
-        .then((proj) => {
-          setProject(proj);
-          setProjectLoading(false);
-        })
-        .catch(() => {
-          setProject(null);
-          setProjectLoading(false);
-        });
-    } else {
-      setProject(null);
-    }
-  }, [activeProjectId, projectsApp]);
+  const { data: project, isLoading: projectLoading } = useQuery({
+    queryKey: ['project', activeProjectId],
+    queryFn: () => getProjectById(projectsApp, activeProjectId!),
+    enabled: !!activeProjectId,
+  });
 
   const finalQuery = useRestorationFinalQuery(project?.id || null);
   const submitMutation = useSubmitRestorationFinalMutation();

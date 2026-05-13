@@ -32,24 +32,9 @@ const iconMap: Record<string, LucideIcon> = {
   "mdi:cash-multiple": DollarSign,
 };
 import { cn } from "@/lib/utils";
+import { sortRows, type SortDir } from "@/common/hooks/table/sorting";
 import { usePagination } from "@/common/hooks/table/usePagination";
 import { TablePagination } from "@/components/shared/TablePagination";
-
-type SortDir = "asc" | "desc";
-
-function naturalCompare(a: string | number | null | undefined, b: string | number | null | undefined): number {
-  const sa = String(a ?? "");
-  const sb = String(b ?? "");
-  return sa.localeCompare(sb, undefined, { numeric: true, sensitivity: "base" });
-}
-
-function sortRows<T>(rows: T[], columns: import("@/types/table").SimpleTableColumn<T>[], sortKey: string | null, sortDir: SortDir): T[] {
-  if (!sortKey) return rows;
-  const col = columns.find((c) => String(c.key) === sortKey);
-  if (!col?.sortValue) return rows;
-  const dir = sortDir === "asc" ? 1 : -1;
-  return [...rows].sort((a, b) => dir * naturalCompare(col.sortValue!(a), col.sortValue!(b)));
-}
 
 const PROGRESS_LABELS: Record<string, string> = {
   NOT_EXECUTED: "Not Executed",

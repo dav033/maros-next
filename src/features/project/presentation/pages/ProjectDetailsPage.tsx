@@ -2,17 +2,15 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useCallback } from "react";
-import { ArrowLeft, FolderTree, User, Phone, Mail, MapPin, Building, TrendingUp, Receipt, StickyNote, DollarSign, Edit, Plus, Save, X } from "lucide-react";
+import { ArrowLeft, FolderTree, User, Phone, Mail, MapPin, Building, Receipt, StickyNote, DollarSign, Edit, Plus, Save, X, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
-import { ProjectModal } from "../organisms/ProjectModal";
-import { useProjectEditModal } from "../hooks/modals/useProjectEditModal";
 import { useProjectsNotesLogic } from "../hooks/notes/useProjectsNotesLogic";
 import { useProjectsNotesModalController } from "../hooks/modals/useProjectsNotesModalController";
-import { NotesEditorModal } from "@/components/shared";
+import { NotesEditorModal, DetailField } from "@/components/shared";
 import { useInstantLeadsByType } from "@/leads/presentation";
 import { LeadType } from "@/leads/domain";
 import { ProjectForm } from "../molecules/ProjectForm";
@@ -93,17 +91,19 @@ type ProjectFormData = {
   leadId?: number;
 };
 
-export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPageProps) {
-  const router = useRouter();
-  const { projectDetails, error } = initialData;
-  const app = useProjectsApp();
+type Payment = NonNullable<NonNullable<ProjectDetails["financial"]>["payments"]>[number];
+type Contact = NonNullable<NonNullable<ProjectDetails["lead"]>["contact"]>;
 
-  // Estado para edición inline del proyecto
-  const [isEditingProject, setIsEditingProject] = useState(false);
-  const [editingProject, setEditingProject] = useState<ProjectFormData>({});
-  const [isSavingProject, setIsSavingProject] = useState(false);
-
-  // Data for modals
+// Fetches leads only when rendered (i.e. when the edit form is open)
+function ProjectEditFormWithLeads({
+  form,
+  onChange,
+  disabled,
+}: {
+  form: ProjectFormData;
+  onChange: (key: string, value: any) => void;
+  disabled: boolean;
+}) {
   const constructionLeads = useInstantLeadsByType(LeadType.CONSTRUCTION);
   const plumbingLeads = useInstantLeadsByType(LeadType.PLUMBING);
   const roofingLeads = useInstantLeadsByType(LeadType.ROOFING);
@@ -113,14 +113,142 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
     ...(roofingLeads.leads ?? []),
   ];
 
-  // Edit modal (mantenido por si se usa desde otro flujo)
-  const editModal = useProjectEditModal({
-    onUpdated: async () => {
-      router.refresh();
-    },
-  });
+  return (
+    <ProjectForm
+      form={form}
+      onChange={onChange}
+      leads={leads}
+      disabled={disabled}
+      isEditMode
+    />
+  );
+}
 
-  // Notes logic
+function PaymentsTable({ payments }: { payments: Payment[] }) {
+  if (!payments.length) {
+    return (
+      <div className="flex items-center gap-3 p-3 rounded-md border border-dashed border-muted-foreground/30">
+        <DollarSign className="size-4 text-muted-foreground" />
+        <div>
+          <p className="text-sm text-muted-foreground">Payments List</p>
+          <p className="text-xs text-muted-foreground">No payment rows received from QuickBooks</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="overflow-hidden rounded-md border">
+      <div className="max-h-64 overflow-auto">
+        <table className="w-full text-sm">
+          <thead className="bg-muted/30">
+            <tr>
+              <th className="px-3 py-2 text-left font-medium">Date</th>
+              <th className="px-3 py-2 text-left font-medium">Method</th>
+              <th className="px-3 py-2 text-left font-medium">Reference</th>
+              <th className="px-3 py-2 text-left font-medium">Invoice</th>
+              <th className="px-3 py-2 text-right font-medium">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            {payments.map((payment, index) => (
+              <tr key={payment.id ?? `${index}-${payment.amount}`} className="border-t">
+                <td className="px-3 py-2">{payment.date || "-"}</td>
+                <td className="px-3 py-2">{payment.method || "-"}</td>
+                <td className="px-3 py-2">{payment.reference || "-"}</td>
+                <td className="px-3 py-2">{payment.linkedInvoice || "-"}</td>
+                <td className="px-3 py-2 text-right">{formatCurrency(payment.amount)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+function ProjectContactCard({ contact, onEdit }: { contact: Contact; onEdit: () => void }) {
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <CardTitle className="flex items-center gap-2">
+          <User className="size-5" />
+          Contact
+        </CardTitle>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onEdit}
+          className="text-muted-foreground hover:text-foreground"
+        >
+          <Edit className="size-4 mr-2" />
+          Edit
+        </Button>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div>
+          <Link
+            href={`/contact/${contact.id}`}
+            className="text-lg font-semibold text-foreground hover:underline"
+          >
+            {contact.name}
+          </Link>
+          {contact.occupation && (
+            <p className="text-sm text-muted-foreground mt-1">{contact.occupation}</p>
+          )}
+        </div>
+        <DetailField
+          icon={Phone}
+          label="Phone"
+          value={contact.phone}
+          onAdd={onEdit}
+        />
+        <DetailField
+          icon={Mail}
+          label="Email"
+          value={contact.email}
+          isEmail
+          onAdd={onEdit}
+        />
+        <DetailField
+          icon={MapPin}
+          label="Address"
+          value={contact.address}
+          onAdd={onEdit}
+        />
+        <DetailField
+          icon={Building}
+          label="Company"
+          value={contact.company?.name}
+          onAdd={onEdit}
+        >
+          {contact.company && (
+            <Link
+              href={`/company/${contact.company.id}`}
+              className="text-foreground hover:underline"
+            >
+              {contact.company.name}
+            </Link>
+          )}
+        </DetailField>
+        <div className="flex items-center gap-2 pt-2">
+          {contact.isCustomer && <Badge variant="secondary">Customer</Badge>}
+          {contact.isClient && <Badge variant="secondary">Client</Badge>}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPageProps) {
+  const router = useRouter();
+  const { projectDetails, error } = initialData;
+  const app = useProjectsApp();
+
+  const [isEditingProject, setIsEditingProject] = useState(false);
+  const [editingProject, setEditingProject] = useState<ProjectFormData>({});
+  const [isSavingProject, setIsSavingProject] = useState(false);
+
   const notesLogic = useProjectsNotesLogic({
     refetch: async () => {
       router.refresh();
@@ -169,13 +297,8 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
     }
   }, [projectDetails, editingProject, app, router]);
 
-  const handleEditProject = useCallback(() => {
-    handleStartEditingProject();
-  }, [handleStartEditingProject]);
-
   const handleOpenNotesModal = useCallback(() => {
     if (projectDetails && projectDetails.lead) {
-      // Create a project object with lead for the notes modal
       const projectWithLead = {
         ...projectDetails,
         lead: {
@@ -186,16 +309,7 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
       notesLogic.openFromProject(projectWithLead as any);
     }
   }, [projectDetails, notesLogic]);
-  
-  const projectModalController = {
-    isOpen: editModal.isOpen,
-    mode: "edit" as const,
-    onClose: editModal.close,
-    createController: undefined,
-    updateController: editModal.updateController,
-    project: editModal.selectedProject,
-  };
-  
+
   const notesModalController = useProjectsNotesModalController({
     isOpen: notesLogic.modalProps.isOpen,
     title: notesLogic.modalProps.title,
@@ -222,7 +336,7 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              Project with ID {projectId} does not exist or could not be found. 
+              Project with ID {projectId} does not exist or could not be found.
               Please verify that the ID is correct.
             </p>
           </CardContent>
@@ -297,7 +411,7 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={handleEditProject}
+                  onClick={handleStartEditingProject}
                   className="text-muted-foreground hover:text-foreground"
                 >
                   <Edit className="size-4 mr-2" />
@@ -307,58 +421,37 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
             </CardHeader>
             <CardContent className="space-y-4">
               {isEditingProject ? (
-                <ProjectForm
+                <ProjectEditFormWithLeads
                   form={editingProject}
                   onChange={(key, value) => setEditingProject((prev) => ({ ...prev, [key]: value }))}
-                  leads={leads}
                   disabled={isSavingProject}
-                  isEditMode
                 />
               ) : (
                 <>
                   <div className="grid grid-cols-2 gap-4">
-                    {typeof projectDetails.financial?.estimatedAmount === "number" ? (
-                      <div>
-                        <p className="text-sm text-muted-foreground flex items-center gap-1">
-                          <Receipt className="size-3" />
-                          Estimate Amount
-                        </p>
-                        <p className="text-foreground font-semibold text-lg">
+                    <DetailField
+                      icon={Receipt}
+                      label="Estimate Amount"
+                      value={projectDetails.financial?.estimatedAmount}
+                    >
+                      {typeof projectDetails.financial?.estimatedAmount === "number" ? (
+                        <p className="font-semibold text-lg">
                           {formatCurrency(projectDetails.financial.estimatedAmount)}
                         </p>
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-between p-3 rounded-md border border-dashed border-muted-foreground/30">
-                        <div className="flex items-center gap-3">
-                            <Receipt className="size-4 text-muted-foreground" />
-                            <div>
-                              <p className="text-sm text-muted-foreground">Estimate Amount</p>
-                              <p className="text-xs text-muted-foreground">Not available</p>
-                            </div>
-                          </div>
-                      </div>
-                    )}
-                    {typeof projectDetails.financial?.paidAmount === "number" ? (
-                      <div>
-                        <p className="text-sm text-muted-foreground flex items-center gap-1">
-                          <DollarSign className="size-3" />
-                          Payments
-                        </p>
-                        <p className="text-foreground font-semibold text-lg">
+                      ) : null}
+                    </DetailField>
+
+                    <DetailField
+                      icon={DollarSign}
+                      label="Payments"
+                      value={projectDetails.financial?.paidAmount}
+                    >
+                      {typeof projectDetails.financial?.paidAmount === "number" ? (
+                        <p className="font-semibold text-lg">
                           {formatCurrency(projectDetails.financial.paidAmount)}
                         </p>
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-between p-3 rounded-md border border-dashed border-muted-foreground/30">
-                        <div className="flex items-center gap-3">
-                          <DollarSign className="size-4 text-muted-foreground" />
-                          <div>
-                            <p className="text-sm text-muted-foreground">Payments</p>
-                            <p className="text-xs text-muted-foreground">Not available</p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
+                      ) : null}
+                    </DetailField>
                   </div>
 
                   <Separator />
@@ -367,279 +460,47 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
                       <DollarSign className="size-3" />
                       Payments List (QuickBooks)
                     </p>
-
-                    {paymentRows.length > 0 ? (
-                      <div className="overflow-hidden rounded-md border">
-                        <div className="max-h-64 overflow-auto">
-                          <table className="w-full text-sm">
-                            <thead className="bg-muted/30">
-                              <tr>
-                                <th className="px-3 py-2 text-left font-medium">Date</th>
-                                <th className="px-3 py-2 text-left font-medium">Method</th>
-                                <th className="px-3 py-2 text-left font-medium">Reference</th>
-                                <th className="px-3 py-2 text-left font-medium">Invoice</th>
-                                <th className="px-3 py-2 text-right font-medium">Amount</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {paymentRows.map((payment, index) => (
-                                <tr key={payment.id ?? `${index}-${payment.amount}`} className="border-t">
-                                  <td className="px-3 py-2">{payment.date || "-"}</td>
-                                  <td className="px-3 py-2">{payment.method || "-"}</td>
-                                  <td className="px-3 py-2">{payment.reference || "-"}</td>
-                                  <td className="px-3 py-2">{payment.linkedInvoice || "-"}</td>
-                                  <td className="px-3 py-2 text-right">{formatCurrency(payment.amount)}</td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-between p-3 rounded-md border border-dashed border-muted-foreground/30">
-                        <div className="flex items-center gap-3">
-                          <DollarSign className="size-4 text-muted-foreground" />
-                          <div>
-                            <p className="text-sm text-muted-foreground">Payments List</p>
-                            <p className="text-xs text-muted-foreground">
-                              No payment rows received from QuickBooks
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
+                    <PaymentsTable payments={paymentRows} />
                   </div>
 
-                  {projectDetails.overview ? (
-                    <>
-                      <Separator />
-                      <div>
-                        <p className="text-muted-foreground text-sm mb-1">Project Overview</p>
-                        <p className="text-foreground">{projectDetails.overview}</p>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <Separator />
-                      <div className="flex items-center justify-between p-3 rounded-md border border-dashed border-muted-foreground/30">
-                        <div>
-                          <p className="text-sm text-muted-foreground">Project Overview</p>
-                          <p className="text-xs text-muted-foreground">Not available</p>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={handleEditProject}
-                        >
-                          <Plus className="size-3 mr-1" />
-                          Add
-                        </Button>
-                      </div>
-                    </>
-                  )}
+                  <Separator />
+                  <DetailField
+                    icon={FileText}
+                    label="Project Overview"
+                    value={projectDetails.overview}
+                    onAdd={handleStartEditingProject}
+                  />
 
-                  {projectDetails.notes && projectDetails.notes.length > 0 ? (
-                    <>
-                      <Separator />
-                      <div>
-                        <p className="text-muted-foreground text-sm mb-2 flex items-center gap-1">
-                          <StickyNote className="size-3" />
-                          Notes
-                        </p>
-                        <ul className="space-y-1">
-                          {projectDetails.notes.map((note, index) => (
-                            <li key={index} className="text-sm text-foreground">
-                              • {note}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <Separator />
-                      <div className="flex items-center justify-between p-3 rounded-md border border-dashed border-muted-foreground/30">
-                        <div className="flex items-center gap-3">
-                          <StickyNote className="size-4 text-muted-foreground" />
-                          <div>
-                            <p className="text-sm text-muted-foreground">Notes</p>
-                            <p className="text-xs text-muted-foreground">No notes</p>
-                          </div>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={handleOpenNotesModal}
-                        >
-                          <Plus className="size-3 mr-1" />
-                          Add
-                        </Button>
-                      </div>
-                    </>
-                  )}
+                  <Separator />
+                  <DetailField
+                    icon={StickyNote}
+                    label="Notes"
+                    value={projectDetails.notes && projectDetails.notes.length > 0 ? "has-notes" : undefined}
+                    onAdd={handleOpenNotesModal}
+                  >
+                    {projectDetails.notes && projectDetails.notes.length > 0 ? (
+                      <ul className="space-y-1 mt-1">
+                        {projectDetails.notes.map((note, index) => (
+                          <li key={index} className="text-sm text-foreground">
+                            • {note}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : null}
+                  </DetailField>
                 </>
               )}
             </CardContent>
           </Card>
-
         </div>
 
         {/* Contact Information */}
         <div className="lg:col-span-1 space-y-6">
           {lead?.contact ? (
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  <User className="size-5" />
-                  Contacto
-                </CardTitle>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => router.push(`/contact/${lead.contact!.id}`)}
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  <Edit className="size-4 mr-2" />
-                  Editar
-                </Button>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Link
-                    href={`/contact/${lead.contact.id}`}
-                    className="text-lg font-semibold text-foreground hover:underline"
-                  >
-                    {lead.contact.name}
-                  </Link>
-                  {lead.contact.occupation && (
-                    <p className="text-sm text-muted-foreground mt-1">{lead.contact.occupation}</p>
-                  )}
-                </div>
-                {lead.contact.phone ? (
-                  <div className="flex items-start gap-3">
-                    <Phone className="size-4 text-muted-foreground mt-0.5 shrink-0" />
-                    <div>
-                      <p className="text-sm text-muted-foreground">Phone</p>
-                      <p className="text-foreground">{lead.contact.phone}</p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-between p-3 rounded-md border border-dashed border-muted-foreground/30">
-                    <div className="flex items-center gap-3">
-                      <Phone className="size-4 text-muted-foreground" />
-                      <div>
-                        <p className="text-sm text-muted-foreground">Phone</p>
-                        <p className="text-xs text-muted-foreground">Not available</p>
-                      </div>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => router.push(`/contact/${lead.contact!.id}`)}
-                    >
-                      <Plus className="size-3 mr-1" />
-                      Add
-                    </Button>
-                  </div>
-                )}
-                {lead.contact.email ? (
-                  <div className="flex items-start gap-3">
-                    <Mail className="size-4 text-muted-foreground mt-0.5 shrink-0" />
-                    <div>
-                      <p className="text-sm text-muted-foreground">Email</p>
-                      <a href={`mailto:${lead.contact.email}`} className="text-foreground hover:underline">
-                        {lead.contact.email}
-                      </a>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-between p-3 rounded-md border border-dashed border-muted-foreground/30">
-                    <div className="flex items-center gap-3">
-                      <Mail className="size-4 text-muted-foreground" />
-                      <div>
-                        <p className="text-sm text-muted-foreground">Email</p>
-                        <p className="text-xs text-muted-foreground">Not available</p>
-                      </div>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => router.push(`/contact/${lead.contact!.id}`)}
-                    >
-                      <Plus className="size-3 mr-1" />
-                      Add
-                    </Button>
-                  </div>
-                )}
-                {lead.contact.address ? (
-                  <div className="flex items-start gap-3">
-                    <MapPin className="size-4 text-muted-foreground mt-0.5 shrink-0" />
-                    <div className="flex-1">
-                      <p className="text-sm text-muted-foreground">Address</p>
-                      <p className="text-foreground">{lead.contact.address}</p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-between p-3 rounded-md border border-dashed border-muted-foreground/30">
-                    <div className="flex items-center gap-3">
-                      <MapPin className="size-4 text-muted-foreground" />
-                      <div>
-                        <p className="text-sm text-muted-foreground">Address</p>
-                        <p className="text-xs text-muted-foreground">Not available</p>
-                      </div>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => router.push(`/contact/${lead.contact!.id}`)}
-                    >
-                      <Plus className="size-3 mr-1" />
-                      Add
-                    </Button>
-                  </div>
-                )}
-                {lead.contact.company ? (
-                  <div className="flex items-start gap-3">
-                    <Building className="size-4 text-muted-foreground mt-0.5 shrink-0" />
-                    <div>
-                      <p className="text-sm text-muted-foreground">Company</p>
-                      <Link
-                        href={`/company`}
-                        className="text-foreground hover:underline"
-                      >
-                        {lead.contact.company.name}
-                      </Link>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-between p-3 rounded-md border border-dashed border-muted-foreground/30">
-                    <div className="flex items-center gap-3">
-                      <Building className="size-4 text-muted-foreground" />
-                      <div>
-                        <p className="text-sm text-muted-foreground">Company</p>
-                        <p className="text-xs text-muted-foreground">Not available</p>
-                      </div>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => router.push(`/contact/${lead.contact!.id}`)}
-                    >
-                      <Plus className="size-3 mr-1" />
-                      Add
-                    </Button>
-                  </div>
-                )}
-                <div className="flex items-center gap-2 pt-2">
-                  {lead.contact.isCustomer && (
-                    <Badge variant="secondary">Customer</Badge>
-                  )}
-                  {lead.contact.isClient && (
-                    <Badge variant="secondary">Client</Badge>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+            <ProjectContactCard
+              contact={lead.contact}
+              onEdit={() => router.push(`/contact/${lead.contact!.id}`)}
+            />
           ) : (
             <Card>
               <CardHeader>
@@ -665,13 +526,7 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
           )}
         </div>
       </div>
-      
-      {/* Modals */}
-      <ProjectModal
-        controller={projectModalController}
-        leads={leads}
-      />
-      
+
       <NotesEditorModal controller={notesModalController} />
     </div>
   );

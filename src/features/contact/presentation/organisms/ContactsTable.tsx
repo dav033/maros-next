@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Loader, Users, Edit, Trash, FileText, ChevronUp, ChevronDown, ChevronsUpDown, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { sortRows, type SortDir } from "@/common/hooks/table/sorting";
 import { usePagination } from "@/common/hooks/table/usePagination";
 import { TablePagination } from "@/components/shared/TablePagination";
 
@@ -30,22 +31,6 @@ const iconMap: Record<string, LucideIcon> = {
   "lucide:trash": Trash,
   "lucide:file-text": FileText,
 };
-
-type SortDir = "asc" | "desc";
-
-function naturalCompare(a: string | number | null | undefined, b: string | number | null | undefined): number {
-  const sa = String(a ?? "");
-  const sb = String(b ?? "");
-  return sa.localeCompare(sb, undefined, { numeric: true, sensitivity: "base" });
-}
-
-function sortRows<T>(rows: T[], columns: import("@/types/table").SimpleTableColumn<T>[], sortKey: string | null, sortDir: SortDir): T[] {
-  if (!sortKey) return rows;
-  const col = columns.find((c) => String(c.key) === sortKey);
-  if (!col?.sortValue) return rows;
-  const dir = sortDir === "asc" ? 1 : -1;
-  return [...rows].sort((a, b) => dir * naturalCompare(col.sortValue!(a), col.sortValue!(b)));
-}
 
 function groupContacts(contacts: Contact[], groupBy: ContactGroupBy): Array<{ key: string; label: string; color?: string; items: Contact[] }> {
   if (groupBy === "none") return [{ key: "all", label: "", items: contacts }];

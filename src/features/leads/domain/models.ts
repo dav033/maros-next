@@ -102,3 +102,50 @@ export type LeadStatusSummary = Readonly<{
   totalLeads: number;
   byStatus: LeadStatusCount;
 }>;
+
+export interface LeadDetails {
+  id: number;
+  leadNumber?: string;
+  name?: string;
+  startDate?: string | null;
+  location?: string;
+  addressLink?: string;
+  status?: string;
+  projectTypeId?: number | null;
+  contactId?: number | null;
+  notes?: string[];
+  inReview: boolean;
+  contact?: {
+    id: number;
+    name: string;
+    phone?: string;
+    email?: string;
+    occupation?: string;
+    role?: string;
+    address?: string;
+    addressLink?: string;
+    isCustomer: boolean;
+    isClient: boolean;
+    company?: {
+      id: number;
+      name: string;
+      address?: string;
+      addressLink?: string;
+      phone?: string;
+      email?: string;
+      submiz?: string;
+      type: any;
+      serviceId?: number;
+      isCustomer: boolean;
+      isClient: boolean;
+      notes?: string[];
+    } | null;
+  } | null;
+  projectType?: {
+    id: number;
+    name: string;
+  } | null;
+  project?: {
+    id: number;
+  } | null;
+}

@@ -132,7 +132,7 @@ export function ContactsPageView({ logic }: ContactsPageViewProps) {
       }
       toolbar={
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-card p-3">
-          <div className="max-w-3xl flex-1">
+          <div className="max-w-4xl flex-1">
             <div className="flex flex-wrap items-center gap-2 w-full">
               <div className="w-32 shrink-0">
                 <Select value={toolbarSearchController.selectedField} onValueChange={toolbarSearchController.onFieldChange}>
@@ -155,7 +155,7 @@ export function ContactsPageView({ logic }: ContactsPageViewProps) {
                   value={toolbarSearchController.searchTerm}
                   onChange={(e) => toolbarSearchController.onSearchChange(e.target.value)}
                   placeholder={toolbarSearchController.placeholder}
-                  className="pl-9 bg-background border-input"
+                  className="h-10 py-2 pl-9 bg-background border-input"
                 />
               </div>
               {toolbarSearchController.searchTerm.trim().length > 0 && (

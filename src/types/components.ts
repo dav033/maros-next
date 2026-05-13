@@ -4,13 +4,13 @@
 
 // Search configuration for tables
 export interface SearchField<T> {
-  key: keyof T;
+  key: keyof T | "all";
   label: string;
 }
 
 export interface SearchConfig<T> {
   fields: SearchField<T>[];
-  defaultField: keyof T;
+  defaultField: keyof T | "all";
   normalize?: (value: string) => string;
 }
 

@@ -99,7 +99,7 @@ export function useProjectsTableLogic({
     totalCount,
   } = useTableWithSearch<Project>({
     data: localProjects,
-    searchableFields: ["all"] as any,
+    searchableFields: ["all"],
     defaultSearchField: "all",
     customSearchFn: (project, query, field) => {
       const normalizedQuery = query.toLowerCase().trim();

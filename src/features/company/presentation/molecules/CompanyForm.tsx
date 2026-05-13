@@ -97,7 +97,7 @@ export function CompanyForm({ value, onChange, disabled, services = [], contacts
 
         <CompanyCheckboxField
           id="company-is-client"
-          label="PROVEEDOR"
+          label="SUPPLIER"
           checked={value.isClient}
           disabled={disabled}
           onChange={handleClientChange}

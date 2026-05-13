@@ -13,10 +13,10 @@ export function useRestorationVisitQuery(projectId: number | null) {
   // Endpoint no existe en el backend por el momento, deshabilitado
   return useQuery({
     queryKey: reportsKeys.restorationVisit(projectId?.toString() || null),
-    queryFn: async () => {
-      if (!projectId) return {} as any;
+    queryFn: async (): Promise<RestorationVisitReport | null> => {
+      if (!projectId) return null;
       // No hacer llamada al backend, devolver datos vacíos
-      return {} as any;
+      return null;
     },
     enabled: false, // Deshabilitado completamente
     retry: false,
