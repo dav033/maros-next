@@ -35,7 +35,7 @@ export function useUpdateLeadController({ lead, onUpdated }: UseUpdateLeadContro
       projectTypeId: lead?.projectType?.id,
       contactId: lead?.contact?.id ?? undefined,
       leadNumber: lead?.leadNumber ?? "",
-      status: lead?.status ?? "NOT_EXECUTED",
+      status: lead?.status ?? "NEW_LEAD",
     },
     validate: (form) => {
       const nameOk = form.leadName.trim().length > 0;

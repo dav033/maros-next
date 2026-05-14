@@ -3,12 +3,13 @@ import type { ProjectType } from "@/projectType/domain";
 import type { ISODate } from "@/shared/domain";
 
 export enum LeadStatus {
-  NOT_EXECUTED = "NOT_EXECUTED",
-  COMPLETED = "COMPLETED",
-  IN_PROGRESS = "IN_PROGRESS",
+  NEW_LEAD = "NEW_LEAD",
+  CONTACTED = "CONTACTED",
+  ESTIMATING_PREPARING_PROPOSAL = "ESTIMATING_PREPARING_PROPOSAL",
+  PROPOSAL_SENT = "PROPOSAL_SENT",
+  FOLLOW_UP = "FOLLOW_UP",
+  WON = "WON",
   LOST = "LOST",
-  POSTPONED = "POSTPONED",
-  PERMITS = "PERMITS",
 }
 
 export enum LeadType {

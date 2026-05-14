@@ -34,7 +34,7 @@ const iconMap: Record<string, LucideIcon> = {
 const TYPE_LABELS: Record<string, string> = {
   DESIGN: "Design",
   HOA: "HOA",
-  GENERAL_CONTRACTOR: "General Contractor",
+  GENERAL_CONTRACTOR: "Contractor",
   SUPPLIER: "Supplier",
   SUBCONTRACTOR: "Subcontractor",
   OTHER: "Other",

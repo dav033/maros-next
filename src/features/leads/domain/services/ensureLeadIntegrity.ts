@@ -11,12 +11,13 @@ import { Lead, LeadStatus } from "../models";
 import { normalizeText, isIsoLocalDate, coerceIsoLocalDate } from "@/shared/validation";
 
 const DEFAULT_STATUS_ORDER: readonly LeadStatus[] = [
-  LeadStatus.NOT_EXECUTED,
-  LeadStatus.COMPLETED,
-  LeadStatus.IN_PROGRESS,
+  LeadStatus.NEW_LEAD,
+  LeadStatus.CONTACTED,
+  LeadStatus.ESTIMATING_PREPARING_PROPOSAL,
+  LeadStatus.PROPOSAL_SENT,
+  LeadStatus.FOLLOW_UP,
+  LeadStatus.WON,
   LeadStatus.LOST,
-  LeadStatus.POSTPONED,
-  LeadStatus.PERMITS,
 ];
 
 export type LeadIntegrityPolicies = Readonly<{
@@ -129,7 +130,7 @@ export function ensureLeadIntegrity(
 
   const s = lead.status as LeadStatus | null | undefined;
   const effectiveStatus = (s ??
-    ("NOT_EXECUTED" as LeadStatus)) as LeadStatus;
+    ("NEW_LEAD" as LeadStatus)) as LeadStatus;
   if (!DEFAULT_STATUS_ORDER.includes(effectiveStatus)) {
     throw new BusinessRuleError("FORMAT_ERROR", "Invalid lead status", {
       details: { field: "status", value: lead.status },

@@ -7,15 +7,26 @@ export type DomainEvent = Readonly<{
   payload: Record<string, unknown>;
 }>;
 
+const ALL_STATUSES: readonly LeadStatus[] = [
+  "NEW_LEAD",
+  "CONTACTED",
+  "ESTIMATING_PREPARING_PROPOSAL",
+  "PROPOSAL_SENT",
+  "FOLLOW_UP",
+  "WON",
+  "LOST",
+] as const as readonly LeadStatus[];
+
 export const DEFAULT_TRANSITIONS: Readonly<
   Partial<Record<LeadStatus, readonly LeadStatus[]>>
 > = ({
-  NOT_EXECUTED: ["IN_PROGRESS", "PERMITS", "POSTPONED"],
-  COMPLETED: ["IN_PROGRESS"],
-  IN_PROGRESS: ["COMPLETED", "LOST", "POSTPONED", "PERMITS"],
-  LOST: ["IN_PROGRESS", "NOT_EXECUTED"],
-  POSTPONED: ["IN_PROGRESS", "NOT_EXECUTED"],
-  PERMITS: ["IN_PROGRESS", "POSTPONED"],
+  NEW_LEAD: ALL_STATUSES.filter((s) => s !== "NEW_LEAD"),
+  CONTACTED: ALL_STATUSES.filter((s) => s !== "CONTACTED"),
+  ESTIMATING_PREPARING_PROPOSAL: ALL_STATUSES.filter((s) => s !== "ESTIMATING_PREPARING_PROPOSAL"),
+  PROPOSAL_SENT: ALL_STATUSES.filter((s) => s !== "PROPOSAL_SENT"),
+  FOLLOW_UP: ALL_STATUSES.filter((s) => s !== "FOLLOW_UP"),
+  WON: ALL_STATUSES.filter((s) => s !== "WON"),
+  LOST: ALL_STATUSES.filter((s) => s !== "LOST"),
 } as unknown) as Readonly<Partial<Record<LeadStatus, readonly LeadStatus[]>>>;
 
 export function canTransition(

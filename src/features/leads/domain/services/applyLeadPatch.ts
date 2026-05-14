@@ -38,7 +38,7 @@ function toEffectiveStatus(
   if (s === undefined) return current;
 
   // null => volver al estado por defecto
-  if (s === null) return "NOT_EXECUTED" as LeadStatus;
+  if (s === null) return "NEW_LEAD" as LeadStatus;
 
   // Strings vacíos (por ejemplo, selects HTML sin valor) => no cambio
   const normalized = String(s).trim();
@@ -53,13 +53,13 @@ function resolveTransitions(
   const ro = (arr?: LeadStatus[]) =>
     (arr as readonly LeadStatus[]) || undefined;
   return {
-    NOT_EXECUTED:
-      ro(overrides?.NOT_EXECUTED) ?? DEFAULT_TRANSITIONS.NOT_EXECUTED,
-    COMPLETED: ro(overrides?.COMPLETED) ?? DEFAULT_TRANSITIONS.COMPLETED,
-    IN_PROGRESS: ro(overrides?.IN_PROGRESS) ?? DEFAULT_TRANSITIONS.IN_PROGRESS,
+    NEW_LEAD: ro(overrides?.NEW_LEAD) ?? DEFAULT_TRANSITIONS.NEW_LEAD,
+    CONTACTED: ro(overrides?.CONTACTED) ?? DEFAULT_TRANSITIONS.CONTACTED,
+    ESTIMATING_PREPARING_PROPOSAL: ro(overrides?.ESTIMATING_PREPARING_PROPOSAL) ?? DEFAULT_TRANSITIONS.ESTIMATING_PREPARING_PROPOSAL,
+    PROPOSAL_SENT: ro(overrides?.PROPOSAL_SENT) ?? DEFAULT_TRANSITIONS.PROPOSAL_SENT,
+    FOLLOW_UP: ro(overrides?.FOLLOW_UP) ?? DEFAULT_TRANSITIONS.FOLLOW_UP,
+    WON: ro(overrides?.WON) ?? DEFAULT_TRANSITIONS.WON,
     LOST: ro(overrides?.LOST) ?? DEFAULT_TRANSITIONS.LOST,
-    POSTPONED: ro(overrides?.POSTPONED) ?? DEFAULT_TRANSITIONS.POSTPONED,
-    PERMITS: ro(overrides?.PERMITS) ?? DEFAULT_TRANSITIONS.PERMITS,
   } as const;
 }
 

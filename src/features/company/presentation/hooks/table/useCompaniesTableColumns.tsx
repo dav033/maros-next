@@ -114,7 +114,7 @@ export function useCompaniesTableColumns({
       },
       {
         key: "isClient",
-        header: "Client",
+        header: "Supplier",
         className: "w-[100px] text-right",
         render: (company: Company) => {
           if (company.isClient === null || company.isClient === undefined) {

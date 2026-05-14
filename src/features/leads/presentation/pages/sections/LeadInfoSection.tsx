@@ -126,12 +126,13 @@ export function LeadInfoSection({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value={EMPTY_SELECT_VALUE}>Select Status</SelectItem>
-                  <SelectItem value="NOT_EXECUTED">Not Executed</SelectItem>
-                  <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
-                  <SelectItem value="COMPLETED">Completed</SelectItem>
+                  <SelectItem value="NEW_LEAD">New Lead</SelectItem>
+                  <SelectItem value="CONTACTED">Contacted</SelectItem>
+                  <SelectItem value="ESTIMATING_PREPARING_PROPOSAL">Estimating / Preparing Proposal</SelectItem>
+                  <SelectItem value="PROPOSAL_SENT">Proposal Sent</SelectItem>
+                  <SelectItem value="FOLLOW_UP">Follow Up</SelectItem>
+                  <SelectItem value="WON">Won</SelectItem>
                   <SelectItem value="LOST">Lost</SelectItem>
-                  <SelectItem value="POSTPONED">Postponed</SelectItem>
-                  <SelectItem value="PERMITS">Permits</SelectItem>
                 </SelectContent>
               </Select>
             </div>

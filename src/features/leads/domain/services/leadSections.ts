@@ -5,12 +5,13 @@ import { DEFAULT_STATUS_ORDER, partitionByStatus } from "./leadsQueries";
 export type SectionKey = LeadStatus;
 
 export const STATUS_LABELS: Record<SectionKey, string> = {
-  NOT_EXECUTED: "Not executed",
-  COMPLETED: "Completed",
-  IN_PROGRESS: "In progress",
+  NEW_LEAD: "New Lead",
+  CONTACTED: "Contacted",
+  ESTIMATING_PREPARING_PROPOSAL: "Estimating / Preparing Proposal",
+  PROPOSAL_SENT: "Proposal Sent",
+  FOLLOW_UP: "Follow Up",
+  WON: "Won",
   LOST: "Lost",
-  POSTPONED: "Postponed",
-  PERMITS: "Permits",
 } as const;
 
 export type LeadSection = Readonly<{

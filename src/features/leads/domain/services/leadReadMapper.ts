@@ -38,31 +38,41 @@ export type ApiLeadDTO = {
 
 function resolveStatus(status: string | null | undefined): LeadStatus {
   if (!status) {
-    return "NOT_EXECUTED" as LeadStatus;
+    return "NEW_LEAD" as LeadStatus;
   }
 
   const upper = status.trim().toUpperCase();
 
   if (
-    upper === "NOT_EXECUTED" ||
-    upper === "COMPLETED" ||
-    upper === "IN_PROGRESS" ||
-    upper === "LOST" ||
-    upper === "POSTPONED" ||
-    upper === "PERMITS"
+    upper === "NEW_LEAD" ||
+    upper === "CONTACTED" ||
+    upper === "ESTIMATING_PREPARING_PROPOSAL" ||
+    upper === "PROPOSAL_SENT" ||
+    upper === "FOLLOW_UP" ||
+    upper === "WON" ||
+    upper === "LOST"
   ) {
     return upper as LeadStatus;
   }
 
-  if (upper === "NEW" || upper === "UNDETERMINED" || upper === "TO_DO") {
-    return "NOT_EXECUTED" as LeadStatus;
+  // Legacy value mappings
+  if (upper === "NOT_EXECUTED" || upper === "NEW" || upper === "UNDETERMINED" || upper === "TO_DO") {
+    return "NEW_LEAD" as LeadStatus;
   }
 
-  if (upper === "DONE") {
-    return "COMPLETED" as LeadStatus;
+  if (upper === "IN_PROGRESS") {
+    return "CONTACTED" as LeadStatus;
   }
 
-  return "NOT_EXECUTED" as LeadStatus;
+  if (upper === "COMPLETED" || upper === "DONE") {
+    return "WON" as LeadStatus;
+  }
+
+  if (upper === "POSTPONED" || upper === "PERMITS") {
+    return "FOLLOW_UP" as LeadStatus;
+  }
+
+  return "NEW_LEAD" as LeadStatus;
 }
 
 // leadType ya no se lee del DTO, se calcula desde leadNumber
@@ -103,7 +113,7 @@ export function mapLeadFromDTO(dto: ApiLeadDTO): Lead {
 
   const notesArray = Array.isArray(dto?.notes) && dto.notes.length > 0 ? dto.notes.map(n => String(n)) : [];
   const inReview = dto?.inReview ?? false;
-  
+
   return {
     id,
     leadNumber,

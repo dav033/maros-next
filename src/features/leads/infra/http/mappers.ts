@@ -34,6 +34,8 @@ export type CreateLeadWithNewContactPayload = CreateLeadBasePayload & {
     phone: string;
     email: string;
     companyId?: number;
+    address?: string;
+    addressLink?: string;
   };
 };
 

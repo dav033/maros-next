@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { useLeadsNotesLogic } from "../hooks/notes/useLeadsNotesLogic";
 import { useLeadsNotesModalController } from "../hooks/modals/useLeadsNotesModalController";
 import { EntityDetailHeader, EntityErrorPage, NotesEditorModal } from "@/components/shared";
-import { getLeadTypeFromNumber, LeadType, type Lead, type LeadDetails } from "@/leads/domain";
+import { getLeadTypeFromNumber, LeadType, LeadStatus, type Lead, type LeadDetails } from "@/leads/domain";
 import { useInstantContacts } from "@/features/contact/presentation/hooks";
 import { useProjectTypes } from "@/projectType/presentation";
 import { toast } from "sonner";
@@ -116,7 +116,12 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
           status: updated.status,
           projectType: updated.projectType,
           contact: updated.contact as LeadDetails["contact"],
+          project: updated.project ?? leadDetails.project,
         });
+
+        if (updated.status === LeadStatus.WON && updated.project?.id) {
+          router.push(`/project/${updated.project.id}`);
+        }
       }
     },
     successMessage: "Lead updated successfully!",
@@ -255,7 +260,8 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
           phone: newContact.phone,
           email: newContact.email,
           occupation: "",
-          address: "",
+          address: leadDetails.location || "",
+          addressLink: leadDetails.addressLink || "",
           isCustomer: false,
           isClient: false,
           companyId: newContact.companyId,

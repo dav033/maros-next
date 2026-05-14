@@ -181,7 +181,7 @@ export function CompaniesPageView({ logic }: CompaniesPageViewProps) {
                   <SelectItem value="all">All types</SelectItem>
                   <SelectItem value="DESIGN">Design</SelectItem>
                   <SelectItem value="HOA">HOA</SelectItem>
-                  <SelectItem value="GENERAL_CONTRACTOR">General Contractor</SelectItem>
+                  <SelectItem value="GENERAL_CONTRACTOR">Contractor</SelectItem>
                   <SelectItem value="SUPPLIER">Supplier</SelectItem>
                   <SelectItem value="SUBCONTRACTOR">Subcontractor</SelectItem>
                   <SelectItem value="OTHER">Other</SelectItem>
@@ -199,12 +199,12 @@ export function CompaniesPageView({ logic }: CompaniesPageViewProps) {
               </Select>
               <Select value={String(clientFilter)} onValueChange={(v) => setClientFilter(v === "all" ? "all" : v === "true")}>
                 <SelectTrigger className="w-32 bg-background border-input">
-                  <SelectValue placeholder="Client" />
+                  <SelectValue placeholder="Supplier" />
                 </SelectTrigger>
                 <SelectContent className="bg-popover border-border">
-                  <SelectItem value="all">All clients</SelectItem>
-                  <SelectItem value="true">Client: Yes</SelectItem>
-                  <SelectItem value="false">Client: No</SelectItem>
+                  <SelectItem value="all">All suppliers</SelectItem>
+                  <SelectItem value="true">Supplier: Yes</SelectItem>
+                  <SelectItem value="false">Supplier: No</SelectItem>
                 </SelectContent>
               </Select>
               <Select value={groupBy} onValueChange={(v) => setGroupBy(v as any)}>

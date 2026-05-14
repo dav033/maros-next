@@ -5,17 +5,18 @@ export type StatusCounts = Readonly<Record<LeadStatus, number>>;
 type MutableStatusCounts = Record<LeadStatus, number>;
 
 function toEffectiveStatus(s: LeadStatus | null | undefined): LeadStatus {
-  return (s ?? "NOT_EXECUTED") as LeadStatus;
+  return (s ?? "NEW_LEAD") as LeadStatus;
 }
 
 function zeroCounts(): MutableStatusCounts {
   return {
-    NOT_EXECUTED: 0,
-    COMPLETED: 0,
-    IN_PROGRESS: 0,
+    NEW_LEAD: 0,
+    CONTACTED: 0,
+    ESTIMATING_PREPARING_PROPOSAL: 0,
+    PROPOSAL_SENT: 0,
+    FOLLOW_UP: 0,
+    WON: 0,
     LOST: 0,
-    POSTPONED: 0,
-    PERMITS: 0,
   } as MutableStatusCounts;
 }
 
@@ -31,12 +32,13 @@ export function summarizeLeads(
   }
 
   const totalLeads =
-    counts.NOT_EXECUTED +
-    counts.COMPLETED +
-    counts.IN_PROGRESS +
-    counts.LOST +
-    counts.POSTPONED +
-    counts.PERMITS;
+    counts.NEW_LEAD +
+    counts.CONTACTED +
+    counts.ESTIMATING_PREPARING_PROPOSAL +
+    counts.PROPOSAL_SENT +
+    counts.FOLLOW_UP +
+    counts.WON +
+    counts.LOST;
 
   return { totalLeads, byStatus: counts as LeadStatusCount };
 }

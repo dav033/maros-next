@@ -2,15 +2,16 @@ import type { Lead, LeadStatus, LeadType } from "../models";
 import { filterLeadsByType as filterByTypeUtil } from "../utils/lead-type.utils";
 
 function effectiveStatus(s: LeadStatus | null | undefined): LeadStatus {
-  return (s ?? "NOT_EXECUTED") as LeadStatus;
+  return (s ?? "NEW_LEAD") as LeadStatus;
 }
 
 const STATUS_ORDER = [
-  "NOT_EXECUTED",
-  "IN_PROGRESS",
-  "PERMITS",
-  "POSTPONED",
-  "COMPLETED",
+  "NEW_LEAD",
+  "CONTACTED",
+  "ESTIMATING_PREPARING_PROPOSAL",
+  "PROPOSAL_SENT",
+  "FOLLOW_UP",
+  "WON",
   "LOST",
 ] as const;
 

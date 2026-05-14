@@ -36,12 +36,13 @@ type LeadEditFormProps = {
 };
 
 const STATUS_OPTIONS = [
-  { value: "NOT_EXECUTED", label: "Not Executed" },
-  { value: "IN_PROGRESS", label: "In Progress" },
-  { value: "COMPLETED", label: "Completed" },
+  { value: "NEW_LEAD", label: "New Lead" },
+  { value: "CONTACTED", label: "Contacted" },
+  { value: "ESTIMATING_PREPARING_PROPOSAL", label: "Estimating / Preparing Proposal" },
+  { value: "PROPOSAL_SENT", label: "Proposal Sent" },
+  { value: "FOLLOW_UP", label: "Follow Up" },
+  { value: "WON", label: "Won" },
   { value: "LOST", label: "Lost" },
-  { value: "POSTPONED", label: "Postponed" },
-  { value: "PERMITS", label: "Permits" },
 ];
 
 export function LeadEditForm({

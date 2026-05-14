@@ -29,11 +29,12 @@ import type { LeadType } from "@/leads/domain";
 
 const LEAD_STATUS_OPTIONS: Array<{ value: LeadStatus | "all"; label: string }> = [
   { value: "all", label: "All statuses" },
-  { value: LeadStatus.NOT_EXECUTED, label: "Not Executed" },
-  { value: LeadStatus.IN_PROGRESS, label: "In Progress" },
-  { value: LeadStatus.COMPLETED, label: "Completed" },
-  { value: LeadStatus.POSTPONED, label: "Postponed" },
-  { value: LeadStatus.PERMITS, label: "Permits" },
+  { value: LeadStatus.NEW_LEAD, label: "New Lead" },
+  { value: LeadStatus.CONTACTED, label: "Contacted" },
+  { value: LeadStatus.ESTIMATING_PREPARING_PROPOSAL, label: "Estimating / Preparing Proposal" },
+  { value: LeadStatus.PROPOSAL_SENT, label: "Proposal Sent" },
+  { value: LeadStatus.FOLLOW_UP, label: "Follow Up" },
+  { value: LeadStatus.WON, label: "Won" },
   { value: LeadStatus.LOST, label: "Lost" },
 ];
 

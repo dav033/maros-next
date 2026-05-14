@@ -78,6 +78,8 @@ export function useCreateLeadController({ leadType, inReview, onCreated }: UseCr
               ...(typeof form.companyId === "number" && form.companyId > 0
                 ? { companyId: form.companyId }
                 : {}),
+              ...(form.location.trim() ? { address: form.location.trim() } : {}),
+              ...(form.addressLink ? { addressLink: form.addressLink.trim() } : {}),
             },
             ...(inReview !== undefined && { inReview }),
           }

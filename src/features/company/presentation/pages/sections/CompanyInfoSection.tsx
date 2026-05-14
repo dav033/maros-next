@@ -173,7 +173,7 @@ export function CompanyInfoSection({
                     setField("isClient", !!checked)
                   }
                 />
-                <Label htmlFor="company-is-client">Client</Label>
+                <Label htmlFor="company-is-client">Supplier</Label>
               </div>
             </div>
           </>
@@ -211,7 +211,7 @@ export function CompanyInfoSection({
               )}
               {company.isClient && (
                 <Badge className="bg-green-500/10 text-green-600 border-green-500/20">
-                  Client
+                  Supplier
                 </Badge>
               )}
             </div>
