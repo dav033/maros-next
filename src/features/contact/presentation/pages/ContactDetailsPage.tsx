@@ -49,7 +49,9 @@ export function ContactDetailsPage({ contactId, initialData }: ContactDetailsPag
   const { contacts = [] } = data;
   
   // Notes logic
-  const notesLogic = useContactsNotesLogic();
+  const notesLogic = useContactsNotesLogic({
+    onSuccess: () => router.refresh(),
+  });
   const app = useContactsApp();
   
   // Lead creation modal
@@ -89,6 +91,7 @@ export function ContactDetailsPage({ contactId, initialData }: ContactDetailsPag
       }
     },
     successMessage: "Contact updated successfully!",
+    onSuccess: () => router.refresh(),
   });
   
   // Company modal state

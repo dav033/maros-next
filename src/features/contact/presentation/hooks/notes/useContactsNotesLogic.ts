@@ -2,12 +2,16 @@
 
 import { useNotesModal } from "@/common/hooks";
 
-
 import { toast } from "sonner";
 
 import { useContactsApp } from "@/di";
-import { patchContact } from "@/contact/application";
+import { patchContact, contactsKeys } from "@/contact/application";
 import type { Contact } from "@/contact/domain";
+import { useQueryClient } from "@tanstack/react-query";
+
+export interface UseContactsNotesLogicOptions {
+  onSuccess?: (notes: string[]) => void;
+}
 
 export interface UseContactsNotesLogicReturn {
   openFromContact: (contact: Contact) => void;
@@ -22,8 +26,9 @@ export interface UseContactsNotesLogicReturn {
   };
 }
 
-export function useContactsNotesLogic(): UseContactsNotesLogicReturn {
+export function useContactsNotesLogic(options?: UseContactsNotesLogicOptions): UseContactsNotesLogicReturn {
   const app = useContactsApp();
+  const queryClient = useQueryClient();
   const {
     notesModalState,
     openNotesModal,
@@ -40,10 +45,22 @@ export function useContactsNotesLogic(): UseContactsNotesLogicReturn {
   const handleSaveNotes = async () => {
     await saveNotesBase(async (contact, notes) => {
       if (typeof contact.id !== "number") return;
-      await patchContact(app, contact.id, {
-        notes: notes ?? [],
-      });
-      toast.success("Notes updated successfully!");
+      try {
+        const updated = await patchContact(app, contact.id, {
+          notes: notes ?? [],
+        });
+        queryClient.setQueryData<Contact[]>(contactsKeys.list, (old) => {
+          if (!old) return old;
+          return old.map((c) => (c.id === contact.id ? updated : c));
+        });
+        queryClient.invalidateQueries({ queryKey: contactsKeys.all });
+        toast.success("Notes updated successfully!");
+        options?.onSuccess?.(notes ?? []);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Could not update notes";
+        toast.error(message);
+        throw error;
+      }
     });
   };
 

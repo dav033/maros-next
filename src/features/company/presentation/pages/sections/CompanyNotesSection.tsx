@@ -19,7 +19,8 @@ export function CompanyNotesSection({
   notes,
   onOpenNotesModal,
 }: CompanyNotesSectionProps) {
-  if (notes && notes.length > 0) {
+  const safeNotes = Array.isArray(notes) ? notes : [];
+  if (safeNotes.length > 0) {
     return (
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
@@ -39,7 +40,7 @@ export function CompanyNotesSection({
         </CardHeader>
         <CardContent>
           <ul className="space-y-2">
-            {notes.map((note, index) => (
+            {safeNotes.map((note, index) => (
               <li key={index} className="text-sm text-foreground">
                 {note}
               </li>

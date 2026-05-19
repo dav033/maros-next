@@ -40,7 +40,6 @@ export function useCompanyMutations() {
       const message =
         error instanceof Error ? error.message : "Could not create company";
       toast.error(message);
-      throw error;
     },
   });
 
@@ -68,7 +67,6 @@ export function useCompanyMutations() {
       const message =
         error instanceof Error ? error.message : "Could not update company";
       toast.error(message);
-      throw error;
     },
   });
 
@@ -87,7 +85,6 @@ export function useCompanyMutations() {
       const message =
         error instanceof Error ? error.message : "Could not delete company";
       toast.error(message);
-      throw error;
     },
   });
 

@@ -22,7 +22,7 @@ export interface UseCompanyNotesLogicReturn {
   };
 }
 
-export function useCompanyNotesLogic(): UseCompanyNotesLogicReturn {
+export function useCompanyNotesLogic(options?: { onSuccess?: (notes: string[]) => void }): UseCompanyNotesLogicReturn {
   const queryClient = useQueryClient();
   const { invalidateQueries } = useCompanyMutations();
 
@@ -60,6 +60,7 @@ export function useCompanyNotesLogic(): UseCompanyNotesLogicReturn {
 
         await invalidateQueries();
         toast.success("Notes updated successfully!");
+        options?.onSuccess?.(notes);
       } catch (error) {
         const message =
           error instanceof Error ? error.message : "Could not update notes";

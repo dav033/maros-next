@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -41,7 +41,9 @@ export function CompanyDetailsPage({
   const { contacts = [], companies = [] } = data;
 
   // Notes logic
-  const notesLogic = useCompanyNotesLogic();
+  const notesLogic = useCompanyNotesLogic({
+    onSuccess: () => router.refresh(),
+  });
 
   // Inline editing
   const inlineEdit = useInlineEdit({
@@ -61,6 +63,7 @@ export function CompanyDetailsPage({
       }
     },
     successMessage: "Company updated successfully!",
+    onSuccess: () => router.refresh(),
   });
 
   const handleOpenNotesModal = useCallback(() => {
@@ -132,7 +135,7 @@ export function CompanyDetailsPage({
             inlineEdit={inlineEdit}
           />
           <CompanyNotesSection
-            notes={companyDetails.notes}
+            notes={Array.isArray(companyDetails.notes) ? companyDetails.notes : []}
             onOpenNotesModal={handleOpenNotesModal}
           />
         </div>

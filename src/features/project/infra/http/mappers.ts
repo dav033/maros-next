@@ -13,6 +13,7 @@ export type UpdateProjectPayload = {
   projectProgressStatus?: string;
   overview?: string;
   leadId?: number;
+  notes?: string[];
 };
 
 export function mapProjectFromApi(dto: ApiProjectDTO): Project {
@@ -40,5 +41,6 @@ export function mapProjectPatchToUpdatePayload(
     projectProgressStatus: patch.projectProgressStatus,
     overview: patch.overview,
     leadId: patch.leadId,
+    notes: patch.notes,
   };
 }
