@@ -142,7 +142,6 @@ export function useLeadsPageLogic({
     onEdit: editModal.open,
     onDelete: async (id) => {
       await deleteMutation.mutateAsync(id);
-      await data.refetch();
     },
     onViewContact: viewContactModal.open,
     onOpenNotesModal: notesLogic.openFromLead,

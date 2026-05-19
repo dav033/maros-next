@@ -63,31 +63,33 @@ export function CompanyBasicFields({
         onAddressLinkChange={onAddressLinkChange}
         onLocationChange={onLocationChange}
       />
-      <div className="relative">
-        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-          <Phone className="size-4" />
+      <div className="grid grid-cols-2 gap-3">
+        <div className="relative">
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+            <Phone className="size-4" />
+          </div>
+          <Input
+            value={phone ?? ""}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => onPhoneChange(e.target.value)}
+            placeholder="Phone"
+            disabled={disabled}
+            type="tel"
+            className="pl-10"
+          />
         </div>
-        <Input
-          value={phone ?? ""}
-          onChange={(e: ChangeEvent<HTMLInputElement>) => onPhoneChange(e.target.value)}
-          placeholder="Phone"
-          disabled={disabled}
-          type="tel"
-          className="pl-10"
-        />
-      </div>
-      <div className="relative">
-        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-          <Mail className="size-4" />
+        <div className="relative">
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+            <Mail className="size-4" />
+          </div>
+          <Input
+            value={email ?? ""}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => onEmailChange(e.target.value)}
+            placeholder="Email"
+            disabled={disabled}
+            type="email"
+            className="pl-10"
+          />
         </div>
-        <Input
-          value={email ?? ""}
-          onChange={(e: ChangeEvent<HTMLInputElement>) => onEmailChange(e.target.value)}
-          placeholder="Email"
-          disabled={disabled}
-          type="email"
-          className="pl-10"
-        />
       </div>
       <div className="relative">
         <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">

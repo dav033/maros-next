@@ -56,6 +56,16 @@ export async function deleteLeadAction(
   }
 }
 
+export async function updateLeadNameAction(id: number, name: string): Promise<ActionResult<void>> {
+  try {
+    const ctx = createServerLeadsAppContext();
+    await ctx.repos.lead.update(id, { name: name.trim() });
+    return success(undefined);
+  } catch (error) {
+    return handleActionError(error);
+  }
+}
+
 export async function acceptLeadAction(id: number): Promise<ActionResult<void>> {
   try {
     const ctx = createServerLeadsAppContext();

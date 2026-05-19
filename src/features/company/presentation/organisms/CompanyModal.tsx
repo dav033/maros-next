@@ -45,20 +45,22 @@ export function CompanyModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent>
-        <DialogHeader>
+      <DialogContent className="flex flex-col max-h-[90vh]">
+        <DialogHeader className="shrink-0">
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
-        <CompanyForm
-          value={formValue}
-          onChange={onChange}
-          disabled={isSubmitting}
-          services={services}
-          contacts={contacts}
-          onCreateNewContact={onCreateNewContact}
-        />
-        {serverError && <ErrorAlert message={serverError} />}
-        <DialogFooter>
+        <div className="overflow-y-auto flex-1 py-1 pr-2">
+          <CompanyForm
+            value={formValue}
+            onChange={onChange}
+            disabled={isSubmitting}
+            services={services}
+            contacts={contacts}
+            onCreateNewContact={onCreateNewContact}
+          />
+          {serverError && <ErrorAlert message={serverError} />}
+        </div>
+        <DialogFooter className="shrink-0 pt-2">
           <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
             Cancel
           </Button>

@@ -87,30 +87,30 @@ export function CompanyForm({ value, onChange, disabled, services = [], contacts
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <CompanyCheckboxField
-          id="company-is-customer"
-          label="CUSTOMER"
-          checked={value.isCustomer}
+        <div className="flex flex-col gap-2">
+          <CompanyCheckboxField
+            id="company-is-customer"
+            label="CUSTOMER"
+            checked={value.isCustomer}
+            disabled={disabled}
+            onChange={handleCustomerChange}
+          />
+          <CompanyCheckboxField
+            id="company-is-client"
+            label="SUPPLIER"
+            checked={value.isClient}
+            disabled={disabled}
+            onChange={handleClientChange}
+          />
+        </div>
+        <Textarea
+          value={value.note ?? ""}
+          onChange={handleNoteChange}
+          placeholder="Add a note (optional)"
           disabled={disabled}
-          onChange={handleCustomerChange}
-        />
-
-        <CompanyCheckboxField
-          id="company-is-client"
-          label="SUPPLIER"
-          checked={value.isClient}
-          disabled={disabled}
-          onChange={handleClientChange}
+          rows={2}
         />
       </div>
-
-      <Textarea
-        value={value.note ?? ""}
-        onChange={handleNoteChange}
-        placeholder="Add a note (optional)"
-        disabled={disabled}
-        rows={3}
-      />
     </div>
   );
 }

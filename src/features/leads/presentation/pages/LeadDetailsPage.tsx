@@ -260,8 +260,8 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
           phone: newContact.phone,
           email: newContact.email,
           occupation: "",
-          address: leadDetails.location || "",
-          addressLink: leadDetails.addressLink || "",
+          address: newContact.address ?? leadDetails.location ?? "",
+          addressLink: newContact.addressLink ?? leadDetails.addressLink ?? "",
           isCustomer: false,
           isClient: false,
           companyId: newContact.companyId,
@@ -333,6 +333,8 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
             companies={companies || []}
             contacts={contacts}
             inlineEdit={inlineEditContact}
+            leadLocation={leadDetails.location || undefined}
+            leadAddressLink={leadDetails.addressLink || undefined}
             onOpenCompanyModal={openCompanyModal}
             onRemoveContact={handleRemoveContactFromLead}
             onLinkContact={handleLinkContactToLead}

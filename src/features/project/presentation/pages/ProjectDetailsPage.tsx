@@ -17,6 +17,8 @@ import { ProjectForm } from "../molecules/ProjectForm";
 import { useProjectsApp } from "@/di";
 import { updateProject } from "@/project/application";
 import type { ProjectPatch } from "@/project/domain";
+import { updateLeadNameAction } from "@/features/leads/actions/leadActions";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { formatCurrency } from "@/shared/utils";
 
@@ -249,6 +251,32 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
   const [editingProject, setEditingProject] = useState<ProjectFormData>({});
   const [isSavingProject, setIsSavingProject] = useState(false);
 
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editingName, setEditingName] = useState("");
+  const [isSavingName, setIsSavingName] = useState(false);
+
+  const handleStartEditingName = useCallback(() => {
+    setEditingName(projectDetails?.lead?.name ?? "");
+    setIsEditingName(true);
+  }, [projectDetails]);
+
+  const handleSaveName = useCallback(async () => {
+    const leadId = projectDetails?.lead?.id;
+    if (!leadId || !editingName.trim()) return;
+    setIsSavingName(true);
+    try {
+      const result = await updateLeadNameAction(leadId, editingName);
+      if (!result.success) throw new Error(result.error);
+      setIsEditingName(false);
+      toast.success("Project name updated!");
+      router.refresh();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to update name");
+    } finally {
+      setIsSavingName(false);
+    }
+  }, [projectDetails, editingName, router]);
+
   const notesLogic = useProjectsNotesLogic({
     refetch: async () => {
       router.refresh();
@@ -360,8 +388,40 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
             <h1 className="text-3xl font-bold text-foreground">
               Project {lead?.leadNumber && `#${lead.leadNumber}`}
             </h1>
-            {lead?.name && (
-              <p className="text-muted-foreground mt-1">{lead.name}</p>
+            {isEditingName ? (
+              <div className="flex items-center gap-2 mt-1">
+                <Input
+                  value={editingName}
+                  onChange={(e) => setEditingName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleSaveName();
+                    if (e.key === "Escape") setIsEditingName(false);
+                  }}
+                  className="h-7 text-sm w-64"
+                  disabled={isSavingName}
+                  autoFocus
+                />
+                <Button size="sm" variant="ghost" onClick={handleSaveName} disabled={isSavingName || !editingName.trim()}>
+                  <Save className="size-3.5" />
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => setIsEditingName(false)} disabled={isSavingName}>
+                  <X className="size-3.5" />
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1 mt-1 group">
+                <p className="text-muted-foreground">{lead?.name ?? "Unnamed project"}</p>
+                {lead?.id && (
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="size-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={handleStartEditingName}
+                  >
+                    <Edit className="size-3" />
+                  </Button>
+                )}
+              </div>
             )}
           </div>
         </div>

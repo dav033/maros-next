@@ -52,6 +52,8 @@ export interface LeadContactSectionProps {
     isCustomer: boolean;
     isClient: boolean;
   }>;
+  leadLocation?: string;
+  leadAddressLink?: string;
   onOpenCompanyModal: (target: "existingContact" | "editingContact" | "newContactDraft") => void;
   onRemoveContact: () => Promise<void>;
   onLinkContact: (mode: ContactMode, contactId?: number, newContact?: any) => Promise<void>;
@@ -62,6 +64,8 @@ export function LeadContactSection({
   companies,
   contacts,
   inlineEdit,
+  leadLocation,
+  leadAddressLink,
   onOpenCompanyModal,
   onRemoveContact,
   onLinkContact,
@@ -88,6 +92,8 @@ export function LeadContactSection({
     contactName: "",
     phone: "",
     email: "",
+    address: leadLocation ?? "",
+    addressLink: leadAddressLink ?? "",
   });
 
   const handleLink = async () => {
@@ -127,24 +133,48 @@ export function LeadContactSection({
             onChange={(field, value) => setNewContactForm((p) => ({ ...p, [field]: value }))}
           />
           {contactMode === ContactMode.NEW_CONTACT && (
-            <div className="mt-3">
-              <Label className="text-xs mb-1 block">Company (Optional)</Label>
-              <div className="flex gap-2">
-                <div className="flex-1">
-                  <ContactCompanySelector
-                    selectedCompanyId={newContactCompanyId}
-                    companies={companies}
-                    onCompanyChange={setNewContactCompanyId}
-                  />
+            <div className="space-y-3 mt-3">
+              <div>
+                <Label className="text-xs mb-1 block">Company (Optional)</Label>
+                <div className="flex gap-2">
+                  <div className="flex-1">
+                    <ContactCompanySelector
+                      selectedCompanyId={newContactCompanyId}
+                      companies={companies}
+                      onCompanyChange={setNewContactCompanyId}
+                    />
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => onOpenCompanyModal("newContactDraft")}
+                    type="button"
+                  >
+                    <Plus className="size-4" />
+                  </Button>
                 </div>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => onOpenCompanyModal("newContactDraft")}
-                  type="button"
-                >
-                  <Plus className="size-4" />
-                </Button>
+              </div>
+              <div>
+                <Label className="text-xs mb-1 block">
+                  Address
+                  {leadLocation && (
+                    <span className="ml-2 text-muted-foreground font-normal">(inherited from lead)</span>
+                  )}
+                </Label>
+                <LocationField
+                  address={newContactForm.address}
+                  addressLink={newContactForm.addressLink}
+                  placeholder="Enter address (optional)"
+                  onLocationChange={({ address, link }) =>
+                    setNewContactForm((p) => ({ ...p, address, addressLink: link }))
+                  }
+                  onAddressChange={(address) =>
+                    setNewContactForm((p) => ({ ...p, address }))
+                  }
+                  onAddressLinkChange={(addressLink) =>
+                    setNewContactForm((p) => ({ ...p, addressLink }))
+                  }
+                />
               </div>
             </div>
           )}

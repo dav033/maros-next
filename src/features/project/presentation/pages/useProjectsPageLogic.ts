@@ -78,7 +78,6 @@ export function useProjectsPageLogic({
     onEdit: editModal.open,
     onDelete: async (id) => {
       await deleteMutation.mutateAsync(id);
-      await data.refetch();
     },
     onOpenNotesModal: notesLogic.openFromProject,
   });
