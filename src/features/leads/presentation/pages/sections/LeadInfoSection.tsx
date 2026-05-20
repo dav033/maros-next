@@ -1,6 +1,6 @@
 "use client";
 
-import { Briefcase, Calendar, FolderTree, MapPin, StickyNote, Edit, Plus } from "lucide-react";
+import { Briefcase, Calendar, DollarSign, FolderTree, MapPin, StickyNote, Edit, Plus } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -20,6 +20,7 @@ export interface LeadInfoSectionProps {
     status?: string;
     projectType?: { id: number; name: string } | null;
     notes?: string[];
+    estimate?: number | null;
   };
   projectTypes: Array<{ id: number; name: string }>;
   inlineEdit: UseInlineEditReturn<{
@@ -30,6 +31,7 @@ export interface LeadInfoSectionProps {
     status: string;
     projectTypeId: number | undefined;
     contactId: number | undefined;
+    estimate: number | string | null | undefined;
   }>;
   onOpenNotesModal: () => void;
 }
@@ -145,6 +147,26 @@ export function LeadInfoSection({
                 <p className="text-xs text-muted-foreground">Not available</p>
               )}
             </div>
+          )}
+
+          {isEditing ? (
+            <div>
+              <p className="text-sm text-muted-foreground mb-2">Estimate</p>
+              <Input
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="0.00"
+                value={editingValue.estimate ?? ""}
+                onChange={(e) => setField("estimate", e.target.value === "" ? null : Number(e.target.value))}
+              />
+            </div>
+          ) : (
+            <DetailField
+              icon={DollarSign}
+              label="Estimate"
+              value={lead.estimate != null ? `$${Number(lead.estimate).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : undefined}
+            />
           )}
         </div>
 

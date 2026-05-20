@@ -12,7 +12,9 @@ export type ApiLeadDTO = {
   contactId?: number;
   projectTypeId?: number;
   notes?: string[];
+  attachments?: string[];
   inReview?: boolean;
+  estimate?: number | null;
 };
 import type { LeadStatus, LeadType } from "@/leads/domain";
 import { mapLeadFromDTO, mapLeadsFromDTO } from "@/leads/domain";
@@ -57,7 +59,9 @@ export type UpdateLeadPayload = {
   startDate?: string;
   leadNumber?: string | null;
   notes?: string[];
+  attachments?: string[];
   inReview?: boolean;
+  estimate?: number | null;
 };
 
 export function mapLeadFromApi(dto: ApiLeadDTO): Lead {
@@ -125,6 +129,8 @@ export function mapLeadPatchToUpdatePayload(
     startDate: patch.startDate,
     leadNumber: patch.leadNumber,
     notes: patch.notes,
+    attachments: patch.attachments,
     inReview: patch.inReview,
+    estimate: patch.estimate,
   };
 }

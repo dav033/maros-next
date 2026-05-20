@@ -33,7 +33,9 @@ export type ApiLeadDTO = {
     id?: number | null;
   } | null;
   notes?: string[] | null;
+  attachments?: string[] | null;
   inReview?: boolean | null;
+  estimate?: number | null;
 } | null;
 
 function resolveStatus(status: string | null | undefined): LeadStatus {
@@ -112,7 +114,9 @@ export function mapLeadFromDTO(dto: ApiLeadDTO): Lead {
   const projectTypeColor = normalizeText(dto?.projectType?.color ?? "");
 
   const notesArray = Array.isArray(dto?.notes) && dto.notes.length > 0 ? dto.notes.map(n => String(n)) : [];
+  const attachmentsArray = Array.isArray(dto?.attachments) ? dto.attachments : [];
   const inReview = dto?.inReview ?? false;
+  const estimate = dto?.estimate != null ? Number(dto.estimate) : null;
 
   return {
     id,
@@ -123,6 +127,7 @@ export function mapLeadFromDTO(dto: ApiLeadDTO): Lead {
     addressLink,
     status,
     inReview,
+    estimate,
     contact: {
       id: contactId,
       name: contactName,
@@ -144,6 +149,7 @@ export function mapLeadFromDTO(dto: ApiLeadDTO): Lead {
         ? { id: dto.project.id }
         : null,
     notes: notesArray,
+    attachments: attachmentsArray,
   };
 }
 

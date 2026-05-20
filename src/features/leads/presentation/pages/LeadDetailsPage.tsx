@@ -31,6 +31,7 @@ import { useInlineEdit } from "@/common/hooks";
 
 import { LeadInfoSection } from "./sections/LeadInfoSection";
 import { LeadContactSection } from "./sections/LeadContactSection";
+import { LeadAttachmentsSection } from "./sections/LeadAttachmentsSection";
 
 
 interface LeadDetailsPageProps {
@@ -95,6 +96,7 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
       status: leadDetails?.status ?? "",
       projectTypeId: leadDetails?.projectType?.id,
       contactId: leadDetails?.contact?.id,
+      estimate: leadDetails?.estimate ?? null,
     },
     onSave: async (patch) => {
       if (leadDetails && typeof leadDetails.id === "number") {
@@ -117,6 +119,7 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
           projectType: updated.projectType,
           contact: updated.contact as LeadDetails["contact"],
           project: updated.project ?? leadDetails.project,
+          estimate: updated.estimate ?? null,
         });
 
         if (updated.status === LeadStatus.WON && updated.project?.id) {
@@ -341,7 +344,18 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
           />
         </div>
       </div>
-      
+
+      <LeadAttachmentsSection
+        leadId={leadDetails.id}
+        attachments={leadDetails.attachments ?? []}
+        onAttachmentsChange={async (newAttachments) => {
+          if (leadDetails && typeof leadDetails.id === "number") {
+            await patchLead(ctx, leadDetails.id, { attachments: newAttachments }, {});
+            setLeadDetails({ ...leadDetails, attachments: newAttachments });
+          }
+        }}
+      />
+
       <CompanyModal
         controller={companyModalController}
         services={services ?? []}

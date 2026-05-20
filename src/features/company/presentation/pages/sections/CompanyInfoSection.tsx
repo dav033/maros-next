@@ -1,6 +1,6 @@
 "use client";
 
-import { Building, Phone, Mail, MapPin } from "lucide-react";
+import { Building, Phone, Mail, MapPin, FileText } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -30,6 +30,7 @@ export interface CompanyInfoSectionProps {
     type: CompanyType;
     isCustomer: boolean;
     isClient: boolean;
+    submiz?: string;
   };
   inlineEdit: UseInlineEditReturn<{
     name: string;
@@ -40,6 +41,7 @@ export interface CompanyInfoSectionProps {
     type: CompanyType | null;
     isCustomer: boolean;
     isClient: boolean;
+    submiz: string;
   }>;
 }
 
@@ -127,6 +129,17 @@ export function CompanyInfoSection({
               />
             </div>
             <div>
+              <Label htmlFor="company-submiz" className="text-sm mb-2 block">
+                Submiz
+              </Label>
+              <Input
+                id="company-submiz"
+                value={editingValue.submiz || ""}
+                onChange={(e) => setField("submiz", e.target.value)}
+                placeholder="Enter submiz (optional)"
+              />
+            </div>
+            <div>
               <Label htmlFor="company-type" className="text-sm mb-2 block">
                 Type
               </Label>
@@ -202,6 +215,11 @@ export function CompanyInfoSection({
               value={company.address}
               linkHref={company.addressLink}
               linkLabel="View on map"
+            />
+            <DetailField
+              icon={FileText}
+              label="Submiz"
+              value={company.submiz}
             />
             <div className="flex items-center gap-2 pt-2">
               {company.isCustomer && (

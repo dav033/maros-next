@@ -56,6 +56,7 @@ export function CompanyDetailsPage({
       type: (companyDetails?.type ?? null) as CompanyType | null,
       isCustomer: companyDetails?.isCustomer ?? false,
       isClient: companyDetails?.isClient ?? false,
+      submiz: companyDetails?.submiz ?? "",
     },
     onSave: async (patch) => {
       if (companyDetails && typeof companyDetails.id === "number") {

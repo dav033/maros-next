@@ -12,4 +12,7 @@ export const endpoints = {
   getByLeadNumber: (leadNumber: string) => `${BASE}/number/${encodeURIComponent(leadNumber)}`,
   getRejectionInfo: (id: number) => `${BASE}/${id}/rejection-info`,
   details: (id: number | string) => `${BASE}/${id}/details`,
+  attachments: (leadId: number) => `${BASE}/${leadId}/attachments`,
+  attachmentPresignedUrl: (leadId: number) => `${BASE}/${leadId}/attachments/presigned-url`,
+  deleteAttachment: (leadId: number, attachmentId: number) => `${BASE}/${leadId}/attachments/${attachmentId}`,
 } as const;

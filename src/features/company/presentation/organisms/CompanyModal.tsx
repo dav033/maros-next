@@ -49,16 +49,18 @@ export function CompanyModal({
         <DialogHeader className="shrink-0">
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
-        <div className="overflow-y-auto flex-1 py-1 pr-2">
-          <CompanyForm
-            value={formValue}
-            onChange={onChange}
-            disabled={isSubmitting}
-            services={services}
-            contacts={contacts}
-            onCreateNewContact={onCreateNewContact}
-          />
-          {serverError && <ErrorAlert message={serverError} />}
+        <div className="overflow-y-auto flex-1 [scrollbar-gutter:stable]">
+          <div className="py-1 px-4">
+            <CompanyForm
+              value={formValue}
+              onChange={onChange}
+              disabled={isSubmitting}
+              services={services}
+              contacts={contacts}
+              onCreateNewContact={onCreateNewContact}
+            />
+            {serverError && <ErrorAlert message={serverError} />}
+          </div>
         </div>
         <DialogFooter className="shrink-0 pt-2">
           <Button variant="outline" onClick={onClose} disabled={isSubmitting}>

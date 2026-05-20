@@ -36,9 +36,10 @@ export function diffToPatch(current: Lead, updated: Lead): LeadPatch {
     contactId: updated.contact.id,
     leadNumber: updated.leadNumber ?? "",
     notes: updated.notes,
+    estimate: updated.estimate,
   };
-  
-  
+
+
   const flattenedCurrent = {
     name: current.name,
     location: current.location ?? "",
@@ -49,6 +50,7 @@ export function diffToPatch(current: Lead, updated: Lead): LeadPatch {
     contactId: current.contact.id,
     leadNumber: current.leadNumber ?? "",
     notes: current.notes,
+    estimate: current.estimate,
   };
 
   
@@ -94,6 +96,12 @@ export function diffToPatch(current: Lead, updated: Lead): LeadPatch {
     patch.notes = updated.notes;
   } else {
     delete patch.notes;
+  }
+
+  if (JSON.stringify(updated.attachments) !== JSON.stringify(current.attachments)) {
+    patch.attachments = updated.attachments;
+  } else {
+    delete patch.attachments;
   }
 
   return patch as LeadPatch;

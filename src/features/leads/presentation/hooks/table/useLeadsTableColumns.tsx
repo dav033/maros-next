@@ -86,6 +86,20 @@ export function useLeadsTableColumns({
         sortValue: (lead: Lead) => lead.location ?? "",
       },
       {
+        key: "estimate",
+        header: "Estimate",
+        className: "w-[120px] text-right",
+        render: (lead: Lead) => (
+          <span className="text-foreground font-mono text-sm">
+            {lead.estimate != null
+              ? `$${Number(lead.estimate).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+              : "—"}
+          </span>
+        ),
+        sortable: true,
+        sortValue: (lead: Lead) => lead.estimate ?? -Infinity,
+      },
+      {
         key: "status",
         header: "Status",
         className: "w-[120px] text-center",

@@ -32,7 +32,9 @@ export interface Lead {
     id: number;
   } | null;
   notes: string[];
+  attachments: string[];
   inReview: boolean;
+  estimate: number | null;
 }
 
 export type LeadId = number;
@@ -84,7 +86,9 @@ export type LeadPatch = Readonly<{
   startDate?: ISODate;
   leadNumber?: string | null;
   notes?: string[];
+  attachments?: string[];
   inReview?: boolean;
+  estimate?: number | null;
 }>;
 
 export type ApplyLeadPatchResult = Readonly<{
@@ -104,6 +108,17 @@ export type LeadStatusSummary = Readonly<{
   byStatus: LeadStatusCount;
 }>;
 
+export interface LeadAttachment {
+  id: number;
+  leadId: number;
+  fileName: string;
+  s3Key: string;
+  contentType?: string;
+  fileSize?: number;
+  createdAt: string;
+  downloadUrl?: string;
+}
+
 export interface LeadDetails {
   id: number;
   leadNumber?: string;
@@ -115,7 +130,9 @@ export interface LeadDetails {
   projectTypeId?: number | null;
   contactId?: number | null;
   notes?: string[];
+  attachments?: string[];
   inReview: boolean;
+  estimate?: number | null;
   contact?: {
     id: number;
     name: string;
