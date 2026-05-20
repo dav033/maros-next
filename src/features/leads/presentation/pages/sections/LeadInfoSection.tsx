@@ -31,7 +31,7 @@ export interface LeadInfoSectionProps {
     status: string;
     projectTypeId: number | undefined;
     contactId: number | undefined;
-    estimate: number | string | null | undefined;
+    estimate: number | null;
   }>;
   onOpenNotesModal: () => void;
 }
