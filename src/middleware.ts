@@ -8,7 +8,7 @@ export function middleware(request: NextRequest) {
   // Already on login — redirect to home if already authenticated
   if (pathname === '/login') {
     if (session) {
-      return NextResponse.redirect(new URL('/', request.url));
+      return NextResponse.redirect(new URL('/dashboard', request.url));
     }
     return NextResponse.next();
   }

@@ -18,6 +18,8 @@ type CreateProjectController = {
     projectProgressStatus?: string;
     overview?: string;
     leadId?: number;
+    leadName?: string;
+    leadNumber?: string;
   };
   setField: (key: any, value: any) => void;
   isLoading: boolean;
@@ -31,6 +33,8 @@ type UpdateProjectController = {
     projectProgressStatus?: string;
     overview?: string;
     leadId?: number;
+    leadName?: string;
+    leadNumber?: string;
   };
   setField: (key: any, value: any) => void;
   isLoading: boolean;

@@ -48,5 +48,7 @@ export type ProjectPatch = Readonly<{
   overview?: string;
   notes?: string[];
   leadId?: LeadId;
+  leadName?: string;
+  leadNumber?: string;
 }>;
 

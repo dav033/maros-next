@@ -36,7 +36,7 @@ export async function loginAction(_: unknown, formData: FormData) {
     sameSite: 'lax',
   });
 
-  redirect('/');
+  redirect('/dashboard');
 }
 
 export async function logoutAction() {

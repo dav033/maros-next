@@ -1,5 +1,6 @@
 export {
   DiProvider,
+  useAnalyticsApp,
   useContactsApp,
   useLeadsApp,
   useProjectTypesApp,

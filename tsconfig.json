@@ -67,6 +67,12 @@
       ],
       "@/reports/*": [
         "./src/features/reports/*"
+      ],
+      "@/analytics": [
+        "./src/features/analytics/index.ts"
+      ],
+      "@/analytics/*": [
+        "./src/features/analytics/*"
       ]
     }
   },

@@ -9,6 +9,7 @@ import {
   UserCog,
   FileBarChart2,
   FileCheck2,
+  LayoutDashboard,
 } from "lucide-react";
 
 export type SidebarItemProps = {
@@ -127,9 +128,20 @@ const reportsSection: SidebarSection = {
   ],
 };
 
+const analyticsSection: SidebarSection = {
+  section: "Analytics",
+  items: [
+    {
+      title: "Dashboard",
+      href: "/dashboard",
+      icon: LayoutDashboard,
+    },
+  ],
+};
+
 export const SIDEBAR_CONFIG: SidebarConfig = {
   title: "Maros Construction",
-  top: [menuSection, accountSection, reportsSection],
+  top: [analyticsSection, menuSection, accountSection, reportsSection],
   bottom: [],
 };
 

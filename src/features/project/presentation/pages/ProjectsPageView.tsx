@@ -1,11 +1,27 @@
 "use client";
 
-import { NotesEditorModal, DeleteFeedbackModal, EntityCrudPageTemplate } from "@/components/shared";
+import {
+  NotesEditorModal,
+  DeleteFeedbackModal,
+  EntityCrudPageTemplate,
+  PageHeaderCard,
+  PageToolbarCard,
+} from "@/components/shared";
 import type { Project } from "@/project/domain";
 import { ProjectProgressStatus, InvoiceStatus } from "@/project/domain";
 import { ProjectsTable } from "@/project/presentation";
 import { ProjectModal } from "../organisms/ProjectModal";
-import { X, FolderPlus, Search, Layers } from "lucide-react";
+import {
+  X,
+  FolderPlus,
+  Search,
+  Layers,
+  FolderKanban,
+  Filter,
+  Plus,
+  SlidersHorizontal,
+  Receipt,
+} from "lucide-react";
 import { ProjectsTableSkeleton } from "../organisms/ProjectsTableSkeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -116,106 +132,109 @@ export function ProjectsPageView({ logic }: ProjectsPageViewProps) {
   return (
     <EntityCrudPageTemplate
       header={
-        <div className="flex flex-col gap-3">
-          <header className="flex flex-col gap-1">
-            <h1 className="text-xl font-semibold text-foreground sm:text-2xl">Projects</h1>
-            <p className="text-xs text-muted-foreground sm:text-sm">Manage your projects</p>
-          </header>
-          <LeadTypeSwitcher currentType={leadType} basePath="/projects" />
-        </div>
+        <PageHeaderCard
+          icon={FolderKanban}
+          title="Projects"
+          description="Track active work, invoices and project progress"
+          rightSlot={
+            <Button onClick={openCreateModal} aria-label="New Project" className="h-9 gap-2">
+              <Plus className="h-4 w-4" />
+              New project
+            </Button>
+          }
+          belowSlot={<LeadTypeSwitcher currentType={leadType} basePath="/projects" />}
+        />
       }
       toolbar={
-        <div className="flex flex-col gap-2 rounded-xl bg-card p-3">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex flex-1 items-center gap-2 flex-wrap">
-              {/* Search field selector */}
-              <div className="w-32 shrink-0">
-                <Select value={toolbarSearchController.selectedField} onValueChange={toolbarSearchController.onFieldChange}>
-                  <SelectTrigger className="bg-background border-input h-9 text-xs">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover border-border">
-                    {toolbarSearchController.searchFields.map((field) => (
-                      <SelectItem key={field.value} value={field.value}>{field.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Search input */}
-              <div className="flex-1 min-w-[160px] relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="text"
-                  value={toolbarSearchController.searchTerm}
-                  onChange={(e) => toolbarSearchController.onSearchChange(e.target.value)}
-                  placeholder={toolbarSearchController.placeholder}
-                  className="pl-9 bg-background border-input h-9"
-                />
-              </div>
-              {toolbarSearchController.searchTerm.trim().length > 0 && (
-                <Button type="button" onClick={() => toolbarSearchController.onSearchChange("")} aria-label="Clear search" variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground h-9 px-2">
-                  <X className="h-4 w-4" />
-                </Button>
-              )}
-
-              {/* Progress status filter */}
-              <div className="w-36 shrink-0">
-                <Select value={progressFilter} onValueChange={(v) => setProgressFilter(v as ProjectProgressStatus | "all")}>
-                  <SelectTrigger className="bg-background border-input h-9 text-xs">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover border-border">
-                    {PROGRESS_OPTIONS.map((opt) => (
-                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Invoice status filter */}
-              <div className="w-36 shrink-0">
-                <Select value={invoiceFilter} onValueChange={(v) => setInvoiceFilter(v as InvoiceStatus | "all")}>
-                  <SelectTrigger className="bg-background border-input h-9 text-xs">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover border-border">
-                    {INVOICE_OPTIONS.map((opt) => (
-                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Group by */}
-              <div className="w-36 shrink-0">
-                <Select value={groupBy} onValueChange={(v) => setGroupBy(v as ProjectGroupBy)}>
-                  <SelectTrigger className="bg-background border-input h-9 text-xs">
-                    <Layers className="h-3.5 w-3.5 mr-1.5 shrink-0 text-muted-foreground" />
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover border-border">
-                    {PROJECT_GROUP_OPTIONS.map((opt) => (
-                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {typeof toolbarSearchController.resultCount === "number" && (
-                <span className="whitespace-nowrap text-[10px] text-muted-foreground">
-                  {toolbarSearchController.resultCount} of {toolbarSearchController.totalCount}
-                </span>
-              )}
-            </div>
-
-            <div className="flex items-center gap-2 shrink-0">
-              <Button onClick={openCreateModal} aria-label="New Project" size="icon" className="bg-[#2c3637] hover:bg-[#2c3637]/90 text-foreground">
-                <FolderPlus className="size-4" />
-              </Button>
-            </div>
+        <PageToolbarCard
+          icon={SlidersHorizontal}
+          label="Filters & search"
+          resultCount={toolbarSearchController.resultCount}
+          totalCount={toolbarSearchController.totalCount}
+        >
+          {/* Search field selector */}
+          <div className="w-32 shrink-0">
+            <Select value={toolbarSearchController.selectedField} onValueChange={toolbarSearchController.onFieldChange}>
+              <SelectTrigger className="bg-background/60 border-border/60 h-9 text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-popover border-border">
+                {toolbarSearchController.searchFields.map((field) => (
+                  <SelectItem key={field.value} value={field.value}>{field.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-        </div>
+
+          {/* Search input */}
+          <div className="flex-1 min-w-[200px] relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="text"
+              value={toolbarSearchController.searchTerm}
+              onChange={(e) => toolbarSearchController.onSearchChange(e.target.value)}
+              placeholder={toolbarSearchController.placeholder}
+              className="pl-9 bg-background/60 border-border/60 h-9"
+            />
+            {toolbarSearchController.searchTerm.trim().length > 0 && (
+              <Button
+                type="button"
+                onClick={() => toolbarSearchController.onSearchChange("")}
+                aria-label="Clear search"
+                variant="ghost"
+                size="sm"
+                className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 px-0 text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-3.5 w-3.5" />
+              </Button>
+            )}
+          </div>
+
+          {/* Progress status filter */}
+          <div className="w-36 shrink-0">
+            <Select value={progressFilter} onValueChange={(v) => setProgressFilter(v as ProjectProgressStatus | "all")}>
+              <SelectTrigger className="bg-background/60 border-border/60 h-9 text-xs">
+                <Filter className="h-3.5 w-3.5 mr-1.5 shrink-0 text-muted-foreground" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-popover border-border">
+                {PROGRESS_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Invoice status filter */}
+          <div className="w-36 shrink-0">
+            <Select value={invoiceFilter} onValueChange={(v) => setInvoiceFilter(v as InvoiceStatus | "all")}>
+              <SelectTrigger className="bg-background/60 border-border/60 h-9 text-xs">
+                <Receipt className="h-3.5 w-3.5 mr-1.5 shrink-0 text-muted-foreground" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-popover border-border">
+                {INVOICE_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Group by */}
+          <div className="w-36 shrink-0">
+            <Select value={groupBy} onValueChange={(v) => setGroupBy(v as ProjectGroupBy)}>
+              <SelectTrigger className="bg-background/60 border-border/60 h-9 text-xs">
+                <Layers className="h-3.5 w-3.5 mr-1.5 shrink-0 text-muted-foreground" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-popover border-border">
+                {PROJECT_GROUP_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </PageToolbarCard>
       }
       isLoading={showSkeleton}
       loadingContent={<ProjectsTableSkeleton />}

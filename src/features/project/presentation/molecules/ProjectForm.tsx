@@ -1,7 +1,8 @@
 "use client";
 
 import { Textarea } from "@/components/ui/textarea";
-import { Briefcase, TrendingUp } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Briefcase, TrendingUp, User } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -18,6 +19,8 @@ type ProjectFormData = {
   overview?: string;
   notes?: string[];
   leadId?: number;
+  leadName?: string;
+  leadNumber?: string;
 };
 
 type ProjectFormProps = {
@@ -73,26 +76,52 @@ export function ProjectForm({
       )}
 
       {isEditMode && (
-        <Select
-          value={form.projectProgressStatus || EMPTY_SELECT_VALUE}
-          onValueChange={(val) => onChange("projectProgressStatus", val === EMPTY_SELECT_VALUE ? undefined : val)}
-          disabled={disabled}
-        >
-          <SelectTrigger className="w-full">
-            <div className="flex items-center">
-              <TrendingUp className="size-4 text-muted-foreground mr-2 shrink-0" />
-              <SelectValue placeholder="Select Progress Status" />
+        <>
+          <div className="space-y-1">
+            <label className="text-xs text-muted-foreground">Lead Name</label>
+            <div className="relative">
+              <User className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={form.leadName ?? ""}
+                onChange={(event) => onChange("leadName", event.target.value || undefined)}
+                placeholder="Lead name"
+                disabled={disabled}
+                className="pl-9"
+              />
             </div>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={EMPTY_SELECT_VALUE}>Select Progress Status</SelectItem>
-            {PROJECT_PROGRESS_OPTIONS.map((opt) => (
-              <SelectItem key={opt.value} value={opt.value}>
-                {opt.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-xs text-muted-foreground">Project Number / Lead Number</label>
+            <Input
+              value={form.leadNumber ?? ""}
+              onChange={(event) => onChange("leadNumber", event.target.value || undefined)}
+              placeholder="e.g. 001-1123"
+              disabled={disabled}
+            />
+          </div>
+
+          <Select
+            value={form.projectProgressStatus || EMPTY_SELECT_VALUE}
+            onValueChange={(val) => onChange("projectProgressStatus", val === EMPTY_SELECT_VALUE ? undefined : val)}
+            disabled={disabled}
+          >
+            <SelectTrigger className="w-full">
+              <div className="flex items-center">
+                <TrendingUp className="size-4 text-muted-foreground mr-2 shrink-0" />
+                <SelectValue placeholder="Select Progress Status" />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={EMPTY_SELECT_VALUE}>Select Progress Status</SelectItem>
+              {PROJECT_PROGRESS_OPTIONS.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </>
       )}
 
       <Textarea

@@ -11,8 +11,6 @@ import Link from "next/link";
 import { useProjectsNotesLogic } from "../hooks/notes/useProjectsNotesLogic";
 import { useProjectsNotesModalController } from "../hooks/modals/useProjectsNotesModalController";
 import { NotesEditorModal, DetailField } from "@/components/shared";
-import { useInstantLeadsByType } from "@/leads/presentation";
-import { LeadType } from "@/leads/domain";
 import { ProjectForm } from "../molecules/ProjectForm";
 import { useProjectsApp } from "@/di";
 import { updateProject } from "@/project/application";
@@ -21,6 +19,13 @@ import { updateLeadNameAction } from "@/features/leads/actions/leadActions";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { formatCurrency } from "@/shared/utils";
+import { ContactModal } from "@/features/contact/presentation/organisms/ContactModal";
+import { useContactModalController } from "@/features/contact/presentation/hooks/controllers/useContactModalController";
+import { useContactMutations, initialContactFormValue } from "@/features/contact/presentation/hooks/mutations/useContactMutations";
+import { useInstantCompanies } from "@/features/company/presentation/hooks";
+import type { ContactFormValue } from "@/contact/domain";
+import { toContactPatch } from "@/contact/domain";
+import type { Contact as DomainContact } from "@/contact/domain";
 
 interface ProjectDetails {
   id: number;
@@ -91,12 +96,13 @@ type ProjectFormData = {
   overview?: string;
   notes?: string[];
   leadId?: number;
+  leadName?: string;
+  leadNumber?: string;
 };
 
 type Payment = NonNullable<NonNullable<ProjectDetails["financial"]>["payments"]>[number];
 type Contact = NonNullable<NonNullable<ProjectDetails["lead"]>["contact"]>;
 
-// Fetches leads only when rendered (i.e. when the edit form is open)
 function ProjectEditFormWithLeads({
   form,
   onChange,
@@ -106,20 +112,11 @@ function ProjectEditFormWithLeads({
   onChange: (key: string, value: any) => void;
   disabled: boolean;
 }) {
-  const constructionLeads = useInstantLeadsByType(LeadType.CONSTRUCTION);
-  const plumbingLeads = useInstantLeadsByType(LeadType.PLUMBING);
-  const roofingLeads = useInstantLeadsByType(LeadType.ROOFING);
-  const leads = [
-    ...(constructionLeads.leads ?? []),
-    ...(plumbingLeads.leads ?? []),
-    ...(roofingLeads.leads ?? []),
-  ];
-
   return (
     <ProjectForm
       form={form}
       onChange={onChange}
-      leads={leads}
+      leads={[]}
       disabled={disabled}
       isEditMode
     />
@@ -246,6 +243,8 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
   const router = useRouter();
   const { projectDetails, error } = initialData;
   const app = useProjectsApp();
+  const { companies } = useInstantCompanies();
+  const { updateContactMutation } = useContactMutations();
 
   const [isEditingProject, setIsEditingProject] = useState(false);
   const [editingProject, setEditingProject] = useState<ProjectFormData>({});
@@ -254,6 +253,10 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
   const [isEditingName, setIsEditingName] = useState(false);
   const [editingName, setEditingName] = useState("");
   const [isSavingName, setIsSavingName] = useState(false);
+
+  const [isEditingContact, setIsEditingContact] = useState(false);
+  const [contactFormValue, setContactFormValue] = useState<ContactFormValue>(initialContactFormValue);
+  const [contactFormError, setContactFormError] = useState<string | null>(null);
 
   const handleStartEditingName = useCallback(() => {
     setEditingName(projectDetails?.lead?.name ?? "");
@@ -290,6 +293,8 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
         overview: projectDetails.overview ?? "",
         notes: projectDetails.notes,
         leadId: projectDetails.lead?.id,
+        leadName: projectDetails.lead?.name,
+        leadNumber: projectDetails.lead?.leadNumber,
       });
       setIsEditingProject(true);
     }
@@ -310,6 +315,8 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
         overview: editingProject.overview?.trim() || undefined,
         notes: editingProject.notes,
         leadId: editingProject.leadId ?? projectDetails.lead?.id,
+        leadName: editingProject.leadName?.trim() || undefined,
+        leadNumber: editingProject.leadNumber?.trim() || undefined,
       };
 
       await updateProject(app, projectDetails.id, patch);
@@ -346,6 +353,70 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
     onClose: notesLogic.modalProps.onClose,
     onSave: notesLogic.modalProps.onSave,
     loading: notesLogic.modalProps.loading,
+  });
+
+  const handleOpenEditContact = useCallback(() => {
+    const contact = projectDetails?.lead?.contact;
+    if (!contact) return;
+    setContactFormValue({
+      name: contact.name ?? "",
+      phone: contact.phone ?? "",
+      email: contact.email ?? "",
+      occupation: contact.occupation ?? "",
+      role: undefined,
+      addressLink: contact.addressLink ?? "",
+      address: contact.address ?? "",
+      isCustomer: contact.isCustomer,
+      isClient: contact.isClient,
+      companyId: contact.company?.id ?? null,
+      note: "",
+    });
+    setContactFormError(null);
+    setIsEditingContact(true);
+  }, [projectDetails]);
+
+  const handleCloseEditContact = useCallback(() => {
+    if (updateContactMutation.isPending) return;
+    setIsEditingContact(false);
+    setContactFormError(null);
+  }, [updateContactMutation.isPending]);
+
+  const handleSubmitEditContact = useCallback(async () => {
+    const contact = projectDetails?.lead?.contact;
+    if (!contact) return;
+    setContactFormError(null);
+    try {
+      const currentForPatch = {
+        id: contact.id,
+        name: contact.name,
+        phone: contact.phone,
+        email: contact.email,
+        occupation: contact.occupation,
+        address: contact.address,
+        addressLink: contact.addressLink,
+        isCustomer: contact.isCustomer,
+        isClient: contact.isClient,
+        companyId: contact.company?.id ?? null,
+      } as unknown as DomainContact;
+      const patch = toContactPatch(currentForPatch, contactFormValue);
+      await updateContactMutation.mutateAsync({ id: contact.id, patch });
+      setIsEditingContact(false);
+      router.refresh();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Could not update contact";
+      setContactFormError(message);
+    }
+  }, [projectDetails, contactFormValue, updateContactMutation, router]);
+
+  const contactModalController = useContactModalController({
+    mode: isEditingContact ? "edit" : "list",
+    closeModal: handleCloseEditContact,
+    handleCreateSubmit: () => {},
+    handleEditSubmit: handleSubmitEditContact,
+    formValue: contactFormValue,
+    handleFormChange: setContactFormValue,
+    isPending: updateContactMutation.isPending,
+    serverError: contactFormError,
   });
 
   if (error || !projectDetails) {
@@ -559,7 +630,7 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
           {lead?.contact ? (
             <ProjectContactCard
               contact={lead.contact}
-              onEdit={() => router.push(`/contact/${lead.contact!.id}`)}
+              onEdit={handleOpenEditContact}
             />
           ) : (
             <Card>
@@ -588,6 +659,11 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
       </div>
 
       <NotesEditorModal controller={notesModalController} />
+
+      <ContactModal
+        controller={contactModalController}
+        companies={companies ?? []}
+      />
     </div>
   );
 }

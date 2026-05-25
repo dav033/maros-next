@@ -15,6 +15,8 @@ type ProjectFormData = {
   overview?: string;
   notes?: string[];
   leadId?: number;
+  leadName?: string;
+  leadNumber?: string;
 };
 
 type UseUpdateProjectControllerOptions = {
@@ -32,9 +34,11 @@ export function useUpdateProjectController({ project, onUpdated }: UseUpdateProj
       overview: project?.overview,
       notes: project?.notes,
       leadId: project?.leadId,
+      leadName: project?.lead?.name,
+      leadNumber: project?.lead?.leadNumber,
     },
     validate: (form) => {
-      return !!form.leadId && !!project;
+      return !!project;
     },
     onSubmit: async (form) => {
       if (!project) {
@@ -46,6 +50,8 @@ export function useUpdateProjectController({ project, onUpdated }: UseUpdateProj
         overview: form.overview,
         notes: form.notes,
         leadId: form.leadId,
+        leadName: form.leadName,
+        leadNumber: form.leadNumber,
       };
 
       const updatedProject = await updateProject(ctx, project.id, patch);
@@ -69,6 +75,8 @@ export function useUpdateProjectController({ project, onUpdated }: UseUpdateProj
         overview: project.overview,
         notes: project.notes,
         leadId: project.leadId,
+        leadName: project.lead?.name,
+        leadNumber: project.lead?.leadNumber,
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

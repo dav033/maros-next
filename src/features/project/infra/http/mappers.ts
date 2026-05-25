@@ -13,6 +13,8 @@ export type UpdateProjectPayload = {
   projectProgressStatus?: string;
   overview?: string;
   leadId?: number;
+  leadName?: string;
+  leadNumber?: string;
   notes?: string[];
 };
 
@@ -41,6 +43,8 @@ export function mapProjectPatchToUpdatePayload(
     projectProgressStatus: patch.projectProgressStatus,
     overview: patch.overview,
     leadId: patch.leadId,
+    leadName: patch.leadName,
+    leadNumber: patch.leadNumber,
     notes: patch.notes,
   };
 }

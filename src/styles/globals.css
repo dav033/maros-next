@@ -288,6 +288,63 @@ select option:focus {
   background-color: hsl(var(--muted));
 }
 
+@keyframes dashboardWidgetEnter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes dashboardKpiEnter {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes dashboardSectionEnter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dashboard-widget-enter {
+  animation: dashboardWidgetEnter 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.dashboard-widget-enter.is-refetching {
+  animation: none;
+}
+
+.dashboard-kpi-enter {
+  animation: dashboardKpiEnter 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.dashboard-section-enter {
+  animation: dashboardSectionEnter 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-widget-enter,
+  .dashboard-kpi-enter,
+  .dashboard-section-enter {
+    animation: none !important;
+  }
+}
+
 @keyframes contextMenuFadeIn {
   from {
     opacity: 0;

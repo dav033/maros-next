@@ -10,6 +10,8 @@ export * from "./InlineEditCardHeader";
 export * from "./LocationField";
 export * from "./NotesButton";
 export * from "./NotesEditorModal";
+export * from "./PageHeaderCard";
+export * from "./PageToolbarCard";
 export * from "./SearchableSelect";
 export * from "./TablePagination";
 export * from "./Typography";
