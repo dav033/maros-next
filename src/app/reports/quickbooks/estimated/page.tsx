@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Suspense, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { money, useProjectFinancials } from "@/analytics";
+import { money } from "@/analytics";
 import { useInstantProjects } from "@/project";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,33 +17,28 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-function normalizeProjectNumber(value: string): string {
-  return value
-    .replace(/^\[|\]$/g, "")
-    .trim()
-    .toUpperCase();
-}
-
 function EstimatedReportContent() {
   const searchParams = useSearchParams();
   const from = searchParams.get("from") ?? "";
   const to = searchParams.get("to") ?? "";
   const dashboardHref = `/dashboard?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`;
 
-  const projectFinancials = useProjectFinancials(200);
-  const { projects } = useInstantProjects();
+  const { projects, isLoading, error } = useInstantProjects();
 
-  const projectNumberToId = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const project of projects ?? []) {
-      const projectId = Number(project.id) || 0;
-      if (projectId <= 0) continue;
-      const number = project.lead?.leadNumber;
-      if (!number) continue;
-      map.set(normalizeProjectNumber(number), projectId);
-    }
-    return map;
-  }, [projects]);
+  const rows = useMemo(
+    () =>
+      (projects ?? [])
+        .filter((project) => project.financial)
+        .map((project) => ({
+          projectId: Number(project.id) || 0,
+          projectNumber: project.lead?.leadNumber ?? "—",
+          estimatedAmount: project.financial?.estimatedAmount ?? 0,
+          invoicedAmount: project.financial?.invoicedAmount ?? 0,
+          paidAmount: project.financial?.paidAmount ?? 0,
+          outstandingAmount: project.financial?.outstandingAmount ?? 0,
+        })),
+    [projects],
+  );
 
   return (
     <section className="space-y-4">
@@ -51,7 +46,7 @@ function EstimatedReportContent() {
         <div>
           <h1 className="text-xl font-semibold">QuickBooks Estimated Report</h1>
           <p className="text-sm text-muted-foreground">
-            Project financial profile from QuickBooks API (estimated, invoiced, paid, outstanding)
+            Project financial profile (estimated, invoiced, paid, outstanding) — same source as the Projects table.
           </p>
         </div>
         <Button asChild variant="outline" className="gap-2">
@@ -67,9 +62,9 @@ function EstimatedReportContent() {
           <CardTitle className="text-sm">Estimated Details</CardTitle>
         </CardHeader>
         <CardContent>
-          {projectFinancials.isLoading ? (
+          {isLoading ? (
             <p className="text-sm text-muted-foreground">Loading estimated financials...</p>
-          ) : projectFinancials.error ? (
+          ) : error ? (
             <p className="text-sm text-destructive">Could not load estimated financials.</p>
           ) : (
             <Table>
@@ -83,13 +78,10 @@ function EstimatedReportContent() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {(projectFinancials.data ?? []).map((row) => {
-                  const normalized = normalizeProjectNumber(row.projectNumber);
-                  const projectId = projectNumberToId.get(normalized);
-                  const href = projectId ? `/project/${projectId}` : undefined;
-
+                {rows.map((row) => {
+                  const href = row.projectId > 0 ? `/project/${row.projectId}` : undefined;
                   return (
-                    <TableRow key={row.projectNumber}>
+                    <TableRow key={`${row.projectNumber}-${row.projectId}`}>
                       <TableCell>
                         {href ? <Link href={href} className="underline">{row.projectNumber}</Link> : row.projectNumber}
                       </TableCell>

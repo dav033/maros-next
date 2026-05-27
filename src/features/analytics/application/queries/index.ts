@@ -2,6 +2,7 @@ export { useOverview } from "./useOverview";
 export { usePipeline } from "./usePipeline";
 export { useProjectsStatus } from "./useProjectsStatus";
 export { useFinancialSnapshot } from "./useFinancialSnapshot";
+export { useFinancialSnapshotFromProjects } from "./useFinancialSnapshotFromProjects";
 export { useAging } from "./useAging";
 export { useRevenueTrend } from "./useRevenueTrend";
 export { useTopClients } from "./useTopClients";

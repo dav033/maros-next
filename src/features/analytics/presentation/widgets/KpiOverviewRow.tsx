@@ -1,14 +1,13 @@
-import { BadgeDollarSign, BriefcaseBusiness, FolderKanban, Target, TrendingUp } from "lucide-react";
-import type { KpiOverview } from "../../domain";
+import { BadgeDollarSign, ClipboardList, FileText, HandCoins, Wallet } from "lucide-react";
+import type { FinancialSnapshot, KpiOverview } from "../../domain";
 import { KpiCard, type KpiTone } from "./KpiCard";
 import { money } from "./formatters";
 
 type KpiOverviewRowProps = {
   overview: KpiOverview;
+  snapshot: FinancialSnapshot;
   revenueRangeLabel?: string;
   revenueHref?: string;
-  outstandingHref?: string;
-  backlogHref?: string;
 };
 
 type KpiSpec = {
@@ -23,10 +22,9 @@ type KpiSpec = {
 
 export function KpiOverviewRow({
   overview,
+  snapshot,
   revenueRangeLabel = "12m",
   revenueHref,
-  outstandingHref,
-  backlogHref,
 }: KpiOverviewRowProps) {
   const kpis: KpiSpec[] = [
     {
@@ -38,38 +36,37 @@ export function KpiOverviewRow({
       href: revenueHref ?? "/reports/quickbooks/revenue",
     },
     {
-      key: "outstanding",
-      label: "A/R Outstanding",
-      value: money.format(overview.outstandingTotal),
-      icon: TrendingUp,
-      tone: "amber",
-      href: outstandingHref ?? "/reports/quickbooks/outstanding",
-    },
-    {
-      key: "backlog",
-      label: "Backlog",
-      value: money.format(overview.backlogTotal),
-      icon: FolderKanban,
+      key: "estimated",
+      label: "Estimated",
+      value: money.format(snapshot.estimatedTotal),
+      icon: ClipboardList,
       tone: "sky",
-      href: backlogHref ?? "/reports/quickbooks/backlog",
+      href: "/reports/quickbooks/estimated",
     },
     {
-      key: "winRate",
-      label: "Win Rate",
-      value: `${overview.winRate.toFixed(1)}%`,
-      icon: Target,
-      hint: `${overview.wonLeadsCount} won · ${overview.lostLeadsCount} lost`,
-      tone: "primary",
-      href: "/leads",
-    },
-    {
-      key: "leads",
-      label: "Leads",
-      value: overview.leadsCount.toString(),
-      icon: BriefcaseBusiness,
-      hint: `${overview.projectsCount} active projects`,
+      key: "invoiced",
+      label: "Invoiced",
+      value: money.format(snapshot.invoicedTotal),
+      icon: FileText,
       tone: "violet",
-      href: "/leads",
+      href: "/reports/quickbooks/estimated",
+    },
+    {
+      key: "paid",
+      label: "Paid",
+      value: money.format(snapshot.paidTotal),
+      icon: HandCoins,
+      tone: "primary",
+      href: "/reports/quickbooks/estimated",
+    },
+    {
+      key: "projectOutstanding",
+      label: "Project Outstanding",
+      value: money.format(snapshot.outstandingTotal),
+      icon: Wallet,
+      tone: "amber",
+      hint: `${snapshot.projectCount} projects`,
+      href: "/reports/quickbooks/estimated",
     },
   ];
 

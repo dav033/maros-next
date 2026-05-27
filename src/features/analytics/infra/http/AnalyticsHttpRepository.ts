@@ -1,3 +1,4 @@
+import type { LeadType } from "@/leads/domain";
 import type { AnalyticsRepositoryPort } from "../../domain/ports";
 import type { HttpClientLike } from "@/shared/infra/http";
 import { optimizedApiClient } from "@/shared/infra/http";
@@ -35,55 +36,62 @@ import type {
 export class AnalyticsHttpRepository implements AnalyticsRepositoryPort {
   constructor(private readonly api: HttpClientLike = optimizedApiClient) {}
 
-  async getOverview(params?: { from?: string; to?: string }) {
+  async getOverview(params?: { from?: string; to?: string; leadType?: LeadType }) {
     const { data } = await this.api.get<OverviewResponse>(analyticsEndpoints.overview(), { params });
     return mapOverview(data);
   }
 
-  async getPipeline() {
-    const { data } = await this.api.get<PipelineBucketResponse[]>(analyticsEndpoints.pipeline());
+  async getPipeline(params?: { leadType?: LeadType }) {
+    const { data } = await this.api.get<PipelineBucketResponse[]>(analyticsEndpoints.pipeline(), {
+      params,
+    });
     return mapPipeline(data);
   }
 
-  async getProjectsStatus() {
+  async getProjectsStatus(params?: { leadType?: LeadType }) {
     const { data } = await this.api.get<ProjectsStatusBucketResponse[]>(
       analyticsEndpoints.projectsStatus(),
+      { params },
     );
     return mapProjectsStatus(data);
   }
 
-  async getFinancialSnapshot() {
+  async getFinancialSnapshot(params?: { leadType?: LeadType }) {
     const { data } = await this.api.get<FinancialSnapshotResponse>(
       analyticsEndpoints.financialSnapshot(),
+      { params },
     );
     return mapFinancialSnapshot(data);
   }
 
-  async getAging() {
-    const { data } = await this.api.get<AgingBucketResponse[]>(analyticsEndpoints.aging());
+  async getAging(params?: { leadType?: LeadType }) {
+    const { data } = await this.api.get<AgingBucketResponse[]>(analyticsEndpoints.aging(), {
+      params,
+    });
     return mapAging(data);
   }
 
-  async getRevenueTrend(params?: { months?: number; from?: string; to?: string }) {
+  async getRevenueTrend(params?: { months?: number; from?: string; to?: string; leadType?: LeadType }) {
     const months = params?.months ?? 12;
     const { data } = await this.api.get<RevenuePointResponse[]>(analyticsEndpoints.revenueTrend(), {
       params: {
         months,
         from: params?.from,
         to: params?.to,
+        leadType: params?.leadType,
       },
     });
     return mapRevenueTrend(data);
   }
 
-  async getTopClients(params?: { limit?: number; by?: "revenue" | "volume" }) {
+  async getTopClients(params?: { limit?: number; by?: "revenue" | "volume"; leadType?: LeadType }) {
     const { data } = await this.api.get<TopClientResponse[]>(analyticsEndpoints.topClients(), {
       params,
     });
     return mapTopClients(data);
   }
 
-  async getOutstandingBalances(params?: { limit?: number }) {
+  async getOutstandingBalances(params?: { limit?: number; leadType?: LeadType }) {
     const { data } = await this.api.get<OutstandingBalanceItemResponse[]>(
       analyticsEndpoints.outstandingBalances(),
       { params },
@@ -91,7 +99,7 @@ export class AnalyticsHttpRepository implements AnalyticsRepositoryPort {
     return mapOutstandingBalances(data);
   }
 
-  async getBacklog(params?: { limit?: number }) {
+  async getBacklog(params?: { limit?: number; leadType?: LeadType }) {
     const { data } = await this.api.get<BacklogItemResponse[]>(analyticsEndpoints.backlog(), {
       params,
     });
@@ -106,7 +114,7 @@ export class AnalyticsHttpRepository implements AnalyticsRepositoryPort {
     return mapQuickbooksParsedReport(data);
   }
 
-  async getProjectFinancials(params?: { limit?: number }) {
+  async getProjectFinancials(params?: { limit?: number; leadType?: LeadType }) {
     const { data } = await this.api.get<ProjectFinancialItemResponse[]>(
       analyticsEndpoints.projectFinancials(),
       { params },
@@ -114,9 +122,10 @@ export class AnalyticsHttpRepository implements AnalyticsRepositoryPort {
     return mapProjectFinancials(data);
   }
 
-  async getProjectHealth() {
+  async getProjectHealth(params?: { leadType?: LeadType }) {
     const { data } = await this.api.get<ProjectHealthResponse[]>(
       analyticsEndpoints.projectHealth(),
+      { params },
     );
     return mapProjectHealth(data);
   }

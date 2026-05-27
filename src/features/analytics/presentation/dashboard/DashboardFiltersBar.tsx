@@ -1,8 +1,22 @@
-import { CalendarDays, CalendarRange, RefreshCw, RotateCcw, Sparkles } from "lucide-react";
+import { CalendarDays, CalendarRange, Hammer, House, Layers3, RefreshCw, RotateCcw, Sparkles, Wrench } from "lucide-react";
+import { LeadType } from "@/leads/domain";
 import type { DateFilter, QuickRangeKey } from "./dateRange";
 import { quickRanges, getQuickDateRange, isSameRange } from "./dateRange";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+
+export type DashboardLeadScope = "all" | LeadType;
+
+const leadScopeOptions: Array<{
+  value: DashboardLeadScope;
+  label: string;
+  icon: typeof Layers3;
+}> = [
+  { value: "all", label: "General", icon: Layers3 },
+  { value: LeadType.CONSTRUCTION, label: "Construction", icon: Hammer },
+  { value: LeadType.PLUMBING, label: "Plumbing", icon: Wrench },
+  { value: LeadType.ROOFING, label: "Roofing", icon: House },
+];
 
 type DashboardFiltersBarProps = {
   draftRange: DateFilter;
@@ -11,8 +25,10 @@ type DashboardFiltersBarProps = {
   hasRangeChanged: boolean;
   hasInvertedDates: boolean;
   appliedQuickRangeLabel: string | null;
+  currentLeadScope: DashboardLeadScope;
   refreshing: boolean;
   onDraftChange: (next: DateFilter) => void;
+  onLeadScopeChange: (next: DashboardLeadScope) => void;
   onApply: () => void;
   onReset: () => void;
   onRefresh: () => void;
@@ -26,8 +42,10 @@ export function DashboardFiltersBar({
   hasRangeChanged,
   hasInvertedDates,
   appliedQuickRangeLabel,
+  currentLeadScope,
   refreshing,
   onDraftChange,
+  onLeadScopeChange,
   onApply,
   onReset,
   onRefresh,
@@ -57,6 +75,30 @@ export function DashboardFiltersBar({
           <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
           {refreshing ? "Refreshing..." : "Refresh data"}
         </Button>
+      </div>
+
+      <div className="mt-5 space-y-1.5">
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Business line</p>
+        <div className="flex flex-wrap gap-1 rounded-lg border border-border/60 bg-background/40 p-1">
+          {leadScopeOptions.map((option) => {
+            const isActive = option.value === currentLeadScope;
+            const Icon = option.icon;
+
+            return (
+              <Button
+                key={option.value}
+                type="button"
+                variant={isActive ? "default" : "ghost"}
+                size="sm"
+                className="h-8 gap-1.5 rounded-md px-3 text-xs"
+                onClick={() => onLeadScopeChange(option.value)}
+              >
+                <Icon className="h-3.5 w-3.5" />
+                {option.label}
+              </Button>
+            );
+          })}
+        </div>
       </div>
 
       <div className="mt-5 grid gap-3 lg:grid-cols-[auto_1fr_auto] lg:items-end">

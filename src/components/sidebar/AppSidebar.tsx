@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import {
@@ -23,6 +23,7 @@ const SIDEBAR_GROUPS_STORAGE_KEY = "maros.sidebar.openGroups";
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() => {
     const defaults = {
       Leads: true,
@@ -57,8 +58,28 @@ export function AppSidebar() {
     }
   }, [openGroups]);
 
-  const isActiveRoute = (href: string) =>
-    pathname === href || (href !== "/" && pathname?.startsWith(href));
+  const isActiveRoute = (href: string) => {
+    const [hrefPath, hrefQuery] = href.split("?");
+    const pathMatches =
+      pathname === hrefPath || (hrefPath !== "/" && pathname?.startsWith(hrefPath));
+
+    if (!pathMatches) {
+      return false;
+    }
+
+    if (!hrefQuery) {
+      return true;
+    }
+
+    const expectedParams = new URLSearchParams(hrefQuery);
+    for (const [key, expectedValue] of expectedParams.entries()) {
+      if (searchParams.get(key) !== expectedValue) {
+        return false;
+      }
+    }
+
+    return true;
+  };
 
   const renderItems = (items: SidebarDropdownConfig[], nested = false) => {
     return items.map((item) => {

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Suspense } from "react";
 import { usePathname } from "next/navigation";
 import { SidebarProvider, SidebarInset, SidebarTrigger, SidebarRail } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/sidebar/AppSidebar";
@@ -14,7 +15,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <SidebarProvider defaultOpen={true}>
-      <AppSidebar />
+      <Suspense fallback={null}>
+        <AppSidebar />
+      </Suspense>
       <SidebarRail />
       <SidebarInset className="min-h-svh flex flex-col w-full">
         <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 md:px-6 md:hidden">

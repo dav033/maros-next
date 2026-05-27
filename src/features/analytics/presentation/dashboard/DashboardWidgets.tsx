@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
-import { Activity, BarChart3, DollarSign, Users } from "lucide-react";
+import { Activity, BarChart3, DollarSign, Hammer, House, Layers3, Users, Wrench } from "lucide-react";
+import { LeadType } from "@/leads/domain";
+import { Button } from "@/components/ui/button";
 import type {
   AgingBucket,
   FinancialSnapshot,
@@ -10,9 +12,9 @@ import type {
   RevenuePoint,
   TopClient,
 } from "../../domain";
+import type { DashboardLeadScope } from "./DashboardFiltersBar";
 import { AgingBucketsChart } from "../widgets/AgingBucketsChart";
 import { AsyncWidget } from "../widgets/AsyncWidget";
-import { FinancialSnapshotPanel } from "../widgets/FinancialSnapshotPanel";
 import { KpiOverviewRow } from "../widgets/KpiOverviewRow";
 import { PipelineFunnelChart } from "../widgets/PipelineFunnelChart";
 import { ProjectHealthList } from "../widgets/ProjectHealthList";
@@ -21,7 +23,6 @@ import { RevenueTrendChart } from "../widgets/RevenueTrendChart";
 import { TopClientsTable } from "../widgets/TopClientsTable";
 import {
   BarChartSkeleton,
-  FinancialSnapshotSkeleton,
   KpiOverviewSkeleton,
   LineChartSkeleton,
   PieChartSkeleton,
@@ -46,12 +47,23 @@ type DashboardWidgetsProps = {
   topClients: QueryLike<TopClient[]>;
   topClientsBy: "revenue" | "volume";
   onTopClientsByChange: (by: "revenue" | "volume") => void;
+  currentLeadScope: DashboardLeadScope;
+  onLeadScopeChange: (next: DashboardLeadScope) => void;
   projectHealth: QueryLike<ProjectHealth[]>;
   revenueRangeLabel?: string;
   revenueHref?: string;
-  outstandingHref?: string;
-  backlogHref?: string;
 };
+
+const leadScopeShortcuts: Array<{
+  value: DashboardLeadScope;
+  label: string;
+  icon: typeof Layers3;
+}> = [
+  { value: "all", label: "General", icon: Layers3 },
+  { value: LeadType.CONSTRUCTION, label: "Construction", icon: Hammer },
+  { value: LeadType.PLUMBING, label: "Plumbing", icon: Wrench },
+  { value: LeadType.ROOFING, label: "Roofing", icon: House },
+];
 
 type SectionProps = {
   icon: typeof Activity;
@@ -91,28 +103,58 @@ export function DashboardWidgets({
   topClients,
   topClientsBy,
   onTopClientsByChange,
+  currentLeadScope,
+  onLeadScopeChange,
   projectHealth,
   revenueRangeLabel,
   revenueHref,
-  outstandingHref,
-  backlogHref,
 }: DashboardWidgetsProps) {
   return (
     <div className="space-y-8">
-      <Section icon={Activity} title="Performance overview" description="Key metrics across revenue, pipeline and projects" delay={0}>
+      <div className="rounded-xl border border-border/60 bg-card/35 p-2">
+        <div className="flex flex-wrap gap-1">
+          {leadScopeShortcuts.map((shortcut) => {
+            const Icon = shortcut.icon;
+            const isActive = shortcut.value === currentLeadScope;
+
+            return (
+              <Button
+                key={shortcut.value}
+                type="button"
+                size="sm"
+                variant={isActive ? "default" : "ghost"}
+                className="h-8 gap-1.5 rounded-md px-3 text-xs"
+                onClick={() => onLeadScopeChange(shortcut.value)}
+              >
+                <Icon className="h-3.5 w-3.5" />
+                {shortcut.label}
+              </Button>
+            );
+          })}
+        </div>
+      </div>
+
+      <Section icon={Activity} title="Performance overview" description="Key metrics across revenue and project financials" delay={0}>
         <AsyncWidget
           query={overview}
           errorText="Could not load overview KPIs."
           skeleton={<KpiOverviewSkeleton />}
         >
-          {(data) => (
-            <KpiOverviewRow
-              overview={data}
-              revenueRangeLabel={revenueRangeLabel}
-              revenueHref={revenueHref}
-              outstandingHref={outstandingHref}
-              backlogHref={backlogHref}
-            />
+          {(overviewData) => (
+            <AsyncWidget
+              query={financialSnapshot}
+              errorText="Could not load financial snapshot."
+              skeleton={<KpiOverviewSkeleton />}
+            >
+              {(snapshotData) => (
+                <KpiOverviewRow
+                  overview={overviewData}
+                  snapshot={snapshotData}
+                  revenueRangeLabel={revenueRangeLabel}
+                  revenueHref={revenueHref}
+                />
+              )}
+            </AsyncWidget>
           )}
         </AsyncWidget>
       </Section>
@@ -139,15 +181,7 @@ export function DashboardWidgets({
         </div>
       </Section>
 
-      <Section icon={DollarSign} title="Financial health" description="Receivables, snapshot and project status mix" delay={220}>
-        <AsyncWidget
-          query={financialSnapshot}
-          errorText="Could not load financial snapshot."
-          skeleton={<FinancialSnapshotSkeleton />}
-        >
-          {(data) => <FinancialSnapshotPanel snapshot={data} />}
-        </AsyncWidget>
-
+      <Section icon={DollarSign} title="Financial health" description="Receivables aging and project status mix" delay={220}>
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <AsyncWidget
             query={aging}

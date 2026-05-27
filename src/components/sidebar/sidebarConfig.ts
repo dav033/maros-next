@@ -132,9 +132,28 @@ const analyticsSection: SidebarSection = {
   section: "Analytics",
   items: [
     {
-      title: "Dashboard",
-      href: "/dashboard",
-      icon: LayoutDashboard,
+      trigger: {
+        title: "Dashboard",
+        icon: LayoutDashboard,
+      },
+      items: [
+        {
+          title: "General",
+          href: "/dashboard",
+        },
+        {
+          title: "Construction",
+          href: "/dashboard?leadType=construction",
+        },
+        {
+          title: "Roofing",
+          href: "/dashboard?leadType=roofing",
+        },
+        {
+          title: "Plumbing",
+          href: "/dashboard?leadType=plumbing",
+        },
+      ],
     },
   ],
 };
