@@ -5,6 +5,7 @@ import { optimizedApiClient } from "@/shared/infra/http";
 import { analyticsEndpoints } from "./endpoints";
 import {
   mapAging,
+  mapCashPosition,
   mapFinancialSnapshot,
   mapOverview,
   mapPipeline,
@@ -20,6 +21,7 @@ import {
 import type {
   AgingBucketResponse,
   BacklogItemResponse,
+  CashPositionResponse,
   FinancialSnapshotResponse,
   OutstandingBalanceItemResponse,
   OverviewResponse,
@@ -128,6 +130,14 @@ export class AnalyticsHttpRepository implements AnalyticsRepositoryPort {
       { params },
     );
     return mapProjectHealth(data);
+  }
+
+  async getCashPosition(params?: { from?: string; to?: string }) {
+    const { data } = await this.api.get<CashPositionResponse>(
+      analyticsEndpoints.cashPosition(),
+      { params },
+    );
+    return mapCashPosition(data);
   }
 
   async refresh() {

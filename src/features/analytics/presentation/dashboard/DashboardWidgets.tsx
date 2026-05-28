@@ -1,10 +1,8 @@
 import type { ReactNode } from "react";
-import { Activity, BarChart3, DollarSign, Hammer, House, Layers3, Users, Wrench } from "lucide-react";
-import { LeadType } from "@/leads/domain";
-import { Button } from "@/components/ui/button";
+import { Activity, BarChart3, DollarSign, Users } from "lucide-react";
 import type {
   AgingBucket,
-  FinancialSnapshot,
+  CashPosition,
   KpiOverview,
   PipelineBucket,
   ProjectHealth,
@@ -32,6 +30,7 @@ import {
 
 type QueryLike<T> = {
   isLoading: boolean;
+  isFetching?: boolean;
   error: unknown;
   data: T | undefined;
   refetch: () => Promise<unknown>;
@@ -41,29 +40,17 @@ type DashboardWidgetsProps = {
   overview: QueryLike<KpiOverview>;
   pipeline: QueryLike<PipelineBucket[]>;
   projectsStatus: QueryLike<ProjectsStatusBucket[]>;
-  financialSnapshot: QueryLike<FinancialSnapshot>;
   aging: QueryLike<AgingBucket[]>;
   revenueTrend: QueryLike<RevenuePoint[]>;
   topClients: QueryLike<TopClient[]>;
   topClientsBy: "revenue" | "volume";
   onTopClientsByChange: (by: "revenue" | "volume") => void;
   currentLeadScope: DashboardLeadScope;
-  onLeadScopeChange: (next: DashboardLeadScope) => void;
   projectHealth: QueryLike<ProjectHealth[]>;
+  cashPosition: QueryLike<CashPosition>;
   revenueRangeLabel?: string;
   revenueHref?: string;
 };
-
-const leadScopeShortcuts: Array<{
-  value: DashboardLeadScope;
-  label: string;
-  icon: typeof Layers3;
-}> = [
-  { value: "all", label: "General", icon: Layers3 },
-  { value: LeadType.CONSTRUCTION, label: "Construction", icon: Hammer },
-  { value: LeadType.PLUMBING, label: "Plumbing", icon: Wrench },
-  { value: LeadType.ROOFING, label: "Roofing", icon: House },
-];
 
 type SectionProps = {
   icon: typeof Activity;
@@ -97,64 +84,34 @@ export function DashboardWidgets({
   overview,
   pipeline,
   projectsStatus,
-  financialSnapshot,
   aging,
   revenueTrend,
   topClients,
   topClientsBy,
   onTopClientsByChange,
   currentLeadScope,
-  onLeadScopeChange,
   projectHealth,
+  cashPosition,
   revenueRangeLabel,
   revenueHref,
 }: DashboardWidgetsProps) {
+  const showCashPosition = currentLeadScope === "all";
   return (
     <div className="space-y-8">
-      <div className="rounded-xl border border-border/60 bg-card/35 p-2">
-        <div className="flex flex-wrap gap-1">
-          {leadScopeShortcuts.map((shortcut) => {
-            const Icon = shortcut.icon;
-            const isActive = shortcut.value === currentLeadScope;
-
-            return (
-              <Button
-                key={shortcut.value}
-                type="button"
-                size="sm"
-                variant={isActive ? "default" : "ghost"}
-                className="h-8 gap-1.5 rounded-md px-3 text-xs"
-                onClick={() => onLeadScopeChange(shortcut.value)}
-              >
-                <Icon className="h-3.5 w-3.5" />
-                {shortcut.label}
-              </Button>
-            );
-          })}
-        </div>
-      </div>
-
-      <Section icon={Activity} title="Performance overview" description="Key metrics across revenue and project financials" delay={0}>
+      <Section icon={Activity} title="Performance overview" description="Revenue, backlog and secured revenue" delay={0}>
         <AsyncWidget
           query={overview}
           errorText="Could not load overview KPIs."
           skeleton={<KpiOverviewSkeleton />}
         >
           {(overviewData) => (
-            <AsyncWidget
-              query={financialSnapshot}
-              errorText="Could not load financial snapshot."
-              skeleton={<KpiOverviewSkeleton />}
-            >
-              {(snapshotData) => (
-                <KpiOverviewRow
-                  overview={overviewData}
-                  snapshot={snapshotData}
-                  revenueRangeLabel={revenueRangeLabel}
-                  revenueHref={revenueHref}
-                />
-              )}
-            </AsyncWidget>
+            <KpiOverviewRow
+              overview={overviewData}
+              cashPosition={showCashPosition ? cashPosition.data ?? null : null}
+              showCashPosition={showCashPosition}
+              revenueRangeLabel={revenueRangeLabel}
+              revenueHref={revenueHref}
+            />
           )}
         </AsyncWidget>
       </Section>

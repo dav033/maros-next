@@ -1,4 +1,4 @@
-import { CalendarDays, CalendarRange, Hammer, House, Layers3, RefreshCw, RotateCcw, Sparkles, Wrench } from "lucide-react";
+import { CalendarDays, CalendarRange, Hammer, House, Layers3, Loader2, RefreshCw, RotateCcw, Sparkles, Wrench } from "lucide-react";
 import { LeadType } from "@/leads/domain";
 import type { DateFilter, QuickRangeKey } from "./dateRange";
 import { quickRanges, getQuickDateRange, isSameRange } from "./dateRange";
@@ -27,6 +27,7 @@ type DashboardFiltersBarProps = {
   appliedQuickRangeLabel: string | null;
   currentLeadScope: DashboardLeadScope;
   refreshing: boolean;
+  isUpdating?: boolean;
   onDraftChange: (next: DateFilter) => void;
   onLeadScopeChange: (next: DashboardLeadScope) => void;
   onApply: () => void;
@@ -44,6 +45,7 @@ export function DashboardFiltersBar({
   appliedQuickRangeLabel,
   currentLeadScope,
   refreshing,
+  isUpdating = false,
   onDraftChange,
   onLeadScopeChange,
   onApply,
@@ -78,7 +80,15 @@ export function DashboardFiltersBar({
       </div>
 
       <div className="mt-5 space-y-1.5">
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Business line</p>
+        <div className="flex items-center gap-2">
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Business line</p>
+          {isUpdating ? (
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
+              <Loader2 className="h-3 w-3 animate-spin" />
+              Updating…
+            </span>
+          ) : null}
+        </div>
         <div className="flex flex-wrap gap-1 rounded-lg border border-border/60 bg-background/40 p-1">
           {leadScopeOptions.map((option) => {
             const isActive = option.value === currentLeadScope;

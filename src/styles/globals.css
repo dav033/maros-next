@@ -329,6 +329,12 @@ select option:focus {
   animation: none;
 }
 
+.dashboard-widget-enter.is-refetching > :not(.refetch-indicator) {
+  opacity: 0.55;
+  transition: opacity 0.2s ease-in-out;
+  pointer-events: none;
+}
+
 .dashboard-kpi-enter {
   animation: dashboardKpiEnter 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
 }

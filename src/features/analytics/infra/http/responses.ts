@@ -7,6 +7,7 @@ export type OverviewResponse = {
   revenueTotal?: number;
   outstandingTotal?: number;
   backlogTotal?: number;
+  revenuePipelineTotal?: number;
 };
 
 export type PipelineBucketResponse = {
@@ -115,6 +116,16 @@ export type ProjectHealthResponse = {
   backlogAmount?: number;
   riskLevel?: string;
   reasons?: unknown[];
+};
+
+export type CashPositionResponse = {
+  cashPosition?: number;
+  cashAtEnd?: number | null;
+  netCash?: number | null;
+  period?: {
+    from?: string;
+    to?: string;
+  };
 };
 
 export type RefreshResponse = {

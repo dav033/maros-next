@@ -1,11 +1,12 @@
-import { BadgeDollarSign, ClipboardList, FileText, HandCoins, Wallet } from "lucide-react";
-import type { FinancialSnapshot, KpiOverview } from "../../domain";
+import { BadgeDollarSign, Hammer, ShieldCheck, Wallet } from "lucide-react";
+import type { CashPosition, KpiOverview } from "../../domain";
 import { KpiCard, type KpiTone } from "./KpiCard";
 import { money } from "./formatters";
 
 type KpiOverviewRowProps = {
   overview: KpiOverview;
-  snapshot: FinancialSnapshot;
+  cashPosition?: CashPosition | null;
+  showCashPosition?: boolean;
   revenueRangeLabel?: string;
   revenueHref?: string;
 };
@@ -22,10 +23,13 @@ type KpiSpec = {
 
 export function KpiOverviewRow({
   overview,
-  snapshot,
+  cashPosition,
+  showCashPosition = false,
   revenueRangeLabel = "12m",
   revenueHref,
 }: KpiOverviewRowProps) {
+  const backlog = overview.revenueTotal - overview.revenuePipelineTotal;
+
   const kpis: KpiSpec[] = [
     {
       key: "revenue",
@@ -36,42 +40,40 @@ export function KpiOverviewRow({
       href: revenueHref ?? "/reports/quickbooks/revenue",
     },
     {
-      key: "estimated",
-      label: "Estimated",
-      value: money.format(snapshot.estimatedTotal),
-      icon: ClipboardList,
+      key: "backlog",
+      label: "Backlog",
+      value: money.format(backlog),
+      icon: Hammer,
       tone: "sky",
-      href: "/reports/quickbooks/estimated",
+      hint: "Revenue − Revenue Pipeline",
     },
     {
-      key: "invoiced",
-      label: "Invoiced",
-      value: money.format(snapshot.invoicedTotal),
-      icon: FileText,
+      key: "revenuePipeline",
+      label: "Revenue Pipeline",
+      value: money.format(overview.revenuePipelineTotal),
+      icon: ShieldCheck,
       tone: "violet",
-      href: "/reports/quickbooks/estimated",
-    },
-    {
-      key: "paid",
-      label: "Paid",
-      value: money.format(snapshot.paidTotal),
-      icon: HandCoins,
-      tone: "primary",
-      href: "/reports/quickbooks/estimated",
-    },
-    {
-      key: "projectOutstanding",
-      label: "Project Outstanding",
-      value: money.format(snapshot.outstandingTotal),
-      icon: Wallet,
-      tone: "amber",
-      hint: `${snapshot.projectCount} projects`,
-      href: "/reports/quickbooks/estimated",
+      hint: "From P&L (Cash basis)",
     },
   ];
 
+  if (showCashPosition) {
+    kpis.push({
+      key: "cashPosition",
+      label: "Cash Position",
+      value: cashPosition ? money.format(cashPosition.cashPosition) : "—",
+      icon: Wallet,
+      tone: "amber",
+      hint: cashPosition?.cashAtEnd != null ? "Cash at end of period" : "Net cash for period",
+    });
+  }
+
+  const gridCols = showCashPosition
+    ? "sm:grid-cols-2 xl:grid-cols-4"
+    : "sm:grid-cols-2 xl:grid-cols-3";
+
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
+    <div className={`grid grid-cols-1 gap-3 ${gridCols}`}>
       {kpis.map((kpi, index) => (
         <div
           key={kpi.key}

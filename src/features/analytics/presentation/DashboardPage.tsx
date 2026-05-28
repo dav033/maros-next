@@ -7,7 +7,7 @@ import { LeadType } from "@/leads/domain";
 import {
   invalidateAnalytics,
   useAging,
-  useFinancialSnapshotFromProjects,
+  useCashPosition,
   useOverview,
   usePipeline,
   useProjectHealth,
@@ -89,11 +89,26 @@ export function DashboardPage() {
   const overview = useOverview({ ...range, leadType });
   const pipeline = usePipeline(leadType);
   const projectsStatus = useProjectsStatus(leadType);
-  const financialSnapshot = useFinancialSnapshotFromProjects(leadType);
   const aging = useAging(leadType);
   const revenueTrend = useRevenueTrend({ months: 12, from: range.from, to: range.to, leadType });
   const topClients = useTopClients(5, topClientsBy, leadType);
   const projectHealth = useProjectHealth(leadType);
+  const cashPosition = useCashPosition({
+    from: range.from,
+    to: range.to,
+    enabled: leadScope === "all",
+  });
+
+  const isUpdating = [
+    overview,
+    pipeline,
+    projectsStatus,
+    aging,
+    revenueTrend,
+    topClients,
+    projectHealth,
+    cashPosition,
+  ].some((query) => query.isFetching);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -144,6 +159,7 @@ export function DashboardPage() {
         appliedQuickRangeLabel={appliedQuickRangeLabel}
         currentLeadScope={leadScope}
         refreshing={refreshing}
+        isUpdating={isUpdating}
         onDraftChange={setDraftRange}
         onLeadScopeChange={handleLeadScopeChange}
         onApply={applyRange}
@@ -156,15 +172,14 @@ export function DashboardPage() {
         overview={overview}
         pipeline={pipeline}
         projectsStatus={projectsStatus}
-        financialSnapshot={financialSnapshot}
         aging={aging}
         revenueTrend={revenueTrend}
         topClients={topClients}
         topClientsBy={topClientsBy}
         onTopClientsByChange={handleTopClientsByChange}
         currentLeadScope={leadScope}
-        onLeadScopeChange={handleLeadScopeChange}
         projectHealth={projectHealth}
+        cashPosition={cashPosition}
         revenueRangeLabel={appliedQuickRangeLabel ?? `${range.from} → ${range.to}`}
         revenueHref={revenueHref}
       />

@@ -53,7 +53,7 @@ export function AsyncWidget<T>({
     <div className={`relative dashboard-widget-enter ${isRefetching ? "is-refetching" : ""}`}>
       {isRefetching ? (
         <span
-          className="pointer-events-none absolute right-3 top-3 z-10 flex h-2 w-2"
+          className="refetch-indicator pointer-events-none absolute right-3 top-3 z-10 flex h-2 w-2"
           aria-label="Refreshing data"
           title="Refreshing data"
         >

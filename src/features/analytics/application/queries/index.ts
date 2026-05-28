@@ -11,4 +11,5 @@ export { useBacklog } from "./useBacklog";
 export { useProjectFinancials } from "./useProjectFinancials";
 export { useQuickbooksRevenueReport } from "./useQuickbooksRevenueReport";
 export { useProjectHealth } from "./useProjectHealth";
+export { useCashPosition } from "./useCashPosition";
 export { analyticsQueryDefaults, invalidateAnalytics } from "./cacheConfig";
