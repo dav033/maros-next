@@ -43,15 +43,6 @@ export function ensureLeadIntegrity(
   }
 
   const name = normalizeText(lead.name);
-  if (!name) {
-    throw new BusinessRuleError(
-      "VALIDATION_ERROR",
-      "Lead name must not be empty",
-      {
-        details: { field: "name" },
-      }
-    );
-  }
   if (name.length > 140) {
     throw new BusinessRuleError(
       "FORMAT_ERROR",

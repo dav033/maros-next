@@ -75,7 +75,7 @@ export function LeadForm({
         <SelectTrigger className="w-full bg-background/95">
           <div className="flex items-center">
             <FolderTree className="size-4 text-muted-foreground mr-2 shrink-0" />
-            <SelectValue placeholder="Select Lead Type *" />
+            <SelectValue placeholder="Select Lead Type" />
           </div>
         </SelectTrigger>
         <SelectContent>
@@ -119,7 +119,7 @@ export function LeadForm({
         >
           <SelectTrigger className="bg-background/95">
             <Wrench className="size-4 text-muted-foreground mr-2" />
-            <SelectValue placeholder="Select Project Type *" />
+            <SelectValue placeholder="Select Project Type" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value={EMPTY_SELECT_VALUE}>Select Project Type</SelectItem>

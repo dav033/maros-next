@@ -256,7 +256,7 @@ export function ProjectsPageView({ logic }: ProjectsPageViewProps) {
               <>
                 Are you sure you want to delete project{" "}
                 <span className="font-semibold text-foreground">
-                  {selectedProject?.lead.name}
+                  {deleteModalProps.itemToDelete?.lead.name}
                 </span>
                 ?
                 <br />

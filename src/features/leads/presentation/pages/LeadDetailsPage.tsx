@@ -26,12 +26,13 @@ import { useContactCompanyModalController } from "@/features/contact/presentatio
 import { useCompanyMutations } from "@/features/company/presentation/hooks";
 import { initialCompanyFormValue, toDraft as toCompanyDraft } from "@/features/company/presentation/helpers/companyFormHelpers";
 import type { CompanyFormValue } from "@/features/company/presentation/molecules/CompanyForm";
-import { createProject } from "@/project/application";
+import { createProject, projectsKeys } from "@/project/application";
 import { useInlineEdit } from "@/common/hooks";
 
 import { LeadInfoSection } from "./sections/LeadInfoSection";
 import { LeadContactSection } from "./sections/LeadContactSection";
 import { LeadAttachmentsSection } from "./sections/LeadAttachmentsSection";
+import { PostConversionEstimateModal } from "../organisms/PostConversionEstimateModal";
 
 
 interface LeadDetailsPageProps {
@@ -67,6 +68,7 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
 
   // Project Conversion
   const [isConvertingToProject, setIsConvertingToProject] = useState(false);
+  const [postConversionProjectId, setPostConversionProjectId] = useState<number | null>(null);
   const handleConvertToProject = useCallback(async () => {
     if (!leadDetails || typeof leadDetails.id !== "number") return;
     if (leadDetails.project?.id) {
@@ -76,6 +78,12 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
     setIsConvertingToProject(true);
     try {
       const created = await createProject(projectsApp, { leadId: leadDetails.id });
+      queryClient.setQueryData<Lead[]>(leadsKeys.byType(leadType), (oldLeads) => {
+        if (!oldLeads) return oldLeads;
+        return oldLeads.filter((lead) => lead.id !== leadDetails.id);
+      });
+      queryClient.invalidateQueries({ queryKey: leadsKeys.all });
+      queryClient.invalidateQueries({ queryKey: projectsKeys.all });
       toast.success("Lead converted to project successfully!");
       router.push(`/project/${created.id}`);
     } catch (error: unknown) {
@@ -84,7 +92,7 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
     } finally {
       setIsConvertingToProject(false);
     }
-  }, [leadDetails, projectsApp, router]);
+  }, [leadDetails, leadType, projectsApp, queryClient, router]);
 
   // Lead Inline Edit
   const inlineEditLead = useInlineEdit({
@@ -122,8 +130,16 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
           estimate: updated.estimate ?? null,
         });
 
-        if (updated.status === LeadStatus.WON && updated.project?.id) {
-          router.push(`/project/${updated.project.id}`);
+        const conversionProjectId = updated.conversion?.converted
+          ? updated.conversion.projectId
+          : undefined;
+        const becameWon =
+          leadDetails.status !== LeadStatus.WON &&
+          updated.status === LeadStatus.WON;
+        if (conversionProjectId) {
+          setPostConversionProjectId(conversionProjectId);
+        } else if (becameWon && updated.project?.id) {
+          setPostConversionProjectId(updated.project.id);
         }
       }
     },
@@ -253,21 +269,20 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
     if (!leadDetails || typeof leadDetails.id !== "number") return;
     try {
       let finalContactId: number | undefined;
-      if (mode === ContactMode.EXISTING_CONTACT) {
-        if (!contactId) throw new Error("Select an existing contact.");
+      if (mode === ContactMode.EXISTING_CONTACT && contactId) {
         finalContactId = contactId;
       } else {
-        if (!newContact.contactName.trim()) throw new Error("Contact name is required.");
+        const contactForm = newContact ?? {};
         const formValue = {
-          name: newContact.contactName,
-          phone: newContact.phone,
-          email: newContact.email,
+          name: contactForm.contactName ?? "",
+          phone: contactForm.phone ?? "",
+          email: contactForm.email ?? "",
           occupation: "",
-          address: newContact.address ?? leadDetails.location ?? "",
-          addressLink: newContact.addressLink ?? leadDetails.addressLink ?? "",
+          address: contactForm.address ?? leadDetails.location ?? "",
+          addressLink: contactForm.addressLink ?? leadDetails.addressLink ?? "",
           isCustomer: false,
           isClient: false,
-          companyId: newContact.companyId,
+          companyId: contactForm.companyId,
         };
         const draft = toContactDraft(formValue);
         const createdContact = await createContact(contactCtx, draft);
@@ -363,6 +378,16 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
       />
       
       <NotesEditorModal controller={notesModalController} />
+
+      {postConversionProjectId !== null && (
+        <PostConversionEstimateModal
+          open
+          onClose={() => setPostConversionProjectId(null)}
+          projectId={postConversionProjectId}
+          leadName={leadDetails.name ?? undefined}
+          contactEmail={leadDetails.contact?.email ?? undefined}
+        />
+      )}
     </div>
   );
 }

@@ -7,5 +7,7 @@ export const endpoints = {
     listPath: "/all",
   }),
   details: (id: number | string) => `${BASE}/${id}/details`,
+  estimateFile: (id: number | string) => `${BASE}/${id}/estimate-file`,
+  sendEstimateEmail: (id: number | string) => `${BASE}/${id}/send-estimate-email`,
 } as const;
 

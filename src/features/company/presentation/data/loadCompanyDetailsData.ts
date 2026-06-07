@@ -1,4 +1,5 @@
 import { serverApiClient } from "@/shared/infra";
+import { AppError } from "@/shared/errors";
 import { CompanyHttpRepository } from "@/features/company/infra/http/CompanyHttpRepository";
 
 interface CompanyDetails {
@@ -57,24 +58,16 @@ export async function loadCompanyDetailsData(companyId: number) {
     };
     
     return { companyDetails: companyDetailsWithContacts };
-  } catch (error: any) {
-    
-    let errorMessage = "Unknown error";
-    if (error?.response?.data?.message) {
-      errorMessage = error.response.data.message;
-    } else if (error?.message) {
-      errorMessage = error.message;
-    } else if (typeof error === "string") {
-      errorMessage = error;
-    }
-    
-    if (error?.response?.status === 404) {
-      errorMessage = `Company with ID ${companyId} not found`;
-    }
-    
-    return { 
-      companyDetails: null, 
-      error: errorMessage 
+  } catch (error) {
+    const appError = AppError.from(error);
+    const errorMessage =
+      appError.kind === "not_found"
+        ? `No encontramos la compañía solicitada.`
+        : appError.userMessage;
+
+    return {
+      companyDetails: null,
+      error: errorMessage,
     };
   }
 }

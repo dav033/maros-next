@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAnalyticsApp } from "@/di";
 import { analyticsKeys } from "../keys/analyticsKeys";
+import { STALE_TIMES } from "@/shared/lib/queryClient";
 
 export function useQuickbooksRevenueReport(params?: { from?: string; to?: string }) {
   const ctx = useAnalyticsApp();
@@ -14,6 +15,6 @@ export function useQuickbooksRevenueReport(params?: { from?: string; to?: string
         from: params?.from,
         to: params?.to,
       }),
-    staleTime: 5 * 60 * 1000,
+    staleTime: STALE_TIMES.reports,
   });
 }

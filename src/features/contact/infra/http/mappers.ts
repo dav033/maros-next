@@ -27,6 +27,7 @@ export type ApiContactDTO = {
     notes: string[];
   } | null;
   notes?: string[] | null;
+  attachments?: string[] | null;
 };
 
 
@@ -41,6 +42,7 @@ export type CreateContactRequestDTO = {
   isClient: boolean;
   companyId?: number | null;
   notes?: string[] | null;
+  attachments?: string[] | null;
 };
 
 
@@ -55,6 +57,7 @@ export type UpdateContactRequestDTO = {
   isClient?: boolean;
   companyId?: number | null;
   notes?: string[] | null;
+  attachments?: string[] | null;
 };
 
 
@@ -86,6 +89,7 @@ export function mapContactFromApi(dto: ApiContactDTO): Contact {
       notes: dto.company.notes || [],
     } : undefined,
     notes: dto.notes ?? [],
+    attachments: dto.attachments ?? [],
   };
 }
 
@@ -112,6 +116,7 @@ export function mapContactDraftToCreateDTO(
       draft.notes && draft.notes.length > 0
         ? draft.notes
         : null,
+    attachments: draft.attachments ?? null,
   };
 }
 
@@ -139,6 +144,7 @@ export function mapContactPatchToUpdateDTO(
   if (patch.isClient !== undefined) dto.isClient = patch.isClient;
   if (patch.companyId !== undefined) dto.companyId = patch.companyId;
   if (patch.notes !== undefined) dto.notes = patch.notes;
-  
+  if (patch.attachments !== undefined) dto.attachments = patch.attachments;
+
   return dto;
 }

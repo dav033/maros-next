@@ -1,13 +1,26 @@
 "use client";
 
-import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useCallback } from "react";
+
+import { useEntityCrud } from "@/shared/presentation";
+import type { EntityKeys } from "@/shared/query/createEntityKeys";
+import { contactsKeys } from "@/contact/application";
+
 import type { Contact, ContactPatch } from "../../../domain/models";
 import type { ContactFormValue } from "../../../domain/mappers";
 import { toContactPatch } from "../../../domain/mappers";
-import { contactsKeys } from "@/contact/application";
-import { toast } from "sonner";
-import { updateContactAction, deleteContactAction } from "../../../actions/contactActions";
+import {
+  deleteContactAction,
+  updateContactAction,
+} from "../../../actions/contactActions";
+
+const contactsEntityKeys: EntityKeys = {
+  all: contactsKeys.all,
+  lists: contactsKeys.lists,
+  list: contactsKeys.lists,
+  details: contactsKeys.details,
+  detail: contactsKeys.detail,
+};
 
 export const initialContactFormValue: ContactFormValue = {
   name: "",
@@ -22,47 +35,31 @@ export const initialContactFormValue: ContactFormValue = {
 };
 
 export function useContactMutations() {
-  const queryClient = useQueryClient();
-
-  const updateContactMutation = useMutation({
-    mutationFn: async (input: { id: number; patch: ContactPatch }) => {
-      const result = await updateContactAction(input.id, input.patch);
-      if (!result.success) {
-        throw new Error(result.error);
-      }
-      return result.data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["customers"] });
-      queryClient.invalidateQueries({ queryKey: contactsKeys.list });
-      toast.success("Contact updated successfully!");
-    },
-    onError: (error: unknown) => {
-      const message =
-        error instanceof Error ? error.message : "Could not update contact";
-      toast.error(message);
-      throw error;
+  const { updateMutation, removeMutation, queryClient } = useEntityCrud<
+    Contact,
+    never,
+    ContactPatch,
+    number
+  >({
+    entityLabel: "Contact",
+    keys: contactsEntityKeys,
+    optimistic: true,
+    actions: {
+      update: (id, patch) => updateContactAction(id, patch),
+      remove: (id) => deleteContactAction(id),
     },
   });
 
-  const handleDeleteContact = async (contactId: number) => {
-    try {
-      const result = await deleteContactAction(contactId);
-      if (!result.success) {
-        throw new Error(result.error);
-      }
-      queryClient.invalidateQueries({ queryKey: ["customers"] });
-      queryClient.invalidateQueries({ queryKey: contactsKeys.list });
-      toast.success("Contact deleted successfully!");
-    } catch (error: unknown) {
-      const message =
-        error instanceof Error ? error.message : "Could not delete contact";
-      toast.error(message);
-    }
-  };
+  const handleDeleteContact = useCallback(
+    async (contactId: number) => {
+      await removeMutation.mutateAsync(contactId);
+      void queryClient.invalidateQueries({ queryKey: ["customers"] });
+    },
+    [removeMutation, queryClient],
+  );
 
   return {
-    updateContactMutation,
+    updateContactMutation: updateMutation,
     handleDeleteContact,
     toContactPatch,
   };

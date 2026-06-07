@@ -1,4 +1,5 @@
 import { serverApiClient } from "@/shared/infra";
+import { AppError } from "@/shared/errors";
 import { LeadHttpRepository } from "@/leads/infra/http/LeadHttpRepository";
 
 export async function loadLeadDetailsData(leadId: number) {
@@ -15,24 +16,16 @@ export async function loadLeadDetailsData(leadId: number) {
     }
     
     return { leadDetails };
-  } catch (error: any) {
-    
-    let errorMessage = "Unknown error";
-    if (error?.response?.data?.message) {
-      errorMessage = error.response.data.message;
-    } else if (error?.message) {
-      errorMessage = error.message;
-    } else if (typeof error === "string") {
-      errorMessage = error;
-    }
-    
-    if (error?.response?.status === 404) {
-      errorMessage = `Lead with ID ${leadId} not found`;
-    }
-    
-    return { 
-      leadDetails: null, 
-      error: errorMessage 
+  } catch (error) {
+    const appError = AppError.from(error);
+    const errorMessage =
+      appError.kind === "not_found"
+        ? `No encontramos el lead solicitado.`
+        : appError.userMessage;
+
+    return {
+      leadDetails: null,
+      error: errorMessage,
     };
   }
 }

@@ -15,13 +15,6 @@ import { normalizeText, isIsoLocalDate, coerceIsoLocalDate } from "@/shared/vali
 
 function validateLeadName(raw: string): string {
   const v = normalizeText(raw);
-  if (!v) {
-    throw new BusinessRuleError(
-      "VALIDATION_ERROR",
-      "Lead name must not be empty",
-      { details: { field: "name" } }
-    );
-  }
   if (v.length > 140) {
     throw new BusinessRuleError("FORMAT_ERROR", "Lead name max length is 140", {
       details: { field: "name", length: v.length },

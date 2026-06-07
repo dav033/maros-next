@@ -1,5 +1,10 @@
+import { createEntityKeys, type EntityId } from "@/shared/query";
+
+const base = createEntityKeys("contacts");
+
 export const contactsKeys = {
-  all: ["contacts"] as const,
+  ...base,
   list: ["contacts", "list"] as const,
-  byCompany: (companyId: number | string) => ["contacts", "company", companyId] as const,
+  byCompany: (companyId: EntityId) =>
+    [...base.all, "company", companyId] as const,
 } as const;

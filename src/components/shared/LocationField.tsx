@@ -209,6 +209,7 @@ export function LocationField({
           mapTypeControl: false,
           streetViewControl: false,
           fullscreenControl: false,
+          gestureHandling: "cooperative",
           mapId: "DEMO_MAP_ID",
         });
 

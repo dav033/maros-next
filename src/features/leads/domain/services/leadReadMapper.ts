@@ -34,6 +34,10 @@ export type ApiLeadDTO = {
   } | null;
   notes?: string[] | null;
   attachments?: string[] | null;
+  conversion?: {
+    converted?: boolean | null;
+    projectId?: number | string | null;
+  } | null;
   inReview?: boolean | null;
   estimate?: number | null;
 } | null;
@@ -115,6 +119,16 @@ export function mapLeadFromDTO(dto: ApiLeadDTO): Lead {
 
   const notesArray = Array.isArray(dto?.notes) && dto.notes.length > 0 ? dto.notes.map(n => String(n)) : [];
   const attachmentsArray = Array.isArray(dto?.attachments) ? dto.attachments : [];
+  const conversionProjectId =
+    dto?.conversion?.projectId != null ? Number(dto.conversion.projectId) : undefined;
+  const conversion = dto?.conversion
+    ? {
+        converted: Boolean(dto.conversion.converted),
+        projectId: Number.isFinite(conversionProjectId)
+          ? conversionProjectId
+          : undefined,
+      }
+    : undefined;
   const inReview = dto?.inReview ?? false;
   const estimate = dto?.estimate != null ? Number(dto.estimate) : null;
 
@@ -150,6 +164,7 @@ export function mapLeadFromDTO(dto: ApiLeadDTO): Lead {
         : null,
     notes: notesArray,
     attachments: attachmentsArray,
+    conversion,
   };
 }
 

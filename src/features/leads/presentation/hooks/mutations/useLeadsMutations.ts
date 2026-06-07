@@ -1,9 +1,14 @@
 "use client";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+
+import { useEntityMutation } from "@/shared/presentation";
 import { leadsKeys } from "@/leads/application";
-import { toast } from "sonner";
-import { deleteLeadAction, acceptLeadAction } from "../../../actions/leadActions";
+
+import {
+  acceptLeadAction,
+  deleteLeadAction,
+} from "../../../actions/leadActions";
 
 export interface DeleteLeadOptions {
   id: number;
@@ -15,49 +20,32 @@ export function useLeadsMutations() {
   const queryClient = useQueryClient();
 
   const invalidateQueries = () => {
-    queryClient.invalidateQueries({ queryKey: leadsKeys.all });
+    void queryClient.invalidateQueries({ queryKey: leadsKeys.all });
   };
 
-  const deleteMutation = useMutation({
-    mutationFn: async (options: number | DeleteLeadOptions) => {
-      const id = typeof options === 'number' ? options : options.id;
-      const deleteOptions = typeof options === 'number' ? undefined : {
-        deleteContact: options.deleteContact,
-        deleteCompany: options.deleteCompany,
-      };
-      const result = await deleteLeadAction(id, deleteOptions);
-      if (!result.success) {
-        throw new Error(result.error);
-      }
+  const deleteMutation = useEntityMutation<number | DeleteLeadOptions, void>({
+    entityLabel: "Lead",
+    action: "deleted",
+    mutationFn: (options) => {
+      const id = typeof options === "number" ? options : options.id;
+      const opts =
+        typeof options === "number"
+          ? undefined
+          : { deleteContact: options.deleteContact, deleteCompany: options.deleteCompany };
+      return deleteLeadAction(id, opts);
     },
-    onSuccess: () => {
-      invalidateQueries();
-      toast.success("Lead deleted successfully!");
-    },
-    onError: (error: unknown) => {
-      const message =
-        error instanceof Error ? error.message : "Could not delete lead";
-      toast.error(message);
-      throw error;
+    invalidate: (qc) => {
+      void qc.invalidateQueries({ queryKey: leadsKeys.all });
     },
   });
 
-  const acceptMutation = useMutation({
-    mutationFn: async (id: number) => {
-      const result = await acceptLeadAction(id);
-      if (!result.success) {
-        throw new Error(result.error);
-      }
-    },
-    onSuccess: () => {
-      invalidateQueries();
-      toast.success("Lead accepted successfully!");
-    },
-    onError: (error: unknown) => {
-      const message =
-        error instanceof Error ? error.message : "Could not accept lead";
-      toast.error(message);
-      throw error;
+  const acceptMutation = useEntityMutation<number, void>({
+    entityLabel: "Lead",
+    action: "updated",
+    successMessage: "Lead accepted successfully!",
+    mutationFn: (id) => acceptLeadAction(id),
+    invalidate: (qc) => {
+      void qc.invalidateQueries({ queryKey: leadsKeys.all });
     },
   });
 
@@ -67,4 +55,3 @@ export function useLeadsMutations() {
     invalidateQueries,
   };
 }
-

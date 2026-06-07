@@ -3,7 +3,9 @@
 import { useState } from "react";
 import type { LeadType } from "@/leads/domain";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { leadsKeys } from "@/leads/application";
 import { LEAD_TYPE_CONFIGS } from "../../config/leadTypeConfigs";
 import {
   useLeadCreateModal,
@@ -18,7 +20,7 @@ import {
 } from "../hooks";
 import type { Lead } from "@/leads/domain";
 import { useProjectsApp } from "@/di";
-import { createProject } from "@/project/application";
+import { createProject, projectsKeys } from "@/project/application";
 
 export interface UseLeadsPageLogicOptions {
   leadType: LeadType;
@@ -60,6 +62,12 @@ export interface UseLeadsPageLogicReturn {
     onConfirm: () => Promise<void>;
     loading: boolean;
   };
+  postConversionEstimateModal: {
+    projectId: number | null;
+    leadName?: string;
+    contactEmail?: string;
+    onClose: () => void;
+  };
 }
 
 import type { LeadsPageData } from "../data/loadLeadsData";
@@ -74,11 +82,17 @@ export function useLeadsPageLogic({
   initialData,
 }: UseLeadsPageLogicOptions): UseLeadsPageLogicReturn {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const projectsApp = useProjectsApp();
   const config = LEAD_TYPE_CONFIGS[leadType];
 
   // 1) Datos
   const data = useLeadsData(leadType, initialData);
+  const [postConversionEstimate, setPostConversionEstimate] = useState<{
+    projectId: number;
+    leadName?: string;
+    contactEmail?: string;
+  } | null>(null);
 
   // 2) Modales CRUD
   const createModal = useLeadCreateModal({
@@ -89,7 +103,17 @@ export function useLeadsPageLogic({
   });
   const editModal = useLeadEditModal({
     leadType,
-    onUpdated: async () => {
+    onUpdated: async (updatedLead) => {
+      const projectId = updatedLead.conversion?.converted
+        ? updatedLead.conversion.projectId
+        : undefined;
+      if (projectId) {
+        setPostConversionEstimate({
+          projectId,
+          leadName: updatedLead.name || undefined,
+          contactEmail: updatedLead.contact?.email || undefined,
+        });
+      }
       await data.refetch();
     },
   });
@@ -122,6 +146,12 @@ export function useLeadsPageLogic({
     setIsConvertingProject(true);
     try {
       const created = await createProject(projectsApp, { leadId: leadToConvert.id });
+      queryClient.setQueryData<Lead[]>(leadsKeys.byType(leadType), (oldLeads) => {
+        if (!oldLeads) return oldLeads;
+        return oldLeads.filter((lead) => lead.id !== leadToConvert.id);
+      });
+      queryClient.invalidateQueries({ queryKey: leadsKeys.all });
+      queryClient.invalidateQueries({ queryKey: projectsKeys.all });
       toast.success("Lead converted to project successfully!");
       setLeadToConvert(null);
       router.push(`/project/${created.id}`);
@@ -175,6 +205,12 @@ export function useLeadsPageLogic({
       onClose: closeConvertProjectModal,
       onConfirm: confirmConvertToProject,
       loading: isConvertingProject,
+    },
+    postConversionEstimateModal: {
+      projectId: postConversionEstimate?.projectId ?? null,
+      leadName: postConversionEstimate?.leadName,
+      contactEmail: postConversionEstimate?.contactEmail,
+      onClose: () => setPostConversionEstimate(null),
     },
   };
 }

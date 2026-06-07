@@ -42,6 +42,7 @@ import {
 
 import { ContactViewModal } from "@/contact";
 import { LeadModal } from "../organisms/LeadModal";
+import { PostConversionEstimateModal } from "../organisms/PostConversionEstimateModal";
 import { LeadsTableSkeleton } from "../organisms/LeadsTableSkeleton";
 import type { UseLeadsInReviewPageLogicReturn } from "./useLeadsInReviewPageLogic";
 import {
@@ -55,7 +56,17 @@ export interface LeadsInReviewPageViewProps {
 }
 
 export function LeadsInReviewPageView({ logic }: LeadsInReviewPageViewProps) {
-  const { config, data, crud, table, notesModal, viewContactModal, reviewActions, rejectConfirmModal } = logic;
+  const {
+    config,
+    data,
+    crud,
+    table,
+    notesModal,
+    viewContactModal,
+    reviewActions,
+    rejectConfirmModal,
+    postConversionEstimateModal,
+  } = logic;
 
   const { title, description, createModalTitle } = config;
 
@@ -228,6 +239,16 @@ export function LeadsInReviewPageView({ logic }: LeadsInReviewPageViewProps) {
             contacts={contactsForModal}
             projectTypes={projectTypes}
           />
+
+{postConversionEstimateModal.projectId !== null && (
+            <PostConversionEstimateModal
+              open
+              onClose={postConversionEstimateModal.onClose}
+              projectId={postConversionEstimateModal.projectId}
+              leadName={postConversionEstimateModal.leadName}
+              contactEmail={postConversionEstimateModal.contactEmail}
+            />
+          )}
 
           {/* Reject Confirmation Modal */}
           <Dialog open={rejectConfirmModal.isOpen} onOpenChange={(open) => !open && rejectConfirmModal.onClose()}>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Paperclip, Upload, X, Download, Loader2, Eye, GripVertical } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -29,7 +29,28 @@ interface LeadAttachmentsSectionProps {
   onAttachmentsChange: (attachments: string[]) => Promise<void>;
 }
 
-const PREVIEWABLE = ["png", "jpg", "jpeg", "gif", "webp", "svg", "pdf", "docx", "doc"];
+const IMAGE_EXTENSIONS = [
+  "png",
+  "jpg",
+  "jpeg",
+  "gif",
+  "webp",
+  "svg",
+  "avif",
+  "bmp",
+  "ico",
+  "tif",
+  "tiff",
+  "heic",
+  "heif",
+];
+
+const PREVIEWABLE = [
+  ...IMAGE_EXTENSIONS,
+  "pdf",
+  "docx",
+  "doc",
+];
 
 function getFileName(key: string): string {
   const parts = key.split("/");
@@ -42,6 +63,65 @@ function isPreviewable(key: string): boolean {
   return PREVIEWABLE.includes(ext);
 }
 
+function isImage(key: string): boolean {
+  const ext = getFileName(key).split(".").pop()?.toLowerCase() ?? "";
+  return IMAGE_EXTENSIONS.includes(ext);
+}
+
+function AttachmentThumbnail({
+  keyName,
+  onClick,
+}: {
+  keyName: string;
+  onClick: () => void;
+}) {
+  const [url, setUrl] = useState<string | null>(null);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    setUrl(null);
+    setFailed(false);
+
+    getPresignedPreviewUrl(keyName)
+      .then((nextUrl) => {
+        if (!cancelled) setUrl(nextUrl);
+      })
+      .catch(() => {
+        if (!cancelled) setFailed(true);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [keyName]);
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex h-16 w-20 shrink-0 items-center justify-center overflow-hidden rounded-md border border-border/70 bg-background/70 p-1 hover:border-primary/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+      aria-label={`Preview ${getFileName(keyName)}`}
+      title="Preview image"
+    >
+      {url && !failed ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={url}
+          alt={getFileName(keyName)}
+          className="max-h-full max-w-full object-contain"
+          loading="lazy"
+          onError={() => setFailed(true)}
+        />
+      ) : failed ? (
+        <Paperclip className="size-5 text-muted-foreground" />
+      ) : (
+        <Loader2 className="size-4 animate-spin text-muted-foreground" />
+      )}
+    </button>
+  );
+}
+
 interface SortableItemProps {
   id: string;
   onPreview: (key: string) => void;
@@ -52,6 +132,8 @@ interface SortableItemProps {
 
 function SortableItem({ id, onPreview, onDownload, onRemove, downloadingKey }: SortableItemProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  const canPreview = isPreviewable(id);
+  const image = isImage(id);
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -74,10 +156,23 @@ function SortableItem({ id, onPreview, onDownload, onRemove, downloadingKey }: S
         <GripVertical className="size-4" />
       </button>
 
-      <span className="truncate flex-1">{getFileName(id)}</span>
+      {image && <AttachmentThumbnail keyName={id} onClick={() => onPreview(id)} />}
+
+      <button
+        type="button"
+        className="group flex min-w-0 flex-1 items-center gap-2 rounded px-2 py-1 text-left hover:bg-accent/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+        onClick={() => (canPreview ? onPreview(id) : onDownload(id))}
+        disabled={!canPreview && downloadingKey === id}
+        title={canPreview ? "Preview attachment" : "Open attachment"}
+      >
+        <span className="truncate">{getFileName(id)}</span>
+        <span className="ml-auto shrink-0 rounded-full border border-border/70 px-2 py-0.5 text-[10px] uppercase tracking-wide text-muted-foreground group-hover:text-foreground">
+          {canPreview ? "Preview" : "Open"}
+        </span>
+      </button>
 
       <div className="flex items-center gap-1 shrink-0">
-        {isPreviewable(id) && (
+        {canPreview && (
           <Button variant="ghost" size="icon" className="size-7" onClick={() => onPreview(id)}>
             <Eye className="size-3" />
           </Button>

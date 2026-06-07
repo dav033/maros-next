@@ -1,4 +1,5 @@
 import { serverApiClient } from "@/shared/infra";
+import { AppError } from "@/shared/errors";
 import { ContactHttpRepository } from "@/contact";
 
 export async function loadContactDetailsData(contactId: number) {
@@ -16,26 +17,16 @@ export async function loadContactDetailsData(contactId: number) {
     }
     
     return { contactDetails };
-  } catch (error: any) {
-    
-    // Extraer mensaje de error más específico
-    let errorMessage = "Unknown error";
-    if (error?.response?.data?.message) {
-      errorMessage = error.response.data.message;
-    } else if (error?.message) {
-      errorMessage = error.message;
-    } else if (typeof error === "string") {
-      errorMessage = error;
-    }
-    
-    // Si es un 404, mensaje más específico
-    if (error?.response?.status === 404) {
-      errorMessage = `Contact with ID ${contactId} not found`;
-    }
-    
-    return { 
-      contactDetails: null, 
-      error: errorMessage 
+  } catch (error) {
+    const appError = AppError.from(error);
+    const errorMessage =
+      appError.kind === "not_found"
+        ? `No encontramos el contacto solicitado.`
+        : appError.userMessage;
+
+    return {
+      contactDetails: null,
+      error: errorMessage,
     };
   }
 }

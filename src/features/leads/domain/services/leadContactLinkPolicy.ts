@@ -27,16 +27,7 @@ export function normalizeNewContact(input: NewContact): NewContact {
 }
 
 export function ensureNewContactMinimums(contact: NewContact): void {
-  if (!contact.name) {
-    throw new BusinessRuleError("VALIDATION_ERROR", "Contact name must not be empty", {
-      details: { field: "contact.name" },
-    });
-  }
-  if (!contact.email) {
-    throw new BusinessRuleError("VALIDATION_ERROR", "Contact email must not be empty", {
-      details: { field: "contact.email" },
-    });
-  }
+  void contact;
 }
 
 export function ensureExclusiveContactLink(args: {

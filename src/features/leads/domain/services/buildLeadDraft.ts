@@ -23,22 +23,14 @@ type CommonInput = Readonly<{
   leadNumber?: string | null;
   leadName?: string;
   location: string;
-  projectTypeId: ProjectTypeId;
+  projectTypeId?: ProjectTypeId;
   leadType?: LeadType; // Opcional: solo para generar número si no se proporciona (no se almacena)
 }>;
 
-function validateLeadName(raw: string | undefined, location: string, leadNumber: string | null): string {
+function validateLeadName(raw: string | undefined): string {
   let v = normalizeText(raw ?? "");
   
   if (!v) {
-    const normalizedLocation = normalizeText(location);
-    if (!normalizedLocation) {
-      throw new BusinessRuleError(
-        "VALIDATION_ERROR",
-        "Location is required when lead name is not provided",
-        { details: { field: "location" } }
-      );
-    }
     return "";
   }
   
@@ -61,7 +53,7 @@ export function buildLeadDraftForNewContact(
     : undefined;
   const leadNumber = makeLeadNumber(input.leadNumber, numberRules);
   
-  const name = validateLeadName(input.leadName, input.location, leadNumber);
+  const name = validateLeadName(input.leadName);
 
   const normalizedContact = normalizeNewContact(input.contact);
   ensureNewContactMinimums(normalizedContact);
@@ -92,7 +84,7 @@ export function buildLeadDraftForExistingContact(
     : undefined;
   const leadNumber = makeLeadNumber(input.leadNumber, numberRules);
   
-  const name = validateLeadName(input.leadName, input.location, leadNumber);
+  const name = validateLeadName(input.leadName);
 
   const draft: LeadDraftWithExistingContact = {
     leadNumber,

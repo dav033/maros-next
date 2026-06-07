@@ -28,6 +28,7 @@ import { useInlineEdit } from "@/common/hooks";
 import { ContactInfoSection } from "./sections/ContactInfoSection";
 import { ContactNotesSection } from "./sections/ContactNotesSection";
 import { ContactLeadsSection } from "./sections/ContactLeadsSection";
+import { EntityAttachmentsSection } from "@/features/attachments/presentation/EntityAttachmentsSection";
 
 
 interface ContactDetailsPageProps {
@@ -255,6 +256,16 @@ export function ContactDetailsPage({ contactId, initialData }: ContactDetailsPag
         controller={leadModalController}
         contacts={contactsForModal}
         projectTypes={projectTypes}
+      />
+
+      <EntityAttachmentsSection
+        entityKind="contact"
+        entityId={contactDetails.id}
+        attachments={contactDetails.attachments ?? []}
+        onAttachmentsChange={async (newAttachments) => {
+          await patchContact(app, contactDetails.id, { attachments: newAttachments });
+          router.refresh();
+        }}
       />
     </div>
   );

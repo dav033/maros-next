@@ -13,6 +13,10 @@ export type ApiLeadDTO = {
   projectTypeId?: number;
   notes?: string[];
   attachments?: string[];
+  conversion?: {
+    converted?: boolean | null;
+    projectId?: number | string | null;
+  } | null;
   inReview?: boolean;
   estimate?: number | null;
 };
@@ -26,7 +30,7 @@ export type CreateLeadBasePayload = {
   location: string;
   addressLink?: string | null;
   status: LeadStatus | null;
-  projectTypeId: number;
+  projectTypeId?: number;
   inReview?: boolean;
 };
 

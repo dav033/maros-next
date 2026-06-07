@@ -26,6 +26,7 @@ export interface Project {
   invoiceStatus?: InvoiceStatus;
   overview?: string;
   notes: string[];
+  attachments?: string[];
   lead: Lead;
   leadId: number;
   startDate?: string;
@@ -40,6 +41,7 @@ export type ProjectDraft = Readonly<{
   projectProgressStatus?: ProjectProgressStatus;
   overview?: string;
   notes?: string[];
+  attachments?: string[];
   leadId: LeadId;
 }>;
 
@@ -47,6 +49,7 @@ export type ProjectPatch = Readonly<{
   projectProgressStatus?: ProjectProgressStatus;
   overview?: string;
   notes?: string[];
+  attachments?: string[];
   leadId?: LeadId;
   leadName?: string;
   leadNumber?: string;

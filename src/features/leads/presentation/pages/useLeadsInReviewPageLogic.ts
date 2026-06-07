@@ -71,6 +71,12 @@ export interface UseLeadsInReviewPageLogicReturn {
     onConfirm: () => Promise<void>;
     isLoading: boolean;
   };
+postConversionEstimateModal: {
+    projectId: number | null;
+    leadName?: string;
+    contactEmail?: string;
+    onClose: () => void;
+  };
 }
 
 export function useLeadsInReviewPageLogic(): UseLeadsInReviewPageLogicReturn {
@@ -99,6 +105,11 @@ export function useLeadsInReviewPageLogic(): UseLeadsInReviewPageLogicReturn {
   const [isLoadingInfo, setIsLoadingInfo] = useState(false);
   const [deleteContact, setDeleteContact] = useState(false);
   const [deleteCompany, setDeleteCompany] = useState(false);
+const [postConversionEstimate, setPostConversionEstimate] = useState<{
+    projectId: number;
+    leadName?: string;
+    contactEmail?: string;
+  } | null>(null);
 
   // Fetch rejection info when modal opens
   useEffect(() => {
@@ -136,7 +147,17 @@ export function useLeadsInReviewPageLogic(): UseLeadsInReviewPageLogicReturn {
   
   const editModal = useLeadEditModal({
     leadType: selectedLeadType,
-    onUpdated: async () => {
+    onUpdated: async (updatedLead) => {
+      const projectId = updatedLead.conversion?.converted
+        ? updatedLead.conversion.projectId
+        : undefined;
+if (projectId) {
+        setPostConversionEstimate({
+          projectId,
+          leadName: updatedLead.name || undefined,
+          contactEmail: updatedLead.contact?.email || undefined,
+        });
+      }
       await data.refetch();
     },
   });
@@ -243,6 +264,12 @@ export function useLeadsInReviewPageLogic(): UseLeadsInReviewPageLogicReturn {
       onClose: onCloseRejectModal,
       onConfirm: onConfirmReject,
       isLoading: isRejecting !== null,
+    },
+postConversionEstimateModal: {
+      projectId: postConversionEstimate?.projectId ?? null,
+      leadName: postConversionEstimate?.leadName,
+      contactEmail: postConversionEstimate?.contactEmail,
+      onClose: () => setPostConversionEstimate(null),
     },
   };
 }

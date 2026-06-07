@@ -6,8 +6,6 @@ import React from "react";
 
 import type { Project } from "@/project/domain";
 import { ProjectProgressStatus, InvoiceStatus } from "@/project/domain";
-import { useProjectsApp } from "@/di";
-import { deleteProject } from "@/project/application";
 
 export type ProjectGroupBy = "none" | "progressStatus" | "invoiceStatus" | "projectType";
 
@@ -59,8 +57,6 @@ export function useProjectsTableLogic({
   onDelete,
   onOpenNotesModal,
 }: UseProjectsTableLogicProps): UseProjectsTableLogicReturn {
-  const app = useProjectsApp();
-
   const [progressFilter, setProgressFilter] = useState<ProjectProgressStatus | "all">("all");
   const [invoiceFilter, setInvoiceFilter] = useState<InvoiceStatus | "all">("all");
   const [groupBy, setGroupBy] = useState<ProjectGroupBy>("none");
@@ -73,7 +69,6 @@ export function useProjectsTableLogic({
     items: projects,
     getId: (p) => p.id,
     onDelete: async (id) => {
-      await deleteProject(app, id);
       await onDelete(id);
     },
     onEdit,

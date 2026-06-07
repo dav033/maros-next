@@ -6,9 +6,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import { ContactModeSelector, ContactMode, LeadForm } from "@/leads/presentation";
 import { LeadEditForm } from "@/leads/presentation";
@@ -190,11 +188,11 @@ export function LeadModal({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-        <DialogContent className="w-[96vw] max-w-2xl">
-        <DialogHeader>
+        <DialogContent className="!flex max-h-[92vh] w-[96vw] max-w-2xl flex-col overflow-hidden p-0">
+        <div className="border-b border-border/70 px-5 py-4 pr-12 sm:px-6 sm:pr-12">
           <DialogTitle className="text-left">{title}</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-5 w-full">
+        </div>
+        <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-5 py-4 sm:px-6">
           {isCreateMode && createController && (
             <>
               <div className="space-y-3 rounded-lg border border-border/70 bg-muted/20 p-3">
@@ -265,15 +263,15 @@ export function LeadModal({
             </div>
           )}
         </div>
-        <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={onClose} disabled={isLoading}>
+        <div className="flex flex-col-reverse gap-2 border-t border-border/70 bg-background px-5 py-4 sm:flex-row sm:justify-end sm:px-6">
+          <Button variant="outline" onClick={onClose} disabled={isLoading} className="w-full sm:w-auto">
             Cancel
           </Button>
           <Button
             variant="default"
             onClick={onSubmit}
             disabled={!canSubmit || isLoading}
-            className="bg-sidebar-accent text-sidebar-accent-foreground hover:bg-sidebar-accent/90"
+            className="w-full bg-sidebar-accent text-sidebar-accent-foreground hover:bg-sidebar-accent/90 sm:w-auto"
           >
             {isLoading ? (
               <>
@@ -296,7 +294,7 @@ export function LeadModal({
               </>
             )}
           </Button>
-        </DialogFooter>
+        </div>
         </DialogContent>
       </Dialog>
 

@@ -6,7 +6,7 @@ import { useFormController } from "@/common/hooks";
 import { useEffect } from "react";
 import { useLeadsApp } from "@/di";
 import { leadsKeys, patchLead } from "@/leads/application";
-import type { Lead, LeadPatch } from "@/leads/domain";
+import type { Lead, LeadPatch, LeadStatus } from "@/leads/domain";
 
 
 type LeadEditFormData = {
@@ -38,10 +38,8 @@ export function useUpdateLeadController({ lead, onUpdated }: UseUpdateLeadContro
       status: lead?.status ?? "NEW_LEAD",
     },
     validate: (form) => {
-      const nameOk = form.leadName.trim().length > 0;
-      const projectOk = !!form.projectTypeId;
-     
-      return nameOk && projectOk;
+      void form;
+      return true;
     },
     transformBeforeSubmit: (form) => {
       if (!lead) return null;
@@ -55,6 +53,10 @@ export function useUpdateLeadController({ lead, onUpdated }: UseUpdateLeadContro
             : undefined,
         projectTypeId: form.projectTypeId !== lead.projectType?.id ? form.projectTypeId : undefined,
         contactId: form.contactId !== lead.contact?.id ? form.contactId : undefined,
+        status:
+          form.status !== lead.status
+            ? ((form.status || null) as LeadStatus | null)
+            : undefined,
         leadNumber: form.leadNumber?.trim() !== lead.leadNumber 
           ? (form.leadNumber?.trim() || null) 
           : undefined,
@@ -83,6 +85,7 @@ export function useUpdateLeadController({ lead, onUpdated }: UseUpdateLeadContro
         projectTypeId: lead.projectType?.id,
         contactId: lead.contact?.id ?? undefined,
         leadNumber: lead.leadNumber ?? "",
+        status: lead.status ?? "NEW_LEAD",
       });
     }
   }, [lead]);

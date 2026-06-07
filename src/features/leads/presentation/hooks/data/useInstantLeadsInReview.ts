@@ -1,12 +1,9 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
 import { useLeadsApp } from "@/di";
 import { leadsKeys, listLeadsInReview } from "@/leads/application";
 import type { Lead } from "@/leads/domain";
-import { buildInstantQueryResult } from "@/shared/query";
-
-const DEFAULT_STALE_TIME = 5 * 60 * 1000;
+import { useInstantList } from "@/shared/query";
 
 export type UseInstantLeadsInReviewResult = {
   leads: Lead[] | undefined;
@@ -19,35 +16,14 @@ export type UseInstantLeadsInReviewResult = {
   refetch: () => Promise<void>;
 };
 
-
-export function useInstantLeadsInReview(initialData?: Lead[]): UseInstantLeadsInReviewResult {
+export function useInstantLeadsInReview(
+  initialData?: Lead[],
+): UseInstantLeadsInReviewResult {
   const ctx = useLeadsApp();
-
-  const query = useQuery<Lead[], Error>({
+  const r = useInstantList<Lead>({
     queryKey: leadsKeys.inReview(),
-    queryFn: async () => {
-      const items = await listLeadsInReview(ctx);
-      return items ?? [];
-    },
+    queryFn: () => listLeadsInReview(ctx),
     initialData,
-    staleTime: DEFAULT_STALE_TIME,
-    gcTime: 10 * 60 * 1000,
   });
-
-  const instant = buildInstantQueryResult<Lead[]>(
-    query,
-    [],
-    DEFAULT_STALE_TIME,
-  );
-
-  return {
-    leads: instant.data,
-    hasData: instant.hasData,
-    isLoading: instant.isLoading,
-    isFetching: instant.isFetching,
-    showSkeleton: instant.showSkeleton,
-    fromCache: instant.fromCache,
-    error: instant.error,
-    refetch: instant.refetch,
-  };
+  return { ...r, leads: r.data };
 }

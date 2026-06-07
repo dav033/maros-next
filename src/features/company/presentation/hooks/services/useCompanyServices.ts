@@ -1,10 +1,10 @@
-import { useQuery } from "@tanstack/react-query";
+"use client";
+
 import { useCompanyApp } from "@/di";
+import { useInstantList } from "@/shared/query";
+
 import { companyServiceCrudUseCases } from "../../../application/usecases/companyServiceCrud";
 import type { CompanyService } from "../../../domain/models";
-import { buildInstantQueryResult } from "@/shared/query";
-
-const DEFAULT_STALE_TIME = 5 * 60 * 1000;
 
 export type UseCompanyServicesResult = {
   services: CompanyService[] | undefined;
@@ -17,34 +17,14 @@ export type UseCompanyServicesResult = {
   refetch: () => Promise<void>;
 };
 
-export function useCompanyServices(initialData?: CompanyService[]): UseCompanyServicesResult {
+export function useCompanyServices(
+  initialData?: CompanyService[],
+): UseCompanyServicesResult {
   const app = useCompanyApp();
-
-  const query = useQuery<CompanyService[], Error>({
+  const r = useInstantList<CompanyService>({
     queryKey: ["companyServices"],
-    queryFn: async () => {
-      const items = await companyServiceCrudUseCases.list(app)();
-      return items ?? [];
-    },
+    queryFn: () => companyServiceCrudUseCases.list(app)(),
     initialData,
-    staleTime: DEFAULT_STALE_TIME,
-    gcTime: 10 * 60 * 1000,
   });
-
-  const instant = buildInstantQueryResult<CompanyService[]>(
-    query,
-    [],
-    DEFAULT_STALE_TIME,
-  );
-
-  return {
-    services: instant.data,
-    hasData: instant.hasData,
-    isLoading: instant.isLoading,
-    isFetching: instant.isFetching,
-    showSkeleton: instant.showSkeleton,
-    fromCache: instant.fromCache,
-    error: instant.error,
-    refetch: instant.refetch,
-  };
+  return { ...r, services: r.data };
 }

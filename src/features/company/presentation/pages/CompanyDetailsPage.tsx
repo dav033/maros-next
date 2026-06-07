@@ -17,6 +17,7 @@ import { CompanyInfoSection } from "./sections/CompanyInfoSection";
 import { CompanyNotesSection } from "./sections/CompanyNotesSection";
 import { CompanyContactsSection } from "./sections/CompanyContactsSection";
 import type { CompanyType, Company, CompanyDetails } from "../../domain/models";
+import { EntityAttachmentsSection } from "@/features/attachments/presentation/EntityAttachmentsSection";
 
 
 
@@ -153,6 +154,16 @@ export function CompanyDetailsPage({
           />
         </div>
       </div>
+
+      <EntityAttachmentsSection
+        entityKind="company"
+        entityId={companyDetails.id}
+        attachments={companyDetails.attachments ?? []}
+        onAttachmentsChange={async (newAttachments) => {
+          await updateCompanyAction(companyDetails.id, { attachments: newAttachments });
+          router.refresh();
+        }}
+      />
 
       {/* Notes Modal */}
       <NotesEditorModal controller={notesModalController} />

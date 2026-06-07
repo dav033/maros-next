@@ -5,6 +5,7 @@ import type { Lead, LeadDraft, LeadPatch } from "@/features/leads/domain/models"
 import type { LeadRepositoryPort } from "@/features/leads/domain/ports";
 import { optimizedApiClient } from "@/shared/infra";
 import { makeHttpResourceRepository } from "@/shared/infra";
+import { AppError } from "@/shared/errors";
 
 import { endpoints as leadEndpoints } from "./endpoints";
 import {
@@ -39,11 +40,12 @@ export class LeadHttpRepository implements LeadRepositoryPort {
         leadEndpoints.getByLeadNumber(leadNumber)
       );
       return data ? mapLeadFromApi(data) : null;
-    } catch (error: any) {
-      if (error?.response?.status === 404) {
+    } catch (error) {
+      const appError = AppError.from(error);
+      if (appError.status === 404 || appError.kind === "not_found") {
         return null;
       }
-      throw error;
+      throw appError;
     }
   }
 
@@ -125,11 +127,7 @@ export class LeadHttpRepository implements LeadRepositoryPort {
   };
 
   async getDetails(id: number): Promise<any> {
-    try {
-      const { data } = await this.api.get(leadEndpoints.details(id));
-      return data;
-    } catch (error: any) {
-      throw error;
-    }
+    const { data } = await this.api.get(leadEndpoints.details(id));
+    return data;
   }
 }

@@ -18,7 +18,7 @@ export type CreateLeadInput =
       leadName?: string;
       leadNumber?: string | null;
       location: string;
-      projectTypeId: ProjectTypeId;
+      projectTypeId?: ProjectTypeId;
       leadType: LeadType; // Solo para generar número si no se proporciona
       contactId: ContactId;
       inReview?: boolean;
@@ -27,7 +27,7 @@ export type CreateLeadInput =
       leadName?: string;
       leadNumber?: string | null;
       location: string;
-      projectTypeId: ProjectTypeId;
+      projectTypeId?: ProjectTypeId;
       leadType: LeadType; // Solo para generar número si no se proporciona
       contact: NewContact;
       inReview?: boolean;

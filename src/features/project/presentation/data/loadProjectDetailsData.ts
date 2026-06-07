@@ -1,4 +1,5 @@
 import { serverApiClient } from "@/shared/infra";
+import { AppError } from "@/shared/errors";
 import { ProjectHttpRepository } from "@/project/infra/http/ProjectHttpRepository";
 
 export async function loadProjectDetailsData(projectId: number) {
@@ -15,24 +16,16 @@ export async function loadProjectDetailsData(projectId: number) {
     }
     
     return { projectDetails };
-  } catch (error: any) {
-    
-    let errorMessage = "Unknown error";
-    if (error?.response?.data?.message) {
-      errorMessage = error.response.data.message;
-    } else if (error?.message) {
-      errorMessage = error.message;
-    } else if (typeof error === "string") {
-      errorMessage = error;
-    }
-    
-    if (error?.response?.status === 404) {
-      errorMessage = `Project with ID ${projectId} not found`;
-    }
-    
-    return { 
-      projectDetails: null, 
-      error: errorMessage 
+  } catch (error) {
+    const appError = AppError.from(error);
+    const errorMessage =
+      appError.kind === "not_found"
+        ? `No encontramos el proyecto solicitado.`
+        : appError.userMessage;
+
+    return {
+      projectDetails: null,
+      error: errorMessage,
     };
   }
 }

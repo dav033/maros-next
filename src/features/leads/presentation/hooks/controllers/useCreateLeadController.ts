@@ -54,22 +54,19 @@ export function useCreateLeadController({ leadType, inReview, onCreated }: UseCr
       email: "",
     },
     validate: (form) => {
-      const locationOk = form.location.trim().length > 0;
-      const projectOk = !!form.projectTypeId;
-      if (contactMode === ContactMode.NEW_CONTACT) {
-        const contactNameOk = (form.contactName ?? "").trim().length > 0;
-        return locationOk && projectOk && contactNameOk;
-      }
-      return locationOk && projectOk && !!form.contactId;
+      void form;
+      return true;
     },
     onSubmit: async (form) => {
-      const input = contactMode === ContactMode.NEW_CONTACT
+      const useExistingContact =
+        contactMode === ContactMode.EXISTING_CONTACT && !!form.contactId;
+      const input = !useExistingContact
         ? {
             leadName: form.leadName.trim() || "",
             leadNumber: form.leadNumber.trim() || null,
             location: form.location.trim(),
             addressLink: form.addressLink || null,
-            projectTypeId: form.projectTypeId!,
+            projectTypeId: form.projectTypeId,
             leadType: form.leadType,
             contact: {
               name: (form.contactName ?? "").trim(),
@@ -88,7 +85,7 @@ export function useCreateLeadController({ leadType, inReview, onCreated }: UseCr
             leadNumber: form.leadNumber.trim() || null,
             location: form.location.trim(),
             addressLink: form.addressLink || null,
-            projectTypeId: form.projectTypeId!,
+            projectTypeId: form.projectTypeId,
             leadType: form.leadType,
             contactId: form.contactId!,
             ...(inReview !== undefined && { inReview }),

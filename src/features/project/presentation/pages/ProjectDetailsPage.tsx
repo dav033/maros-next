@@ -26,11 +26,13 @@ import { useInstantCompanies } from "@/features/company/presentation/hooks";
 import type { ContactFormValue } from "@/contact/domain";
 import { toContactPatch } from "@/contact/domain";
 import type { Contact as DomainContact } from "@/contact/domain";
+import { EntityAttachmentsSection } from "@/features/attachments/presentation/EntityAttachmentsSection";
 
 interface ProjectDetails {
   id: number;
   projectProgressStatus?: string;
   invoiceStatus?: string;
+  attachments?: string[];
   financial?: {
     estimatedAmount?: number;
     paidAmount?: number;
@@ -657,6 +659,16 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
           )}
         </div>
       </div>
+
+      <EntityAttachmentsSection
+        entityKind="project"
+        entityId={projectDetails.id}
+        attachments={projectDetails.attachments ?? []}
+        onAttachmentsChange={async (newAttachments) => {
+          await updateProject(app, projectDetails.id, { attachments: newAttachments });
+          router.refresh();
+        }}
+      />
 
       <NotesEditorModal controller={notesModalController} />
 

@@ -63,7 +63,6 @@ export function LeadEditForm({
         value={form.leadName ?? ""}
         onChange={(e: ChangeEvent<HTMLInputElement>) => onChange("leadName", e.target.value)}
         disabled={disabled}
-        required
         className="w-full"
       />
 
@@ -85,7 +84,7 @@ export function LeadEditForm({
           <SelectTrigger className="w-full">
             <div className="flex items-center">
               <Wrench className="size-4 text-muted-foreground mr-2 shrink-0" />
-              <SelectValue placeholder="Select Project Type *" />
+              <SelectValue placeholder="Select Project Type" />
             </div>
           </SelectTrigger>
           <SelectContent>

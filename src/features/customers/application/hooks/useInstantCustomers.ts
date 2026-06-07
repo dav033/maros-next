@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { buildInstantQueryResult } from "@/shared/query";
+import { STALE_TIMES } from "@/shared/lib/queryClient";
 import type { Contact } from "@/contact";
 import type { Company } from "@/company";
 
@@ -9,7 +10,7 @@ import { customersKeys } from "../../infra/keys";
 import type { CustomersData } from "../../domain/Customer";
 import { CustomersHttpRepository } from "../../infra/http/CustomersHttpRepository";
 
-const DEFAULT_STALE_TIME = 5 * 60 * 1000;
+const DEFAULT_STALE_TIME = STALE_TIMES.lists;
 
 export type UseInstantCustomersResult = {
   contacts: Contact[] | undefined;

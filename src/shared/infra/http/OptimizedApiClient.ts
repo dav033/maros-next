@@ -1,4 +1,6 @@
 import axios, { type AxiosInstance, type AxiosRequestConfig } from "axios";
+import { AppError } from "@/shared/errors";
+import { emitUnauthorized } from "@/shared/errors/authEvents";
 import type { HttpClientLike, RequestOptions } from "./types";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080/api";
@@ -11,6 +13,17 @@ export class OptimizedApiClient implements HttpClientLike {
       baseURL,
       withCredentials: true,
     });
+
+    this.axiosInstance.interceptors.response.use(
+      (response) => response,
+      (error: unknown) => {
+        const appError = AppError.from(error);
+        if (appError.kind === "unauthorized") {
+          emitUnauthorized(appError);
+        }
+        return Promise.reject(appError);
+      }
+    );
   }
 
   private async request<T>(
@@ -29,23 +42,8 @@ export class OptimizedApiClient implements HttpClientLike {
       signal: options?.signal,
     };
 
-    try {
-      const response = await this.axiosInstance.request<T>(config);
-      return { data: response.data, status: response.status };
-    } catch (error: any) {
-      if (error.response) {
-        // El servidor respondió con un código de estado fuera del rango 2xx
-        throw new Error(
-          `Request failed: ${error.response.status} ${error.response.statusText} - ${error.response.data?.message || error.message}`
-        );
-      } else if (error.request) {
-        // La petición se hizo pero no se recibió respuesta
-        throw new Error(`No response received: ${error.message}`);
-      } else {
-        // Algo pasó al configurar la petición
-        throw new Error(`Request setup error: ${error.message}`);
-      }
-    }
+    const response = await this.axiosInstance.request<T>(config);
+    return { data: response.data, status: response.status };
   }
 
   get<T = unknown>(url: string, options?: RequestOptions) {

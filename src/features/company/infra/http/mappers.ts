@@ -15,6 +15,7 @@ export type ApiCompanyDTO = {
   isCustomer: boolean;
   isClient: boolean;
   notes?: string[] | null;
+  attachments?: string[] | null;
   phone?: string | null;
   email?: string | null;
   submiz?: string | null;
@@ -29,6 +30,7 @@ export type CreateCompanyRequestDTO = {
   isCustomer: boolean;
   isClient: boolean;
   notes?: string[] | null;
+  attachments?: string[] | null;
   phone?: string | null;
   email?: string | null;
   submiz?: string | null;
@@ -43,6 +45,7 @@ export type UpdateCompanyRequestDTO = {
   isCustomer: boolean;
   isClient: boolean;
   notes?: string[] | null;
+  attachments?: string[] | null;
   phone?: string | null;
   email?: string | null;
   submiz?: string | null;
@@ -66,6 +69,7 @@ export function mapCompanyFromApi(dto: ApiCompanyDTO): Company {
     isCustomer: dto.isCustomer,
     isClient: dto.isClient,
     notes: dto.notes ?? [],
+    attachments: dto.attachments ?? [],
     phone: dto.phone ?? undefined,
     email: dto.email ?? undefined,
     submiz: dto.submiz ?? undefined,
@@ -91,6 +95,7 @@ export function mapCompanyDraftToCreateDTO(
       draft.notes && draft.notes.length > 0
         ? draft.notes
         : null,
+    attachments: draft.attachments ?? null,
     phone: draft.phone ?? null,
     email: draft.email ?? null,
     submiz: draft.submiz ?? null,
@@ -125,6 +130,9 @@ export function mapCompanyPatchToUpdateDTO(
   }
   if (patch.notes !== undefined) {
     dto.notes = patch.notes;
+  }
+  if (patch.attachments !== undefined) {
+    dto.attachments = patch.attachments;
   }
   if (patch.phone !== undefined) {
     dto.phone = patch.phone;

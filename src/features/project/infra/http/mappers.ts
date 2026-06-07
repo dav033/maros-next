@@ -7,6 +7,7 @@ export type CreateProjectPayload = {
   projectProgressStatus?: string;
   overview?: string;
   leadId: number;
+  attachments?: string[];
 };
 
 export type UpdateProjectPayload = {
@@ -16,6 +17,7 @@ export type UpdateProjectPayload = {
   leadName?: string;
   leadNumber?: string;
   notes?: string[];
+  attachments?: string[];
 };
 
 export function mapProjectFromApi(dto: ApiProjectDTO): Project {
@@ -33,6 +35,7 @@ export function mapProjectDraftToCreatePayload(
     projectProgressStatus: draft.projectProgressStatus,
     overview: draft.overview,
     leadId: draft.leadId,
+    attachments: draft.attachments,
   };
 }
 
@@ -46,5 +49,6 @@ export function mapProjectPatchToUpdatePayload(
     leadName: patch.leadName,
     leadNumber: patch.leadNumber,
     notes: patch.notes,
+    attachments: patch.attachments,
   };
 }

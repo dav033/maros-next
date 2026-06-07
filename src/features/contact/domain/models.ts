@@ -21,6 +21,7 @@ export interface Contact {
     notes: string[];
   } | undefined;
   notes: string[];
+  attachments?: string[];
 }
 
 export type ContactDraft = Readonly<{
@@ -35,6 +36,7 @@ export type ContactDraft = Readonly<{
   isClient?: boolean | undefined;
   companyId?: number | null | undefined;
   notes?: string[] | null | undefined;
+  attachments?: string[] | null | undefined;
 }>;
 
 export type ContactPatch = Readonly<{
@@ -49,6 +51,7 @@ export type ContactPatch = Readonly<{
   isClient?: boolean | undefined;
   companyId?: number | null | undefined;
   notes?: string[] | null | undefined;
+  attachments?: string[] | null | undefined;
 }>;
 
 export type ContactId = number;
@@ -130,6 +133,7 @@ export interface ContactDetails {
   isCustomer: boolean;
   isClient: boolean;
   notes: string[];
+  attachments?: string[];
   company?: {
     id: number;
     name: string;

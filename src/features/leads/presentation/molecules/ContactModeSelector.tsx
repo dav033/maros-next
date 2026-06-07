@@ -88,7 +88,7 @@ export function ContactModeSelector({
             <Input
               value={form.contactName}
               onChange={(e: ChangeEvent<HTMLInputElement>) => onChange("contactName", e.target.value)}
-              placeholder="Contact Name *"
+              placeholder="Contact Name"
               disabled={disabled}
               className="pl-10"
             />
@@ -131,7 +131,7 @@ export function ContactModeSelector({
               }))}
             value={selectedContactId != null ? String(selectedContactId) : ""}
             onChange={(value) => onContactSelect(value ? Number(value) : undefined)}
-            placeholder="Select Contact *"
+            placeholder="Select Contact"
             searchPlaceholder="Search contact..."
             emptyText="No contacts found"
             icon={User}

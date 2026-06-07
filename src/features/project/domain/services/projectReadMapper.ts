@@ -9,6 +9,7 @@ export type ApiProjectDTO = {
   invoiceStatus?: string | null;
   overview?: string | null;
   notes?: string[] | null;
+  attachments?: string[] | null;
   leadId?: number | null;
   financial?: ProjectFinancial | null;
   lead?: {
@@ -96,7 +97,11 @@ export function mapProjectFromDTO(dto: ApiProjectDTO, leadMapper: (dto: any) => 
   const invoiceStatus = resolveInvoiceStatus(dto?.invoiceStatus);
   const overview = dto?.overview && dto.overview.trim() !== "" ? dto.overview.trim() : undefined;
   const notes = Array.isArray(dto?.notes) ? dto.notes.filter((n): n is string => typeof n === "string") : [];
-  
+  const attachments = Array.isArray(dto?.attachments)
+    ? dto.attachments.filter((a): a is string => typeof a === "string")
+    : [];
+
+
   // Map financial information if present
   let financial: ProjectFinancial | undefined = undefined;
   if (dto?.financial) {
@@ -142,6 +147,7 @@ export function mapProjectFromDTO(dto: ApiProjectDTO, leadMapper: (dto: any) => 
     invoiceStatus,
     overview,
     notes,
+    attachments,
     lead,
     leadId,
     financial,

@@ -144,11 +144,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const errorMessage = error.message || "Failed to translate text";
+    if (process.env.NODE_ENV !== "production") {
+      console.error("[/api/translate]", error);
+    }
 
     return NextResponse.json(
-      { error: errorMessage, details: error.response?.data },
-      { status: statusCode }
+      { error: "No se pudo traducir el contenido. Intenta de nuevo." },
+      { status: statusCode >= 400 && statusCode < 600 ? statusCode : 500 }
     );
   }
 }

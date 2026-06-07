@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useLeadsApp } from "@/di";
 import { getLeadByNumber } from "@/leads/application";
 import type { Lead } from "@/leads/domain";
+import { STALE_TIMES } from "@/shared/lib/queryClient";
 
 export function useLeadByNumber(leadNumber: string | null) {
   const ctx = useLeadsApp();
@@ -17,8 +18,8 @@ export function useLeadByNumber(leadNumber: string | null) {
       return getLeadByNumber(ctx, leadNumber);
     },
     enabled: !!leadNumber && leadNumber.trim() !== "",
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    gcTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: STALE_TIMES.detail,
+    gcTime: 10 * 60 * 1000,
   });
 }
 

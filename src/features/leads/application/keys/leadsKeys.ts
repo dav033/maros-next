@@ -1,9 +1,12 @@
+import { createEntityKeys } from "@/shared/query";
+
 import type { LeadType } from "@/leads/domain";
 
+const base = createEntityKeys("leads");
+
 export const leadsKeys = {
-  all: ["leads"] as const,
-  byType: (type: LeadType) => [...leadsKeys.all, "byType", type] as const,
-  inReview: () => [...leadsKeys.all, "inReview"] as const,
-  detail: (id: number) => [...leadsKeys.all, "detail", id] as const,
-  summary: () => [...leadsKeys.all, "summary"] as const,
+  ...base,
+  byType: (type: LeadType) => [...base.all, "byType", type] as const,
+  inReview: () => [...base.all, "inReview"] as const,
+  summary: () => [...base.all, "summary"] as const,
 } as const;

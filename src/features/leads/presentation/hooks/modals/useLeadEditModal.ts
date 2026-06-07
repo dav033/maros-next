@@ -8,7 +8,7 @@ import { useUpdateLeadController } from "../controllers/useUpdateLeadController"
 
 export interface UseLeadEditModalOptions {
   leadType: LeadType;
-  onUpdated?: () => Promise<void>;
+  onUpdated?: (lead: Lead) => Promise<void> | void;
 }
 
 export interface UseLeadEditModalResult {
@@ -31,7 +31,7 @@ export function useLeadEditModal({
       setIsOpen(false);
       setSelectedLead(null);
       toast.success("Lead updated successfully!");
-      await onUpdated?.();
+      await onUpdated?.(lead);
     },
   });
 

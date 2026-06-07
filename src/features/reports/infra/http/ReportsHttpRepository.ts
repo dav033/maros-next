@@ -2,6 +2,7 @@ import type { ReportsRepositoryPort, ReportSubmitResult } from "../../domain/por
 import type { RestorationFinalReport, RestorationVisitReport } from "../../domain/models";
 import type { HttpClientLike } from "@/shared/infra";
 import { optimizedApiClient } from "@/shared/infra";
+import { AppError } from "@/shared/errors";
 import { reportEndpoints } from "./endpoints";
 import {
   type RestorationFinalDTO,
@@ -23,12 +24,12 @@ export class ReportsHttpRepository implements ReportsRepositoryPort {
         reportEndpoints.restorationVisit.get(projectId)
       );
       return mapRestorationVisitFromApi(data ?? {});
-    } catch (error: any) {
-      // Si el endpoint no existe (404) o no hay datos, devolver objeto vacío
-      if (error?.response?.status === 404) {
+    } catch (error) {
+      const appError = AppError.from(error);
+      if (appError.status === 404 || appError.kind === "not_found") {
         return mapRestorationVisitFromApi({});
       }
-      throw error;
+      throw appError;
     }
   }
 
@@ -50,12 +51,12 @@ export class ReportsHttpRepository implements ReportsRepositoryPort {
         reportEndpoints.restorationFinal.get(projectId)
       );
       return mapRestorationFinalFromApi(data ?? {});
-    } catch (error: any) {
-      // Si el endpoint no existe (404) o no hay datos, devolver objeto vacío
-      if (error?.response?.status === 404) {
+    } catch (error) {
+      const appError = AppError.from(error);
+      if (appError.status === 404 || appError.kind === "not_found") {
         return mapRestorationFinalFromApi({});
       }
-      throw error;
+      throw appError;
     }
   }
 

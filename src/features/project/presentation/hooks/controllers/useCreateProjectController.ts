@@ -3,6 +3,7 @@
 import { useFormController } from "@/common/hooks";
 import { useProjectsApp } from "@/di";
 import { projectsKeys, createProject } from "@/project/application";
+import { leadsKeys } from "@/leads/application";
 import type { Project, ProjectDraft } from "@/project/domain";
 
 
@@ -39,7 +40,7 @@ export function useCreateProjectController({ onCreated }: UseCreateProjectContro
 
       return await createProject(ctx, draft);
     },
-    invalidateKeys: [projectsKeys.all],
+    invalidateKeys: [projectsKeys.all, leadsKeys.all],
     onSuccess: onCreated,
   });
 

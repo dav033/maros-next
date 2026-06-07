@@ -21,15 +21,15 @@ export function getLeadTypeFromNumber(leadNumber: string | null | undefined): Le
     return null;
   }
   
-  // Patrón para ROOFING: número seguido de 'R-' y más números
-  // Ejemplo: 053R-1025
-  if (/^\d+R-\d+$/.test(trimmed)) {
+  // Patrón para ROOFING: número seguido de 'R-' y más números.
+  // Permite notas al final, por ejemplo: 053R-1025 (issue)
+  if (/^\d+R-\d+(?:\D.*)?$/.test(trimmed)) {
     return LeadType.ROOFING;
   }
 
-  // Patrón para PLUMBING: número seguido de 'P-' y más números
-  // Ejemplo: 053P-1025
-  if (/^\d+P-\d+$/.test(trimmed)) {
+  // Patrón para PLUMBING: número seguido de 'P-' y más números.
+  // Permite notas al final, por ejemplo: 053P-1025 (issue)
+  if (/^\d+P-\d+(?:\D.*)?$/.test(trimmed)) {
     return LeadType.PLUMBING;
   }
 

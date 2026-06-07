@@ -1,56 +1,31 @@
 "use client";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import type { ProjectPatch } from "@/project/domain";
+import { useEntityCrud } from "@/shared/presentation";
 import { projectsKeys } from "@/project/application";
-import { toast } from "sonner";
-import { updateProjectAction, deleteProjectAction } from "../../../actions/projectActions";
+import type { Project, ProjectPatch } from "@/project/domain";
+import {
+  deleteProjectAction,
+  updateProjectAction,
+} from "../../../actions/projectActions";
 
 export function useProjectsMutations() {
-  const queryClient = useQueryClient();
-
-  const updateMutation = useMutation({
-    mutationFn: async (input: { id: number; patch: ProjectPatch }) => {
-      const result = await updateProjectAction(input.id, input.patch);
-      if (!result.success) {
-        throw new Error(result.error);
-      }
-      return result.data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: projectsKeys.all });
-      toast.success("Project updated successfully!");
-    },
-    onError: (error: unknown) => {
-      const message =
-        error instanceof Error ? error.message : "Could not update project";
-      toast.error(message);
-      throw error;
-    },
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: async (id: number) => {
-      const result = await deleteProjectAction(id);
-      if (!result.success) {
-        throw new Error(result.error);
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: projectsKeys.all });
-      toast.success("Project deleted successfully!");
-    },
-    onError: (error: unknown) => {
-      const message =
-        error instanceof Error ? error.message : "Could not delete project";
-      toast.error(message);
-      throw error;
+  const { updateMutation, removeMutation } = useEntityCrud<
+    Project,
+    never,
+    ProjectPatch,
+    number
+  >({
+    entityLabel: "Project",
+    keys: projectsKeys,
+    optimistic: true,
+    actions: {
+      update: (id, patch) => updateProjectAction(id, patch),
+      remove: (id) => deleteProjectAction(id),
     },
   });
 
   return {
     updateMutation,
-    deleteMutation,
+    deleteMutation: removeMutation,
   };
 }
-

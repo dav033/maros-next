@@ -1,11 +1,4 @@
-export const companyKeys = {
-  all: ["companies"] as const,
-  lists: () => [...companyKeys.all, "list"] as const,
-  detail: (id: number) => [...companyKeys.all, "detail", id] as const,
-} as const;
+import { createEntityKeys } from "@/shared/query";
 
-export const companyServiceKeys = {
-  all: ["company-services"] as const,
-  lists: () => [...companyServiceKeys.all, "list"] as const,
-  detail: (id: number) => [...companyServiceKeys.all, "detail", id] as const,
-} as const;
+export const companyKeys = createEntityKeys("companies");
+export const companyServiceKeys = createEntityKeys("company-services");

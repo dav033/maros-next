@@ -13,12 +13,23 @@ function getS3Client() {
   });
 }
 
+function normalizeBasePrefix(prefix: string | undefined): string {
+  const normalized = (prefix || "mcp/attachments/")
+    .replace(/\\/g, "/")
+    .replace(/^\/+/, "")
+    .replace(/\/+/g, "/");
+
+  return normalized.endsWith("/") ? normalized : `${normalized}/`;
+}
+
 export async function getPresignedUploadUrl(
   fileName: string,
   contentType: string,
   leadId: number
 ): Promise<{ url: string; key: string }> {
-  const key = `leads/${leadId}/${Date.now()}-${fileName}`;
+  const key = `${normalizeBasePrefix(
+    process.env.S3_BASE_PREFIX,
+  )}leads/${leadId}/${Date.now()}-${fileName}`;
   const command = new PutObjectCommand({
     Bucket: process.env.S3_BUCKET_NAME!,
     Key: key,
@@ -46,6 +57,13 @@ export async function getPresignedPreviewUrl(key: string): Promise<string> {
     gif: "image/gif",
     webp: "image/webp",
     svg: "image/svg+xml",
+    avif: "image/avif",
+    bmp: "image/bmp",
+    ico: "image/x-icon",
+    tif: "image/tiff",
+    tiff: "image/tiff",
+    heic: "image/heic",
+    heif: "image/heif",
     doc: "application/msword",
     docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   };

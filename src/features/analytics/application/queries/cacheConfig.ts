@@ -1,7 +1,8 @@
 import { keepPreviousData, type QueryClient } from "@tanstack/react-query";
 import { analyticsKeys } from "../keys/analyticsKeys";
+import { STALE_TIMES } from "@/shared/lib/queryClient";
 
-const STALE_TIME = 5 * 60 * 1000;
+const STALE_TIME = STALE_TIMES.analytics;
 const GC_TIME = 30 * 60 * 1000;
 
 export const analyticsQueryDefaults = {

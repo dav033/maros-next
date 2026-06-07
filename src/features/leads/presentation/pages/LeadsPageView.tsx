@@ -12,6 +12,7 @@ import { LeadStatus } from "@/leads/domain";
 import { LeadsTable } from "@/leads/presentation";
 import { ContactViewModal } from "@/contact";
 import { LeadModal } from "../organisms/LeadModal";
+import { PostConversionEstimateModal } from "../organisms/PostConversionEstimateModal";
 import { X, Briefcase, Search, Layers, Filter, Plus, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -56,7 +57,16 @@ export interface LeadsPageViewProps {
 }
 
 export function LeadsPageView({ logic, leadType }: LeadsPageViewProps) {
-  const { config, data, crud, table, notesModal, viewContactModal, convertProjectModal } = logic;
+  const {
+    config,
+    data,
+    crud,
+    table,
+    notesModal,
+    viewContactModal,
+    convertProjectModal,
+    postConversionEstimateModal,
+  } = logic;
 
   const { title, description, createModalTitle } = config;
 
@@ -280,6 +290,16 @@ export function LeadsPageView({ logic, leadType }: LeadsPageViewProps) {
             contacts={contactsForModal}
             projectTypes={projectTypes}
           />
+
+{postConversionEstimateModal.projectId !== null && (
+            <PostConversionEstimateModal
+              open
+              onClose={postConversionEstimateModal.onClose}
+              projectId={postConversionEstimateModal.projectId}
+              leadName={postConversionEstimateModal.leadName}
+              contactEmail={postConversionEstimateModal.contactEmail}
+            />
+          )}
         </>
       }
     />

@@ -1,91 +1,57 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import type { CompanyDraft, CompanyPatch } from "../../../domain/models";
-import { companyKeys } from "../../../application";
-import { toast } from "sonner";
+"use client";
+
+import { useQueryClient } from "@tanstack/react-query";
+
+import { useEntityMutation } from "@/shared/presentation";
+import { optimisticRemove } from "@/shared/query/optimistic";
 import { contactsKeys } from "@/contact/application";
+
+import { companyKeys } from "../../../application";
+import type { Company, CompanyDraft, CompanyPatch } from "../../../domain/models";
 import {
   createCompanyAction,
-  updateCompanyAction,
   deleteCompanyAction,
+  updateCompanyAction,
 } from "../../../actions/companyActions";
+
+type CreateInput = { draft: CompanyDraft; contactIds?: number[] };
+type UpdateInput = { id: number; patch: CompanyPatch; contactIds?: number[] };
 
 export function useCompanyMutations() {
   const queryClient = useQueryClient();
 
   const invalidateQueries = () => {
-    queryClient.invalidateQueries({ queryKey: companyKeys.all });
-    queryClient.invalidateQueries({ queryKey: ["customers"] });
-    queryClient.invalidateQueries({ queryKey: contactsKeys.list });
+    void queryClient.invalidateQueries({ queryKey: companyKeys.all });
+    void queryClient.invalidateQueries({ queryKey: ["customers"] });
+    void queryClient.invalidateQueries({ queryKey: contactsKeys.list });
   };
 
-  const createMutation = useMutation({
-    mutationFn: async ({
-      draft,
-      contactIds,
-    }: {
-      draft: CompanyDraft;
-      contactIds?: number[];
-    }) => {
-      const result = await createCompanyAction(draft, contactIds);
-      if (!result.success) {
-        throw new Error(result.error);
-      }
-      return result.data;
-    },
-    onSuccess: () => {
-      invalidateQueries();
-      toast.success("Company created successfully!");
-    },
-    onError: (error: unknown) => {
-      const message =
-        error instanceof Error ? error.message : "Could not create company";
-      toast.error(message);
-    },
+  const createMutation = useEntityMutation<CreateInput, Company>({
+    entityLabel: "Company",
+    action: "created",
+    mutationFn: ({ draft, contactIds }) => createCompanyAction(draft, contactIds),
+    invalidate: invalidateQueries,
   });
 
-  const updateMutation = useMutation({
-    mutationFn: async ({
-      id,
-      patch,
-      contactIds,
-    }: {
-      id: number;
-      patch: CompanyPatch;
-      contactIds?: number[];
-    }) => {
-      const result = await updateCompanyAction(id, patch, contactIds);
-      if (!result.success) {
-        throw new Error(result.error);
-      }
-      return result.data;
-    },
-    onSuccess: () => {
-      invalidateQueries();
-      toast.success("Company updated successfully!");
-    },
-    onError: (error: unknown) => {
-      const message =
-        error instanceof Error ? error.message : "Could not update company";
-      toast.error(message);
-    },
+  const updateMutation = useEntityMutation<UpdateInput, Company>({
+    entityLabel: "Company",
+    action: "updated",
+    mutationFn: ({ id, patch, contactIds }) =>
+      updateCompanyAction(id, patch, contactIds),
+    invalidate: invalidateQueries,
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: async (id: number) => {
-      const result = await deleteCompanyAction(id);
-      if (!result.success) {
-        throw new Error(result.error);
-      }
-    },
-    onSuccess: () => {
-      invalidateQueries();
-      toast.success("Company deleted successfully!");
-    },
-    onError: (error: unknown) => {
-      const message =
-        error instanceof Error ? error.message : "Could not delete company";
-      toast.error(message);
-    },
+  const deleteMutation = useEntityMutation<number, void>({
+    entityLabel: "Company",
+    action: "deleted",
+    mutationFn: (id) => deleteCompanyAction(id),
+    optimistic: (qc, id) =>
+      optimisticRemove<Company, number>(qc, {
+        listKey: companyKeys.lists(),
+        detailKey: companyKeys.detail(id),
+        id,
+      }),
+    invalidate: invalidateQueries,
   });
 
   return {

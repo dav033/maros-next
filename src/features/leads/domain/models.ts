@@ -33,9 +33,15 @@ export interface Lead {
   } | null;
   notes: string[];
   attachments: string[];
+  conversion?: LeadConversion;
   inReview: boolean;
   estimate: number | null;
 }
+
+export type LeadConversion = Readonly<{
+  converted: boolean;
+  projectId?: number;
+}>;
 
 export type LeadId = number;
 export type ContactId = number;
@@ -60,7 +66,7 @@ type LeadDraftBase = Readonly<{
   location: string;
   addressLink?: string | null;
   status: LeadStatus | null;
-  projectTypeId: ProjectTypeId;
+  projectTypeId?: ProjectTypeId;
   inReview?: boolean;
 }>;
 

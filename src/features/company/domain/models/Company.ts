@@ -19,6 +19,7 @@ export interface Company {
   isCustomer: boolean;
   isClient: boolean;
   notes: string[];
+  attachments?: string[];
   phone?: string | undefined;
   email?: string | undefined;
   submiz?: string | undefined;
@@ -33,6 +34,7 @@ export type CompanyDraft = Readonly<{
   isCustomer?: boolean | undefined;
   isClient?: boolean | undefined;
   notes?: string[] | null;
+  attachments?: string[] | null;
   phone?: string | null | undefined;
   email?: string | null | undefined;
   submiz?: string | null | undefined;
@@ -47,6 +49,7 @@ export type CompanyPatch = Readonly<{
   isCustomer?: boolean | undefined;
   isClient?: boolean | undefined;
   notes?: string[] | null | undefined;
+  attachments?: string[] | null | undefined;
   phone?: string | null | undefined;
   email?: string | null | undefined;
   submiz?: string | null | undefined;
@@ -65,6 +68,7 @@ export interface CompanyDetails {
   isCustomer: boolean;
   isClient: boolean;
   notes: string[];
+  attachments?: string[];
   phone?: string;
   email?: string;
   submiz?: string;
