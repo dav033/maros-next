@@ -208,7 +208,7 @@ jobs:
 - **Incidente `react-hook-form`** (módulo a medio instalar): el gate `next build`
   en CI lo habría cazado antes del deploy. Es el mejor argumento para el Tier 0.
 - **`NEXT_PUBLIC_API_BASE_URL`**: añadir un test que verifique el fallback
-  (`http://localhost:4000/api`) y que en prod/preview se usa el de `netlify.toml`.
+  (`https://api.marosconstruction.com/api`) y que en prod/preview se usa la variable del deploy.
 - **Server vs Client components**: el build falla si un `'use client'` usa APIs de
   server o viceversa; `next build` en CI lo detecta.
 - **Limpieza pendiente**: el label de debug `AUTH_PASSWORD` y el endpoint
