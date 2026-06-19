@@ -50,11 +50,25 @@ export function messageForCode(code: string | undefined): string | undefined {
   return CODE_MESSAGES[code];
 }
 
+// Códigos cuyo mensaje del servidor es una razón de negocio legible para el
+// usuario (p. ej. "Contact name already exists"). Para estos preferimos mostrar
+// el mensaje específico del backend antes que la copia genérica, que oculta el
+// motivo real y confunde (parece un error de formato cuando es un duplicado).
+const PREFER_SERVER_MESSAGE_CODES = new Set(["VALIDATION_ERROR"]);
+
 export function resolveUserMessage(input: {
   status?: number;
   code?: string;
   serverMessage?: string;
 }): string {
+  if (
+    input.code &&
+    PREFER_SERVER_MESSAGE_CODES.has(input.code) &&
+    input.serverMessage &&
+    input.serverMessage.trim() !== ""
+  ) {
+    return input.serverMessage;
+  }
   return (
     messageForCode(input.code) ??
     messageForStatus(input.status) ??

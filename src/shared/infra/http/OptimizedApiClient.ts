@@ -3,7 +3,7 @@ import { AppError } from "@/shared/errors";
 import { emitUnauthorized } from "@/shared/errors/authEvents";
 import type { HttpClientLike, RequestOptions } from "./types";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080/api";
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000/api";
 
 export class OptimizedApiClient implements HttpClientLike {
   private readonly axiosInstance: AxiosInstance;
