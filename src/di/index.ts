@@ -7,4 +7,5 @@ export {
   useCompanyApp,
   useReportsApp,
   useProjectsApp,
+  useQuickbooksApp,
 } from "./DiProvider";

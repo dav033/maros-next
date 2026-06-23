@@ -119,7 +119,7 @@ export function LeadsTable({
       getRowHref={(l) => (l.id ? `/lead/${l.id}` : undefined)}
       groupBy={buildGroupBy(groupBy)}
       paginated={pagination?.enabled}
-      defaultSort={{ key: "leadNumber", dir: "asc" }}
+      defaultSort={{ key: "leadNumber", dir: "desc" }}
       loadingState={<DefaultTableLoading label="Loading leads…" />}
       emptyState={
         <div className="flex flex-col items-center justify-center rounded-lg border border-border bg-card/40 p-8 text-center">

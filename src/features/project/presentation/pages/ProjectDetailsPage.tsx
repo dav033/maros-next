@@ -27,6 +27,7 @@ import type { ContactFormValue } from "@/contact/domain";
 import { toContactPatch } from "@/contact/domain";
 import type { Contact as DomainContact } from "@/contact/domain";
 import { EntityAttachmentsSection } from "@/features/attachments/presentation/EntityAttachmentsSection";
+import { QuickbooksProjectAttachments } from "@/features/quickbooks/presentation/components/QuickbooksProjectAttachments";
 
 interface ProjectDetails {
   id: number;
@@ -669,6 +670,10 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
           router.refresh();
         }}
       />
+
+      {lead?.leadNumber ? (
+        <QuickbooksProjectAttachments projectNumber={lead.leadNumber} />
+      ) : null}
 
       <NotesEditorModal controller={notesModalController} />
 
