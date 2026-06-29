@@ -57,5 +57,14 @@ export class ProjectHttpRepository implements ProjectRepositoryPort {
       throw error;
     }
   }
+
+  revertToLead = async (id: number): Promise<{ leadId: number }> => {
+    const { data } = await this.api.post<{ leadId: number }>(
+      projectEndpoints.revertToLead(id),
+      {},
+    );
+    if (!data) throw new Error("Empty response reverting project to lead");
+    return data;
+  };
 }
 

@@ -9,6 +9,7 @@ const TYPE_CONFIG: Record<LeadType, { label: string; color: string }> = {
   [LeadType.CONSTRUCTION]: { label: "Construction", color: "#f59e0b" },
   [LeadType.PLUMBING]: { label: "Plumbing", color: "#3b82f6" },
   [LeadType.ROOFING]: { label: "Roofing", color: "#ef4444" },
+  [LeadType.FENCE]: { label: "Fence", color: "#10b981" },
 };
 
 export function LeadTypeBadge({ leadType }: LeadTypeBadgeProps) {

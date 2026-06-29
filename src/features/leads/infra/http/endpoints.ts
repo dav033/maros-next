@@ -6,6 +6,7 @@ export const endpoints = {
   ...buildCrudEndpoints<number>(BASE),
   listByType: () => `${BASE}/type`,
   listInReview: () => `${BASE}/review`,
+  listLost: () => `${BASE}/lost`,
   validateLeadNumber: () => `${BASE}/validate/lead-number`,
   createWithNewContact: () => `${BASE}/new-contact`,
   createWithExistingContact: () => `${BASE}/existing-contact`,

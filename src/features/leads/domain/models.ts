@@ -16,6 +16,7 @@ export enum LeadType {
   CONSTRUCTION = "CONSTRUCTION",
   PLUMBING = "PLUMBING",
   ROOFING = "ROOFING",
+  FENCE = "FENCE",
 }
 
 export interface Lead {

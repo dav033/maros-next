@@ -64,7 +64,7 @@ export function KpiOverviewRow({
       value: cashPosition ? money.format(cashPosition.cashPosition) : "—",
       icon: Wallet,
       tone: "amber",
-      hint: cashPosition?.cashAtEnd != null ? "Cash at end of period" : "Net cash for period",
+      hint: "Total bank balance",
     });
   }
 

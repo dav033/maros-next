@@ -3,9 +3,11 @@ export * from "./controllers/useUpdateLeadController";
 
 export * from "./data/useInstantLeadsByType";
 export * from "./data/useInstantLeadsInReview";
+export * from "./data/useInstantLostLeads";
 export * from "./data/useLeadByNumber";
 export * from "./data/useLeadsData";
 export * from "./data/useLeadsInReviewData";
+export * from "./data/useLostLeadsData";
 
 export * from "./mutations/useLeadsMutations";
 

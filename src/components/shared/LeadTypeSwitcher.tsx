@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Hammer, House, Wrench } from "lucide-react";
+import { Hammer, House, Wrench, Fence } from "lucide-react";
 import { LeadType } from "@/leads/domain";
 import { leadTypeToRouteSegment } from "@/features/leads/utils/leadTypeRoute";
 
@@ -35,6 +35,12 @@ const options: Array<{
     subtitle: "Water systems",
     icon: Wrench,
   },
+  {
+    type: LeadType.FENCE,
+    label: "Fence",
+    subtitle: "Fences & gates",
+    icon: Fence,
+  },
 ];
 
 export function LeadTypeSwitcher({ currentType, basePath }: LeadTypeSwitcherProps) {
@@ -51,6 +57,8 @@ export function LeadTypeSwitcher({ currentType, basePath }: LeadTypeSwitcherProp
         return LeadType.ROOFING;
       case "plumbing":
         return LeadType.PLUMBING;
+      case "fence":
+        return LeadType.FENCE;
       default:
         return null;
     }
@@ -60,7 +68,7 @@ export function LeadTypeSwitcher({ currentType, basePath }: LeadTypeSwitcherProp
 
   return (
     <div className="mx-auto w-full max-w-[88rem] rounded-xl border border-zinc-600/50 bg-gradient-to-r from-muted/35 via-muted/20 to-background p-2">
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
         {options.map((option) => {
           const active = option.type === effectiveType;
           const Icon = option.icon;

@@ -84,8 +84,13 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
       });
       queryClient.invalidateQueries({ queryKey: leadsKeys.all });
       queryClient.invalidateQueries({ queryKey: projectsKeys.all });
+      setLeadDetails({
+        ...leadDetails,
+        status: LeadStatus.WON,
+        project: { id: created.id },
+      });
       toast.success("Lead converted to project successfully!");
-      router.push(`/project/${created.id}`);
+      setPostConversionProjectId(created.id);
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Could not convert lead to project";
       toast.error(message);

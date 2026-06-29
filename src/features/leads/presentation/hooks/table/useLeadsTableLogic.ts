@@ -9,7 +9,7 @@ import { FileText, FolderPlus, User } from "lucide-react";
 import React from "react";
 import { leadsSearchConfig } from "../../search/leadsSearchConfig";
 
-export type LeadGroupBy = "none" | "status" | "projectType";
+export type LeadGroupBy = "none" | "status" | "projectType" | "leadType";
 
 export interface UseLeadsTableLogicProps {
   leads: Lead[];

@@ -10,6 +10,8 @@ import {
   FileBarChart2,
   FileCheck2,
   LayoutDashboard,
+  Fence,
+  XCircle,
 } from "lucide-react";
 
 export type SidebarItemProps = {
@@ -63,7 +65,17 @@ const menuSection: SidebarSection = {
           href: "/leads/plumbing",
           icon: Wrench,
         },
+        {
+          title: "Fence",
+          href: "/leads/fence",
+          icon: Fence,
+        },
       ],
+    },
+    {
+      title: "Lost Leads",
+      href: "/leads/lost",
+      icon: XCircle,
     },
     {
       trigger: {

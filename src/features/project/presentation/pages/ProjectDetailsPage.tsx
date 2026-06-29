@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useCallback } from "react";
-import { ArrowLeft, FolderTree, User, Phone, Mail, MapPin, Building, Receipt, StickyNote, DollarSign, Edit, Plus, Save, X, FileText } from "lucide-react";
+import { ArrowLeft, FolderTree, User, Phone, Mail, MapPin, Building, Receipt, StickyNote, DollarSign, Edit, Plus, Save, X, FileText, Trash2, Undo2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,7 +13,7 @@ import { useProjectsNotesModalController } from "../hooks/modals/useProjectsNote
 import { NotesEditorModal, DetailField } from "@/components/shared";
 import { ProjectForm } from "../molecules/ProjectForm";
 import { useProjectsApp } from "@/di";
-import { updateProject } from "@/project/application";
+import { updateProject, deleteProject, revertProjectToLead } from "@/project/application";
 import type { ProjectPatch } from "@/project/domain";
 import { updateLeadNameAction } from "@/features/leads/actions/leadActions";
 import { Input } from "@/components/ui/input";
@@ -251,6 +251,44 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
   const [isEditingProject, setIsEditingProject] = useState(false);
   const [editingProject, setEditingProject] = useState<ProjectFormData>({});
   const [isSavingProject, setIsSavingProject] = useState(false);
+  const [isReverting, setIsReverting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleRevertToLead = useCallback(async () => {
+    if (!projectDetails || typeof projectDetails.id !== "number") return;
+    const confirmed = window.confirm(
+      "Revert this project back to a lead? The project will be deleted and the lead status will be set to FOLLOW_UP.",
+    );
+    if (!confirmed) return;
+    setIsReverting(true);
+    try {
+      const { leadId } = await revertProjectToLead(app, projectDetails.id);
+      toast.success("Project reverted to lead.");
+      router.push(`/lead/${leadId}`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not revert project to lead");
+    } finally {
+      setIsReverting(false);
+    }
+  }, [projectDetails, app, router]);
+
+  const handleDeleteProject = useCallback(async () => {
+    if (!projectDetails || typeof projectDetails.id !== "number") return;
+    const confirmed = window.confirm(
+      "Delete this project? The associated lead will also be deleted. This cannot be undone.",
+    );
+    if (!confirmed) return;
+    setIsDeleting(true);
+    try {
+      await deleteProject(app, projectDetails.id);
+      toast.success("Project and lead deleted.");
+      router.push("/projects");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not delete project");
+    } finally {
+      setIsDeleting(false);
+    }
+  }, [projectDetails, app, router]);
 
   const [isEditingName, setIsEditingName] = useState(false);
   const [editingName, setEditingName] = useState("");
@@ -505,6 +543,24 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
           {projectDetails.invoiceStatus && (
             <Badge variant="outline">{projectDetails.invoiceStatus}</Badge>
           )}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRevertToLead}
+            disabled={isReverting || isDeleting}
+          >
+            <Undo2 className="size-4 mr-2" />
+            {isReverting ? "Reverting..." : "Revert to Lead"}
+          </Button>
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={handleDeleteProject}
+            disabled={isDeleting || isReverting}
+          >
+            <Trash2 className="size-4 mr-2" />
+            {isDeleting ? "Deleting..." : "Delete"}
+          </Button>
         </div>
       </div>
 

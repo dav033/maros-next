@@ -38,4 +38,13 @@ export const LEAD_TYPE_CONFIGS: Record<LeadType, LeadTypeConfig> = {
     emptySubtitle: "No leads available yet.",
     createModalTitle: "Create Roofing Lead",
   },
+  [LeadType.FENCE]: {
+    leadType: LeadType.FENCE,
+    title: "Fence Leads",
+    description: "Manage fence leads and opportunities.",
+    emptyIconName: "mdi:fence",
+    emptyTitle: "No fence leads found.",
+    emptySubtitle: "No leads available yet.",
+    createModalTitle: "Create Fence Lead",
+  },
 };

@@ -11,9 +11,31 @@ import {
   type EntityTableGroupBy,
 } from "@/components/shared";
 import type { Lead } from "@/leads/domain";
+import { LeadType, getLeadTypeFromNumber } from "@/leads/domain";
 
 import { useLeadsTableColumns } from "../hooks";
 import type { LeadGroupBy } from "../hooks/table/useLeadsTableLogic";
+
+const LEAD_TYPE_LABELS: Record<LeadType, string> = {
+  [LeadType.CONSTRUCTION]: "Construction",
+  [LeadType.ROOFING]: "Roofing",
+  [LeadType.PLUMBING]: "Plumbing",
+  [LeadType.FENCE]: "Fence",
+};
+
+const LEAD_TYPE_COLORS: Record<LeadType, string> = {
+  [LeadType.CONSTRUCTION]: "#f59e0b",
+  [LeadType.ROOFING]: "#ef4444",
+  [LeadType.PLUMBING]: "#3b82f6",
+  [LeadType.FENCE]: "#10b981",
+};
+
+const LEAD_TYPE_ORDER = [
+  LeadType.CONSTRUCTION,
+  LeadType.ROOFING,
+  LeadType.PLUMBING,
+  LeadType.FENCE,
+];
 
 const STATUS_LABELS: Record<string, string> = {
   NEW_LEAD: "New Lead",
@@ -53,6 +75,14 @@ function buildGroupBy(mode: LeadGroupBy): EntityTableGroupBy<Lead> | undefined {
       getLabel: (key) => STATUS_LABELS[key] ?? key,
       getColor: (key) => STATUS_COLORS[key],
       order: STATUS_ORDER,
+    };
+  }
+  if (mode === "leadType") {
+    return {
+      getKey: (l) => getLeadTypeFromNumber(l.leadNumber) ?? "Unclassified",
+      getLabel: (key) => LEAD_TYPE_LABELS[key as LeadType] ?? key,
+      getColor: (key) => LEAD_TYPE_COLORS[key as LeadType],
+      order: LEAD_TYPE_ORDER,
     };
   }
   return {

@@ -6,6 +6,7 @@ export interface ProjectRepositoryPort {
   create(draft: ProjectDraft): Promise<Project>;
   update(id: ProjectId, patch: ProjectPatch): Promise<Project>;
   delete(id: ProjectId): Promise<void>;
+  revertToLead(id: ProjectId): Promise<{ leadId: number }>;
 }
 
 
