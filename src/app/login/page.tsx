@@ -1,6 +1,5 @@
 'use client';
 
-import * as React from 'react';
 import { useActionState } from 'react';
 import { loginAction } from '@/app/actions/auth';
 import { Button } from '@/components/ui/button';

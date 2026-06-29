@@ -3,7 +3,7 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8080/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'https://api.marosconstruction.com/api';
 
 export async function loginAction(_: unknown, formData: FormData) {
   const password = formData.get('password') as string;

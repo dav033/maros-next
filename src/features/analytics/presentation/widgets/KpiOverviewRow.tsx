@@ -34,7 +34,7 @@ export function KpiOverviewRow({
     {
       key: "revenue",
       label: `Revenue (${revenueRangeLabel})`,
-      value: money.format(overview.revenueTotal),
+      value: money.format(overview.revenuePipelineTotal),
       icon: BadgeDollarSign,
       tone: "emerald",
       href: revenueHref ?? "/reports/quickbooks/revenue",
@@ -50,7 +50,7 @@ export function KpiOverviewRow({
     {
       key: "revenuePipeline",
       label: "Revenue Pipeline",
-      value: money.format(overview.revenuePipelineTotal),
+      value: money.format(overview.revenueTotal),
       icon: ShieldCheck,
       tone: "violet",
       hint: "From P&L (Cash basis)",

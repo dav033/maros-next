@@ -3,7 +3,10 @@ import { AppError } from "@/shared/errors";
 import { emitUnauthorized } from "@/shared/errors/authEvents";
 import type { HttpClientLike, RequestOptions } from "./types";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080/api";
+// Fallback seguro para producción: nunca apuntar a localhost en un build desplegado.
+// En local, `.env` puede definir NEXT_PUBLIC_API_BASE_URL con la API local.
+const BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://api.marosconstruction.com/api";
 
 export class OptimizedApiClient implements HttpClientLike {
   private readonly axiosInstance: AxiosInstance;

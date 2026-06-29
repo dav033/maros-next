@@ -73,6 +73,12 @@
       ],
       "@/analytics/*": [
         "./src/features/analytics/*"
+      ],
+      "@/quickbooks": [
+        "./src/features/quickbooks/index.ts"
+      ],
+      "@/quickbooks/*": [
+        "./src/features/quickbooks/*"
       ]
     }
   },
