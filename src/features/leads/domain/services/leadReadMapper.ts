@@ -39,7 +39,10 @@ export type ApiLeadDTO = {
     projectId?: number | string | null;
   } | null;
   inReview?: boolean | null;
-  estimate?: number | null;
+  /** Bloque QBO adjuntado por el backend (fuente de verdad de estimates). */
+  financial?: {
+    estimatedAmount?: number | null;
+  } | null;
 } | null;
 
 function resolveStatus(status: string | null | undefined): LeadStatus {
@@ -130,7 +133,11 @@ export function mapLeadFromDTO(dto: ApiLeadDTO): Lead {
       }
     : undefined;
   const inReview = dto?.inReview ?? false;
-  const estimate = dto?.estimate != null ? Number(dto.estimate) : null;
+  // El estimate viene 100% de QuickBooks (financial.estimatedAmount), no del CRM.
+  const estimate =
+    dto?.financial?.estimatedAmount != null
+      ? Number(dto.financial.estimatedAmount)
+      : null;
 
   return {
     id,

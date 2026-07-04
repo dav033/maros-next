@@ -2,15 +2,12 @@ import type { LucideIcon } from "lucide-react";
 import {
   Briefcase,
   FolderKanban,
-  House,
   Users,
   Building,
-  Wrench,
   UserCog,
   FileBarChart2,
   FileCheck2,
   LayoutDashboard,
-  Fence,
   XCircle,
 } from "lucide-react";
 
@@ -18,6 +15,10 @@ export type SidebarItemProps = {
   title: string;
   href: string;
   icon?: LucideIcon;
+  /** Prefijo de ruta que marca el link como activo (además del href exacto). */
+  activePrefix?: string;
+  /** Prefijos excluidos del match de activePrefix (ej. /leads/lost). */
+  activeExclude?: string[];
 };
 
 export type SidebarDropdownProps = {
@@ -41,36 +42,17 @@ export type SidebarConfig = {
   title?: string;
 };
 
+// Leads y Projects son un solo link: el cambio de tipo (construction/roofing/
+// plumbing) se hace dentro de cada página con su switcher.
 const menuSection: SidebarSection = {
   section: "Business",
   items: [
     {
-      trigger: {
-        title: "Leads",
-        icon: Briefcase,
-      },
-      items: [
-        {
-          title: "Construction",
-          href: "/leads/construction",
-          icon: FolderKanban,
-        },
-        {
-          title: "Roofing",
-          href: "/leads/roofing",
-          icon: House,
-        },
-        {
-          title: "Plumbing",
-          href: "/leads/plumbing",
-          icon: Wrench,
-        },
-        {
-          title: "Fence",
-          href: "/leads/fence",
-          icon: Fence,
-        },
-      ],
+      title: "Leads",
+      href: "/leads/construction",
+      icon: Briefcase,
+      activePrefix: "/leads",
+      activeExclude: ["/leads/lost"],
     },
     {
       title: "Lost Leads",
@@ -78,27 +60,10 @@ const menuSection: SidebarSection = {
       icon: XCircle,
     },
     {
-      trigger: {
-        title: "Projects",
-        icon: FolderKanban,
-      },
-      items: [
-        {
-          title: "Construction",
-          href: "/projects/construction",
-          icon: FolderKanban,
-        },
-        {
-          title: "Roofing",
-          href: "/projects/roofing",
-          icon: House,
-        },
-        {
-          title: "Plumbing",
-          href: "/projects/plumbing",
-          icon: Wrench,
-        },
-      ],
+      title: "Projects",
+      href: "/projects/construction",
+      icon: FolderKanban,
+      activePrefix: "/projects",
     },
   ],
 };
@@ -140,32 +105,15 @@ const reportsSection: SidebarSection = {
   ],
 };
 
+// Dashboard es un solo link: el filtro por tipo de lead vive en la propia
+// página (DashboardFiltersBar).
 const analyticsSection: SidebarSection = {
   section: "Analytics",
   items: [
     {
-      trigger: {
-        title: "Dashboard",
-        icon: LayoutDashboard,
-      },
-      items: [
-        {
-          title: "General",
-          href: "/dashboard",
-        },
-        {
-          title: "Construction",
-          href: "/dashboard?leadType=construction",
-        },
-        {
-          title: "Roofing",
-          href: "/dashboard?leadType=roofing",
-        },
-        {
-          title: "Plumbing",
-          href: "/dashboard?leadType=plumbing",
-        },
-      ],
+      title: "Dashboard",
+      href: "/dashboard",
+      icon: LayoutDashboard,
     },
   ],
 };

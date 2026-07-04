@@ -12,11 +12,12 @@ export enum LeadStatus {
   LOST = "LOST",
 }
 
+// Fence NO es un tipo grande de lead: es un ProjectType (tipo de proyecto
+// menor, como Pergola o Landscaping) que se asigna en el campo projectType.
 export enum LeadType {
   CONSTRUCTION = "CONSTRUCTION",
   PLUMBING = "PLUMBING",
   ROOFING = "ROOFING",
-  FENCE = "FENCE",
 }
 
 export interface Lead {
@@ -36,6 +37,7 @@ export interface Lead {
   attachments: string[];
   conversion?: LeadConversion;
   inReview: boolean;
+  /** Monto estimado desde QuickBooks (solo lectura; no se edita en el CRM). */
   estimate: number | null;
 }
 
@@ -95,7 +97,6 @@ export type LeadPatch = Readonly<{
   notes?: string[];
   attachments?: string[];
   inReview?: boolean;
-  estimate?: number | null;
 }>;
 
 export type ApplyLeadPatchResult = Readonly<{
@@ -139,7 +140,10 @@ export interface LeadDetails {
   notes?: string[];
   attachments?: string[];
   inReview: boolean;
-  estimate?: number | null;
+  /** Bloque QBO adjuntado por el backend (fuente de verdad de estimates). */
+  financial?: {
+    estimatedAmount?: number | null;
+  } | null;
   contact?: {
     id: number;
     name: string;

@@ -8,6 +8,7 @@ export interface QboAttachmentResponse {
   updatedAt: string;
   linkedEntityType: string;
   linkedEntityId: string;
+  linkedEntityAmount?: number | null;
   includeOnSend: boolean;
   hasDownloadUrl: boolean;
   downloadUrlExpires: string | null;

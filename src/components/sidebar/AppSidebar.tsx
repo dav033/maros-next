@@ -81,6 +81,14 @@ export function AppSidebar() {
     return true;
   };
 
+  const isActiveItem = (item: SidebarItemProps) => {
+    if (isActiveRoute(item.href)) return true;
+    if (!item.activePrefix || !pathname?.startsWith(item.activePrefix)) {
+      return false;
+    }
+    return !(item.activeExclude ?? []).some((prefix) => pathname.startsWith(prefix));
+  };
+
   const renderItems = (items: SidebarDropdownConfig[], nested = false) => {
     return items.map((item) => {
       if ("trigger" in item) {
@@ -132,7 +140,7 @@ export function AppSidebar() {
       }
 
       const linkItem = item as SidebarItemProps;
-      const active = isActiveRoute(linkItem.href);
+      const active = isActiveItem(linkItem);
       const Icon = linkItem.icon;
 
       return (

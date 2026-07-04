@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, useState, useEffect } from "react";
-import { ArrowLeft, FolderPlus } from "lucide-react";
+import { FolderPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLeadsNotesLogic } from "../hooks/notes/useLeadsNotesLogic";
@@ -109,7 +109,6 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
       status: leadDetails?.status ?? "",
       projectTypeId: leadDetails?.projectType?.id,
       contactId: leadDetails?.contact?.id,
-      estimate: leadDetails?.estimate ?? null,
     },
     onSave: async (patch) => {
       if (leadDetails && typeof leadDetails.id === "number") {
@@ -132,7 +131,6 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
           projectType: updated.projectType,
           contact: updated.contact as LeadDetails["contact"],
           project: updated.project ?? leadDetails.project,
-          estimate: updated.estimate ?? null,
         });
 
         const conversionProjectId = updated.conversion?.converted

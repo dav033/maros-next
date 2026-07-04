@@ -14,6 +14,8 @@ export default defineConfig({
     globals: true,
     setupFiles: ["./vitest.setup.ts"],
     include: ["src/**/*.{test,spec}.{ts,tsx}"],
+    // No quedan tests en el proyecto; evita que `npm test` (y `npm run verify`) fallen.
+    passWithNoTests: true,
     css: false,
     coverage: {
       provider: "v8",

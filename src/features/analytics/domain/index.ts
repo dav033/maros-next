@@ -6,5 +6,5 @@ export type { QuickbooksParsedReport, QuickbooksReportRow } from "./quickbooks-r
 export type { ProjectFinancialItem } from "./project-financial";
 export type { RevenuePoint, TopClient } from "./revenue-point";
 export type { ProjectHealth } from "./project-health";
-export type { CashPosition } from "./cash-position";
+export type { ExpensesSummary } from "./expenses-summary";
 export type { AnalyticsRepositoryPort } from "./ports";

@@ -20,6 +20,8 @@ export interface QboAttachment {
   updatedAt: string;
   linkedEntityType: QboAttachmentEntityType | string;
   linkedEntityId: string;
+  /** Monto de la transacción vinculada en QuickBooks (Bill/Invoice/etc.). */
+  linkedEntityAmount: number | null;
   includeOnSend: boolean;
   hasDownloadUrl: boolean;
   downloadUrlExpires: string | null;

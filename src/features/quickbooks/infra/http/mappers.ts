@@ -30,6 +30,10 @@ function mapAttachment(a: QboAttachmentResponse): QboAttachment {
     updatedAt: a.updatedAt,
     linkedEntityType: a.linkedEntityType,
     linkedEntityId: a.linkedEntityId,
+    linkedEntityAmount:
+      typeof a.linkedEntityAmount === "number" && Number.isFinite(a.linkedEntityAmount)
+        ? a.linkedEntityAmount
+        : null,
     includeOnSend: a.includeOnSend,
     hasDownloadUrl: a.hasDownloadUrl,
     downloadUrlExpires: a.downloadUrlExpires,

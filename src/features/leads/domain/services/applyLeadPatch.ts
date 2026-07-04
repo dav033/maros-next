@@ -169,11 +169,6 @@ const PATCH_HANDLERS: {
     ...acc,
     inReview: Boolean(v),
   }),
-
-  estimate: (v, _ctx, acc) => ({
-    ...acc,
-    estimate: v == null ? null : Number(v),
-  }),
 };
 
 export function applyLeadPatch(

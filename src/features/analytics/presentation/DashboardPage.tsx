@@ -7,7 +7,7 @@ import { LeadType } from "@/leads/domain";
 import {
   invalidateAnalytics,
   useAging,
-  useCashPosition,
+  useExpensesSummary,
   useOverview,
   usePipeline,
   useProjectHealth,
@@ -93,7 +93,7 @@ export function DashboardPage() {
   const revenueTrend = useRevenueTrend({ months: 12, from: range.from, to: range.to, leadType });
   const topClients = useTopClients(5, topClientsBy, leadType);
   const projectHealth = useProjectHealth(leadType);
-  const cashPosition = useCashPosition({
+  const expensesSummary = useExpensesSummary({
     from: range.from,
     to: range.to,
     enabled: leadScope === "all",
@@ -107,7 +107,7 @@ export function DashboardPage() {
     revenueTrend,
     topClients,
     projectHealth,
-    cashPosition,
+    expensesSummary,
   ].some((query) => query.isFetching);
 
   const handleRefresh = async () => {
@@ -179,7 +179,7 @@ export function DashboardPage() {
         onTopClientsByChange={handleTopClientsByChange}
         currentLeadScope={leadScope}
         projectHealth={projectHealth}
-        cashPosition={cashPosition}
+        expensesSummary={expensesSummary}
         revenueRangeLabel={appliedQuickRangeLabel ?? `${range.from} → ${range.to}`}
         revenueHref={revenueHref}
       />

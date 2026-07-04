@@ -15,6 +15,6 @@ export const analyticsEndpoints = {
   projectFinancials: () => `${BASE}/project-financials`,
   quickbooksRevenueReport: () => `${BASE}/quickbooks-revenue-report`,
   projectHealth: () => `${BASE}/project-health`,
-  cashPosition: () => `${BASE}/cash-position`,
+  expensesSummary: () => `${BASE}/expenses-summary`,
   refresh: () => `${BASE}/refresh`,
 } as const;

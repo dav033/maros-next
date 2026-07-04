@@ -1,7 +1,7 @@
 import type { LeadType } from "@/leads/domain";
 import type { AgingBucket, FinancialSnapshot } from "./financial-snapshot";
 import type { BacklogItem, OutstandingBalanceItem } from "./financial-details";
-import type { CashPosition } from "./cash-position";
+import type { ExpensesSummary } from "./expenses-summary";
 import type { KpiOverview } from "./kpi-overview";
 import type { PipelineBucket, ProjectsStatusBucket } from "./pipeline-bucket";
 import type { ProjectFinancialItem } from "./project-financial";
@@ -34,6 +34,6 @@ export interface AnalyticsRepositoryPort {
     to?: string;
   }): Promise<QuickbooksParsedReport>;
   getProjectHealth(params?: { leadType?: LeadType }): Promise<ProjectHealth[]>;
-  getCashPosition(params?: { from?: string; to?: string }): Promise<CashPosition>;
+  getExpensesSummary(params?: { from?: string; to?: string }): Promise<ExpensesSummary>;
   refresh(): Promise<{ ok: boolean }>;
 }

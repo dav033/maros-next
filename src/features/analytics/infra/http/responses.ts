@@ -118,10 +118,9 @@ export type ProjectHealthResponse = {
   reasons?: unknown[];
 };
 
-export type CashPositionResponse = {
-  cashPosition?: number;
-  cashAtEnd?: number | null;
-  netCash?: number | null;
+export type ExpensesSummaryResponse = {
+  totalExpenses?: number;
+  totalCogs?: number;
   period?: {
     from?: string;
     to?: string;

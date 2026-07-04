@@ -20,21 +20,18 @@ const LEAD_TYPE_LABELS: Record<LeadType, string> = {
   [LeadType.CONSTRUCTION]: "Construction",
   [LeadType.ROOFING]: "Roofing",
   [LeadType.PLUMBING]: "Plumbing",
-  [LeadType.FENCE]: "Fence",
 };
 
 const LEAD_TYPE_COLORS: Record<LeadType, string> = {
   [LeadType.CONSTRUCTION]: "#f59e0b",
   [LeadType.ROOFING]: "#ef4444",
   [LeadType.PLUMBING]: "#3b82f6",
-  [LeadType.FENCE]: "#10b981",
 };
 
 const LEAD_TYPE_ORDER = [
   LeadType.CONSTRUCTION,
   LeadType.ROOFING,
   LeadType.PLUMBING,
-  LeadType.FENCE,
 ];
 
 const STATUS_LABELS: Record<string, string> = {

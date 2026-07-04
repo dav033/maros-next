@@ -5,11 +5,11 @@ import type { PipelineBucket, ProjectsStatusBucket } from "../../domain/pipeline
 import type { ProjectFinancialItem } from "../../domain/project-financial";
 import type { RevenuePoint, TopClient } from "../../domain/revenue-point";
 import type { ProjectHealth } from "../../domain/project-health";
-import type { CashPosition } from "../../domain/cash-position";
+import type { ExpensesSummary } from "../../domain/expenses-summary";
 import type { QuickbooksParsedReport } from "../../domain/quickbooks-report";
 import type {
   AgingBucketResponse,
-  CashPositionResponse,
+  ExpensesSummaryResponse,
   FinancialSnapshotResponse,
   OverviewResponse,
   PipelineBucketResponse,
@@ -160,18 +160,11 @@ export const mapProjectFinancials = (
     estimateVsInvoicedDelta: toNumber(item?.estimateVsInvoicedDelta),
   }));
 
-const toNullableNumber = (value: unknown): number | null => {
-  if (value === null || value === undefined) return null;
-  const n = Number(value);
-  return Number.isFinite(n) ? n : null;
-};
-
-export const mapCashPosition = (
-  dto: CashPositionResponse | null | undefined,
-): CashPosition => ({
-  cashPosition: toNumber(dto?.cashPosition),
-  cashAtEnd: toNullableNumber(dto?.cashAtEnd),
-  netCash: toNullableNumber(dto?.netCash),
+export const mapExpensesSummary = (
+  dto: ExpensesSummaryResponse | null | undefined,
+): ExpensesSummary => ({
+  totalExpenses: toNumber(dto?.totalExpenses),
+  totalCogs: toNumber(dto?.totalCogs),
   period: {
     from: String(dto?.period?.from ?? ""),
     to: String(dto?.period?.to ?? ""),

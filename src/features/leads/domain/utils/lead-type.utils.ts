@@ -33,13 +33,7 @@ export function getLeadTypeFromNumber(leadNumber: string | null | undefined): Le
     return LeadType.PLUMBING;
   }
 
-  // Patrón para FENCE: número seguido de 'F-' y más números.
-  // Permite notas al final, por ejemplo: 053F-1025 (issue)
-  if (/^\d+F-\d+(?:\D.*)?$/.test(trimmed)) {
-    return LeadType.FENCE;
-  }
-
-  // Todo lo que no sea ROOFING, PLUMBING o FENCE se considera CONSTRUCTION.
+  // Todo lo que no sea ROOFING o PLUMBING se considera CONSTRUCTION.
   // Esto mantiene compatibilidad con números legacy que no siguen
   // exactamente el formato NNN-NNNN.
   return LeadType.CONSTRUCTION;

@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { Activity, BarChart3, DollarSign, Users } from "lucide-react";
 import type {
   AgingBucket,
-  CashPosition,
+  ExpensesSummary,
   KpiOverview,
   PipelineBucket,
   ProjectHealth,
@@ -47,7 +47,7 @@ type DashboardWidgetsProps = {
   onTopClientsByChange: (by: "revenue" | "volume") => void;
   currentLeadScope: DashboardLeadScope;
   projectHealth: QueryLike<ProjectHealth[]>;
-  cashPosition: QueryLike<CashPosition>;
+  expensesSummary: QueryLike<ExpensesSummary>;
   revenueRangeLabel?: string;
   revenueHref?: string;
 };
@@ -91,11 +91,11 @@ export function DashboardWidgets({
   onTopClientsByChange,
   currentLeadScope,
   projectHealth,
-  cashPosition,
+  expensesSummary,
   revenueRangeLabel,
   revenueHref,
 }: DashboardWidgetsProps) {
-  const showCashPosition = currentLeadScope === "all";
+  const showExpensesSummary = currentLeadScope === "all";
   return (
     <div className="space-y-8">
       <Section icon={Activity} title="Performance overview" description="Revenue, backlog and secured revenue" delay={0}>
@@ -107,8 +107,8 @@ export function DashboardWidgets({
           {(overviewData) => (
             <KpiOverviewRow
               overview={overviewData}
-              cashPosition={showCashPosition ? cashPosition.data ?? null : null}
-              showCashPosition={showCashPosition}
+              expensesSummary={showExpensesSummary ? expensesSummary.data ?? null : null}
+              showExpensesSummary={showExpensesSummary}
               revenueRangeLabel={revenueRangeLabel}
               revenueHref={revenueHref}
             />

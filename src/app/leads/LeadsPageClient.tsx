@@ -16,7 +16,6 @@ const LEAD_TYPE_OPTIONS = [
   { value: LeadType.CONSTRUCTION, label: "Construction" },
   { value: LeadType.ROOFING, label: "Roofing" },
   { value: LeadType.PLUMBING, label: "Plumbing" },
-  { value: LeadType.FENCE, label: "Fence" },
 ];
 
 export function LeadsPageClient() {

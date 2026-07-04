@@ -1,12 +1,12 @@
-import { BadgeDollarSign, Hammer, ShieldCheck, Wallet } from "lucide-react";
-import type { CashPosition, KpiOverview } from "../../domain";
+import { BadgeDollarSign, Hammer, Package, Receipt, ShieldCheck } from "lucide-react";
+import type { ExpensesSummary, KpiOverview } from "../../domain";
 import { KpiCard, type KpiTone } from "./KpiCard";
 import { money } from "./formatters";
 
 type KpiOverviewRowProps = {
   overview: KpiOverview;
-  cashPosition?: CashPosition | null;
-  showCashPosition?: boolean;
+  expensesSummary?: ExpensesSummary | null;
+  showExpensesSummary?: boolean;
   revenueRangeLabel?: string;
   revenueHref?: string;
 };
@@ -23,8 +23,8 @@ type KpiSpec = {
 
 export function KpiOverviewRow({
   overview,
-  cashPosition,
-  showCashPosition = false,
+  expensesSummary,
+  showExpensesSummary = false,
   revenueRangeLabel = "12m",
   revenueHref,
 }: KpiOverviewRowProps) {
@@ -57,19 +57,29 @@ export function KpiOverviewRow({
     },
   ];
 
-  if (showCashPosition) {
-    kpis.push({
-      key: "cashPosition",
-      label: "Cash Position",
-      value: cashPosition ? money.format(cashPosition.cashPosition) : "—",
-      icon: Wallet,
-      tone: "amber",
-      hint: "Total bank balance",
-    });
+  if (showExpensesSummary) {
+    kpis.push(
+      {
+        key: "totalExpenses",
+        label: "Total Expenses",
+        value: expensesSummary ? money.format(expensesSummary.totalExpenses) : "—",
+        icon: Receipt,
+        tone: "amber",
+        hint: "From P&L (Cash basis)",
+      },
+      {
+        key: "totalCogs",
+        label: "Cost of Goods Sold",
+        value: expensesSummary ? money.format(expensesSummary.totalCogs) : "—",
+        icon: Package,
+        tone: "primary",
+        hint: "From P&L (Cash basis)",
+      },
+    );
   }
 
-  const gridCols = showCashPosition
-    ? "sm:grid-cols-2 xl:grid-cols-4"
+  const gridCols = showExpensesSummary
+    ? "sm:grid-cols-2 xl:grid-cols-5"
     : "sm:grid-cols-2 xl:grid-cols-3";
 
   return (

@@ -26,6 +26,6 @@ export const analyticsKeys = {
     [...analyticsKeys.all, "quickbooks-revenue-report", from ?? "", to ?? ""] as const,
   projectHealth: (leadType?: LeadType) =>
     [...analyticsKeys.all, "project-health", leadType ?? ""] as const,
-  cashPosition: (from?: string, to?: string) =>
-    [...analyticsKeys.all, "cash-position", from ?? "", to ?? ""] as const,
+  expensesSummary: (from?: string, to?: string) =>
+    [...analyticsKeys.all, "expenses-summary", from ?? "", to ?? ""] as const,
 } as const;

@@ -44,6 +44,11 @@ function formatBytes(bytes: number | null): string {
   return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 }
 
+const attachmentMoney = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+});
+
 function getFileIcon(contentType: string, fileName: string) {
   if (contentType?.startsWith("image/")) return ImageIcon;
   if (contentType === "application/pdf" || fileName?.toLowerCase().endsWith(".pdf")) return FileText;
@@ -155,6 +160,15 @@ function AttachmentRow({ attachment, searchTerm, onRefreshed, onError }: Attachm
           <Badge variant="outline" className="text-[10px]">
             {attachment.linkedEntityType}
           </Badge>
+          {attachment.linkedEntityAmount != null && (
+            <Badge
+              variant="outline"
+              className="border-emerald-500/40 bg-emerald-500/10 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400"
+              title={`Amount of the linked ${attachment.linkedEntityType}`}
+            >
+              {attachmentMoney.format(attachment.linkedEntityAmount)}
+            </Badge>
+          )}
           {!attachment.includeOnSend && (
             <Badge variant="secondary" className="text-[10px]">
               Private
