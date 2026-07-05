@@ -29,10 +29,26 @@ export type FinancialSnapshotResponse = {
   outstandingTotal?: number;
 };
 
-export type AgingBucketResponse = {
-  label?: string;
+export type LeadsPerMonthPointResponse = {
+  month?: string;
   count?: number;
-  totalBalance?: number;
+};
+
+export type CostCategoryResponse = {
+  category?: string;
+  section?: string;
+  amount?: number;
+};
+
+export type CostsBreakdownResponse = {
+  totalCosts?: number;
+  totalExpenses?: number;
+  totalCogs?: number;
+  categories?: CostCategoryResponse[];
+  period?: {
+    from?: string;
+    to?: string;
+  };
 };
 
 export type RevenuePointResponse = {

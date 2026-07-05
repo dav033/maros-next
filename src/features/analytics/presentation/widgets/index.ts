@@ -3,7 +3,8 @@ export { KpiOverviewRow } from "./KpiOverviewRow";
 export { PipelineFunnelChart } from "./PipelineFunnelChart";
 export { ProjectsStatusChart } from "./ProjectsStatusChart";
 export { RevenueTrendChart } from "./RevenueTrendChart";
-export { AgingBucketsChart } from "./AgingBucketsChart";
+export { LeadsPerMonthChart } from "./LeadsPerMonthChart";
+export { CostsBreakdownPanel } from "./CostsBreakdownPanel";
 export { FinancialSnapshotPanel } from "./FinancialSnapshotPanel";
 export { TopClientsTable } from "./TopClientsTable";
 export { ProjectHealthList } from "./ProjectHealthList";
@@ -17,6 +18,7 @@ export {
   LineChartSkeleton,
   PieChartSkeleton,
   FinancialSnapshotSkeleton,
+  CostsBreakdownSkeleton,
   TopClientsSkeleton,
   ProjectHealthSkeleton,
 } from "./WidgetStates";

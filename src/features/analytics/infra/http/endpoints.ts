@@ -7,7 +7,7 @@ export const analyticsEndpoints = {
   pipeline: () => `${BASE}/pipeline`,
   projectsStatus: () => `${BASE}/projects-status`,
   financialSnapshot: () => `${BASE}/financial-snapshot`,
-  aging: () => `${BASE}/aging`,
+  leadsPerMonth: () => `${BASE}/leads-per-month`,
   revenueTrend: () => `${BASE}/revenue-trend`,
   topClients: () => `${BASE}/top-clients`,
   outstandingBalances: () => `${BASE}/outstanding-balances`,
@@ -16,5 +16,6 @@ export const analyticsEndpoints = {
   quickbooksRevenueReport: () => `${BASE}/quickbooks-revenue-report`,
   projectHealth: () => `${BASE}/project-health`,
   expensesSummary: () => `${BASE}/expenses-summary`,
+  costsBreakdown: () => `${BASE}/costs-breakdown`,
   refresh: () => `${BASE}/refresh`,
 } as const;

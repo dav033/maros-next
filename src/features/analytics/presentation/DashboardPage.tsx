@@ -6,8 +6,9 @@ import { useQueryClient } from "@tanstack/react-query";
 import { LeadType } from "@/leads/domain";
 import {
   invalidateAnalytics,
-  useAging,
+  useCostsBreakdown,
   useExpensesSummary,
+  useLeadsPerMonth,
   useOverview,
   usePipeline,
   useProjectHealth,
@@ -89,11 +90,16 @@ export function DashboardPage() {
   const overview = useOverview({ ...range, leadType });
   const pipeline = usePipeline(leadType);
   const projectsStatus = useProjectsStatus(leadType);
-  const aging = useAging(leadType);
+  const leadsPerMonth = useLeadsPerMonth({ months: 12, from: range.from, to: range.to, leadType });
   const revenueTrend = useRevenueTrend({ months: 12, from: range.from, to: range.to, leadType });
   const topClients = useTopClients(5, topClientsBy, leadType);
   const projectHealth = useProjectHealth(leadType);
   const expensesSummary = useExpensesSummary({
+    from: range.from,
+    to: range.to,
+    enabled: leadScope === "all",
+  });
+  const costsBreakdown = useCostsBreakdown({
     from: range.from,
     to: range.to,
     enabled: leadScope === "all",
@@ -103,11 +109,12 @@ export function DashboardPage() {
     overview,
     pipeline,
     projectsStatus,
-    aging,
+    leadsPerMonth,
     revenueTrend,
     topClients,
     projectHealth,
     expensesSummary,
+    costsBreakdown,
   ].some((query) => query.isFetching);
 
   const handleRefresh = async () => {
@@ -172,7 +179,8 @@ export function DashboardPage() {
         overview={overview}
         pipeline={pipeline}
         projectsStatus={projectsStatus}
-        aging={aging}
+        leadsPerMonth={leadsPerMonth}
+        costsBreakdown={costsBreakdown}
         revenueTrend={revenueTrend}
         topClients={topClients}
         topClientsBy={topClientsBy}

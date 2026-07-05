@@ -202,6 +202,41 @@ export function FinancialSnapshotSkeleton() {
   );
 }
 
+export function CostsBreakdownSkeleton() {
+  return (
+    <CardShellSkeleton>
+      <CardHeaderSkeleton titleWidth="w-36" />
+      <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+        {Array.from({ length: 3 }).map((_, index) => (
+          <div key={index} className="rounded-lg border border-border/60 bg-muted/20 px-4 py-3">
+            <Skeleton className="h-3 w-20" />
+            <Skeleton className="mt-2 h-6 w-24" />
+          </div>
+        ))}
+      </div>
+      <div className="mt-5 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        {Array.from({ length: 2 }).map((_, column) => (
+          <div key={column} className="space-y-3">
+            <div className="flex items-center justify-between border-b border-border/40 pb-2">
+              <Skeleton className="h-3 w-24" />
+              <Skeleton className="h-3 w-16" />
+            </div>
+            {Array.from({ length: 4 }).map((_, row) => (
+              <div key={row} className="space-y-1.5">
+                <div className="flex items-center justify-between gap-3">
+                  <Skeleton className="h-3 w-32" />
+                  <Skeleton className="h-3 w-14" />
+                </div>
+                <Skeleton className="h-1.5 w-full rounded-full" />
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+    </CardShellSkeleton>
+  );
+}
+
 export function TopClientsSkeleton() {
   return (
     <CardShellSkeleton>

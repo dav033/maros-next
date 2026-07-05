@@ -10,8 +10,8 @@ export const analyticsKeys = {
     [...analyticsKeys.all, "projects-status", leadType ?? ""] as const,
   financialSnapshot: (leadType?: LeadType) =>
     [...analyticsKeys.all, "financial-snapshot", leadType ?? ""] as const,
-  aging: (leadType?: LeadType) =>
-    [...analyticsKeys.all, "aging", leadType ?? ""] as const,
+  leadsPerMonth: (months: number, from?: string, to?: string, leadType?: LeadType) =>
+    [...analyticsKeys.all, "leads-per-month", months, from ?? "", to ?? "", leadType ?? ""] as const,
   revenueTrend: (months: number, from?: string, to?: string, leadType?: LeadType) =>
     [...analyticsKeys.all, "revenue-trend", months, from ?? "", to ?? "", leadType ?? ""] as const,
   topClients: (limit: number, by: "revenue" | "volume", leadType?: LeadType) =>
@@ -28,4 +28,6 @@ export const analyticsKeys = {
     [...analyticsKeys.all, "project-health", leadType ?? ""] as const,
   expensesSummary: (from?: string, to?: string) =>
     [...analyticsKeys.all, "expenses-summary", from ?? "", to ?? ""] as const,
+  costsBreakdown: (from?: string, to?: string) =>
+    [...analyticsKeys.all, "costs-breakdown", from ?? "", to ?? ""] as const,
 } as const;

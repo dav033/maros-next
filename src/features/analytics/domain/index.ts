@@ -1,6 +1,8 @@
 export type { KpiOverview } from "./kpi-overview";
 export type { PipelineBucket, ProjectsStatusBucket } from "./pipeline-bucket";
-export type { FinancialSnapshot, AgingBucket } from "./financial-snapshot";
+export type { FinancialSnapshot } from "./financial-snapshot";
+export type { LeadsPerMonthPoint } from "./leads-per-month";
+export type { CostCategory, CostsBreakdown } from "./costs-breakdown";
 export type { OutstandingBalanceItem, BacklogItem } from "./financial-details";
 export type { QuickbooksParsedReport, QuickbooksReportRow } from "./quickbooks-report";
 export type { ProjectFinancialItem } from "./project-financial";

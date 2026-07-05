@@ -1,9 +1,10 @@
 import type { ReactNode } from "react";
 import { Activity, BarChart3, DollarSign, Users } from "lucide-react";
 import type {
-  AgingBucket,
+  CostsBreakdown,
   ExpensesSummary,
   KpiOverview,
+  LeadsPerMonthPoint,
   PipelineBucket,
   ProjectHealth,
   ProjectsStatusBucket,
@@ -11,9 +12,10 @@ import type {
   TopClient,
 } from "../../domain";
 import type { DashboardLeadScope } from "./DashboardFiltersBar";
-import { AgingBucketsChart } from "../widgets/AgingBucketsChart";
 import { AsyncWidget } from "../widgets/AsyncWidget";
+import { CostsBreakdownPanel } from "../widgets/CostsBreakdownPanel";
 import { KpiOverviewRow } from "../widgets/KpiOverviewRow";
+import { LeadsPerMonthChart } from "../widgets/LeadsPerMonthChart";
 import { PipelineFunnelChart } from "../widgets/PipelineFunnelChart";
 import { ProjectHealthList } from "../widgets/ProjectHealthList";
 import { ProjectsStatusChart } from "../widgets/ProjectsStatusChart";
@@ -21,6 +23,7 @@ import { RevenueTrendChart } from "../widgets/RevenueTrendChart";
 import { TopClientsTable } from "../widgets/TopClientsTable";
 import {
   BarChartSkeleton,
+  CostsBreakdownSkeleton,
   KpiOverviewSkeleton,
   LineChartSkeleton,
   PieChartSkeleton,
@@ -40,7 +43,8 @@ type DashboardWidgetsProps = {
   overview: QueryLike<KpiOverview>;
   pipeline: QueryLike<PipelineBucket[]>;
   projectsStatus: QueryLike<ProjectsStatusBucket[]>;
-  aging: QueryLike<AgingBucket[]>;
+  leadsPerMonth: QueryLike<LeadsPerMonthPoint[]>;
+  costsBreakdown: QueryLike<CostsBreakdown>;
   revenueTrend: QueryLike<RevenuePoint[]>;
   topClients: QueryLike<TopClient[]>;
   topClientsBy: "revenue" | "volume";
@@ -84,7 +88,8 @@ export function DashboardWidgets({
   overview,
   pipeline,
   projectsStatus,
-  aging,
+  leadsPerMonth,
+  costsBreakdown,
   revenueTrend,
   topClients,
   topClientsBy,
@@ -138,15 +143,16 @@ export function DashboardWidgets({
         </div>
       </Section>
 
-      <Section icon={DollarSign} title="Financial health" description="Receivables aging and project status mix" delay={220}>
+      <Section icon={BarChart3} title="Leads & projects" description="Monthly lead intake and project status mix" delay={220}>
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <AsyncWidget
-            query={aging}
-            errorText="Could not load aging report."
-            emptyText="No aging data available."
+            query={leadsPerMonth}
+            errorText="Could not load leads per month."
+            emptyText="No leads found for this range."
+            isEmpty={(data) => data.length === 0 || data.every((item) => item.count <= 0)}
             skeleton={<BarChartSkeleton />}
           >
-            {(data) => <AgingBucketsChart data={data} />}
+            {(data) => <LeadsPerMonthChart data={data} />}
           </AsyncWidget>
 
           <AsyncWidget
@@ -160,6 +166,20 @@ export function DashboardWidgets({
           </AsyncWidget>
         </div>
       </Section>
+
+      {showExpensesSummary ? (
+        <Section icon={DollarSign} title="Costs" description="All expenses and COGS by category" delay={270}>
+          <AsyncWidget
+            query={costsBreakdown}
+            errorText="Could not load costs breakdown."
+            emptyText="No cost data available for this range."
+            isEmpty={(data) => data.categories.length === 0 && data.totalCosts === 0}
+            skeleton={<CostsBreakdownSkeleton />}
+          >
+            {(data) => <CostsBreakdownPanel data={data} />}
+          </AsyncWidget>
+        </Section>
+      ) : null}
 
       <Section icon={Users} title="Clients & risk" description="Top accounts and projects that need attention" delay={320}>
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">

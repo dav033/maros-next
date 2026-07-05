@@ -5,9 +5,3 @@ export type FinancialSnapshot = {
   paidTotal: number;
   outstandingTotal: number;
 };
-
-export type AgingBucket = {
-  label: string;
-  count: number;
-  totalBalance: number;
-};

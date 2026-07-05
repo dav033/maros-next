@@ -2,16 +2,19 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useAnalyticsApp } from "@/di";
-import type { LeadType } from "@/leads/domain";
 import { analyticsKeys } from "../keys/analyticsKeys";
 import { analyticsQueryDefaults } from "./cacheConfig";
 
-export function useAging(leadType?: LeadType) {
+export function useCostsBreakdown(
+  params?: { from?: string; to?: string; enabled?: boolean },
+) {
   const ctx = useAnalyticsApp();
+  const { from, to, enabled = true } = params ?? {};
 
   return useQuery({
     ...analyticsQueryDefaults,
-    queryKey: analyticsKeys.aging(leadType),
-    queryFn: () => ctx.repos.analytics.getAging({ leadType }),
+    queryKey: analyticsKeys.costsBreakdown(from, to),
+    queryFn: () => ctx.repos.analytics.getCostsBreakdown({ from, to }),
+    enabled,
   });
 }

@@ -1,5 +1,7 @@
 import type { KpiOverview } from "../../domain/kpi-overview";
-import type { AgingBucket, FinancialSnapshot } from "../../domain/financial-snapshot";
+import type { FinancialSnapshot } from "../../domain/financial-snapshot";
+import type { CostsBreakdown } from "../../domain/costs-breakdown";
+import type { LeadsPerMonthPoint } from "../../domain/leads-per-month";
 import type { BacklogItem, OutstandingBalanceItem } from "../../domain/financial-details";
 import type { PipelineBucket, ProjectsStatusBucket } from "../../domain/pipeline-bucket";
 import type { ProjectFinancialItem } from "../../domain/project-financial";
@@ -8,8 +10,9 @@ import type { ProjectHealth } from "../../domain/project-health";
 import type { ExpensesSummary } from "../../domain/expenses-summary";
 import type { QuickbooksParsedReport } from "../../domain/quickbooks-report";
 import type {
-  AgingBucketResponse,
+  CostsBreakdownResponse,
   ExpensesSummaryResponse,
+  LeadsPerMonthPointResponse,
   FinancialSnapshotResponse,
   OverviewResponse,
   PipelineBucketResponse,
@@ -62,11 +65,12 @@ export const mapFinancialSnapshot = (
   outstandingTotal: toNumber(dto?.outstandingTotal),
 });
 
-export const mapAging = (dto: AgingBucketResponse[] | null | undefined): AgingBucket[] =>
+export const mapLeadsPerMonth = (
+  dto: LeadsPerMonthPointResponse[] | null | undefined,
+): LeadsPerMonthPoint[] =>
   (dto ?? []).map((item) => ({
-    label: String(item?.label ?? "Unknown"),
+    month: String(item?.month ?? ""),
     count: toNumber(item?.count),
-    totalBalance: toNumber(item?.totalBalance),
   }));
 
 export const mapRevenueTrend = (
@@ -165,6 +169,23 @@ export const mapExpensesSummary = (
 ): ExpensesSummary => ({
   totalExpenses: toNumber(dto?.totalExpenses),
   totalCogs: toNumber(dto?.totalCogs),
+  period: {
+    from: String(dto?.period?.from ?? ""),
+    to: String(dto?.period?.to ?? ""),
+  },
+});
+
+export const mapCostsBreakdown = (
+  dto: CostsBreakdownResponse | null | undefined,
+): CostsBreakdown => ({
+  totalCosts: toNumber(dto?.totalCosts),
+  totalExpenses: toNumber(dto?.totalExpenses),
+  totalCogs: toNumber(dto?.totalCogs),
+  categories: (dto?.categories ?? []).map((item) => ({
+    category: String(item?.category ?? "Unknown"),
+    section: item?.section === "COGS" ? "COGS" : "EXPENSES",
+    amount: toNumber(item?.amount),
+  })),
   period: {
     from: String(dto?.period?.from ?? ""),
     to: String(dto?.period?.to ?? ""),

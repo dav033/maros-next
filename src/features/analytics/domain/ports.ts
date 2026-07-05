@@ -1,7 +1,9 @@
 import type { LeadType } from "@/leads/domain";
-import type { AgingBucket, FinancialSnapshot } from "./financial-snapshot";
+import type { FinancialSnapshot } from "./financial-snapshot";
 import type { BacklogItem, OutstandingBalanceItem } from "./financial-details";
+import type { CostsBreakdown } from "./costs-breakdown";
 import type { ExpensesSummary } from "./expenses-summary";
+import type { LeadsPerMonthPoint } from "./leads-per-month";
 import type { KpiOverview } from "./kpi-overview";
 import type { PipelineBucket, ProjectsStatusBucket } from "./pipeline-bucket";
 import type { ProjectFinancialItem } from "./project-financial";
@@ -14,7 +16,12 @@ export interface AnalyticsRepositoryPort {
   getPipeline(params?: { leadType?: LeadType }): Promise<PipelineBucket[]>;
   getProjectsStatus(params?: { leadType?: LeadType }): Promise<ProjectsStatusBucket[]>;
   getFinancialSnapshot(params?: { leadType?: LeadType }): Promise<FinancialSnapshot>;
-  getAging(params?: { leadType?: LeadType }): Promise<AgingBucket[]>;
+  getLeadsPerMonth(params?: {
+    months?: number;
+    from?: string;
+    to?: string;
+    leadType?: LeadType;
+  }): Promise<LeadsPerMonthPoint[]>;
   getRevenueTrend(params?: {
     months?: number;
     from?: string;
@@ -35,5 +42,6 @@ export interface AnalyticsRepositoryPort {
   }): Promise<QuickbooksParsedReport>;
   getProjectHealth(params?: { leadType?: LeadType }): Promise<ProjectHealth[]>;
   getExpensesSummary(params?: { from?: string; to?: string }): Promise<ExpensesSummary>;
+  getCostsBreakdown(params?: { from?: string; to?: string }): Promise<CostsBreakdown>;
   refresh(): Promise<{ ok: boolean }>;
 }

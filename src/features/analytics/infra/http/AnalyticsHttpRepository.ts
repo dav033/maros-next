@@ -4,8 +4,9 @@ import type { HttpClientLike } from "@/shared/infra/http";
 import { optimizedApiClient } from "@/shared/infra/http";
 import { analyticsEndpoints } from "./endpoints";
 import {
-  mapAging,
+  mapCostsBreakdown,
   mapExpensesSummary,
+  mapLeadsPerMonth,
   mapFinancialSnapshot,
   mapOverview,
   mapPipeline,
@@ -19,9 +20,10 @@ import {
   mapTopClients,
 } from "./mappers";
 import type {
-  AgingBucketResponse,
   BacklogItemResponse,
+  CostsBreakdownResponse,
   ExpensesSummaryResponse,
+  LeadsPerMonthPointResponse,
   FinancialSnapshotResponse,
   OutstandingBalanceItemResponse,
   OverviewResponse,
@@ -66,11 +68,19 @@ export class AnalyticsHttpRepository implements AnalyticsRepositoryPort {
     return mapFinancialSnapshot(data);
   }
 
-  async getAging(params?: { leadType?: LeadType }) {
-    const { data } = await this.api.get<AgingBucketResponse[]>(analyticsEndpoints.aging(), {
-      params,
-    });
-    return mapAging(data);
+  async getLeadsPerMonth(params?: { months?: number; from?: string; to?: string; leadType?: LeadType }) {
+    const { data } = await this.api.get<LeadsPerMonthPointResponse[]>(
+      analyticsEndpoints.leadsPerMonth(),
+      {
+        params: {
+          months: params?.months ?? 12,
+          from: params?.from,
+          to: params?.to,
+          leadType: params?.leadType,
+        },
+      },
+    );
+    return mapLeadsPerMonth(data);
   }
 
   async getRevenueTrend(params?: { months?: number; from?: string; to?: string; leadType?: LeadType }) {
@@ -138,6 +148,14 @@ export class AnalyticsHttpRepository implements AnalyticsRepositoryPort {
       { params },
     );
     return mapExpensesSummary(data);
+  }
+
+  async getCostsBreakdown(params?: { from?: string; to?: string }) {
+    const { data } = await this.api.get<CostsBreakdownResponse>(
+      analyticsEndpoints.costsBreakdown(),
+      { params },
+    );
+    return mapCostsBreakdown(data);
   }
 
   async refresh() {
