@@ -1,3 +1,4 @@
+import type { ReadonlyHeaders } from "next/dist/server/web/spec-extension/adapters/headers";
 import { AppError } from "@/shared/errors";
 import { resolveUserMessage } from "@/shared/errors";
 import type { FieldErrors } from "@/shared/errors";
@@ -15,9 +16,14 @@ type BackendErrorBody = {
 
 export class ServerApiClient implements HttpClientLike {
   private readonly baseURL: string;
+  private readonly defaultHeaders: Record<string, string>;
 
-  constructor(baseURL: string = BASE_URL) {
+  constructor(
+    baseURL: string = BASE_URL,
+    defaultHeaders: Record<string, string> = {}
+  ) {
     this.baseURL = baseURL;
+    this.defaultHeaders = defaultHeaders;
   }
 
   private async request<T>(
@@ -30,6 +36,7 @@ export class ServerApiClient implements HttpClientLike {
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
+      ...this.defaultHeaders,
       ...(options?.headers as Record<string, string>),
     };
 
@@ -157,4 +164,39 @@ function kindForStatus(status: number) {
   return "unknown" as const;
 }
 
+/**
+ * Creates a server-side HTTP API client that forwards the incoming request's
+ * authentication headers (`Cookie` and `Authorization`) to the backend.
+ *
+ * Use this factory in Next.js Server Components / Route Handlers to preserve
+ * the user's session when making authenticated API calls to the NestJS backend
+ * during server-side rendering (SSR) or prefetching.
+ *
+ * @param reqHeaders  The incoming request headers object (from `headers()`
+ *                    or `NextRequest`).
+ * @returns A configured `ServerApiClient` instance with forwarded auth headers.
+ *
+ * @example
+ * // In a Server Component page:
+ * const headers = await import('next/headers').then((m) => m.headers());
+ * const apiClient = createServerApiClient(headers);
+ * const { data } = await apiClient.get('/quickbooks/reports/revenue');
+ */
+export function createServerApiClient(
+  reqHeaders: Headers | ReadonlyHeaders
+): ServerApiClient {
+  const defaultHeaders: Record<string, string> = {};
+  const cookie = reqHeaders.get("cookie");
+  if (cookie) defaultHeaders["Cookie"] = cookie;
+  const authorization = reqHeaders.get("authorization");
+  if (authorization) defaultHeaders["Authorization"] = authorization;
+  return new ServerApiClient(BASE_URL, defaultHeaders);
+}
+
+/**
+ * @deprecated Use `createServerApiClient(reqHeaders)` in Server Components so
+ * auth headers (Cookie / Authorization) are forwarded to the backend. This
+ * singleton has no request context and should not be used for authenticated
+ * server-side calls.
+ */
 export const serverApiClient = new ServerApiClient(BASE_URL);

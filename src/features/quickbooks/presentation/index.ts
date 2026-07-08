@@ -1,4 +1,5 @@
 export { QuickbooksProjectAttachments } from "./components/QuickbooksProjectAttachments";
+export { QuickbooksReportPrefetchBoundary } from "./QuickbooksReportPrefetchBoundary";
 export { useGroupedQboAttachments } from "./hooks/useGroupedQboAttachments";
 export { useFilteredQboAttachments } from "./hooks/useFilteredQboAttachments";
 export { getAllEntityTypeOrder, getEntityTypeMeta } from "./utils/entityTypeMeta";
