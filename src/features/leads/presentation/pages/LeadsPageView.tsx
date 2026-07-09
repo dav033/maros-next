@@ -232,6 +232,7 @@ export function LeadsPageView({ logic, leadType }: LeadsPageViewProps) {
           onViewContact={table.onViewContact}
           groupBy={groupBy}
           pagination={{ enabled: true }}
+          isMutating={table.isMutating}
         />
       }
       modals={

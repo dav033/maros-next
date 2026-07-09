@@ -13,19 +13,11 @@ import type { Lead } from "@/leads/domain";
 
 import { useLeadsInReviewTableColumns } from "../hooks";
 
-type ContextMenuItem = {
-  label: string;
-  onClick: () => void;
-  icon?: string | React.ReactNode;
-  variant?: "default" | "danger";
-  disabled?: boolean;
-};
-
 export interface LeadsInReviewTableProps {
   leads: Lead[];
   isLoading?: boolean;
   onEdit?: (lead: Lead) => void;
-  getContextMenuItems: (row: Lead) => ContextMenuItem[];
+  getContextMenuItems: (row: Lead) => EntityContextMenuItem[];
   onOpenNotesModal?: (lead: Lead) => void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onViewContact?: (contact: any) => void;
@@ -34,6 +26,7 @@ export interface LeadsInReviewTableProps {
   isAccepting?: number | null;
   isRejecting?: number | null;
   pagination?: { enabled?: boolean };
+  isMutating?: (lead: Lead) => boolean;
 }
 
 export function LeadsInReviewTable({
@@ -47,6 +40,7 @@ export function LeadsInReviewTable({
   isAccepting,
   isRejecting,
   pagination,
+  isMutating,
 }: LeadsInReviewTableProps) {
   const router = useRouter();
   const columns = useLeadsInReviewTableColumns({
@@ -66,6 +60,9 @@ export function LeadsInReviewTable({
         icon: item.icon,
         variant: item.variant,
         disabled: item.disabled,
+        checked: item.checked,
+        separator: item.separator,
+        subItems: item.subItems,
       })),
     [getContextMenuItems],
   );
@@ -76,6 +73,7 @@ export function LeadsInReviewTable({
       columns={columns}
       rowKey={(l) => (l.id as number) ?? 0}
       isLoading={isLoading}
+      isMutating={isMutating}
       getContextMenuItems={contextMenu}
       onRowClick={(l) => l.id && router.push(`/lead/${l.id}`)}
       getRowHref={(l) => (l.id ? `/lead/${l.id}` : undefined)}

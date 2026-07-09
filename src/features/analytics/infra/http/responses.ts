@@ -8,6 +8,7 @@ export type OverviewResponse = {
   outstandingTotal?: number;
   backlogTotal?: number;
   revenuePipelineTotal?: number;
+  profit?: number;
 };
 
 export type PipelineBucketResponse = {

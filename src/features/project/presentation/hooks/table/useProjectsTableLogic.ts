@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useEntityTableLogic, useTableWithSearch } from "@/common/hooks";
+import { useEntityTableLogic, useTableWithSearch, type ContextMenuItem } from "@/common/hooks";
 import React from "react";
 
 import type { Project } from "@/project/domain";
@@ -42,13 +42,7 @@ export interface UseProjectsTableLogicReturn {
     isDeleting: boolean;
     error: string | null;
   };
-  getContextMenuItems: (project: Project) => Array<{
-    label: string;
-    onClick: () => void;
-    variant?: "default" | "danger";
-    icon?: string | React.ReactNode;
-    disabled?: boolean;
-  }>;
+  getContextMenuItems: (project: Project) => ContextMenuItem[];
 }
 
 export function useProjectsTableLogic({

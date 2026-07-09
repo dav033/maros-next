@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useEntityTableLogic, useTableWithSearch } from "@/common/hooks";
+import { useEntityTableLogic, useTableWithSearch, type ContextMenuItem } from "@/common/hooks";
 
 import type { Company } from "../../../domain/models";
 import { CompanyType } from "../../../domain/models";
@@ -44,13 +44,7 @@ export interface UseCompaniesTableLogicReturn {
     isDeleting: boolean;
     error: string | null;
   };
-  getContextMenuItems: (company: Company) => Array<{
-    label: string;
-    onClick: () => void;
-    variant?: "default" | "danger";
-    icon?: string | React.ReactNode;
-    disabled?: boolean;
-  }>;
+  getContextMenuItems: (company: Company) => ContextMenuItem[];
   onOpenNotesModal?: (company: Company) => void;
 }
 

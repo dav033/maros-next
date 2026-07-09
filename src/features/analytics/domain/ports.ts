@@ -41,7 +41,15 @@ export interface AnalyticsRepositoryPort {
     to?: string;
   }): Promise<QuickbooksParsedReport>;
   getProjectHealth(params?: { leadType?: LeadType }): Promise<ProjectHealth[]>;
-  getExpensesSummary(params?: { from?: string; to?: string }): Promise<ExpensesSummary>;
-  getCostsBreakdown(params?: { from?: string; to?: string }): Promise<CostsBreakdown>;
+  getExpensesSummary(params?: {
+    from?: string;
+    to?: string;
+    leadType?: LeadType;
+  }): Promise<ExpensesSummary>;
+  getCostsBreakdown(params?: {
+    from?: string;
+    to?: string;
+    leadType?: LeadType;
+  }): Promise<CostsBreakdown>;
   refresh(): Promise<{ ok: boolean }>;
 }

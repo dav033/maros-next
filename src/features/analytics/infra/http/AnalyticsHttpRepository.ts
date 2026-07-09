@@ -142,7 +142,11 @@ export class AnalyticsHttpRepository implements AnalyticsRepositoryPort {
     return mapProjectHealth(data);
   }
 
-  async getExpensesSummary(params?: { from?: string; to?: string }) {
+  async getExpensesSummary(params?: {
+    from?: string;
+    to?: string;
+    leadType?: LeadType;
+  }) {
     const { data } = await this.api.get<ExpensesSummaryResponse>(
       analyticsEndpoints.expensesSummary(),
       { params },
@@ -150,7 +154,11 @@ export class AnalyticsHttpRepository implements AnalyticsRepositoryPort {
     return mapExpensesSummary(data);
   }
 
-  async getCostsBreakdown(params?: { from?: string; to?: string }) {
+  async getCostsBreakdown(params?: {
+    from?: string;
+    to?: string;
+    leadType?: LeadType;
+  }) {
     const { data } = await this.api.get<CostsBreakdownResponse>(
       analyticsEndpoints.costsBreakdown(),
       { params },

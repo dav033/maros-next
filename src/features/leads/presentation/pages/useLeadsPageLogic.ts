@@ -19,12 +19,10 @@ import {
   type UseLeadsTableLogicReturn,
 } from "../hooks";
 import type { Lead } from "@/leads/domain";
+import { LeadStatus } from "@/leads/domain";
 import { useProjectsApp } from "@/di";
 import { createProject, projectsKeys } from "@/project/application";
-
-export interface UseLeadsPageLogicOptions {
-  leadType: LeadType;
-}
+import type { LeadsPageData } from "../data/loadLeadsData";
 
 export interface UseLeadsPageLogicReturn {
   config: typeof LEAD_TYPE_CONFIGS[LeadType];
@@ -69,8 +67,6 @@ export interface UseLeadsPageLogicReturn {
     onClose: () => void;
   };
 }
-
-import type { LeadsPageData } from "../data/loadLeadsData";
 
 export interface UseLeadsPageLogicOptions {
   leadType: LeadType;
@@ -119,7 +115,7 @@ export function useLeadsPageLogic({
   });
 
   // 3) Negocio
-  const { deleteMutation } = useLeadsMutations();
+  const { deleteMutation, updateStatusMutation, updateProjectTypeMutation } = useLeadsMutations();
   const notesLogic = useLeadsNotesLogic({ leadType });
   const viewContactModal = useLeadViewContactModal();
   const [leadToConvert, setLeadToConvert] = useState<Lead | null>(null);
@@ -166,6 +162,22 @@ export function useLeadsPageLogic({
     }
   };
 
+  const handleUpdateStatus = async (lead: Lead, status: LeadStatus) => {
+    try {
+      await updateStatusMutation.mutateAsync({ id: lead.id, status });
+    } catch {
+      // Error ya manejado por useEntityMutation
+    }
+  };
+
+  const handleUpdateProjectType = async (lead: Lead, projectTypeId: number) => {
+    try {
+      await updateProjectTypeMutation.mutateAsync({ id: lead.id, projectTypeId });
+    } catch {
+      // Error ya manejado por useEntityMutation
+    }
+  };
+
   // 4) Tabla (búsqueda, filtrado e interacciones)
   const table = useLeadsTableLogic({
     leads: data.leads,
@@ -176,6 +188,13 @@ export function useLeadsPageLogic({
     onViewContact: viewContactModal.open,
     onOpenNotesModal: notesLogic.openFromLead,
     onConvertToProject: handleConvertToProject,
+    projectTypes: data.projectTypes,
+    onUpdateStatus: handleUpdateStatus,
+    onUpdateProjectType: handleUpdateProjectType,
+    isUpdatingStatus: (lead) =>
+      updateStatusMutation.isPending && updateStatusMutation.variables?.id === lead.id,
+    isUpdatingProjectType: (lead) =>
+      updateProjectTypeMutation.isPending && updateProjectTypeMutation.variables?.id === lead.id,
   });
 
   return {

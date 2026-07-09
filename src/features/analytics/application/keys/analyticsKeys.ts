@@ -26,8 +26,8 @@ export const analyticsKeys = {
     [...analyticsKeys.all, "quickbooks-revenue-report", from ?? "", to ?? ""] as const,
   projectHealth: (leadType?: LeadType) =>
     [...analyticsKeys.all, "project-health", leadType ?? ""] as const,
-  expensesSummary: (from?: string, to?: string) =>
-    [...analyticsKeys.all, "expenses-summary", from ?? "", to ?? ""] as const,
-  costsBreakdown: (from?: string, to?: string) =>
-    [...analyticsKeys.all, "costs-breakdown", from ?? "", to ?? ""] as const,
+  expensesSummary: (from?: string, to?: string, leadType?: LeadType) =>
+    [...analyticsKeys.all, "expenses-summary", from ?? "", to ?? "", leadType ?? ""] as const,
+  costsBreakdown: (from?: string, to?: string, leadType?: LeadType) =>
+    [...analyticsKeys.all, "costs-breakdown", from ?? "", to ?? "", leadType ?? ""] as const,
 } as const;

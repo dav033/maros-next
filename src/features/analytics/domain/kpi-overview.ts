@@ -8,4 +8,5 @@ export type KpiOverview = {
   outstandingTotal: number;
   backlogTotal: number;
   revenuePipelineTotal: number;
+  profit: number;
 };

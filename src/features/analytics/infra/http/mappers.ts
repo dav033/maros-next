@@ -38,6 +38,7 @@ export const mapOverview = (dto: OverviewResponse | null | undefined): KpiOvervi
   outstandingTotal: toNumber(dto?.outstandingTotal),
   backlogTotal: toNumber(dto?.backlogTotal),
   revenuePipelineTotal: toNumber(dto?.revenuePipelineTotal),
+  profit: toNumber(dto?.profit),
 });
 
 export const mapPipeline = (dto: PipelineBucketResponse[] | null | undefined): PipelineBucket[] =>

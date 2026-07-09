@@ -3,12 +3,24 @@
 import { useCallback, useEffect, useState } from "react";
 import React from "react";
 
+/** Item del menú contextual de una fila de tabla. */
 export interface ContextMenuItem {
+  /** Texto visible del item. */
   label: string;
-  onClick: () => void;
+  /** Acción al hacer clic. No es necesario si el item tiene `subItems`. */
+  onClick?: () => void;
+  /** Variante visual: `"danger"` pinta el texto en rojo. */
   variant?: "default" | "danger";
+  /** Icono (nombre string lucide/mdi o ReactNode). */
   icon?: string | React.ReactNode;
+  /** Deshabilitado (no se puede hacer clic). */
   disabled?: boolean;
+  /** Muestra un checkmark al final del item. */
+  checked?: boolean;
+  /** Renderiza un separador horizontal en lugar del item. */
+  separator?: boolean;
+  /** Subítems anidados para menú en cascada. */
+  subItems?: ContextMenuItem[];
 }
 
 export interface UseEntityTableLogicOptions<T, TId = number> {

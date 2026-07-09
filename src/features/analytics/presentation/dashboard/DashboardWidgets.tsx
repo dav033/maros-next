@@ -11,7 +11,6 @@ import type {
   RevenuePoint,
   TopClient,
 } from "../../domain";
-import type { DashboardLeadScope } from "./DashboardFiltersBar";
 import { AsyncWidget } from "../widgets/AsyncWidget";
 import { CostsBreakdownPanel } from "../widgets/CostsBreakdownPanel";
 import { KpiOverviewRow } from "../widgets/KpiOverviewRow";
@@ -49,7 +48,6 @@ type DashboardWidgetsProps = {
   topClients: QueryLike<TopClient[]>;
   topClientsBy: "revenue" | "volume";
   onTopClientsByChange: (by: "revenue" | "volume") => void;
-  currentLeadScope: DashboardLeadScope;
   projectHealth: QueryLike<ProjectHealth[]>;
   expensesSummary: QueryLike<ExpensesSummary>;
   revenueRangeLabel?: string;
@@ -94,13 +92,11 @@ export function DashboardWidgets({
   topClients,
   topClientsBy,
   onTopClientsByChange,
-  currentLeadScope,
   projectHealth,
   expensesSummary,
   revenueRangeLabel,
   revenueHref,
 }: DashboardWidgetsProps) {
-  const showExpensesSummary = currentLeadScope === "all";
   return (
     <div className="space-y-8">
       <Section icon={Activity} title="Performance overview" description="Revenue, backlog and secured revenue" delay={0}>
@@ -112,8 +108,7 @@ export function DashboardWidgets({
           {(overviewData) => (
             <KpiOverviewRow
               overview={overviewData}
-              expensesSummary={showExpensesSummary ? expensesSummary.data ?? null : null}
-              showExpensesSummary={showExpensesSummary}
+              expensesSummary={expensesSummary.data ?? null}
               revenueRangeLabel={revenueRangeLabel}
               revenueHref={revenueHref}
             />
@@ -167,19 +162,17 @@ export function DashboardWidgets({
         </div>
       </Section>
 
-      {showExpensesSummary ? (
-        <Section icon={DollarSign} title="Costs" description="All expenses and COGS by category" delay={270}>
-          <AsyncWidget
-            query={costsBreakdown}
-            errorText="Could not load costs breakdown."
-            emptyText="No cost data available for this range."
-            isEmpty={(data) => data.categories.length === 0 && data.totalCosts === 0}
-            skeleton={<CostsBreakdownSkeleton />}
-          >
-            {(data) => <CostsBreakdownPanel data={data} />}
-          </AsyncWidget>
-        </Section>
-      ) : null}
+      <Section icon={DollarSign} title="Costs" description="All expenses and COGS by category" delay={270}>
+        <AsyncWidget
+          query={costsBreakdown}
+          errorText="Could not load costs breakdown."
+          emptyText="No cost data available for this range."
+          isEmpty={(data) => data.categories.length === 0 && data.totalCosts === 0}
+          skeleton={<CostsBreakdownSkeleton />}
+        >
+          {(data) => <CostsBreakdownPanel data={data} />}
+        </AsyncWidget>
+      </Section>
 
       <Section icon={Users} title="Clients & risk" description="Top accounts and projects that need attention" delay={320}>
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">

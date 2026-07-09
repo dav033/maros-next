@@ -2,12 +2,16 @@
 
 import { memo, type ReactNode, useCallback, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronDown, ChevronUp, ChevronsUpDown, Loader } from "lucide-react";
+import { Check, ChevronDown, ChevronUp, ChevronsUpDown, Loader } from "lucide-react";
 
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -26,12 +30,24 @@ import type { SimpleTableColumn } from "@/types/table";
 import { TablePagination } from "./TablePagination";
 import { resolveContextIcon } from "./contextMenuIcons";
 
+/** Item del menú contextual de una fila de la tabla. */
 export type EntityContextMenuItem = {
+  /** Texto visible del item. */
   label: string;
-  onClick: () => void;
+  /** Acción al hacer clic. No es necesario si el item tiene `subItems`. */
+  onClick?: () => void;
+  /** Icono (nombre string lucide/mdi o ReactNode). */
   icon?: string | ReactNode;
+  /** Variante visual: `"danger"` pinta el texto en rojo. */
   variant?: "default" | "danger";
+  /** Deshabilitado (no se puede hacer clic). */
   disabled?: boolean;
+  /** Muestra un checkmark al final del item. */
+  checked?: boolean;
+  /** Renderiza un separador horizontal en lugar del item. */
+  separator?: boolean;
+  /** Subítems anidados para menú en cascada. */
+  subItems?: EntityContextMenuItem[];
 };
 
 export type EntityTableGroupBy<T> = {
@@ -210,6 +226,54 @@ function EntityTableInner<T>({
     return getContextMenuItems(contextSelected);
   }, [contextSelected, getContextMenuItems]);
 
+  const renderMenuItem = (item: EntityContextMenuItem, index: number): ReactNode => {
+    if (item.separator) {
+      return <DropdownMenuSeparator key={`separator-${index}`} />;
+    }
+
+    if (item.subItems && item.subItems.length > 0) {
+      return (
+        <DropdownMenuSub key={`${item.label}-${index}`}>
+          <DropdownMenuSubTrigger
+            disabled={item.disabled}
+            className={cn(
+              "flex items-center gap-2",
+              item.variant === "danger" &&
+                "text-destructive focus:text-destructive focus:bg-destructive/10",
+            )}
+          >
+            {item.icon && <span className="mr-2">{resolveContextIcon(item.icon)}</span>}
+            <span>{item.label}</span>
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent>
+            {item.subItems.map((subItem, subIndex) => renderMenuItem(subItem, subIndex))}
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
+      );
+    }
+
+    return (
+      <DropdownMenuItem
+        key={`${item.label}-${index}`}
+        disabled={item.disabled}
+        onClick={() => {
+          if (item.disabled || !item.onClick) return;
+          item.onClick();
+          setContextMenuOpen(false);
+        }}
+        className={cn(
+          "flex items-center gap-2",
+          item.variant === "danger" &&
+            "text-destructive focus:text-destructive focus:bg-destructive/10",
+        )}
+      >
+        {item.icon && <span className="mr-2">{resolveContextIcon(item.icon)}</span>}
+        <span className="flex-1">{item.label}</span>
+        {item.checked && <Check className="h-4 w-4 ml-auto" />}
+      </DropdownMenuItem>
+    );
+  };
+
   const showSkeleton = isLoading && data.length === 0;
   const showEmpty = !isLoading && data.length === 0;
 
@@ -337,24 +401,7 @@ function EntityTableInner<T>({
             top: contextPosition.y,
           }}
         >
-          {menuItems.map((item, index) => (
-            <DropdownMenuItem
-              key={`${item.label}-${index}`}
-              disabled={item.disabled}
-              onClick={() => {
-                if (item.disabled) return;
-                item.onClick();
-                setContextMenuOpen(false);
-              }}
-              className={cn(
-                item.variant === "danger" &&
-                  "text-destructive focus:text-destructive focus:bg-destructive/10",
-              )}
-            >
-              {item.icon && <span className="mr-2">{resolveContextIcon(item.icon)}</span>}
-              <span>{item.label}</span>
-            </DropdownMenuItem>
-          ))}
+          {menuItems.map((item, index) => renderMenuItem(item, index))}
         </DropdownMenuContent>
       </DropdownMenu>
     </>

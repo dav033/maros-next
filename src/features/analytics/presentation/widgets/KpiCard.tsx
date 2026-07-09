@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { ArrowUpRight, type LucideIcon } from "lucide-react";
+import { ArrowUpRight, Info, type LucideIcon } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
-export type KpiTone = "primary" | "emerald" | "amber" | "sky" | "violet";
+export type KpiTone = "primary" | "emerald" | "amber" | "sky" | "violet" | "rose";
 
 type KpiCardProps = {
   label: string;
@@ -39,6 +40,11 @@ const toneStyles: Record<KpiTone, { iconBg: string; iconText: string; accent: st
     iconText: "text-violet-400",
     accent: "from-violet-500/10",
   },
+  rose: {
+    iconBg: "bg-rose-500/15",
+    iconText: "text-rose-400",
+    accent: "from-rose-500/10",
+  },
 };
 
 export function KpiCard({ label, value, icon: Icon, hint, tone = "primary", href }: KpiCardProps) {
@@ -62,7 +68,23 @@ export function KpiCard({ label, value, icon: Icon, hint, tone = "primary", href
         </div>
         <p className="text-2xl font-semibold tracking-tight text-foreground sm:text-[1.7rem]">{value}</p>
         <div className="flex items-end justify-between gap-2">
-          {hint ? <p className="text-xs text-muted-foreground">{hint}</p> : <span />}
+          {hint ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <Info className="h-3.5 w-3.5" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-[200px] text-center">
+                <p>{hint}</p>
+              </TooltipContent>
+            </Tooltip>
+          ) : (
+            <span />
+          )}
           {href ? (
             <ArrowUpRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary" />
           ) : null}

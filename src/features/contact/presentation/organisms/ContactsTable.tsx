@@ -79,6 +79,9 @@ export function ContactsTable({
           icon: item.icon,
           variant: item.variant,
           disabled: item.disabled,
+          checked: item.checked,
+          separator: item.separator,
+          subItems: item.subItems,
         }));
     }
     if (onEdit || onDelete) {

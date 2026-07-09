@@ -48,13 +48,7 @@ export interface CompaniesTableProps {
   companies: Company[];
   isLoading?: boolean;
   services?: Array<{ id: number; name: string; color?: string | null }>;
-  getContextMenuItems: (row: Company) => Array<{
-    label: string;
-    onClick: () => void;
-    icon?: string | React.ReactNode;
-    variant?: "default" | "danger";
-    disabled?: boolean;
-  }>;
+  getContextMenuItems: (row: Company) => EntityContextMenuItem[];
   onOpenNotesModal?: (company: Company) => void;
   groupBy?: CompanyGroupBy;
   pagination?: { enabled?: boolean };
@@ -83,6 +77,9 @@ export function CompaniesTable({
         icon: item.icon,
         variant: item.variant,
         disabled: item.disabled,
+        checked: item.checked,
+        separator: item.separator,
+        subItems: item.subItems,
       })),
     [getContextMenuItems],
   );

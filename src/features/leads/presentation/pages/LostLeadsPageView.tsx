@@ -130,6 +130,7 @@ export function LostLeadsPageView({ logic }: LostLeadsPageViewProps) {
           onViewContact={table.onViewContact}
           groupBy="leadType"
           pagination={{ enabled: true }}
+          isMutating={table.isMutating}
         />
       }
       modals={

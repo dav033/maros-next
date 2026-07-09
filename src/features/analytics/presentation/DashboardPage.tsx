@@ -94,16 +94,8 @@ export function DashboardPage() {
   const revenueTrend = useRevenueTrend({ months: 12, from: range.from, to: range.to, leadType });
   const topClients = useTopClients(5, topClientsBy, leadType);
   const projectHealth = useProjectHealth(leadType);
-  const expensesSummary = useExpensesSummary({
-    from: range.from,
-    to: range.to,
-    enabled: leadScope === "all",
-  });
-  const costsBreakdown = useCostsBreakdown({
-    from: range.from,
-    to: range.to,
-    enabled: leadScope === "all",
-  });
+  const expensesSummary = useExpensesSummary({ from: range.from, to: range.to, leadType });
+  const costsBreakdown = useCostsBreakdown({ from: range.from, to: range.to, leadType });
 
   const isUpdating = [
     overview,
@@ -185,7 +177,6 @@ export function DashboardPage() {
         topClients={topClients}
         topClientsBy={topClientsBy}
         onTopClientsByChange={handleTopClientsByChange}
-        currentLeadScope={leadScope}
         projectHealth={projectHealth}
         expensesSummary={expensesSummary}
         revenueRangeLabel={appliedQuickRangeLabel ?? `${range.from} → ${range.to}`}

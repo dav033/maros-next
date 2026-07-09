@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useEntityTableLogic, useTableWithSearch } from "@/common/hooks";
+import { useEntityTableLogic, useTableWithSearch, type ContextMenuItem } from "@/common/hooks";
 
 import type { Contact } from "@/contact/domain";
 import { useContactsApp } from "@/di";
@@ -44,13 +44,7 @@ export interface UseContactsTableLogicReturn {
     isDeleting: boolean;
     error: string | null;
   };
-  getContextMenuItems: (contact: Contact) => Array<{
-    label: string;
-    onClick: () => void;
-    variant?: "default" | "danger";
-    icon?: string | React.ReactNode;
-    disabled?: boolean;
-  }>;
+  getContextMenuItems: (contact: Contact) => ContextMenuItem[];
   onOpenNotesModal?: (contact: Contact) => void;
   onOpenCompanyModal?: (company: any) => void;
 }

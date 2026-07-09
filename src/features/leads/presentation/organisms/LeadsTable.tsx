@@ -88,24 +88,17 @@ function buildGroupBy(mode: LeadGroupBy): EntityTableGroupBy<Lead> | undefined {
   };
 }
 
-type ContextMenuItem = {
-  label: string;
-  onClick: () => void;
-  icon?: string | React.ReactNode;
-  variant?: "default" | "danger";
-  disabled?: boolean;
-};
-
 export interface LeadsTableProps {
   leads: Lead[];
   isLoading?: boolean;
   onEdit?: (lead: Lead) => void;
-  getContextMenuItems: (row: Lead) => ContextMenuItem[];
+  getContextMenuItems: (row: Lead) => EntityContextMenuItem[];
   onOpenNotesModal?: (lead: Lead) => void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onViewContact?: (contact: any) => void;
   groupBy?: LeadGroupBy;
   pagination?: { enabled?: boolean };
+  isMutating?: (lead: Lead) => boolean;
 }
 
 export function LeadsTable({
@@ -116,6 +109,7 @@ export function LeadsTable({
   onViewContact,
   groupBy = "none",
   pagination,
+  isMutating,
 }: LeadsTableProps) {
   const router = useRouter();
   const columns = useLeadsTableColumns({
@@ -131,6 +125,9 @@ export function LeadsTable({
         icon: item.icon,
         variant: item.variant,
         disabled: item.disabled,
+        checked: item.checked,
+        separator: item.separator,
+        subItems: item.subItems,
       })),
     [getContextMenuItems],
   );
@@ -141,6 +138,7 @@ export function LeadsTable({
       columns={columns}
       rowKey={(l) => (l.id as number) ?? 0}
       isLoading={isLoading}
+      isMutating={isMutating}
       getContextMenuItems={contextMenu}
       onRowClick={(l) => l.id && router.push(`/lead/${l.id}`)}
       getRowHref={(l) => (l.id ? `/lead/${l.id}` : undefined)}

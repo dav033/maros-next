@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
 import {
   useLeadCreateModal,
   useLeadEditModal,
@@ -13,7 +14,7 @@ import {
   type UseLeadsTableLogicReturn,
 } from "../hooks";
 import type { Lead } from "@/leads/domain";
-import { LeadType, getLeadTypeFromNumber } from "@/leads/domain";
+import { LeadStatus, LeadType, getLeadTypeFromNumber } from "@/leads/domain";
 import { getLeadRejectionInfoAction, type LeadRejectionInfo } from "../../actions/leadActions";
 
 export interface UseLeadsInReviewPageLogicReturn {
@@ -71,7 +72,7 @@ export interface UseLeadsInReviewPageLogicReturn {
     onConfirm: () => Promise<void>;
     isLoading: boolean;
   };
-postConversionEstimateModal: {
+  postConversionEstimateModal: {
     projectId: number | null;
     leadName?: string;
     contactEmail?: string;
@@ -105,7 +106,7 @@ export function useLeadsInReviewPageLogic(): UseLeadsInReviewPageLogicReturn {
   const [isLoadingInfo, setIsLoadingInfo] = useState(false);
   const [deleteContact, setDeleteContact] = useState(false);
   const [deleteCompany, setDeleteCompany] = useState(false);
-const [postConversionEstimate, setPostConversionEstimate] = useState<{
+  const [postConversionEstimate, setPostConversionEstimate] = useState<{
     projectId: number;
     leadName?: string;
     contactEmail?: string;
@@ -123,6 +124,8 @@ const [postConversionEstimate, setPostConversionEstimate] = useState<{
         .then((result) => {
           if (result.success) {
             setRejectionInfo(result.data);
+          } else {
+            toast.error(result.error ?? "Could not load rejection info");
           }
         })
         .finally(() => {
@@ -151,7 +154,7 @@ const [postConversionEstimate, setPostConversionEstimate] = useState<{
       const projectId = updatedLead.conversion?.converted
         ? updatedLead.conversion.projectId
         : undefined;
-if (projectId) {
+      if (projectId) {
         setPostConversionEstimate({
           projectId,
           leadName: updatedLead.name || undefined,
@@ -170,9 +173,26 @@ if (projectId) {
   };
 
   // 3) Negocio
-  const { deleteMutation, acceptMutation } = useLeadsMutations();
+  const { deleteMutation, acceptMutation, updateStatusMutation, updateProjectTypeMutation } =
+    useLeadsMutations();
   const notesLogic = useLeadsInReviewNotesLogic();
   const viewContactModal = useLeadViewContactModal();
+
+  const handleUpdateStatus = async (lead: Lead, status: LeadStatus) => {
+    try {
+      await updateStatusMutation.mutateAsync({ id: lead.id, status });
+    } catch {
+      // Error ya manejado por useEntityMutation
+    }
+  };
+
+  const handleUpdateProjectType = async (lead: Lead, projectTypeId: number) => {
+    try {
+      await updateProjectTypeMutation.mutateAsync({ id: lead.id, projectTypeId });
+    } catch {
+      // Error ya manejado por useEntityMutation
+    }
+  };
 
   // 4) Tabla (búsqueda, filtrado e interacciones)
   const table = useLeadsTableLogic({
@@ -180,10 +200,16 @@ if (projectId) {
     onEdit: openEditModal,
     onDelete: async (id) => {
       await deleteMutation.mutateAsync(id);
-      await data.refetch();
     },
     onViewContact: viewContactModal.open,
     onOpenNotesModal: notesLogic.openFromLead,
+    projectTypes: data.projectTypes,
+    onUpdateStatus: handleUpdateStatus,
+    onUpdateProjectType: handleUpdateProjectType,
+    isUpdatingStatus: (lead) =>
+      updateStatusMutation.isPending && updateStatusMutation.variables?.id === lead.id,
+    isUpdatingProjectType: (lead) =>
+      updateProjectTypeMutation.isPending && updateProjectTypeMutation.variables?.id === lead.id,
   });
 
   // 5) Accept/Reject actions
@@ -192,7 +218,6 @@ if (projectId) {
     setIsAccepting(lead.id);
     try {
       await acceptMutation.mutateAsync(lead.id);
-      await data.refetch();
     } finally {
       setIsAccepting(null);
     }
@@ -218,7 +243,6 @@ if (projectId) {
         deleteContact: deleteContact && rejectionInfo?.contact?.canDelete,
         deleteCompany: deleteCompany && rejectionInfo?.company?.canDelete,
       });
-      await data.refetch();
       setLeadToReject(null);
     } finally {
       setIsRejecting(null);
@@ -265,7 +289,7 @@ if (projectId) {
       onConfirm: onConfirmReject,
       isLoading: isRejecting !== null,
     },
-postConversionEstimateModal: {
+    postConversionEstimateModal: {
       projectId: postConversionEstimate?.projectId ?? null,
       leadName: postConversionEstimate?.leadName,
       contactEmail: postConversionEstimate?.contactEmail,

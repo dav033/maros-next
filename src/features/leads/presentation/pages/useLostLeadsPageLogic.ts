@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { useNotesModal } from "@/common/hooks";
 import { leadsKeys } from "@/leads/application";
 import type { Lead } from "@/leads/domain";
+import { LeadStatus } from "@/leads/domain";
 import {
   useLeadViewContactModal,
   useLeadsMutations,
@@ -43,7 +44,7 @@ export function useLostLeadsPageLogic(): UseLostLeadsPageLogicReturn {
   const data = useLostLeadsData();
 
   // 2) Negocio
-  const { deleteMutation } = useLeadsMutations();
+  const { deleteMutation, updateStatusMutation, updateProjectTypeMutation } = useLeadsMutations();
   const viewContactModal = useLeadViewContactModal();
 
   // 3) Notas (edición in-place)
@@ -73,6 +74,22 @@ export function useLostLeadsPageLogic(): UseLostLeadsPageLogicReturn {
     });
   };
 
+  const handleUpdateStatus = async (lead: Lead, status: LeadStatus) => {
+    try {
+      await updateStatusMutation.mutateAsync({ id: lead.id, status });
+    } catch {
+      // Error ya manejado por useEntityMutation
+    }
+  };
+
+  const handleUpdateProjectType = async (lead: Lead, projectTypeId: number) => {
+    try {
+      await updateProjectTypeMutation.mutateAsync({ id: lead.id, projectTypeId });
+    } catch {
+      // Error ya manejado por useEntityMutation
+    }
+  };
+
   // 4) Tabla (búsqueda, filtrado e interacciones)
   const table = useLeadsTableLogic({
     leads: data.leads,
@@ -83,10 +100,16 @@ export function useLostLeadsPageLogic(): UseLostLeadsPageLogicReturn {
     },
     onDelete: async (id) => {
       await deleteMutation.mutateAsync(id);
-      await data.refetch();
     },
     onViewContact: viewContactModal.open,
     onOpenNotesModal: openNotesFromLead,
+    projectTypes: data.projectTypes,
+    onUpdateStatus: handleUpdateStatus,
+    onUpdateProjectType: handleUpdateProjectType,
+    isUpdatingStatus: (lead) =>
+      updateStatusMutation.isPending && updateStatusMutation.variables?.id === lead.id,
+    isUpdatingProjectType: (lead) =>
+      updateProjectTypeMutation.isPending && updateProjectTypeMutation.variables?.id === lead.id,
   });
 
   return {
