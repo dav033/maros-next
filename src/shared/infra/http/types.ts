@@ -22,6 +22,11 @@ export interface HttpClientLike {
     body?: unknown,
     options?: RequestOptions
   ): Promise<{ data: T; status: number }>;
+  patch<T = unknown>(
+    url: string,
+    body?: unknown,
+    options?: RequestOptions
+  ): Promise<{ data: T; status: number }>;
   delete<T = unknown>(
     url: string,
     options?: RequestOptions

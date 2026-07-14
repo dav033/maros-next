@@ -16,6 +16,7 @@ import { useProjectsApp } from "@/di";
 import { updateProject, deleteProject, revertProjectToLead } from "@/project/application";
 import type { ProjectPatch } from "@/project/domain";
 import { updateLeadNameAction } from "@/features/leads/actions/leadActions";
+import { updateProjectEstimateAction } from "@/features/project/actions/estimateActions";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { formatCurrency } from "@/shared/utils";
@@ -294,6 +295,42 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
   const [isEditingName, setIsEditingName] = useState(false);
   const [editingName, setEditingName] = useState("");
   const [isSavingName, setIsSavingName] = useState(false);
+
+  const [isEditingEstimate, setIsEditingEstimate] = useState(false);
+  const [editingEstimate, setEditingEstimate] = useState("");
+  const [isSavingEstimate, setIsSavingEstimate] = useState(false);
+
+  const handleStartEditingEstimate = useCallback(() => {
+    const current = projectDetails?.financial?.estimatedAmount;
+    setEditingEstimate(typeof current === "number" ? String(current) : "");
+    setIsEditingEstimate(true);
+  }, [projectDetails]);
+
+  const handleCancelEditingEstimate = useCallback(() => {
+    setIsEditingEstimate(false);
+    setEditingEstimate("");
+  }, []);
+
+  const handleSaveEstimate = useCallback(async () => {
+    if (!projectDetails || typeof projectDetails.id !== "number") return;
+    const amount = Number(editingEstimate);
+    if (!Number.isFinite(amount) || amount < 0) {
+      toast.error("Enter a valid amount (0 or greater).");
+      return;
+    }
+    setIsSavingEstimate(true);
+    try {
+      const result = await updateProjectEstimateAction(projectDetails.id, amount);
+      if (!result.success) throw new Error(result.error);
+      setIsEditingEstimate(false);
+      toast.success("Estimate updated and synced to QuickBooks.");
+      router.refresh();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to update estimate");
+    } finally {
+      setIsSavingEstimate(false);
+    }
+  }, [projectDetails, editingEstimate, router]);
 
   const [isEditingContact, setIsEditingContact] = useState(false);
   const [contactFormValue, setContactFormValue] = useState<ContactFormValue>(initialContactFormValue);
@@ -622,13 +659,73 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
                     <DetailField
                       icon={Receipt}
                       label="Estimate Amount"
-                      value={projectDetails.financial?.estimatedAmount}
                     >
-                      {typeof projectDetails.financial?.estimatedAmount === "number" ? (
-                        <p className="font-semibold text-lg">
-                          {formatCurrency(projectDetails.financial.estimatedAmount)}
-                        </p>
-                      ) : null}
+                      {isEditingEstimate ? (
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <Input
+                              type="number"
+                              min={0}
+                              step="0.01"
+                              autoFocus
+                              value={editingEstimate}
+                              onChange={(e) => setEditingEstimate(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                  e.preventDefault();
+                                  void handleSaveEstimate();
+                                } else if (e.key === "Escape") {
+                                  e.preventDefault();
+                                  handleCancelEditingEstimate();
+                                }
+                              }}
+                              disabled={isSavingEstimate}
+                              className="h-8 w-32"
+                              placeholder="0.00"
+                            />
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="size-8 text-green-600 hover:text-green-700"
+                              onClick={handleSaveEstimate}
+                              disabled={isSavingEstimate}
+                              aria-label="Save estimate"
+                            >
+                              <Save className="size-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="size-8 text-muted-foreground"
+                              onClick={handleCancelEditingEstimate}
+                              disabled={isSavingEstimate}
+                              aria-label="Cancel"
+                            >
+                              <X className="size-4" />
+                            </Button>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            This is the project&apos;s total estimate. Saving updates it in QuickBooks.
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <p className="font-semibold text-lg">
+                            {typeof projectDetails.financial?.estimatedAmount === "number"
+                              ? formatCurrency(projectDetails.financial.estimatedAmount)
+                              : "—"}
+                          </p>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="size-7 text-muted-foreground hover:text-foreground"
+                            onClick={handleStartEditingEstimate}
+                            aria-label="Edit estimate"
+                          >
+                            <Edit className="size-3.5" />
+                          </Button>
+                        </div>
+                      )}
                     </DetailField>
 
                     <DetailField

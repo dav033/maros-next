@@ -94,6 +94,10 @@ export class ServerApiClient implements HttpClientLike {
     return this.request<T>("PUT", url, body, options);
   }
 
+  patch<T = unknown>(url: string, body?: unknown, options?: RequestOptions) {
+    return this.request<T>("PATCH", url, body, options);
+  }
+
   delete<T = unknown>(url: string, options?: RequestOptions) {
     return this.request<T>("DELETE", url, undefined, options);
   }

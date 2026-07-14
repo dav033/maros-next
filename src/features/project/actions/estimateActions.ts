@@ -37,6 +37,31 @@ export async function getProjectEstimateFileAction(
   }
 }
 
+export interface UpdateEstimateResult {
+  estimate: unknown;
+  financial: { estimatedAmount?: number } | null;
+}
+
+/**
+ * Actualiza el valor del estimate del proyecto desde la plataforma. El backend
+ * lo sincroniza con QuickBooks (reescribe el estimate más reciente a una única
+ * línea con ese total, o crea uno si no existe).
+ */
+export async function updateProjectEstimateAction(
+  projectId: number,
+  amount: number,
+): Promise<ActionResult<UpdateEstimateResult>> {
+  try {
+    const { data } = await serverApiClient.patch<UpdateEstimateResult>(
+      endpoints.estimate(projectId),
+      { amount },
+    );
+    return success(data);
+  } catch (error) {
+    return handleActionError(error);
+  }
+}
+
 export interface SendEstimateEmailInput {
   recipients: string[];
   cc?: string[];
