@@ -6,6 +6,8 @@ import {
   LEAD_TYPE_ROUTE_SEGMENTS,
 } from "@/features/leads/utils/leadTypeRoute";
 
+export const dynamic = "force-dynamic";
+
 interface LeadsByTypePageProps {
   params: Promise<{ leadType: string }>;
 }
