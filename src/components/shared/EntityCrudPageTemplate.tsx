@@ -35,7 +35,7 @@ export function EntityCrudPageTemplate({
     >
       {header}
       {toolbar}
-      <section className="mt-2 flex flex-1 flex-col">
+      <section className="dashboard-section-enter mt-2 flex flex-1 flex-col" style={{ animationDelay: "120ms" }}>
         {isLoading ? loadingContent : (isEmpty && emptyContent) ? emptyContent : tableContent}
       </section>
       {modals}

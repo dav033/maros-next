@@ -1,23 +1,20 @@
 "use client";
 
 import { useMemo } from "react";
-import type { Lead } from "@/leads/domain";
-import { leadsSearchConfig, leadsSearchPlaceholder } from "../../search/leadsSearchConfig";
+import { leadsSearchPlaceholder } from "../../search/leadsSearchConfig";
 
 export interface UseLeadsToolbarSearchControllerOptions {
   searchQuery: string;
-  searchField: string;
   setSearchQuery: (q: string) => void;
-  setSearchField: (f: string) => void;
   filteredCount: number;
   totalCount: number;
 }
 
+// Búsqueda siempre a través de todos los campos (leadNumber, name, location) a la vez;
+// sin selector de campo, ver leadsSearchConfig.defaultField = "all".
 export function useLeadsToolbarSearchController({
   searchQuery,
-  searchField,
   setSearchQuery,
-  setSearchField,
   filteredCount,
   totalCount,
 }: UseLeadsToolbarSearchControllerOptions) {
@@ -25,21 +22,11 @@ export function useLeadsToolbarSearchController({
     () => ({
       searchTerm: searchQuery ?? "",
       onSearchChange: setSearchQuery,
-      selectedField: searchField ?? "all",
-      onFieldChange: (value: string) =>
-        setSearchField(value as keyof Lead | "all"),
-      searchFields: [
-        { value: "all", label: "All fields" },
-        ...leadsSearchConfig.fields.map((field) => ({
-          value: field.key,
-          label: field.label,
-        })),
-      ],
       placeholder: leadsSearchPlaceholder,
       resultCount: filteredCount,
       totalCount: totalCount,
     }),
-    [searchQuery, searchField, setSearchQuery, setSearchField, filteredCount, totalCount]
+    [searchQuery, setSearchQuery, filteredCount, totalCount]
   );
 }
 

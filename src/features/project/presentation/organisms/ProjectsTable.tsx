@@ -9,55 +9,29 @@ import {
   EntityTable,
   type EntityContextMenuItem,
   type EntityTableGroupBy,
+  type EntityTableSelection,
 } from "@/components/shared";
 import type { Project } from "@/project/domain";
+import { getLeadTypeFromNumber } from "@/leads/domain";
+import type { LeadType } from "@/leads/domain";
+import {
+  LEAD_TYPE_COLORS,
+  LEAD_TYPE_LABELS,
+  LEAD_TYPE_ORDER,
+} from "@/features/leads/presentation/atoms/leadVisualTokens";
 
 import { useProjectsTableColumns } from "../hooks/table/useProjectsTableColumns";
 import type {
   ProjectGroupBy,
   UseProjectsTableLogicReturn,
 } from "../hooks/table/useProjectsTableLogic";
-
-const PROGRESS_LABELS: Record<string, string> = {
-  NOT_EXECUTED: "Not Executed",
-  IN_PROGRESS: "In Progress",
-  COMPLETED: "Completed",
-  LOST: "Lost",
-  POSTPONED: "Postponed",
-  PERMITS: "Permits",
-};
-
-const PROGRESS_COLORS: Record<string, string> = {
-  NOT_EXECUTED: "#6b7280",
-  IN_PROGRESS: "#3b82f6",
-  COMPLETED: "#22c55e",
-  LOST: "#6b7280",
-  POSTPONED: "#f59e0b",
-  PERMITS: "#8b5cf6",
-};
-
-const INVOICE_LABELS: Record<string, string> = {
-  PAID: "Paid",
-  PENDING: "Pending",
-  NOT_EXECUTED: "Not Executed",
-  PERMITS: "Permits",
-};
-
-const INVOICE_COLORS: Record<string, string> = {
-  PAID: "#22c55e",
-  PENDING: "#f59e0b",
-  NOT_EXECUTED: "#6b7280",
-  PERMITS: "#8b5cf6",
-};
-
-const PROGRESS_ORDER = [
-  "IN_PROGRESS",
-  "NOT_EXECUTED",
-  "PERMITS",
-  "POSTPONED",
-  "COMPLETED",
-  "LOST",
-];
+import {
+  INVOICE_COLORS,
+  INVOICE_LABELS,
+  PROGRESS_COLORS,
+  PROGRESS_LABELS,
+  PROGRESS_ORDER,
+} from "./projectVisualTokens";
 
 function buildGroupBy(mode: ProjectGroupBy): EntityTableGroupBy<Project> | undefined {
   if (mode === "none") return undefined;
@@ -76,6 +50,14 @@ function buildGroupBy(mode: ProjectGroupBy): EntityTableGroupBy<Project> | undef
       getColor: (key) => INVOICE_COLORS[key],
     };
   }
+  if (mode === "leadType") {
+    return {
+      getKey: (p) => getLeadTypeFromNumber(p.lead?.leadNumber) ?? "Unclassified",
+      getLabel: (key) => LEAD_TYPE_LABELS[key as LeadType] ?? key,
+      getColor: (key) => LEAD_TYPE_COLORS[key as LeadType],
+      order: LEAD_TYPE_ORDER,
+    };
+  }
   return {
     getKey: (p) => p.lead?.projectType?.name ?? "Unclassified",
     getLabel: (key) => key,
@@ -91,6 +73,7 @@ export interface ProjectsTableProps {
   onOpenNotesModal?: (project: Project) => void;
   groupBy?: ProjectGroupBy;
   pagination?: { enabled?: boolean };
+  selection?: EntityTableSelection;
 }
 
 export function ProjectsTable({
@@ -102,7 +85,9 @@ export function ProjectsTable({
   onOpenNotesModal,
   groupBy = "none",
   pagination,
+  selection,
 }: ProjectsTableProps) {
+  const isMutating = tableLogic?.isMutating;
   const router = useRouter();
   const rows = tableLogic?.rows ?? projects ?? [];
   const columns = useProjectsTableColumns({ onOpenNotesModal });
@@ -153,6 +138,8 @@ export function ProjectsTable({
       columns={columns}
       rowKey={(p) => p.id}
       isLoading={isLoading}
+      isMutating={isMutating}
+      selection={selection}
       getContextMenuItems={getContextMenuItems}
       onRowClick={(p) => p.id && router.push(`/project/${p.id}`)}
       getRowHref={(p) => (p.id ? `/project/${p.id}` : undefined)}

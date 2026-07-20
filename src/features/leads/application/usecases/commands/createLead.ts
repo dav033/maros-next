@@ -21,6 +21,7 @@ export type CreateLeadInput =
       projectTypeId?: ProjectTypeId;
       leadType: LeadType; // Solo para generar número si no se proporciona
       contactId: ContactId;
+      estimate?: number;
       inReview?: boolean;
     }>
   | Readonly<{
@@ -30,6 +31,7 @@ export type CreateLeadInput =
       projectTypeId?: ProjectTypeId;
       leadType: LeadType; // Solo para generar número si no se proporciona
       contact: NewContact;
+      estimate?: number;
       inReview?: boolean;
     }>;
 

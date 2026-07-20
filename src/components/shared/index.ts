@@ -1,5 +1,6 @@
 // Shared business components (not shadcn UI primitives)
 export * from "./AddressAutocompleteInput";
+export * from "./BulkActionsBar";
 export * from "./ColorPicker";
 export * from "./DeleteFeedbackModal";
 export * from "./DetailField";
@@ -11,6 +12,7 @@ export * from "./EntityTable";
 export * from "./contextMenuIcons";
 export * from "./InlineEditCardHeader";
 export * from "./LocationField";
+export * from "./MultiSelectFilter";
 export * from "./NotesButton";
 export * from "./NotesEditorModal";
 export * from "./PageHeaderCard";
@@ -18,3 +20,4 @@ export * from "./PageToolbarCard";
 export * from "./SearchableSelect";
 export * from "./TablePagination";
 export * from "./Typography";
+export * from "./YesNoBadge";

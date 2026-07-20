@@ -37,8 +37,10 @@ export interface Lead {
   attachments: string[];
   conversion?: LeadConversion;
   inReview: boolean;
-  /** Monto estimado desde QuickBooks (solo lectura; no se edita en el CRM). */
+  /** Estimado manual, editable desde el CRM. Independiente de QuickBooks. */
   estimate: number | null;
+  /** Monto del Estimate real en QuickBooks (solo lectura, informativo). */
+  qboEstimate: number | null;
 }
 
 export type LeadConversion = Readonly<{
@@ -70,6 +72,7 @@ type LeadDraftBase = Readonly<{
   addressLink?: string | null;
   status: LeadStatus | null;
   projectTypeId?: ProjectTypeId;
+  estimate?: number;
   inReview?: boolean;
 }>;
 
@@ -96,6 +99,7 @@ export type LeadPatch = Readonly<{
   leadNumber?: string | null;
   notes?: string[];
   attachments?: string[];
+  estimate?: number | null;
   inReview?: boolean;
 }>;
 
@@ -140,7 +144,9 @@ export interface LeadDetails {
   notes?: string[];
   attachments?: string[];
   inReview: boolean;
-  /** Bloque QBO adjuntado por el backend (fuente de verdad de estimates). */
+  /** Estimado manual, editable desde el CRM. Independiente de QuickBooks. */
+  estimate?: number | null;
+  /** Bloque QBO adjuntado por el backend (Estimate real, solo lectura). */
   financial?: {
     estimatedAmount?: number | null;
   } | null;

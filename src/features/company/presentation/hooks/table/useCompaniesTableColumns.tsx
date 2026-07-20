@@ -1,13 +1,11 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
 import type { SimpleTableColumn } from "@/types/table";
-import { Check, X } from "lucide-react";
 import Link from "next/link";
 
 import * as React from "react";
 import type { Company } from "../../../domain/models";
-import { NotesButton } from "@/components/shared";
+import { NotesButton, YesNoBadge } from "@/components/shared";
 import { CompanyTypeBadge } from "../../atoms/CompanyTypeBadge";
 import { ServiceBadge } from "../../atoms/ServiceBadge";
 
@@ -97,17 +95,7 @@ export function useCompaniesTableColumns({
           if (company.isCustomer === null || company.isCustomer === undefined) {
             return <span className="text-muted-foreground">—</span>;
           }
-          return company.isCustomer ? (
-            <Badge className="gap-1 bg-green-500/10 text-green-600 border-green-500/20 hover:bg-green-500/20 dark:bg-green-500/20 dark:text-green-400 dark:border-green-500/30">
-              <Check className="size-3" />
-              Yes
-            </Badge>
-          ) : (
-            <Badge className="gap-1 bg-red-500/10 text-red-600 border-red-500/20 hover:bg-red-500/20 dark:bg-red-500/20 dark:text-red-400 dark:border-red-500/30">
-              <X className="size-3" />
-              No
-            </Badge>
-          );
+          return <YesNoBadge value={company.isCustomer} />;
         },
         sortable: true,
         sortValue: (company: Company) => (company.isCustomer ? "Yes" : "No"),
@@ -120,17 +108,7 @@ export function useCompaniesTableColumns({
           if (company.isClient === null || company.isClient === undefined) {
             return <span className="text-muted-foreground">—</span>;
           }
-          return company.isClient ? (
-            <Badge className="gap-1 bg-green-500/10 text-green-600 border-green-500/20 hover:bg-green-500/20 dark:bg-green-500/20 dark:text-green-400 dark:border-green-500/30">
-              <Check className="size-3" />
-              Yes
-            </Badge>
-          ) : (
-            <Badge className="gap-1 bg-red-500/10 text-red-600 border-red-500/20 hover:bg-red-500/20 dark:bg-red-500/20 dark:text-red-400 dark:border-red-500/30">
-              <X className="size-3" />
-              No
-            </Badge>
-          );
+          return <YesNoBadge value={company.isClient} />;
         },
         sortable: true,
         sortValue: (company: Company) => (company.isClient ? "Yes" : "No"),

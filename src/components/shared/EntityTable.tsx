@@ -2,8 +2,10 @@
 
 import { memo, type ReactNode, useCallback, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, ChevronDown, ChevronUp, ChevronsUpDown, Loader } from "lucide-react";
+import { Check, ChevronDown, ChevronUp, ChevronsUpDown, Loader, MoreVertical } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,6 +14,7 @@ import {
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -57,6 +60,12 @@ export type EntityTableGroupBy<T> = {
   order?: string[];
 };
 
+/** Selección múltiple de filas para acciones en lote (bulk change status, bulk delete, ...). */
+export type EntityTableSelection = {
+  selectedIds: Set<string | number>;
+  onSelectionChange: (ids: Set<string | number>) => void;
+};
+
 export type EntityTableProps<T> = {
   data: T[];
   columns: SimpleTableColumn<T>[];
@@ -68,6 +77,9 @@ export type EntityTableProps<T> = {
   onRowClick?: (row: T) => void;
   /** Returns a route to prefetch on row hover (warms Next.js bundle for instant navigation). */
   getRowHref?: (row: T) => string | undefined;
+
+  /** Habilita checkboxes por fila + "select all" en el header. Opcional, no rompe consumidores existentes. */
+  selection?: EntityTableSelection;
 
   groupBy?: EntityTableGroupBy<T>;
   paginated?: boolean;
@@ -129,6 +141,7 @@ function EntityTableInner<T>({
   getContextMenuItems,
   onRowClick,
   getRowHref,
+  selection,
   groupBy,
   paginated = false,
   defaultPageSize = 25,
@@ -168,6 +181,41 @@ function EntityTableInner<T>({
     enabled: !isGrouped && paginated,
     defaultPageSize,
   });
+
+  const visibleRows = isGrouped ? sortedData : pagedData;
+
+  const allVisibleSelected =
+    Boolean(selection) &&
+    visibleRows.length > 0 &&
+    visibleRows.every((row) => selection!.selectedIds.has(rowKey(row)));
+  const someVisibleSelected =
+    Boolean(selection) && visibleRows.some((row) => selection!.selectedIds.has(rowKey(row)));
+
+  const handleToggleAll = useCallback(() => {
+    if (!selection) return;
+    const next = new Set(selection.selectedIds);
+    if (allVisibleSelected) {
+      for (const row of visibleRows) next.delete(rowKey(row));
+    } else {
+      for (const row of visibleRows) next.add(rowKey(row));
+    }
+    selection.onSelectionChange(next);
+  }, [selection, allVisibleSelected, visibleRows, rowKey]);
+
+  const handleToggleRow = useCallback(
+    (row: T) => {
+      if (!selection) return;
+      const id = rowKey(row);
+      const next = new Set(selection.selectedIds);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      selection.onSelectionChange(next);
+    },
+    [selection, rowKey],
+  );
 
   const [contextMenuOpen, setContextMenuOpen] = useState(false);
   const [contextSelected, setContextSelected] = useState<T | null>(null);
@@ -219,6 +267,18 @@ function EntityTableInner<T>({
       onRowClick(row);
     },
     [onRowClick, contextMenuOpen],
+  );
+
+  const handleRowKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLTableRowElement>, row: T) => {
+      if (!onRowClick) return;
+      if (event.key !== "Enter" && event.key !== " ") return;
+      const target = event.target as HTMLElement;
+      if (target.closest('button, a, [role="button"], [role="menuitem"]')) return;
+      event.preventDefault();
+      onRowClick(row);
+    },
+    [onRowClick],
   );
 
   const menuItems = useMemo(() => {
@@ -287,21 +347,35 @@ function EntityTableInner<T>({
 
   const renderRow = (row: T) => {
     const mutating = isMutating?.(row) ?? false;
+    const rowMenuItems = getContextMenuItems ? getContextMenuItems(row) : [];
     return (
       <TableRow
         key={rowKey(row)}
         data-mutating={mutating || undefined}
+        tabIndex={onRowClick ? 0 : undefined}
         onContextMenu={
           getContextMenuItems ? (event) => handleRowContextMenu(event, row) : undefined
         }
         onClick={onRowClick ? (event) => handleRowClick(event, row) : undefined}
+        onKeyDown={onRowClick ? (event) => handleRowKeyDown(event, row) : undefined}
         onMouseEnter={getRowHref ? () => handleRowMouseEnter(row) : undefined}
         className={cn(
           "transition-colors",
           mutating && "opacity-60 pointer-events-none",
-          onRowClick && "cursor-pointer hover:bg-accent/30",
+          onRowClick &&
+            "cursor-pointer hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring",
         )}
       >
+        {selection ? (
+          <TableCell className="w-10 px-4 py-3">
+            <Checkbox
+              checked={selection.selectedIds.has(rowKey(row))}
+              onCheckedChange={() => handleToggleRow(row)}
+              onClick={(event) => event.stopPropagation()}
+              aria-label="Select row"
+            />
+          </TableCell>
+        ) : null}
         {columns.map((col) => (
           <TableCell key={String(col.key)} className={cn("px-4 py-3", col.className)}>
             {col.render
@@ -310,6 +384,27 @@ function EntityTableInner<T>({
                 null}
           </TableCell>
         ))}
+        {getContextMenuItems ? (
+          <TableCell className="w-10 px-2 py-3 text-right">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Row actions"
+                  className="h-8 w-8"
+                  onClick={(event) => event.stopPropagation()}
+                >
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="min-w-[160px]">
+                {rowMenuItems.map((item, index) => renderMenuItem(item, index))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </TableCell>
+        ) : null}
       </TableRow>
     );
   };
@@ -325,18 +420,46 @@ function EntityTableInner<T>({
         <Table>
           <TableHeader className="bg-muted/50">
             <TableRow className="text-left text-xs uppercase tracking-wide text-muted-foreground h-12 border-b border-border">
+              {selection ? (
+                <TableHead className="w-10 px-4 py-3">
+                  <Checkbox
+                    checked={allVisibleSelected ? true : someVisibleSelected ? "indeterminate" : false}
+                    onCheckedChange={handleToggleAll}
+                    aria-label="Select all rows"
+                  />
+                </TableHead>
+              ) : null}
               {columns.map((col) => {
                 const key = String(col.key);
                 const isActive = sortKey === key;
+                const ariaSort = col.sortable
+                  ? isActive
+                    ? sortDir === "asc"
+                      ? "ascending"
+                      : "descending"
+                    : "none"
+                  : undefined;
                 return (
                   <TableHead
                     key={key}
                     className={cn(
                       "px-4 py-3 h-full align-middle",
                       col.className,
-                      col.sortable && "cursor-pointer select-none",
+                      col.sortable &&
+                        "cursor-pointer select-none focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring",
                     )}
+                    tabIndex={col.sortable ? 0 : undefined}
+                    aria-sort={ariaSort}
                     onClick={col.sortable ? () => handleSort(col) : undefined}
+                    onKeyDown={
+                      col.sortable
+                        ? (event) => {
+                            if (event.key !== "Enter" && event.key !== " ") return;
+                            event.preventDefault();
+                            handleSort(col);
+                          }
+                        : undefined
+                    }
                   >
                     <span className="inline-flex items-center gap-1">
                       {col.header}
@@ -354,17 +477,32 @@ function EntityTableInner<T>({
                   </TableHead>
                 );
               })}
+              {getContextMenuItems ? (
+                <TableHead className="w-10 px-2 py-3">
+                  <span className="sr-only">Actions</span>
+                </TableHead>
+              ) : null}
             </TableRow>
           </TableHeader>
           <TableBody className="divide-y divide-border">
             {showSkeleton
               ? Array.from({ length: skeletonRows }).map((_, i) => (
                   <TableRow key={`skeleton-${i}`}>
+                    {selection ? (
+                      <TableCell className="w-10 px-4 py-3">
+                        <Skeleton className="h-4 w-4 rounded-sm" />
+                      </TableCell>
+                    ) : null}
                     {columns.map((col) => (
                       <TableCell key={String(col.key)} className="px-4 py-3">
                         <Skeleton className="h-4 w-full" />
                       </TableCell>
                     ))}
+                    {getContextMenuItems ? (
+                      <TableCell className="w-10 px-2 py-3">
+                        <Skeleton className="h-8 w-8 rounded-md" />
+                      </TableCell>
+                    ) : null}
                   </TableRow>
                 ))
               : isGrouped
@@ -372,7 +510,9 @@ function EntityTableInner<T>({
                     <GroupRows
                       key={group.key}
                       group={group}
-                      columnsCount={columns.length}
+                      columnsCount={
+                        columns.length + (getContextMenuItems ? 1 : 0) + (selection ? 1 : 0)
+                      }
                       renderRow={renderRow}
                     />
                   ))

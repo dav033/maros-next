@@ -26,6 +26,7 @@ type LeadFormData = {
   contactName?: string;
   phone?: string;
   email?: string;
+  estimate?: number;
 };
 
 type UseCreateLeadControllerOptions = {
@@ -52,6 +53,7 @@ export function useCreateLeadController({ leadType, inReview, onCreated }: UseCr
       contactName: "",
       phone: "",
       email: "",
+      estimate: undefined,
     },
     validate: (form) => {
       void form;
@@ -68,6 +70,7 @@ export function useCreateLeadController({ leadType, inReview, onCreated }: UseCr
             addressLink: form.addressLink || null,
             projectTypeId: form.projectTypeId,
             leadType: form.leadType,
+            estimate: form.estimate,
             contact: {
               name: (form.contactName ?? "").trim(),
               phone: (form.phone ?? "").trim(),
@@ -87,6 +90,7 @@ export function useCreateLeadController({ leadType, inReview, onCreated }: UseCr
             addressLink: form.addressLink || null,
             projectTypeId: form.projectTypeId,
             leadType: form.leadType,
+            estimate: form.estimate,
             contactId: form.contactId!,
             ...(inReview !== undefined && { inReview }),
           };

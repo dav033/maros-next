@@ -17,6 +17,7 @@ type LeadEditFormData = {
   addressLink?: string | null;
   leadNumber?: string;
   status?: string;
+  estimate?: number;
 };
 
 type UseUpdateLeadControllerOptions = {
@@ -36,6 +37,7 @@ export function useUpdateLeadController({ lead, onUpdated }: UseUpdateLeadContro
       contactId: lead?.contact?.id ?? undefined,
       leadNumber: lead?.leadNumber ?? "",
       status: lead?.status ?? "NEW_LEAD",
+      estimate: lead?.estimate ?? undefined,
     },
     validate: (form) => {
       void form;
@@ -57,9 +59,10 @@ export function useUpdateLeadController({ lead, onUpdated }: UseUpdateLeadContro
           form.status !== lead.status
             ? ((form.status || null) as LeadStatus | null)
             : undefined,
-        leadNumber: form.leadNumber?.trim() !== lead.leadNumber 
-          ? (form.leadNumber?.trim() || null) 
+        leadNumber: form.leadNumber?.trim() !== lead.leadNumber
+          ? (form.leadNumber?.trim() || null)
           : undefined,
+        estimate: form.estimate !== (lead.estimate ?? undefined) ? form.estimate ?? null : undefined,
       };
 
       const cleanPatch = Object.fromEntries(
@@ -86,6 +89,7 @@ export function useUpdateLeadController({ lead, onUpdated }: UseUpdateLeadContro
         contactId: lead.contact?.id ?? undefined,
         leadNumber: lead.leadNumber ?? "",
         status: lead.status ?? "NEW_LEAD",
+        estimate: lead.estimate ?? undefined,
       });
     }
   }, [lead]);

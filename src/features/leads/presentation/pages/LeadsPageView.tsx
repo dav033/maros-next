@@ -4,16 +4,29 @@ import {
   NotesEditorModal,
   DeleteFeedbackModal,
   EntityCrudPageTemplate,
+  MultiSelectFilter,
   PageHeaderCard,
   PageToolbarCard,
+  BulkActionsBar,
 } from "@/components/shared";
 import type { Lead } from "@/leads/domain";
-import { LeadStatus } from "@/leads/domain";
+import { LeadStatus, STATUS_LABELS } from "@/leads/domain";
 import { LeadsTable } from "@/leads/presentation";
+import { LEAD_STATUS_COLORS } from "../atoms/leadVisualTokens";
 import { ContactViewModal } from "@/contact";
 import { LeadModal } from "../organisms/LeadModal";
 import { PostConversionEstimateModal } from "../organisms/PostConversionEstimateModal";
-import { X, Briefcase, Search, Layers, Filter, Plus, SlidersHorizontal } from "lucide-react";
+import {
+  X,
+  Briefcase,
+  Search,
+  Layers,
+  Filter,
+  Plus,
+  SlidersHorizontal,
+  Check,
+  Trash2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -23,6 +36,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { LeadsTableSkeleton } from "../organisms/LeadsTableSkeleton";
 import type { UseLeadsPageLogicReturn } from "./useLeadsPageLogic";
 import type { LeadGroupBy } from "../hooks/table/useLeadsTableLogic";
@@ -34,16 +53,11 @@ import {
 import { LeadTypeSwitcher } from "@/components/shared/LeadTypeSwitcher";
 import type { LeadType } from "@/leads/domain";
 
-const LEAD_STATUS_OPTIONS: Array<{ value: LeadStatus | "all"; label: string }> = [
-  { value: "all", label: "All statuses" },
-  { value: LeadStatus.NEW_LEAD, label: "New Lead" },
-  { value: LeadStatus.CONTACTED, label: "Contacted" },
-  { value: LeadStatus.ESTIMATING_PREPARING_PROPOSAL, label: "Estimating / Preparing Proposal" },
-  { value: LeadStatus.PROPOSAL_SENT, label: "Proposal Sent" },
-  { value: LeadStatus.FOLLOW_UP, label: "Follow Up" },
-  { value: LeadStatus.WON, label: "Won" },
-  { value: LeadStatus.LOST, label: "Lost" },
-];
+const LEAD_STATUS_FILTER_OPTIONS = Object.values(LeadStatus).map((status) => ({
+  value: status,
+  label: (STATUS_LABELS as Record<string, string>)[status] ?? status,
+  color: LEAD_STATUS_COLORS[status],
+}));
 
 const LEAD_GROUP_OPTIONS: Array<{ value: LeadGroupBy; label: string }> = [
   { value: "none", label: "No grouping" },
@@ -62,6 +76,7 @@ export function LeadsPageView({ logic, leadType }: LeadsPageViewProps) {
     data,
     crud,
     table,
+    bulkActions,
     notesModal,
     viewContactModal,
     convertProjectModal,
@@ -94,7 +109,7 @@ export function LeadsPageView({ logic, leadType }: LeadsPageViewProps) {
     getContextMenuItems,
   } = table;
 
-  const { searchQuery, searchField, setSearchQuery, setSearchField } = searchState;
+  const { searchQuery, setSearchQuery } = searchState;
   const { statusFilter, setStatusFilter, groupBy, setGroupBy } = filterState;
 
   const { controller: leadModalController, contactsForModal } =
@@ -121,9 +136,7 @@ export function LeadsPageView({ logic, leadType }: LeadsPageViewProps) {
 
   const toolbarSearchController = useLeadsToolbarSearchController({
     searchQuery,
-    searchField,
     setSearchQuery,
-    setSearchField,
     filteredCount,
     totalCount,
   });
@@ -151,21 +164,7 @@ export function LeadsPageView({ logic, leadType }: LeadsPageViewProps) {
           resultCount={toolbarSearchController.resultCount}
           totalCount={toolbarSearchController.totalCount}
         >
-          {/* Search field selector */}
-          <div className="w-32 shrink-0">
-            <Select value={toolbarSearchController.selectedField} onValueChange={toolbarSearchController.onFieldChange}>
-              <SelectTrigger className="bg-background/60 border-border/60 h-9 text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-popover border-border">
-                {toolbarSearchController.searchFields.map((field) => (
-                  <SelectItem key={field.value} value={field.value}>{field.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Search input */}
+          {/* Search input (busca en todos los campos a la vez) */}
           <div className="flex-1 min-w-[200px] relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -189,19 +188,15 @@ export function LeadsPageView({ logic, leadType }: LeadsPageViewProps) {
             )}
           </div>
 
-          {/* Status filter */}
-          <div className="w-36 shrink-0">
-            <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as LeadStatus | "all")}>
-              <SelectTrigger className="bg-background/60 border-border/60 h-9 text-xs">
-                <Filter className="h-3.5 w-3.5 mr-1.5 shrink-0 text-muted-foreground" />
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-popover border-border">
-                {LEAD_STATUS_OPTIONS.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          {/* Status filter (multi-select: ver más de un estado a la vez) */}
+          <div className="w-40 shrink-0">
+            <MultiSelectFilter
+              icon={Filter}
+              placeholder="All statuses"
+              options={LEAD_STATUS_FILTER_OPTIONS}
+              selected={statusFilter}
+              onChange={setStatusFilter}
+            />
           </div>
 
           {/* Group by */}
@@ -223,20 +218,82 @@ export function LeadsPageView({ logic, leadType }: LeadsPageViewProps) {
       isLoading={showSkeleton}
       loadingContent={<LeadsTableSkeleton />}
       tableContent={
-        <LeadsTable
-          leads={rows}
-          isLoading={showSkeleton}
-          onEdit={openEditModal}
-          getContextMenuItems={getContextMenuItems}
-          onOpenNotesModal={table.onOpenNotesModal}
-          onViewContact={table.onViewContact}
-          groupBy={groupBy}
-          pagination={{ enabled: true }}
-          isMutating={table.isMutating}
-        />
+        <div className="space-y-3">
+          <BulkActionsBar count={bulkActions.selectedCount} onClear={bulkActions.clearSelection}>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  className="gap-1.5"
+                  disabled={bulkActions.availableStatuses.length === 0 || bulkActions.isChangingStatus}
+                >
+                  <Check className="h-3.5 w-3.5" />
+                  Change status
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                {bulkActions.availableStatuses.map((status) => (
+                  <DropdownMenuItem
+                    key={status}
+                    onClick={() => void bulkActions.changeStatus(status)}
+                  >
+                    {(STATUS_LABELS as Record<string, string>)[status] ?? status}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              className="gap-1.5"
+              onClick={bulkActions.deleteModal.open}
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              Delete
+            </Button>
+          </BulkActionsBar>
+
+          <LeadsTable
+            leads={rows}
+            isLoading={showSkeleton}
+            onEdit={openEditModal}
+            getContextMenuItems={getContextMenuItems}
+            onOpenNotesModal={table.onOpenNotesModal}
+            onViewContact={table.onViewContact}
+            groupBy={groupBy}
+            pagination={{ enabled: true }}
+            isMutating={table.isMutating}
+            selection={{
+              selectedIds: bulkActions.selectedIds,
+              onSelectionChange: bulkActions.onSelectionChange,
+            }}
+          />
+        </div>
       }
       modals={
         <>
+          <DeleteFeedbackModal
+            isOpen={bulkActions.deleteModal.isOpen}
+            title="Delete Leads"
+            description={
+              <>
+                Are you sure you want to delete{" "}
+                <span className="font-semibold text-foreground">
+                  {bulkActions.selectedCount} lead{bulkActions.selectedCount === 1 ? "" : "s"}
+                </span>
+                ?
+                <br />
+                This action cannot be undone.
+              </>
+            }
+            loading={bulkActions.deleteModal.isDeleting}
+            onClose={bulkActions.deleteModal.close}
+            onConfirm={() => void bulkActions.deleteModal.confirm()}
+          />
+
           <DeleteFeedbackModal
             isOpen={deleteModalProps.isOpen}
             title="Delete Lead"
@@ -244,7 +301,7 @@ export function LeadsPageView({ logic, leadType }: LeadsPageViewProps) {
               <>
                 Are you sure you want to delete lead{" "}
                 <span className="font-semibold text-foreground">
-                  {(deleteModalProps.itemToDelete as any)?.name}
+                  {deleteModalProps.itemToDelete?.name}
                 </span>
                 ?
                 <br />

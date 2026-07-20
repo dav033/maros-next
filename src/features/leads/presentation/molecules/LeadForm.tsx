@@ -4,7 +4,7 @@ import { LocationField } from "@/components/shared";
 import type { ChangeEvent } from "react";
 
 import { Input } from "@/components/ui/input";
-import { FolderTree, Wrench, User } from "lucide-react";
+import { FolderTree, Wrench, User, DollarSign } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -27,6 +27,7 @@ type LeadFormData = {
   location: string;
   addressLink?: string | null;
   note?: string;
+  estimate?: number;
 };
 
 type LeadFormProps = {
@@ -132,6 +133,21 @@ export function LeadForm({
         </Select>
       </div>
 
+      <div className="relative">
+        <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
+        <Input
+          type="number"
+          step="0.01"
+          min="0"
+          value={form.estimate ?? ""}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            onChange("estimate", e.target.value === "" ? undefined : Number(e.target.value))
+          }
+          placeholder="Estimate (optional)"
+          disabled={disabled}
+          className="bg-background/95 pl-9"
+        />
+      </div>
 
       <Input
         value={form.note ?? ""}

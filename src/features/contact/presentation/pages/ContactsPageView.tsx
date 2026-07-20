@@ -18,13 +18,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-// TODO: NotesEditorModal needs to be migrated separately
 import { ContactsTable } from "../organisms/ContactsTable";
 import { ContactsTableSkeleton } from "../organisms/ContactsTableSkeleton";
 import { ContactModal } from "../organisms/ContactModal";
 import { CompanyModal } from "@/features/company/presentation/organisms/CompanyModal";
 import { CompanyDetailsModal } from "../organisms/CompanyDetailsModal";
-import type { UseContactsPageLogicReturn } from "../hooks";
+import type { ContactGroupBy, UseContactsPageLogicReturn } from "../hooks";
 import {
   useContactCompanyModalController,
   useContactModalController,
@@ -206,7 +205,7 @@ export function ContactsPageView({ logic }: ContactsPageViewProps) {
               <SelectItem value="false">Client: No</SelectItem>
             </SelectContent>
           </Select>
-          <Select value={groupBy} onValueChange={(v) => setGroupBy(v as any)}>
+          <Select value={groupBy} onValueChange={(v) => setGroupBy(v as ContactGroupBy)}>
             <SelectTrigger className="w-40 bg-background/60 border-border/60 h-9 text-xs">
               <Layers className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
               <SelectValue />

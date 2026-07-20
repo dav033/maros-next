@@ -20,7 +20,9 @@ export interface LeadInfoSectionProps {
     status?: string;
     projectType?: { id: number; name: string } | null;
     notes?: string[];
-    /** Monto estimado desde QuickBooks (solo lectura). */
+    /** Estimado manual, editable desde el CRM. */
+    estimate?: number | null;
+    /** Monto del Estimate real en QuickBooks (solo lectura, informativo). */
     financial?: { estimatedAmount?: number | null } | null;
   };
   projectTypes: Array<{ id: number; name: string }>;
@@ -32,6 +34,7 @@ export interface LeadInfoSectionProps {
     status: string;
     projectTypeId: number | undefined;
     contactId: number | undefined;
+    estimate: number | undefined;
   }>;
   onOpenNotesModal: () => void;
 }
@@ -147,6 +150,31 @@ export function LeadInfoSection({
                 <p className="text-xs text-muted-foreground">Not available</p>
               )}
             </div>
+          )}
+
+          {isEditing ? (
+            <div>
+              <p className="text-sm text-muted-foreground mb-2">Estimate</p>
+              <Input
+                type="number"
+                step="0.01"
+                min="0"
+                value={editingValue.estimate ?? ""}
+                onChange={(e) =>
+                  setField(
+                    "estimate",
+                    e.target.value === "" ? undefined : Number(e.target.value),
+                  )
+                }
+                placeholder="Manual estimate"
+              />
+            </div>
+          ) : (
+            <DetailField
+              icon={DollarSign}
+              label="Estimate"
+              value={lead.estimate != null ? `$${Number(lead.estimate).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : undefined}
+            />
           )}
 
           <DetailField

@@ -4,16 +4,17 @@ interface CompanyTypeBadgeProps {
   type: string | null | undefined;
 }
 
-const TYPE_COLORS: Record<string, string> = {
-  SUBCONTRACTOR: "#3b82f6",
-  GENERAL_CONTRACTOR: "#22c55e",
-  SUPPLIER: "#f59e0b",
-  HOA: "#8b5cf6",
-  DESIGN: "#6b7280",
-  OTHER: "#6b7280",
+// Colores desde tokens CSS compartidos (--badge-*), no hex crudo: ver globals.css.
+export const TYPE_COLORS: Record<string, string> = {
+  SUBCONTRACTOR: "hsl(var(--badge-blue))",
+  GENERAL_CONTRACTOR: "hsl(var(--badge-green))",
+  SUPPLIER: "hsl(var(--badge-amber))",
+  HOA: "hsl(var(--badge-violet))",
+  DESIGN: "hsl(var(--badge-neutral))",
+  OTHER: "hsl(var(--badge-neutral))",
 };
 
-const TYPE_LABELS: Record<string, string> = {
+export const TYPE_LABELS: Record<string, string> = {
   SUBCONTRACTOR: "Subcontractor",
   GENERAL_CONTRACTOR: "Contractor",
   SUPPLIER: "Supplier",
@@ -23,7 +24,7 @@ const TYPE_LABELS: Record<string, string> = {
 };
 
 export function CompanyTypeBadge({ type }: CompanyTypeBadgeProps) {
-  const color = type ? TYPE_COLORS[type] ?? "#6b7280" : "#6b7280";
+  const color = type ? TYPE_COLORS[type] ?? "hsl(var(--badge-neutral))" : "hsl(var(--badge-neutral))";
   const label = type ? (TYPE_LABELS[type] ?? type) : "No type";
 
   return (

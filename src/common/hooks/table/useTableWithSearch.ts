@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
+import { usePersistedState } from "../ui/usePersistedState";
 
 export interface SearchField<T> {
   key: keyof T & string | "all";
@@ -19,6 +20,8 @@ export interface UseTableWithSearchOptions<T> {
   defaultSearchField?: string;
   customSearchFn?: (item: T, query: string, field: string) => boolean;
   normalize?: (value: string) => string;
+  /** Si se pasa, el texto buscado sobrevive navegación/reload (localStorage bajo esta key). */
+  persistKey?: string;
 }
 
 export interface UseTableWithSearchResult<T> {
@@ -64,9 +67,16 @@ export function useTableWithSearch<T extends Record<string, any>>({
   defaultSearchField = "all",
   customSearchFn,
   normalize,
+  persistKey,
 }: UseTableWithSearchOptions<T>): UseTableWithSearchResult<T> {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchField, setSearchField] = useState(defaultSearchField);
+  const [searchQuery, setSearchQuery] = usePersistedState(
+    persistKey ? `${persistKey}:query` : null,
+    "",
+  );
+  const [searchField, setSearchField] = usePersistedState(
+    persistKey ? `${persistKey}:field` : null,
+    defaultSearchField,
+  );
 
   const searchConfig = useMemo<SearchConfig<T>>(
     () => ({

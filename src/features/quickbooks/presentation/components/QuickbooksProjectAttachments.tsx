@@ -65,7 +65,7 @@ function highlightMatch(text: string, query: string): ReactNode {
   return (
     <>
       {text.slice(0, idx)}
-      <mark className="rounded-sm bg-amber-200/70 px-0.5 text-foreground dark:bg-amber-500/30">
+      <mark className="rounded-sm bg-amber-500/30 px-0.5 text-foreground">
         {text.slice(idx, idx + query.length)}
       </mark>
       {text.slice(idx + query.length)}
@@ -163,7 +163,7 @@ function AttachmentRow({ attachment, searchTerm, onRefreshed, onError }: Attachm
           {attachment.linkedEntityAmount != null && (
             <Badge
               variant="outline"
-              className="border-emerald-500/40 bg-emerald-500/10 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400"
+              className="border-emerald-500/40 bg-emerald-500/10 text-[10px] font-semibold text-emerald-400"
               title={`Amount of the linked ${attachment.linkedEntityType}`}
             >
               {attachmentMoney.format(attachment.linkedEntityAmount)}
@@ -324,7 +324,7 @@ function CoverageBanner({ data }: { data: QboProjectAttachments }) {
   if (!notFound && !lowCoverage && warnings.length === 0) return null;
 
   return (
-    <div className="flex items-start gap-2 rounded-md border border-amber-300/60 bg-amber-50/40 p-3 text-xs text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
+    <div className="flex items-start gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-200">
       <TriangleAlert className="mt-0.5 size-3.5 shrink-0" />
       <div className="space-y-1">
         {notFound && (

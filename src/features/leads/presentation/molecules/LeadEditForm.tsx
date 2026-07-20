@@ -4,7 +4,7 @@ import { LocationField } from "@/components/shared";
 import type { ChangeEvent } from "react";
 
 import { Input } from "@/components/ui/input";
-import { Wrench, Flag, User } from "lucide-react";
+import { Wrench, Flag, User, DollarSign } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -25,6 +25,7 @@ type LeadEditFormProps = {
     contactId?: number;
     leadNumber?: string;
     status?: string;
+    estimate?: number;
   };
   onChange: <K extends keyof LeadEditFormProps["form"]>(
     key: K,
@@ -117,6 +118,22 @@ export function LeadEditForm({
             ))}
           </SelectContent>
         </Select>
+      </div>
+
+      <div className="relative">
+        <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
+        <Input
+          type="number"
+          step="0.01"
+          min="0"
+          placeholder="Manual estimate"
+          value={form.estimate ?? ""}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            onChange("estimate", e.target.value === "" ? undefined : Number(e.target.value))
+          }
+          disabled={disabled}
+          className="w-full pl-9"
+        />
       </div>
 
       <Select

@@ -11,10 +11,12 @@ import {
   useLeadCreateModal,
   useLeadEditModal,
   useLeadViewContactModal,
+  useLeadsBulkActions,
   useLeadsData,
   useLeadsMutations,
   useLeadsNotesLogic,
   useLeadsTableLogic,
+  type UseLeadsBulkActionsReturn,
   type UseLeadsDataReturn,
   type UseLeadsTableLogicReturn,
 } from "../hooks";
@@ -39,6 +41,7 @@ export interface UseLeadsPageLogicReturn {
     updateController: ReturnType<typeof useLeadEditModal>["updateController"];
   };
   table: UseLeadsTableLogicReturn;
+  bulkActions: UseLeadsBulkActionsReturn;
   notesModal: {
     isOpen: boolean;
     title: string;
@@ -197,6 +200,13 @@ export function useLeadsPageLogic({
       updateProjectTypeMutation.isPending && updateProjectTypeMutation.variables?.id === lead.id,
   });
 
+  // 5) Selección múltiple y acciones en lote
+  const bulkActions = useLeadsBulkActions({
+    leads: table.rows,
+    updateStatusMutation,
+    deleteMutation,
+  });
+
   return {
     config,
     data,
@@ -212,6 +222,7 @@ export function useLeadsPageLogic({
       updateController: editModal.updateController,
     },
     table,
+    bulkActions,
     notesModal: notesLogic.modalProps,
     viewContactModal: {
       isOpen: viewContactModal.isOpen,

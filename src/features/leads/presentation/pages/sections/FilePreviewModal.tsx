@@ -131,7 +131,7 @@ function DocxPreview({ url }: { url: string }) {
 
   return (
     <div
-      className="prose prose-sm dark:prose-invert max-w-none overflow-auto max-h-[70vh] p-4 border rounded bg-background"
+      className="prose prose-sm prose-invert max-w-none overflow-auto max-h-[70vh] p-4 border rounded bg-background"
       dangerouslySetInnerHTML={{ __html: html }}
     />
   );

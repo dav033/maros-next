@@ -9,6 +9,7 @@ import {
   FileCheck2,
   LayoutDashboard,
   XCircle,
+  CheckCircle2,
 } from "lucide-react";
 
 export type SidebarItemProps = {
@@ -64,6 +65,17 @@ const menuSection: SidebarSection = {
       href: "/projects/construction",
       icon: FolderKanban,
       activePrefix: "/projects",
+      activeExclude: ["/projects/completed", "/projects/lost"],
+    },
+    {
+      title: "Completed Projects",
+      href: "/projects/completed",
+      icon: CheckCircle2,
+    },
+    {
+      title: "Lost Projects",
+      href: "/projects/lost",
+      icon: XCircle,
     },
   ],
 };

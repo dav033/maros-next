@@ -210,6 +210,9 @@ export function useLeadsInReviewPageLogic(): UseLeadsInReviewPageLogicReturn {
       updateStatusMutation.isPending && updateStatusMutation.variables?.id === lead.id,
     isUpdatingProjectType: (lead) =>
       updateProjectTypeMutation.isPending && updateProjectTypeMutation.variables?.id === lead.id,
+    // Namespace propio: esta página no tiene UI de statusFilter, no debe heredar en silencio
+    // el filtro seteado en /leads (podría vaciar la tabla de Leads in Review sin aviso).
+    persistNamespace: "leads-review",
   });
 
   // 5) Accept/Reject actions

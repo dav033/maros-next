@@ -25,4 +25,5 @@ export * from "./table/useLeadsTableColumns";
 export * from "./table/useLeadsInReviewTableColumns";
 export * from "./table/useLeadsTableLogic";
 export * from "./table/useLeadsToolbarSearchController";
+export * from "./table/useLeadsBulkActions";
 

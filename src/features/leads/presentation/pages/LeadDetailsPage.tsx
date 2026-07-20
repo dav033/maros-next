@@ -109,6 +109,7 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
       status: leadDetails?.status ?? "",
       projectTypeId: leadDetails?.projectType?.id,
       contactId: leadDetails?.contact?.id,
+      estimate: leadDetails?.estimate ?? undefined,
     },
     onSave: async (patch) => {
       if (leadDetails && typeof leadDetails.id === "number") {
@@ -131,6 +132,7 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
           projectType: updated.projectType,
           contact: updated.contact as LeadDetails["contact"],
           project: updated.project ?? leadDetails.project,
+          estimate: updated.estimate,
         });
 
         const conversionProjectId = updated.conversion?.converted

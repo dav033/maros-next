@@ -31,7 +31,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ContactModal } from "@/features/contact/presentation/organisms/ContactModal";
-import type { UseCompaniesPageLogicReturn } from "../hooks";
+import type { CompanyType } from "../../domain/models";
+import type { CompanyGroupBy, UseCompaniesPageLogicReturn } from "../hooks";
 import {
   useCompaniesToolbarSearchController,
   useCompanyContactModalController,
@@ -208,7 +209,7 @@ export function CompaniesPageView({ logic }: CompaniesPageViewProps) {
               </Button>
             )}
           </div>
-          <Select value={String(typeFilter)} onValueChange={(v) => setTypeFilter(v as any)}>
+          <Select value={String(typeFilter)} onValueChange={(v) => setTypeFilter(v as CompanyType | "all")}>
             <SelectTrigger className="w-44 bg-background/60 border-border/60 h-9 text-xs">
               <Building className="h-3.5 w-3.5 mr-1.5 shrink-0 text-muted-foreground" />
               <SelectValue placeholder="Type" />
@@ -243,7 +244,7 @@ export function CompaniesPageView({ logic }: CompaniesPageViewProps) {
               <SelectItem value="false">Supplier: No</SelectItem>
             </SelectContent>
           </Select>
-          <Select value={groupBy} onValueChange={(v) => setGroupBy(v as any)}>
+          <Select value={groupBy} onValueChange={(v) => setGroupBy(v as CompanyGroupBy)}>
             <SelectTrigger className="w-40 bg-background/60 border-border/60 h-9 text-xs">
               <Layers className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
               <SelectValue />

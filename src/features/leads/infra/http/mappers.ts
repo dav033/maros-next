@@ -18,6 +18,7 @@ export type ApiLeadDTO = {
     projectId?: number | string | null;
   } | null;
   inReview?: boolean;
+  estimate?: number | string | null;
   financial?: {
     estimatedAmount?: number | null;
   } | null;
@@ -33,6 +34,7 @@ export type CreateLeadBasePayload = {
   addressLink?: string | null;
   status: LeadStatus | null;
   projectTypeId?: number;
+  estimate?: number;
   inReview?: boolean;
 };
 
@@ -66,6 +68,7 @@ export type UpdateLeadPayload = {
   leadNumber?: string | null;
   notes?: string[];
   attachments?: string[];
+  estimate?: number | null;
   inReview?: boolean;
 };
 
@@ -87,6 +90,7 @@ export function mapLeadDraftToCreatePayload(
     addressLink: draft.addressLink,
     status: draft.status,
     projectTypeId: draft.projectTypeId,
+    estimate: draft.estimate,
     inReview: draft.inReview,
   };
 
@@ -135,6 +139,7 @@ export function mapLeadPatchToUpdatePayload(
     leadNumber: patch.leadNumber,
     notes: patch.notes,
     attachments: patch.attachments,
+    estimate: patch.estimate === undefined ? undefined : patch.estimate ?? null,
     inReview: patch.inReview,
   };
 }

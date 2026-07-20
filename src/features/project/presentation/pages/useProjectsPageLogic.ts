@@ -3,14 +3,16 @@
 import {
   useProjectCreateModal,
   useProjectEditModal,
+  useProjectsBulkActions,
   useProjectsData,
   useProjectsMutations,
   useProjectsTableLogic,
   useProjectsNotesLogic,
+  type UseProjectsBulkActionsReturn,
   type UseProjectsDataReturn,
   type UseProjectsTableLogicReturn,
 } from "../hooks";
-import type { Project } from "@/project/domain";
+import type { Project, ProjectProgressStatus } from "@/project/domain";
 import { LeadType } from "@/leads/domain";
 
 export interface UseProjectsPageLogicReturn {
@@ -28,6 +30,7 @@ export interface UseProjectsPageLogicReturn {
     updateController: ReturnType<typeof useProjectEditModal>["updateController"];
   };
   table: UseProjectsTableLogicReturn;
+  bulkActions: UseProjectsBulkActionsReturn;
   notesModal: {
     isOpen: boolean;
     title: string;
@@ -70,7 +73,15 @@ export function useProjectsPageLogic({
   });
 
   // 4) Negocio
-  const { deleteMutation } = useProjectsMutations();
+  const { deleteMutation, updateMutation } = useProjectsMutations();
+
+  const handleUpdateStatus = async (project: Project, status: ProjectProgressStatus) => {
+    try {
+      await updateMutation.mutateAsync({ id: project.id, patch: { projectProgressStatus: status } });
+    } catch {
+      // Error ya manejado por useEntityMutation
+    }
+  };
 
   // 5) Tabla (búsqueda, filtrado e interacciones)
   const table = useProjectsTableLogic({
@@ -80,6 +91,16 @@ export function useProjectsPageLogic({
       await deleteMutation.mutateAsync(id);
     },
     onOpenNotesModal: notesLogic.openFromProject,
+    onUpdateStatus: handleUpdateStatus,
+    isUpdatingStatus: (project) =>
+      updateMutation.isPending && updateMutation.variables?.id === project.id,
+  });
+
+  // 6) Selección múltiple y acciones en lote
+  const bulkActions = useProjectsBulkActions({
+    projects: table.rows,
+    updateMutation,
+    deleteMutation,
   });
 
   return {
@@ -97,6 +118,7 @@ export function useProjectsPageLogic({
       updateController: editModal.updateController,
     },
     table,
+    bulkActions,
     notesModal: notesLogic.modalProps,
     openNotesModal: notesLogic.openFromProject,
   };

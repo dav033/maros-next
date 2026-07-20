@@ -9,69 +9,23 @@ import {
   EntityTable,
   type EntityContextMenuItem,
   type EntityTableGroupBy,
+  type EntityTableSelection,
 } from "@/components/shared";
-import type { Lead } from "@/leads/domain";
-import { LeadType, getLeadTypeFromNumber } from "@/leads/domain";
+import type { Lead, LeadType } from "@/leads/domain";
+import { DEFAULT_STATUS_ORDER, STATUS_LABELS, getLeadTypeFromNumber } from "@/leads/domain";
 
 import { useLeadsTableColumns } from "../hooks";
 import type { LeadGroupBy } from "../hooks/table/useLeadsTableLogic";
-
-const LEAD_TYPE_LABELS: Record<LeadType, string> = {
-  [LeadType.CONSTRUCTION]: "Construction",
-  [LeadType.ROOFING]: "Roofing",
-  [LeadType.PLUMBING]: "Plumbing",
-};
-
-const LEAD_TYPE_COLORS: Record<LeadType, string> = {
-  [LeadType.CONSTRUCTION]: "#f59e0b",
-  [LeadType.ROOFING]: "#ef4444",
-  [LeadType.PLUMBING]: "#3b82f6",
-};
-
-const LEAD_TYPE_ORDER = [
-  LeadType.CONSTRUCTION,
-  LeadType.ROOFING,
-  LeadType.PLUMBING,
-];
-
-const STATUS_LABELS: Record<string, string> = {
-  NEW_LEAD: "New Lead",
-  CONTACTED: "Contacted",
-  ESTIMATING_PREPARING_PROPOSAL: "Estimating / Preparing Proposal",
-  PROPOSAL_SENT: "Proposal Sent",
-  FOLLOW_UP: "Follow Up",
-  WON: "Won",
-  LOST: "Lost",
-};
-
-const STATUS_COLORS: Record<string, string> = {
-  NEW_LEAD: "#6b7280",
-  CONTACTED: "#3b82f6",
-  ESTIMATING_PREPARING_PROPOSAL: "#6366f1",
-  PROPOSAL_SENT: "#f59e0b",
-  FOLLOW_UP: "#f97316",
-  WON: "#22c55e",
-  LOST: "#6b7280",
-};
-
-const STATUS_ORDER = [
-  "NEW_LEAD",
-  "CONTACTED",
-  "ESTIMATING_PREPARING_PROPOSAL",
-  "PROPOSAL_SENT",
-  "FOLLOW_UP",
-  "WON",
-  "LOST",
-];
+import { LEAD_STATUS_COLORS, LEAD_TYPE_COLORS, LEAD_TYPE_LABELS, LEAD_TYPE_ORDER } from "../atoms/leadVisualTokens";
 
 function buildGroupBy(mode: LeadGroupBy): EntityTableGroupBy<Lead> | undefined {
   if (mode === "none") return undefined;
   if (mode === "status") {
     return {
       getKey: (l) => l.status,
-      getLabel: (key) => STATUS_LABELS[key] ?? key,
-      getColor: (key) => STATUS_COLORS[key],
-      order: STATUS_ORDER,
+      getLabel: (key) => (STATUS_LABELS as Record<string, string>)[key] ?? key,
+      getColor: (key) => LEAD_STATUS_COLORS[key],
+      order: [...DEFAULT_STATUS_ORDER],
     };
   }
   if (mode === "leadType") {
@@ -99,6 +53,7 @@ export interface LeadsTableProps {
   groupBy?: LeadGroupBy;
   pagination?: { enabled?: boolean };
   isMutating?: (lead: Lead) => boolean;
+  selection?: EntityTableSelection;
 }
 
 export function LeadsTable({
@@ -110,6 +65,7 @@ export function LeadsTable({
   groupBy = "none",
   pagination,
   isMutating,
+  selection,
 }: LeadsTableProps) {
   const router = useRouter();
   const columns = useLeadsTableColumns({
@@ -139,6 +95,7 @@ export function LeadsTable({
       rowKey={(l) => (l.id as number) ?? 0}
       isLoading={isLoading}
       isMutating={isMutating}
+      selection={selection}
       getContextMenuItems={contextMenu}
       onRowClick={(l) => l.id && router.push(`/lead/${l.id}`)}
       getRowHref={(l) => (l.id ? `/lead/${l.id}` : undefined)}

@@ -1,19 +1,35 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useEntityTableLogic, useTableWithSearch, type ContextMenuItem } from "@/common/hooks";
+import { useMemo } from "react";
+import {
+  useEntityTableLogic,
+  usePersistedState,
+  setStorageCodec,
+  useTableWithSearch,
+  type ContextMenuItem,
+} from "@/common/hooks";
 import React from "react";
+import { Check } from "lucide-react";
 
 import type { Project } from "@/project/domain";
 import { ProjectProgressStatus, InvoiceStatus } from "@/project/domain";
+import { PROGRESS_LABELS } from "../../organisms/projectVisualTokens";
 
-export type ProjectGroupBy = "none" | "progressStatus" | "invoiceStatus" | "projectType";
+export type ProjectGroupBy = "none" | "progressStatus" | "invoiceStatus" | "projectType" | "leadType";
 
 interface UseProjectsTableLogicProps {
   projects: Project[];
   onEdit: (project: Project) => void;
   onDelete: (projectId: number) => Promise<void>;
   onOpenNotesModal?: (project: Project) => void;
+  /** Callback ejecutado al elegir un nuevo estado en el submenú "Change Status". */
+  onUpdateStatus?: (project: Project, status: ProjectProgressStatus) => Promise<void> | void;
+  /** Predicate que retorna `true` si el project está siendo actualizado (status). Deshabilita el submenú. */
+  isUpdatingStatus?: (project: Project) => boolean;
+  /** Prefijo de las keys de localStorage para persistir búsqueda/filtros/orden. Páginas sin UI
+   * para progressFilter/invoiceFilter (Completed/Lost) deben pasar un namespace propio para no
+   * heredar en silencio el filtro seteado en la página principal de Projects. */
+  persistNamespace?: string;
 }
 
 export interface UseProjectsTableLogicReturn {
@@ -27,10 +43,11 @@ export interface UseProjectsTableLogicReturn {
     setSearchField: (f: string) => void;
   };
   filterState: {
-    progressFilter: ProjectProgressStatus | "all";
-    setProgressFilter: (v: ProjectProgressStatus | "all") => void;
-    invoiceFilter: InvoiceStatus | "all";
-    setInvoiceFilter: (v: InvoiceStatus | "all") => void;
+    /** Vacío = sin filtro (se muestran todos los estados). */
+    progressFilter: Set<ProjectProgressStatus>;
+    setProgressFilter: (v: Set<ProjectProgressStatus>) => void;
+    invoiceFilter: Set<InvoiceStatus>;
+    setInvoiceFilter: (v: Set<InvoiceStatus>) => void;
     groupBy: ProjectGroupBy;
     setGroupBy: (v: ProjectGroupBy) => void;
   };
@@ -43,6 +60,7 @@ export interface UseProjectsTableLogicReturn {
     error: string | null;
   };
   getContextMenuItems: (project: Project) => ContextMenuItem[];
+  isMutating: (project: Project) => boolean;
 }
 
 export function useProjectsTableLogic({
@@ -50,10 +68,24 @@ export function useProjectsTableLogic({
   onEdit,
   onDelete,
   onOpenNotesModal,
+  onUpdateStatus,
+  isUpdatingStatus,
+  persistNamespace = "projects",
 }: UseProjectsTableLogicProps): UseProjectsTableLogicReturn {
-  const [progressFilter, setProgressFilter] = useState<ProjectProgressStatus | "all">("all");
-  const [invoiceFilter, setInvoiceFilter] = useState<InvoiceStatus | "all">("all");
-  const [groupBy, setGroupBy] = useState<ProjectGroupBy>("none");
+  const [progressFilter, setProgressFilter] = usePersistedState<Set<ProjectProgressStatus>>(
+    `${persistNamespace}:progressFilter`,
+    new Set(),
+    setStorageCodec,
+  );
+  const [invoiceFilter, setInvoiceFilter] = usePersistedState<Set<InvoiceStatus>>(
+    `${persistNamespace}:invoiceFilter`,
+    new Set(),
+    setStorageCodec,
+  );
+  const [groupBy, setGroupBy] = usePersistedState<ProjectGroupBy>(
+    `${persistNamespace}:groupBy`,
+    "none",
+  );
 
   const {
     rows: localProjects,
@@ -68,16 +100,37 @@ export function useProjectsTableLogic({
     onEdit,
     buildExtraMenuItems: (project) => {
       const items = [];
+      const mutatingRow = isUpdatingStatus?.(project) ?? false;
+
+      if (onUpdateStatus) {
+        items.push({
+          label: "Change Status",
+          icon: React.createElement(Check, { className: "size-4" }),
+          disabled: mutatingRow,
+          subItems: Object.values(ProjectProgressStatus).map((status) => ({
+            label: PROGRESS_LABELS[status] ?? status,
+            checked: project.projectProgressStatus === status,
+            disabled: project.projectProgressStatus === status || mutatingRow,
+            onClick: () => {
+              void onUpdateStatus(project, status);
+            },
+          })),
+        });
+      }
+
       if (onOpenNotesModal) {
         items.push({
           label: "Notes",
           onClick: () => onOpenNotesModal(project),
           icon: "lucide:sticky-note",
+          disabled: mutatingRow,
         });
       }
       return items;
     },
   });
+
+  const isMutating = (project: Project) => isUpdatingStatus?.(project) ?? false;
 
   const {
     filteredData: searchFiltered,
@@ -117,12 +170,19 @@ export function useProjectsTableLogic({
       }
     },
     normalize: (text: string) => text.toLowerCase().trim(),
+    persistKey: `${persistNamespace}:search`,
   });
 
   const filteredData = useMemo(() => {
     let result = searchFiltered;
-    if (progressFilter !== "all") result = result.filter((p) => p.projectProgressStatus === progressFilter);
-    if (invoiceFilter !== "all") result = result.filter((p) => p.invoiceStatus === invoiceFilter);
+    if (progressFilter.size > 0) {
+      result = result.filter(
+        (p) => p.projectProgressStatus && progressFilter.has(p.projectProgressStatus),
+      );
+    }
+    if (invoiceFilter.size > 0) {
+      result = result.filter((p) => p.invoiceStatus && invoiceFilter.has(p.invoiceStatus));
+    }
     return result;
   }, [searchFiltered, progressFilter, invoiceFilter]);
 
@@ -146,6 +206,7 @@ export function useProjectsTableLogic({
     },
     deleteModalProps,
     getContextMenuItems,
+    isMutating,
   };
 }
 

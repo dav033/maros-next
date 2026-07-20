@@ -165,6 +165,11 @@ const PATCH_HANDLERS: {
     attachments: Array.isArray(v) ? v : [],
   }),
 
+  estimate: (v, _ctx, acc) => ({
+    ...acc,
+    estimate: v === null || v === undefined ? null : Number(v),
+  }),
+
   inReview: (v, _ctx, acc) => ({
     ...acc,
     inReview: Boolean(v),

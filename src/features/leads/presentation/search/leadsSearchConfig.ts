@@ -11,6 +11,6 @@ export const leadsSearchConfig: SearchConfig<Lead> = {
     { key: "leadNumber", label: "Lead Number" },
     { key: "location", label: "Location" },
   ],
-  defaultField: "name",
+  defaultField: "all",
   normalize: (s: string) => s.toLowerCase().trim(),
 };

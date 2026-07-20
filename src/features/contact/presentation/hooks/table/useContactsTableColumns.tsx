@@ -1,14 +1,12 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
 import type { SimpleTableColumn } from "@/types/table";
-import { Check, X } from "lucide-react";
 
 import * as React from "react";
 import type { Contact } from "@/contact";
 import { ContactRoleLabels } from "@/contact/domain";
 import type { Company } from "@/company";
-import { NotesButton } from "@/components/shared";
+import { NotesButton, YesNoBadge } from "@/components/shared";
 import { CompanyCell } from "../../atoms/CompanyCell";
 
 interface UseContactsTableColumnsProps {
@@ -94,17 +92,7 @@ export function useContactsTableColumns({
           if (contact.isCustomer === null || contact.isCustomer === undefined) {
             return <span className="text-muted-foreground">—</span>;
           }
-          return contact.isCustomer ? (
-            <Badge variant="outline" className="gap-1" style={{ borderColor: "#22c55e", color: "#22c55e" }}>
-              <Check className="size-3" />
-              Yes
-            </Badge>
-          ) : (
-            <Badge variant="outline" className="gap-1" style={{ borderColor: "#6b7280", color: "#6b7280" }}>
-              <X className="size-3" />
-              No
-            </Badge>
-          );
+          return <YesNoBadge value={contact.isCustomer} />;
         },
         sortable: true,
         sortValue: (contact: Contact) => (contact.isCustomer ? "Yes" : "No"),
@@ -117,17 +105,7 @@ export function useContactsTableColumns({
           if (contact.isClient === null || contact.isClient === undefined) {
             return <span className="text-muted-foreground">—</span>;
           }
-          return contact.isClient ? (
-            <Badge variant="outline" className="gap-1" style={{ borderColor: "#22c55e", color: "#22c55e" }}>
-              <Check className="size-3" />
-              Yes
-            </Badge>
-          ) : (
-            <Badge variant="outline" className="gap-1" style={{ borderColor: "#6b7280", color: "#6b7280" }}>
-              <X className="size-3" />
-              No
-            </Badge>
-          );
+          return <YesNoBadge value={contact.isClient} />;
         },
         sortable: true,
         sortValue: (contact: Contact) => (contact.isClient ? "Yes" : "No"),

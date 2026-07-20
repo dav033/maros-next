@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
-import { useEntityTableLogic, useTableWithSearch } from "@/common/hooks";
+import { useCallback, useMemo } from "react";
+import { useEntityTableLogic, usePersistedState, setStorageCodec, useTableWithSearch } from "@/common/hooks";
 import { type EntityContextMenuItem } from "@/components/shared";
 import type { Lead } from "@/leads/domain";
 import { LeadStatus, canTransition } from "@/leads/domain";
@@ -37,6 +37,10 @@ export interface UseLeadsTableLogicProps {
   isUpdatingStatus?: (lead: Lead) => boolean;
   /** Predicate que retorna `true` si el lead está siendo actualizado (project type). Deshabilita el submenú. */
   isUpdatingProjectType?: (lead: Lead) => boolean;
+  /** Prefijo de las keys de localStorage para persistir búsqueda/filtro/orden. Páginas sin UI de
+   * statusFilter (Lost Leads, Leads in Review) deben pasar un namespace propio para no heredar en
+   * silencio el filtro seteado en la página principal de Leads (podría vaciar la tabla sin aviso). */
+  persistNamespace?: string;
 }
 
 /** Valores retornados por `useLeadsTableLogic`. */
@@ -54,8 +58,9 @@ export interface UseLeadsTableLogicReturn {
     setSearchField: (f: string) => void;
   };
   filterState: {
-    statusFilter: LeadStatus | "all";
-    setStatusFilter: (v: LeadStatus | "all") => void;
+    /** Vacío = sin filtro (se muestran todos los estados). */
+    statusFilter: Set<LeadStatus>;
+    setStatusFilter: (v: Set<LeadStatus>) => void;
     groupBy: LeadGroupBy;
     setGroupBy: (v: LeadGroupBy) => void;
   };
@@ -98,9 +103,17 @@ export function useLeadsTableLogic({
   onUpdateProjectType,
   isUpdatingStatus,
   isUpdatingProjectType,
+  persistNamespace = "leads",
 }: UseLeadsTableLogicProps): UseLeadsTableLogicReturn {
-  const [statusFilter, setStatusFilter] = useState<LeadStatus | "all">("all");
-  const [groupBy, setGroupBy] = useState<LeadGroupBy>("none");
+  const [statusFilter, setStatusFilter] = usePersistedState<Set<LeadStatus>>(
+    `${persistNamespace}:statusFilter`,
+    new Set(),
+    setStorageCodec,
+  );
+  const [groupBy, setGroupBy] = usePersistedState<LeadGroupBy>(
+    `${persistNamespace}:groupBy`,
+    "none",
+  );
 
   // 1) Estado de selección / delete modal / acciones base
   const {
@@ -203,12 +216,13 @@ export function useLeadsTableLogic({
     searchableFields: leadsSearchConfig.fields.map((f) => f.key),
     defaultSearchField: leadsSearchConfig.defaultField,
     normalize: leadsSearchConfig.normalize,
+    persistKey: `${persistNamespace}:search`,
   });
 
   // 3) Filtro por status
   const filteredLeads = useMemo(() => {
-    if (statusFilter === "all") return searchFilteredLeads;
-    return searchFilteredLeads.filter((l) => l.status === statusFilter);
+    if (statusFilter.size === 0) return searchFilteredLeads;
+    return searchFilteredLeads.filter((l) => statusFilter.has(l.status));
   }, [searchFilteredLeads, statusFilter]);
 
   return {

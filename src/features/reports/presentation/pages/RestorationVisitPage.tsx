@@ -316,7 +316,7 @@ export function RestorationVisitPage() {
                     key={index}
                     className="flex items-center justify-between gap-3 px-4 py-2 bg-muted rounded-md border border-border"
                   >
-                    <span className="text-sm sm:text-base text-foreground dark:text-foreground flex-1 truncate">
+                    <span className="text-sm sm:text-base text-foreground flex-1 truncate">
                       {email}
                     </span>
                     <Button variant="ghost" size="icon" aria-label="Remove email"

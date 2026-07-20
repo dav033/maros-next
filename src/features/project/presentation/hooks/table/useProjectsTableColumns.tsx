@@ -3,32 +3,23 @@
 import type { SimpleTableColumn } from "@/types/table";
 
 import * as React from "react";
-import type { Project } from "@/project/domain";
+import type { Project, ProjectProgressStatus } from "@/project/domain";
 import { Badge } from "@/components/ui/badge";
 import { NotesButton } from "@/components/shared";
-import { ProjectProgressStatus } from "@/project/domain";
 import { formatCurrency } from "@/shared/utils";
-
-// Mismo lenguaje visual que la tabla de leads (LeadStatusBadge).
-const STATUS_META: Record<ProjectProgressStatus, { label: string; color: string }> = {
-  [ProjectProgressStatus.NOT_EXECUTED]: { label: "Not Executed", color: "#6b7280" },
-  [ProjectProgressStatus.IN_PROGRESS]: { label: "In Progress", color: "#3b82f6" },
-  [ProjectProgressStatus.COMPLETED]: { label: "Completed", color: "#22c55e" },
-  [ProjectProgressStatus.LOST]: { label: "Lost", color: "#ef4444" },
-  [ProjectProgressStatus.POSTPONED]: { label: "Postponed", color: "#f97316" },
-  [ProjectProgressStatus.PERMITS]: { label: "Permits", color: "#8b5cf6" },
-};
+import { PROGRESS_COLORS, PROGRESS_LABELS } from "../../organisms/projectVisualTokens";
 
 function ProjectStatusBadge({ status }: { status: ProjectProgressStatus }) {
-  const meta = STATUS_META[status] ?? { label: status, color: "#6b7280" };
+  const label = PROGRESS_LABELS[status] ?? status;
+  const color = PROGRESS_COLORS[status] ?? "hsl(var(--badge-neutral))";
   return (
     <Badge
       variant="outline"
       className="gap-1.5 text-xs"
-      style={{ borderColor: meta.color, color: meta.color }}
+      style={{ borderColor: color, color }}
     >
-      <span className="h-2 w-2 rounded-full" style={{ backgroundColor: meta.color }} />
-      {meta.label}
+      <span className="h-2 w-2 rounded-full" style={{ backgroundColor: color }} />
+      {label}
     </Badge>
   );
 }
@@ -52,11 +43,13 @@ function computeBacklog(project: Project): number | null {
 
 type MoneyTone = "violet" | "emerald" | "amber" | "rose";
 
+// El proyecto es un solo tema oscuro (ver src/app/layout.tsx, .dark fijo en <html>),
+// así que solo el color pensado para fondo oscuro llega a pintar; sin variante dark: muerta.
 const MONEY_TONE_CLASSES: Record<MoneyTone, string> = {
-  violet: "bg-violet-500/15 text-violet-700 ring-violet-500/30 dark:text-violet-300",
-  emerald: "bg-emerald-500/15 text-emerald-700 ring-emerald-500/30 dark:text-emerald-300",
-  amber: "bg-amber-500/15 text-amber-700 ring-amber-500/30 dark:text-amber-300",
-  rose: "bg-rose-500/15 text-rose-700 ring-rose-500/30 dark:text-rose-300",
+  violet: "bg-violet-500/15 text-violet-300 ring-violet-500/30",
+  emerald: "bg-emerald-500/15 text-emerald-300 ring-emerald-500/30",
+  amber: "bg-amber-500/15 text-amber-300 ring-amber-500/30",
+  rose: "bg-rose-500/15 text-rose-300 ring-rose-500/30",
 };
 
 function MoneyPill({ value, tone }: { value: string; tone: MoneyTone }) {

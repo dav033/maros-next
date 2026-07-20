@@ -83,7 +83,7 @@ export function DashboardFiltersBar({
         <div className="flex items-center gap-2">
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Business line</p>
           {isUpdating ? (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
+            <span className="inline-flex animate-in items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary fade-in-0 zoom-in-95 duration-200">
               <Loader2 className="h-3 w-3 animate-spin" />
               Updating…
             </span>
@@ -151,7 +151,8 @@ export function DashboardFiltersBar({
                 value={draftRange.from}
                 max={draftRange.to || undefined}
                 onChange={(event) => onDraftChange({ ...draftRange, from: event.target.value })}
-                className="h-10 w-[160px]"
+                aria-invalid={hasInvertedDates}
+                className={`h-10 w-[160px] ${hasInvertedDates ? "border-destructive/60 focus-visible:ring-destructive" : ""}`}
               />
             </div>
             <div className="space-y-1">
@@ -161,7 +162,8 @@ export function DashboardFiltersBar({
                 value={draftRange.to}
                 min={draftRange.from || undefined}
                 onChange={(event) => onDraftChange({ ...draftRange, to: event.target.value })}
-                className="h-10 w-[160px]"
+                aria-invalid={hasInvertedDates}
+                className={`h-10 w-[160px] ${hasInvertedDates ? "border-destructive/60 focus-visible:ring-destructive" : ""}`}
               />
             </div>
           </div>
@@ -184,7 +186,10 @@ export function DashboardFiltersBar({
       </div>
 
       {hasInvertedDates ? (
-        <p className="mt-3 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+        <p
+          role="alert"
+          className="mt-3 animate-in rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive fade-in-0 slide-in-from-top-1 duration-200"
+        >
           Invalid range: "From" date must be before or equal to "To" date.
         </p>
       ) : null}

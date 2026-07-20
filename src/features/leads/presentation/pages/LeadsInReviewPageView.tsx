@@ -25,13 +25,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -93,8 +86,7 @@ export function LeadsInReviewPageView({ logic }: LeadsInReviewPageViewProps) {
     getContextMenuItems,
   } = table;
 
-  const { searchQuery, searchField, setSearchQuery, setSearchField } =
-    searchState;
+  const { searchQuery, setSearchQuery } = searchState;
 
   const { controller: leadModalController, contactsForModal } =
     useLeadModalController({
@@ -120,9 +112,7 @@ export function LeadsInReviewPageView({ logic }: LeadsInReviewPageViewProps) {
 
   const toolbarSearchController = useLeadsToolbarSearchController({
     searchQuery,
-    searchField,
     setSearchQuery,
-    setSearchField,
     filteredCount,
     totalCount,
   });
@@ -149,20 +139,6 @@ export function LeadsInReviewPageView({ logic }: LeadsInReviewPageViewProps) {
           resultCount={toolbarSearchController.resultCount}
           totalCount={toolbarSearchController.totalCount}
         >
-          <div className="w-32 shrink-0">
-            <Select value={toolbarSearchController.selectedField} onValueChange={toolbarSearchController.onFieldChange}>
-              <SelectTrigger className="bg-background/60 border-border/60 h-9 text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-popover border-border">
-                {toolbarSearchController.searchFields.map((field) => (
-                  <SelectItem key={field.value} value={field.value}>
-                    {field.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
           <div className="flex-1 min-w-[200px] relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input

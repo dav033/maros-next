@@ -4,11 +4,14 @@ import {
   NotesEditorModal,
   DeleteFeedbackModal,
   EntityCrudPageTemplate,
+  MultiSelectFilter,
   PageHeaderCard,
   PageToolbarCard,
+  BulkActionsBar,
 } from "@/components/shared";
 import type { Project } from "@/project/domain";
 import { ProjectProgressStatus, InvoiceStatus } from "@/project/domain";
+import { INVOICE_COLORS, PROGRESS_COLORS, PROGRESS_LABELS } from "../organisms/projectVisualTokens";
 import { ProjectsTable } from "@/project/presentation";
 import { ProjectModal } from "../organisms/ProjectModal";
 import {
@@ -21,6 +24,8 @@ import {
   Plus,
   SlidersHorizontal,
   Receipt,
+  Check,
+  Trash2,
 } from "lucide-react";
 import { ProjectsTableSkeleton } from "../organisms/ProjectsTableSkeleton";
 import { Button } from "@/components/ui/button";
@@ -32,6 +37,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import type { UseProjectsPageLogicReturn } from "./useProjectsPageLogic";
 import type { ProjectGroupBy } from "../hooks/table/useProjectsTableLogic";
 import { useProjectsToolbarSearchController } from "../hooks/table/useProjectsToolbarSearchController";
@@ -39,22 +50,20 @@ import { useProjectsNotesModalController } from "../hooks/modals/useProjectsNote
 import { useInstantLeadsByType } from "@/leads/presentation";
 import { LeadTypeSwitcher } from "@/components/shared/LeadTypeSwitcher";
 
-const PROGRESS_OPTIONS: Array<{ value: ProjectProgressStatus | "all"; label: string }> = [
-  { value: "all", label: "All progress" },
-  { value: ProjectProgressStatus.NOT_EXECUTED, label: "Not Executed" },
-  { value: ProjectProgressStatus.IN_PROGRESS, label: "In Progress" },
-  { value: ProjectProgressStatus.COMPLETED, label: "Completed" },
-  { value: ProjectProgressStatus.POSTPONED, label: "Postponed" },
-  { value: ProjectProgressStatus.PERMITS, label: "Permits" },
-  { value: ProjectProgressStatus.LOST, label: "Lost" },
+const PROGRESS_FILTER_OPTIONS = [
+  { value: ProjectProgressStatus.NOT_EXECUTED, label: "Not Executed", color: PROGRESS_COLORS.NOT_EXECUTED },
+  { value: ProjectProgressStatus.IN_PROGRESS, label: "In Progress", color: PROGRESS_COLORS.IN_PROGRESS },
+  { value: ProjectProgressStatus.COMPLETED, label: "Completed", color: PROGRESS_COLORS.COMPLETED },
+  { value: ProjectProgressStatus.POSTPONED, label: "Postponed", color: PROGRESS_COLORS.POSTPONED },
+  { value: ProjectProgressStatus.PERMITS, label: "Permits", color: PROGRESS_COLORS.PERMITS },
+  { value: ProjectProgressStatus.LOST, label: "Lost", color: PROGRESS_COLORS.LOST },
 ];
 
-const INVOICE_OPTIONS: Array<{ value: InvoiceStatus | "all"; label: string }> = [
-  { value: "all", label: "All invoices" },
-  { value: InvoiceStatus.PAID, label: "Paid" },
-  { value: InvoiceStatus.PENDING, label: "Pending" },
-  { value: InvoiceStatus.NOT_EXECUTED, label: "Not Executed" },
-  { value: InvoiceStatus.PERMITS, label: "Permits" },
+const INVOICE_FILTER_OPTIONS = [
+  { value: InvoiceStatus.PAID, label: "Paid", color: INVOICE_COLORS.PAID },
+  { value: InvoiceStatus.PENDING, label: "Pending", color: INVOICE_COLORS.PENDING },
+  { value: InvoiceStatus.NOT_EXECUTED, label: "Not Executed", color: INVOICE_COLORS.NOT_EXECUTED },
+  { value: InvoiceStatus.PERMITS, label: "Permits", color: INVOICE_COLORS.PERMITS },
 ];
 
 const PROJECT_GROUP_OPTIONS: Array<{ value: ProjectGroupBy; label: string }> = [
@@ -62,6 +71,7 @@ const PROJECT_GROUP_OPTIONS: Array<{ value: ProjectGroupBy; label: string }> = [
   { value: "progressStatus", label: "By progress" },
   { value: "invoiceStatus", label: "By invoice" },
   { value: "projectType", label: "By type" },
+  { value: "leadType", label: "By category" },
 ];
 
 export interface ProjectsPageViewProps {
@@ -69,7 +79,7 @@ export interface ProjectsPageViewProps {
 }
 
 export function ProjectsPageView({ logic }: ProjectsPageViewProps) {
-  const { leadType, data, crud, table, notesModal, openNotesModal } = logic;
+  const { leadType, data, crud, table, bulkActions, notesModal, openNotesModal } = logic;
 
   const { projects, showSkeleton } = data;
 
@@ -190,34 +200,26 @@ export function ProjectsPageView({ logic }: ProjectsPageViewProps) {
             )}
           </div>
 
-          {/* Progress status filter */}
-          <div className="w-36 shrink-0">
-            <Select value={progressFilter} onValueChange={(v) => setProgressFilter(v as ProjectProgressStatus | "all")}>
-              <SelectTrigger className="bg-background/60 border-border/60 h-9 text-xs">
-                <Filter className="h-3.5 w-3.5 mr-1.5 shrink-0 text-muted-foreground" />
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-popover border-border">
-                {PROGRESS_OPTIONS.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          {/* Progress status filter (multi-select: ver más de un estado a la vez) */}
+          <div className="w-40 shrink-0">
+            <MultiSelectFilter
+              icon={Filter}
+              placeholder="All progress"
+              options={PROGRESS_FILTER_OPTIONS}
+              selected={progressFilter}
+              onChange={setProgressFilter}
+            />
           </div>
 
-          {/* Invoice status filter */}
-          <div className="w-36 shrink-0">
-            <Select value={invoiceFilter} onValueChange={(v) => setInvoiceFilter(v as InvoiceStatus | "all")}>
-              <SelectTrigger className="bg-background/60 border-border/60 h-9 text-xs">
-                <Receipt className="h-3.5 w-3.5 mr-1.5 shrink-0 text-muted-foreground" />
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-popover border-border">
-                {INVOICE_OPTIONS.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          {/* Invoice status filter (multi-select) */}
+          <div className="w-40 shrink-0">
+            <MultiSelectFilter
+              icon={Receipt}
+              placeholder="All invoices"
+              options={INVOICE_FILTER_OPTIONS}
+              selected={invoiceFilter}
+              onChange={setInvoiceFilter}
+            />
           </div>
 
           {/* Group by */}
@@ -239,16 +241,78 @@ export function ProjectsPageView({ logic }: ProjectsPageViewProps) {
       isLoading={showSkeleton}
       loadingContent={<ProjectsTableSkeleton />}
       tableContent={
-        <ProjectsTable
-          tableLogic={table}
-          isLoading={showSkeleton}
-          onOpenNotesModal={openNotesModal}
-          groupBy={groupBy}
-          pagination={{ enabled: true }}
-        />
+        <div className="space-y-3">
+          <BulkActionsBar count={bulkActions.selectedCount} onClear={bulkActions.clearSelection}>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  className="gap-1.5"
+                  disabled={bulkActions.availableStatuses.length === 0 || bulkActions.isChangingStatus}
+                >
+                  <Check className="h-3.5 w-3.5" />
+                  Change status
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                {bulkActions.availableStatuses.map((status) => (
+                  <DropdownMenuItem
+                    key={status}
+                    onClick={() => void bulkActions.changeStatus(status)}
+                  >
+                    {PROGRESS_LABELS[status] ?? status}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              className="gap-1.5"
+              onClick={bulkActions.deleteModal.open}
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              Delete
+            </Button>
+          </BulkActionsBar>
+
+          <ProjectsTable
+            tableLogic={table}
+            isLoading={showSkeleton}
+            onOpenNotesModal={openNotesModal}
+            groupBy={groupBy}
+            pagination={{ enabled: true }}
+            selection={{
+              selectedIds: bulkActions.selectedIds,
+              onSelectionChange: bulkActions.onSelectionChange,
+            }}
+          />
+        </div>
       }
       modals={
         <>
+          <DeleteFeedbackModal
+            isOpen={bulkActions.deleteModal.isOpen}
+            title="Delete Projects"
+            description={
+              <>
+                Are you sure you want to delete{" "}
+                <span className="font-semibold text-foreground">
+                  {bulkActions.selectedCount} project{bulkActions.selectedCount === 1 ? "" : "s"}
+                </span>
+                ?
+                <br />
+                This action cannot be undone.
+              </>
+            }
+            loading={bulkActions.deleteModal.isDeleting}
+            onClose={bulkActions.deleteModal.close}
+            onConfirm={() => void bulkActions.deleteModal.confirm()}
+          />
+
           <DeleteFeedbackModal
             isOpen={deleteModalProps.isOpen}
             title="Delete Project"

@@ -1,5 +1,7 @@
 "use client";
 
+import type { LucideIcon } from "lucide-react";
+import { X, Search, SlidersHorizontal } from "lucide-react";
 import {
   NotesEditorModal,
   DeleteFeedbackModal,
@@ -7,38 +9,35 @@ import {
   PageHeaderCard,
   PageToolbarCard,
 } from "@/components/shared";
-import { LeadsTable } from "@/leads/presentation";
-import { ContactViewModal } from "@/contact";
-import { X, XCircle, Search, SlidersHorizontal } from "lucide-react";
+import { ProjectsTable } from "@/project/presentation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { LeadsTableSkeleton } from "../organisms/LeadsTableSkeleton";
-import type { UseLostLeadsPageLogicReturn } from "./useLostLeadsPageLogic";
-import {
-  useLeadsToolbarSearchController,
-  useLeadsNotesModalController,
-} from "../hooks";
+import { ProjectsTableSkeleton } from "../organisms/ProjectsTableSkeleton";
+import type { UseProjectsByStatusPageLogicReturn } from "./useProjectsByStatusPageLogic";
+import { useProjectsToolbarSearchController } from "../hooks/table/useProjectsToolbarSearchController";
+import { useProjectsNotesModalController } from "../hooks/modals/useProjectsNotesModalController";
 
-export interface LostLeadsPageViewProps {
-  logic: UseLostLeadsPageLogicReturn;
+export interface ProjectsByStatusPageViewProps {
+  logic: UseProjectsByStatusPageLogicReturn;
+  icon: LucideIcon;
+  title: string;
+  description: string;
 }
 
-export function LostLeadsPageView({ logic }: LostLeadsPageViewProps) {
-  const { data, table, notesModal, viewContactModal } = logic;
+export function ProjectsByStatusPageView({
+  logic,
+  icon,
+  title,
+  description,
+}: ProjectsByStatusPageViewProps) {
+  const { data, table, notesModal } = logic;
   const { showSkeleton } = data;
 
-  const {
-    rows,
-    totalCount,
-    filteredCount,
-    searchState,
-    deleteModalProps,
-    getContextMenuItems,
-  } = table;
+  const { totalCount, filteredCount, searchState, deleteModalProps } = table;
 
-  const { searchQuery, setSearchQuery } = searchState;
+  const { searchQuery, searchField, setSearchQuery, setSearchField } = searchState;
 
-  const notesModalController = useLeadsNotesModalController({
+  const notesModalController = useProjectsNotesModalController({
     isOpen: notesModal.isOpen,
     title: notesModal.title,
     notes: notesModal.notes,
@@ -48,22 +47,18 @@ export function LostLeadsPageView({ logic }: LostLeadsPageViewProps) {
     loading: notesModal.loading,
   });
 
-  const toolbarSearchController = useLeadsToolbarSearchController({
+  const toolbarSearchController = useProjectsToolbarSearchController({
     searchQuery,
+    searchField,
     setSearchQuery,
+    setSearchField,
     filteredCount,
     totalCount,
   });
 
   return (
     <EntityCrudPageTemplate
-      header={
-        <PageHeaderCard
-          icon={XCircle}
-          title="Lost Leads"
-          description="All lost leads across every category, grouped by type."
-        />
-      }
+      header={<PageHeaderCard icon={icon} title={title} description={description} />}
       toolbar={
         <PageToolbarCard
           icon={SlidersHorizontal}
@@ -71,7 +66,7 @@ export function LostLeadsPageView({ logic }: LostLeadsPageViewProps) {
           resultCount={toolbarSearchController.resultCount}
           totalCount={toolbarSearchController.totalCount}
         >
-          {/* Search input (busca en todos los campos a la vez) */}
+          {/* Search input (búsqueda simple: estas páginas ya vienen acotadas por status) */}
           <div className="flex-1 min-w-[200px] relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -97,29 +92,26 @@ export function LostLeadsPageView({ logic }: LostLeadsPageViewProps) {
         </PageToolbarCard>
       }
       isLoading={showSkeleton}
-      loadingContent={<LeadsTableSkeleton />}
+      loadingContent={<ProjectsTableSkeleton />}
       tableContent={
-        <LeadsTable
-          leads={rows}
+        <ProjectsTable
+          tableLogic={table}
           isLoading={showSkeleton}
-          getContextMenuItems={getContextMenuItems}
-          onOpenNotesModal={table.onOpenNotesModal}
-          onViewContact={table.onViewContact}
+          onOpenNotesModal={logic.openNotesModal}
           groupBy="leadType"
           pagination={{ enabled: true }}
-          isMutating={table.isMutating}
         />
       }
       modals={
         <>
           <DeleteFeedbackModal
             isOpen={deleteModalProps.isOpen}
-            title="Delete Lead"
+            title="Delete Project"
             description={
               <>
-                Are you sure you want to delete lead{" "}
+                Are you sure you want to delete project{" "}
                 <span className="font-semibold text-foreground">
-                  {(deleteModalProps.itemToDelete as { name?: string })?.name}
+                  {deleteModalProps.itemToDelete?.lead.name}
                 </span>
                 ?
                 <br />
@@ -133,12 +125,6 @@ export function LostLeadsPageView({ logic }: LostLeadsPageViewProps) {
           />
 
           <NotesEditorModal controller={notesModalController} />
-
-          <ContactViewModal
-            isOpen={viewContactModal.isOpen}
-            contact={viewContactModal.contact}
-            onClose={viewContactModal.close}
-          />
         </>
       }
     />

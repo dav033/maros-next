@@ -25,6 +25,7 @@ type CommonInput = Readonly<{
   location: string;
   projectTypeId?: ProjectTypeId;
   leadType?: LeadType; // Opcional: solo para generar número si no se proporciona (no se almacena)
+  estimate?: number;
 }>;
 
 function validateLeadName(raw: string | undefined): string {
@@ -66,6 +67,7 @@ export function buildLeadDraftForNewContact(
     status: ((policies as any).defaultStatus ?? null) as LeadStatus | null,
     projectTypeId: input.projectTypeId,
     contact: normalizedContact,
+    estimate: input.estimate,
     ...(inReview !== undefined && { inReview }),
   };
 
@@ -94,6 +96,7 @@ export function buildLeadDraftForExistingContact(
     status: ((policies as any).defaultStatus ?? null) as LeadStatus | null,
     projectTypeId: input.projectTypeId,
     contactId: input.contactId,
+    estimate: input.estimate,
     ...(inReview !== undefined && { inReview }),
   };
 

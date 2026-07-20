@@ -14,15 +14,7 @@ import {
 import type { Company } from "../../domain/models";
 import { useCompaniesTableColumns } from "../hooks";
 import type { CompanyGroupBy } from "../hooks/table/useCompaniesTableLogic";
-
-const TYPE_LABELS: Record<string, string> = {
-  DESIGN: "Design",
-  HOA: "HOA",
-  GENERAL_CONTRACTOR: "Contractor",
-  SUPPLIER: "Supplier",
-  SUBCONTRACTOR: "Subcontractor",
-  OTHER: "Other",
-};
+import { TYPE_COLORS, TYPE_LABELS } from "../atoms/CompanyTypeBadge";
 
 function buildGroupBy(mode: CompanyGroupBy): EntityTableGroupBy<Company> | undefined {
   if (mode === "none") return undefined;
@@ -30,6 +22,7 @@ function buildGroupBy(mode: CompanyGroupBy): EntityTableGroupBy<Company> | undef
     return {
       getKey: (c) => c.type ?? "OTHER",
       getLabel: (key) => TYPE_LABELS[key] ?? key,
+      getColor: (key) => TYPE_COLORS[key],
     };
   }
   if (mode === "customer") {

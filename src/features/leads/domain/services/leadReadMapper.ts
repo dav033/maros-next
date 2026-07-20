@@ -39,7 +39,9 @@ export type ApiLeadDTO = {
     projectId?: number | string | null;
   } | null;
   inReview?: boolean | null;
-  /** Bloque QBO adjuntado por el backend (fuente de verdad de estimates). */
+  /** Estimado manual, editable desde el CRM. Independiente de QuickBooks. */
+  estimate?: number | string | null;
+  /** Bloque QBO adjuntado por el backend (Estimate real, solo lectura). */
   financial?: {
     estimatedAmount?: number | null;
   } | null;
@@ -133,8 +135,9 @@ export function mapLeadFromDTO(dto: ApiLeadDTO): Lead {
       }
     : undefined;
   const inReview = dto?.inReview ?? false;
-  // El estimate viene 100% de QuickBooks (financial.estimatedAmount), no del CRM.
-  const estimate =
+  // Estimado manual (editable en el CRM), independiente del Estimate real de QuickBooks.
+  const estimate = dto?.estimate != null ? Number(dto.estimate) : null;
+  const qboEstimate =
     dto?.financial?.estimatedAmount != null
       ? Number(dto.financial.estimatedAmount)
       : null;
@@ -149,6 +152,7 @@ export function mapLeadFromDTO(dto: ApiLeadDTO): Lead {
     status,
     inReview,
     estimate,
+    qboEstimate,
     contact: {
       id: contactId,
       name: contactName,

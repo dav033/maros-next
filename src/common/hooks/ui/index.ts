@@ -5,3 +5,4 @@ export * from "./useDeleteModal";
 export * from "./useNotesEditor";
 export * from "./useNotesModal";
 export * from "./usePersistentToggle";
+export * from "./usePersistedState";

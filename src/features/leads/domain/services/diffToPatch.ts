@@ -36,6 +36,7 @@ export function diffToPatch(current: Lead, updated: Lead): LeadPatch {
     contactId: updated.contact.id,
     leadNumber: updated.leadNumber ?? "",
     notes: updated.notes,
+    estimate: updated.estimate,
   };
 
 
@@ -49,6 +50,7 @@ export function diffToPatch(current: Lead, updated: Lead): LeadPatch {
     contactId: current.contact.id,
     leadNumber: current.leadNumber ?? "",
     notes: current.notes,
+    estimate: current.estimate,
   };
 
   

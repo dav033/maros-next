@@ -72,7 +72,7 @@ export function useContactCompanyModalLogic(
       // Vinculamos la nueva compañía al formulario del contacto actual
       crud.handleFormChange({
         ...crud.formValue,
-        companyId: (created as any).id,
+        companyId: created.id,
       });
 
       setIsCompanyModalOpen(false);
