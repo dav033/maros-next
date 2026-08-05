@@ -29,6 +29,7 @@ import { ContactInfoSection } from "./sections/ContactInfoSection";
 import { ContactNotesSection } from "./sections/ContactNotesSection";
 import { ContactLeadsSection } from "./sections/ContactLeadsSection";
 import { EntityAttachmentsSection } from "@/features/attachments/presentation/EntityAttachmentsSection";
+import { EntityNotesSection } from "@/features/notes/presentation/organisms/EntityNotesSection";
 
 
 interface ContactDetailsPageProps {
@@ -266,6 +267,12 @@ export function ContactDetailsPage({ contactId, initialData }: ContactDetailsPag
           await patchContact(app, contactDetails.id, { attachments: newAttachments });
           router.refresh();
         }}
+      />
+
+      <EntityNotesSection
+        entityKind="contact"
+        entityId={contactDetails.id}
+        defaultTitle={contactDetails.name || undefined}
       />
     </div>
   );

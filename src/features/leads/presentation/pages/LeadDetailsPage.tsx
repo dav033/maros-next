@@ -32,6 +32,7 @@ import { useInlineEdit } from "@/common/hooks";
 import { LeadInfoSection } from "./sections/LeadInfoSection";
 import { LeadContactSection } from "./sections/LeadContactSection";
 import { LeadAttachmentsSection } from "./sections/LeadAttachmentsSection";
+import { EntityNotesSection } from "@/features/notes/presentation/organisms/EntityNotesSection";
 import { PostConversionEstimateModal } from "../organisms/PostConversionEstimateModal";
 
 
@@ -374,6 +375,12 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
             setLeadDetails({ ...leadDetails, attachments: newAttachments });
           }
         }}
+      />
+
+      <EntityNotesSection
+        entityKind="lead"
+        entityId={leadDetails.id}
+        defaultTitle={leadDetails.name || undefined}
       />
 
       <CompanyModal

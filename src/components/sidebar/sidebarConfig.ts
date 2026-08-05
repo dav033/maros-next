@@ -10,6 +10,7 @@ import {
   LayoutDashboard,
   XCircle,
   CheckCircle2,
+  NotebookPen,
 } from "lucide-react";
 
 export type SidebarItemProps = {
@@ -76,6 +77,12 @@ const menuSection: SidebarSection = {
       title: "Lost Projects",
       href: "/projects/lost",
       icon: XCircle,
+    },
+    {
+      title: "Notes",
+      href: "/notes",
+      icon: NotebookPen,
+      activePrefix: "/notes",
     },
   ],
 };

@@ -79,6 +79,12 @@
       ],
       "@/quickbooks/*": [
         "./src/features/quickbooks/*"
+      ],
+      "@/notes": [
+        "./src/features/notes/index.ts"
+      ],
+      "@/notes/*": [
+        "./src/features/notes/*"
       ]
     }
   },

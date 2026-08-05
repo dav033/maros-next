@@ -220,7 +220,7 @@ export function LeadInfoSection({
             <div className="flex items-center justify-between mb-2">
               <p className="text-muted-foreground text-sm flex items-center gap-1">
                 <StickyNote className="size-3" />
-                Notes
+                Quick notes
               </p>
               <Button
                 variant="ghost"
@@ -229,7 +229,7 @@ export function LeadInfoSection({
                 className="text-muted-foreground hover:text-foreground h-auto py-1"
               >
                 <Edit className="size-3 mr-1" />
-                Edit Notes
+                Edit
               </Button>
             </div>
             <ul className="space-y-2">
@@ -243,7 +243,7 @@ export function LeadInfoSection({
         ) : (
           <DetailField
             icon={StickyNote}
-            label="Notes"
+            label="Quick notes"
             value={undefined}
             onAdd={onOpenNotesModal}
           />

@@ -26,7 +26,7 @@ export function CompanyNotesSection({
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <StickyNote className="size-5" />
-            Notes
+            Quick notes
           </CardTitle>
           <Button
             variant="ghost"

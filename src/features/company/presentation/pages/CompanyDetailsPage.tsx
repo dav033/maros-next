@@ -18,6 +18,7 @@ import { CompanyNotesSection } from "./sections/CompanyNotesSection";
 import { CompanyContactsSection } from "./sections/CompanyContactsSection";
 import type { CompanyType, Company, CompanyDetails } from "../../domain/models";
 import { EntityAttachmentsSection } from "@/features/attachments/presentation/EntityAttachmentsSection";
+import { EntityNotesSection } from "@/features/notes/presentation/organisms/EntityNotesSection";
 
 
 
@@ -163,6 +164,12 @@ export function CompanyDetailsPage({
           await updateCompanyAction(companyDetails.id, { attachments: newAttachments });
           router.refresh();
         }}
+      />
+
+      <EntityNotesSection
+        entityKind="company"
+        entityId={companyDetails.id}
+        defaultTitle={companyDetails.name || undefined}
       />
 
       {/* Notes Modal */}

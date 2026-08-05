@@ -29,6 +29,7 @@ import { toContactPatch } from "@/contact/domain";
 import type { Contact as DomainContact } from "@/contact/domain";
 import { EntityAttachmentsSection } from "@/features/attachments/presentation/EntityAttachmentsSection";
 import { QuickbooksProjectAttachments } from "@/features/quickbooks/presentation/components/QuickbooksProjectAttachments";
+import { EntityNotesSection } from "@/features/notes/presentation/organisms/EntityNotesSection";
 
 interface ProjectDetails {
   id: number;
@@ -761,7 +762,7 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
                   <Separator />
                   <DetailField
                     icon={StickyNote}
-                    label="Notes"
+                    label="Quick notes"
                     value={projectDetails.notes && projectDetails.notes.length > 0 ? "has-notes" : undefined}
                     onAdd={handleOpenNotesModal}
                   >
@@ -822,6 +823,12 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
           await updateProject(app, projectDetails.id, { attachments: newAttachments });
           router.refresh();
         }}
+      />
+
+      <EntityNotesSection
+        entityKind="project"
+        entityId={projectDetails.id}
+        defaultTitle={projectDetails.lead?.name || undefined}
       />
 
       {lead?.leadNumber ? (

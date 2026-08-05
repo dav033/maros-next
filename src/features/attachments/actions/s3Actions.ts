@@ -3,13 +3,14 @@
 import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
-export type AttachmentEntityKind = "lead" | "project" | "company" | "contact";
+export type AttachmentEntityKind = "lead" | "project" | "company" | "contact" | "note";
 
 const PREFIX_BY_KIND: Record<AttachmentEntityKind, string> = {
   lead: "leads",
   project: "projects",
   company: "companies",
   contact: "contacts",
+  note: "notes",
 };
 
 function normalizeBasePrefix(prefix: string | undefined): string {
