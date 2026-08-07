@@ -20,8 +20,8 @@ interface GoogleTokenResponse {
   access_token: string;
 }
 
-function loginError(request: NextRequest, error: string): NextResponse {
-  return NextResponse.redirect(new URL(`/login?error=${error}`, request.url));
+function loginError(baseUrl: string, error: string): NextResponse {
+  return NextResponse.redirect(new URL(`/login?error=${error}`, baseUrl));
 }
 
 export async function GET(request: NextRequest) {
@@ -32,12 +32,18 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Google OAuth is not configured' }, { status: 500 });
   }
 
+  // Build absolute redirect URLs from GOOGLE_REDIRECT_URI's origin, not request.url —
+  // behind Netlify's Next.js runtime, request.url resolves to the internal per-deploy
+  // hostname (<hash>--site.netlify.app), not the public custom domain. A cookie scoped
+  // to .marosconstruction.com never reaches that mismatched host.
+  const baseUrl = new URL(redirectUri).origin;
+
   const code = request.nextUrl.searchParams.get('code');
   const state = request.nextUrl.searchParams.get('state');
   const expectedState = request.cookies.get(OAUTH_STATE_COOKIE)?.value;
 
   if (!code || !state || !expectedState || state !== expectedState) {
-    return loginError(request, 'oauth');
+    return loginError(baseUrl, 'oauth');
   }
 
   let tokens: GoogleTokenResponse;
@@ -54,11 +60,11 @@ export async function GET(request: NextRequest) {
       }).toString(),
     });
     if (!tokenRes.ok) {
-      return loginError(request, 'oauth');
+      return loginError(baseUrl, 'oauth');
     }
     tokens = await tokenRes.json();
   } catch {
-    return loginError(request, 'oauth');
+    return loginError(baseUrl, 'oauth');
   }
 
   let claims;
@@ -69,7 +75,7 @@ export async function GET(request: NextRequest) {
     });
     claims = payload;
   } catch {
-    return loginError(request, 'oauth');
+    return loginError(baseUrl, 'oauth');
   }
 
   const email = typeof claims.email === 'string' ? claims.email : undefined;
@@ -79,12 +85,12 @@ export async function GET(request: NextRequest) {
   const emailVerified = claims.email_verified === true;
 
   if (!email || !emailVerified || hd !== WORKSPACE_DOMAIN) {
-    return loginError(request, 'domain');
+    return loginError(baseUrl, 'domain');
   }
 
   const sessionToken = await createSessionToken({ email, name: name ?? email, picture });
 
-  const response = NextResponse.redirect(new URL('/dashboard', request.url));
+  const response = NextResponse.redirect(new URL('/dashboard', baseUrl));
   response.cookies.set(SESSION_COOKIE, sessionToken, {
     httpOnly: true,
     path: '/',
