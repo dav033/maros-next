@@ -5,6 +5,7 @@ import "../styles/globals.css";
 import { AppProviders } from "./AppProviders";
 import { AppShell } from "./AppShell";
 import { Toaster } from "@/components/ui/sonner";
+import { fetchCurrentUser } from "@/shared/auth/currentUser";
 
 const workSans = Work_Sans({
   subsets: ["latin"],
@@ -24,13 +25,17 @@ export const metadata: Metadata = {
   description: "Next.js application with Clean Architecture",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  // Only real on pages behind middleware's auth check — on /login there is
+  // no session cookie yet, and fetchCurrentUser resolves to null.
+  const currentUser = await fetchCurrentUser();
+
   return (
     <html lang="en" className={`dark ${workSans.variable}`}>
       <body className="min-h-svh bg-background text-foreground font-sans">
-        <AppProviders>
+        <AppProviders currentUser={currentUser}>
           <AppShell>{children}</AppShell>
           <Toaster />
         </AppProviders>

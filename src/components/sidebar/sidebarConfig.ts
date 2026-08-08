@@ -11,7 +11,9 @@ import {
   XCircle,
   CheckCircle2,
   NotebookPen,
+  ShieldCheck,
 } from "lucide-react";
+import type { Permission } from "@/shared/auth/permissions";
 
 export type SidebarItemProps = {
   title: string;
@@ -21,6 +23,8 @@ export type SidebarItemProps = {
   activePrefix?: string;
   /** Prefijos excluidos del match de activePrefix (ej. /leads/lost). */
   activeExclude?: string[];
+  /** Oculto si el usuario no tiene este permiso. Sin valor = visible para cualquiera autenticado. */
+  permission?: Permission;
 };
 
 export type SidebarDropdownProps = {
@@ -55,11 +59,13 @@ const menuSection: SidebarSection = {
       icon: Briefcase,
       activePrefix: "/leads",
       activeExclude: ["/leads/lost"],
+      permission: "leads:read",
     },
     {
       title: "Lost Leads",
       href: "/leads/lost",
       icon: XCircle,
+      permission: "leads:read",
     },
     {
       title: "Projects",
@@ -67,22 +73,26 @@ const menuSection: SidebarSection = {
       icon: FolderKanban,
       activePrefix: "/projects",
       activeExclude: ["/projects/completed", "/projects/lost"],
+      permission: "projects:read",
     },
     {
       title: "Completed Projects",
       href: "/projects/completed",
       icon: CheckCircle2,
+      permission: "projects:read",
     },
     {
       title: "Lost Projects",
       href: "/projects/lost",
       icon: XCircle,
+      permission: "projects:read",
     },
     {
       title: "Notes",
       href: "/notes",
       icon: NotebookPen,
       activePrefix: "/notes",
+      permission: "notes:read",
     },
   ],
 };
@@ -94,16 +104,19 @@ const accountSection: SidebarSection = {
       title: "Contacts",
       href: "/contacts",
       icon: Users,
+      permission: "contacts:read",
     },
     {
       title: "Company",
       href: "/company",
       icon: Building,
+      permission: "companies:read",
     },
     {
       title: "Customers",
       href: "/customers",
       icon: UserCog,
+      permission: "companies:read",
     },
   ],
 };
@@ -115,11 +128,13 @@ const reportsSection: SidebarSection = {
       title: "Restoration Visit",
       href: "/reports/restoration-visit",
       icon: FileBarChart2,
+      permission: "reports:read",
     },
     {
       title: "Restoration Final",
       href: "/reports/restoration-final",
       icon: FileCheck2,
+      permission: "reports:read",
     },
   ],
 };
@@ -133,13 +148,32 @@ const analyticsSection: SidebarSection = {
       title: "Dashboard",
       href: "/dashboard",
       icon: LayoutDashboard,
+      permission: "dashboard:read",
+    },
+  ],
+};
+
+const settingsSection: SidebarSection = {
+  section: "Settings",
+  items: [
+    {
+      title: "Users",
+      href: "/settings/users",
+      icon: Users,
+      permission: "users:read",
+    },
+    {
+      title: "Roles",
+      href: "/settings/roles",
+      icon: ShieldCheck,
+      permission: "users:read",
     },
   ],
 };
 
 export const SIDEBAR_CONFIG: SidebarConfig = {
   title: "Maros Construction",
-  top: [analyticsSection, menuSection, accountSection, reportsSection],
+  top: [analyticsSection, menuSection, accountSection, reportsSection, settingsSection],
   bottom: [],
 };
 

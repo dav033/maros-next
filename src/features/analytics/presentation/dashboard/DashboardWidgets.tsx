@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Activity, BarChart3, DollarSign, Users } from "lucide-react";
+import { Can } from "@/shared/auth/Can";
 import type {
   CostsBreakdown,
   ExpensesSummary,
@@ -99,33 +100,37 @@ export function DashboardWidgets({
 }: DashboardWidgetsProps) {
   return (
     <div className="space-y-8">
-      <Section icon={Activity} title="Performance overview" description="Revenue, backlog and secured revenue" delay={0}>
-        <AsyncWidget
-          query={overview}
-          errorText="Could not load overview KPIs."
-          skeleton={<KpiOverviewSkeleton />}
-        >
-          {(overviewData) => (
-            <KpiOverviewRow
-              overview={overviewData}
-              expensesSummary={expensesSummary.data ?? null}
-              revenueRangeLabel={revenueRangeLabel}
-              revenueHref={revenueHref}
-            />
-          )}
-        </AsyncWidget>
-      </Section>
+      <Can permission="finance:read">
+        <Section icon={Activity} title="Performance overview" description="Revenue, backlog and secured revenue" delay={0}>
+          <AsyncWidget
+            query={overview}
+            errorText="Could not load overview KPIs."
+            skeleton={<KpiOverviewSkeleton />}
+          >
+            {(overviewData) => (
+              <KpiOverviewRow
+                overview={overviewData}
+                expensesSummary={expensesSummary.data ?? null}
+                revenueRangeLabel={revenueRangeLabel}
+                revenueHref={revenueHref}
+              />
+            )}
+          </AsyncWidget>
+        </Section>
+      </Can>
 
       <Section icon={BarChart3} title="Revenue & pipeline" description="Trends and pipeline distribution" delay={120}>
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <AsyncWidget
-            query={revenueTrend}
-            errorText="Could not load revenue trend."
-            emptyText="No revenue data found for this range."
-            skeleton={<LineChartSkeleton />}
-          >
-            {(data) => <RevenueTrendChart data={data} />}
-          </AsyncWidget>
+          <Can permission="finance:read">
+            <AsyncWidget
+              query={revenueTrend}
+              errorText="Could not load revenue trend."
+              emptyText="No revenue data found for this range."
+              skeleton={<LineChartSkeleton />}
+            >
+              {(data) => <RevenueTrendChart data={data} />}
+            </AsyncWidget>
+          </Can>
 
           <AsyncWidget
             query={pipeline}
@@ -162,30 +167,34 @@ export function DashboardWidgets({
         </div>
       </Section>
 
-      <Section icon={DollarSign} title="Costs" description="All expenses and COGS by category" delay={270}>
-        <AsyncWidget
-          query={costsBreakdown}
-          errorText="Could not load costs breakdown."
-          emptyText="No cost data available for this range."
-          isEmpty={(data) => data.categories.length === 0 && data.totalCosts === 0}
-          skeleton={<CostsBreakdownSkeleton />}
-        >
-          {(data) => <CostsBreakdownPanel data={data} />}
-        </AsyncWidget>
-      </Section>
+      <Can permission="finance:read">
+        <Section icon={DollarSign} title="Costs" description="All expenses and COGS by category" delay={270}>
+          <AsyncWidget
+            query={costsBreakdown}
+            errorText="Could not load costs breakdown."
+            emptyText="No cost data available for this range."
+            isEmpty={(data) => data.categories.length === 0 && data.totalCosts === 0}
+            skeleton={<CostsBreakdownSkeleton />}
+          >
+            {(data) => <CostsBreakdownPanel data={data} />}
+          </AsyncWidget>
+        </Section>
+      </Can>
 
       <Section icon={Users} title="Clients & risk" description="Top accounts and projects that need attention" delay={320}>
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <AsyncWidget
-            query={topClients}
-            errorText="Could not load top clients."
-            emptyText="No top clients found for this period."
-            skeleton={<TopClientsSkeleton />}
-          >
-            {(data) => (
-              <TopClientsTable data={data} by={topClientsBy} onByChange={onTopClientsByChange} />
-            )}
-          </AsyncWidget>
+          <Can permission="finance:read">
+            <AsyncWidget
+              query={topClients}
+              errorText="Could not load top clients."
+              emptyText="No top clients found for this period."
+              skeleton={<TopClientsSkeleton />}
+            >
+              {(data) => (
+                <TopClientsTable data={data} by={topClientsBy} onByChange={onTopClientsByChange} />
+              )}
+            </AsyncWidget>
+          </Can>
 
           <AsyncWidget
             query={projectHealth}

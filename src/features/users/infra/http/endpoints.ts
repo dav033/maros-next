@@ -1,0 +1,9 @@
+import { api } from "@/shared/infra";
+
+export const endpoints = {
+  users: () => api.resource("users"),
+  user: (id: number) => `${api.resource("users")}/${id}`,
+  roles: () => api.resource("roles"),
+  role: (id: number) => `${api.resource("roles")}/${id}`,
+  permissions: () => api.resource("permissions"),
+} as const;

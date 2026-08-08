@@ -7,3 +7,4 @@ export { createProjectsAppContext } from "./projectsFactory";
 export { createAnalyticsAppContext } from "./analyticsFactory";
 export { createQuickbooksAppContext } from "./quickbooksFactory";
 export { createNotesAppContext } from "./notesFactory";
+export { createUsersAppContext } from "./usersFactory";

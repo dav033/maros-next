@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronRight, LogOut } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -15,15 +16,46 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useCurrentUser } from "@/shared/auth/CurrentUserProvider";
+import type { Permission } from "@/shared/auth/permissions";
+import { logoutAction } from "@/app/actions/auth";
 import { SIDEBAR_CONFIG } from "./sidebarConfig";
-import type { SidebarDropdownConfig } from "./sidebarConfig";
+import type { SidebarDropdownConfig, SidebarSection } from "./sidebarConfig";
 import type { SidebarItemProps } from "./sidebarConfig";
 
 const SIDEBAR_GROUPS_STORAGE_KEY = "maros.sidebar.openGroups";
 
+function filterByPermission(
+  items: SidebarDropdownConfig[],
+  hasPermission: (permission: Permission) => boolean
+): SidebarDropdownConfig[] {
+  const result: SidebarDropdownConfig[] = [];
+  for (const item of items) {
+    if ("trigger" in item) {
+      const children = filterByPermission(item.items, hasPermission);
+      if (children.length > 0) result.push({ ...item, items: children });
+      continue;
+    }
+    if (!item.permission || hasPermission(item.permission)) {
+      result.push(item);
+    }
+  }
+  return result;
+}
+
 export function AppSidebar() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { user, hasPermission } = useCurrentUser();
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() => {
     const defaults = {
       Leads: true,
@@ -166,16 +198,53 @@ export function AppSidebar() {
         {SIDEBAR_CONFIG.top.map((entry, index) => {
           if (!("section" in entry)) return null;
 
+          const visibleItems = filterByPermission(
+            (entry as SidebarSection).items,
+            hasPermission
+          );
+          if (visibleItems.length === 0) return null;
+
           return (
             <SidebarGroup key={`${entry.section}-${index}`}>
               {entry.section && <SidebarGroupLabel>{entry.section}</SidebarGroupLabel>}
               <SidebarGroupContent>
-                <SidebarMenu>{renderItems(entry.items)}</SidebarMenu>
+                <SidebarMenu>{renderItems(visibleItems)}</SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
           );
         })}
       </SidebarContent>
+
+      <SidebarFooter className="border-t p-2">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <SidebarMenuButton className="h-auto py-2">
+              <Avatar className="h-7 w-7">
+                <AvatarImage src={user?.picture ?? undefined} alt={user?.name ?? user?.email} />
+                <AvatarFallback>
+                  {(user?.name ?? user?.email ?? "?").charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex min-w-0 flex-col items-start group-data-[collapsible=icon]:hidden">
+                <span className="truncate text-sm font-medium">
+                  {user?.name ?? user?.email ?? "Unknown"}
+                </span>
+                <span className="truncate text-xs text-muted-foreground">{user?.role?.name}</span>
+              </div>
+            </SidebarMenuButton>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent side="top" align="start" className="w-56">
+            <DropdownMenuLabel className="truncate font-normal text-muted-foreground">
+              {user?.email}
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onSelect={() => void logoutAction()}>
+              <LogOut className="h-4 w-4" />
+              Sign out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </SidebarFooter>
     </Sidebar>
   );
 }

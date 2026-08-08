@@ -11,6 +11,7 @@ import type { ProjectsAppContext } from "@/project";
 import type { AnalyticsAppContext } from "@/analytics";
 import type { QuickbooksAppContext } from "@/quickbooks";
 import type { NotesAppContext } from "@/notes";
+import type { UsersAppContext } from "@/features/users";
 import {
   createContactsAppContext,
   createLeadsAppContext,
@@ -21,6 +22,7 @@ import {
   createAnalyticsAppContext,
   createQuickbooksAppContext,
   createNotesAppContext,
+  createUsersAppContext,
 } from "./factories";
 
 type DiContextValue = {
@@ -33,6 +35,7 @@ type DiContextValue = {
   analyticsApp: AnalyticsAppContext;
   quickbooksApp: QuickbooksAppContext;
   notesApp: NotesAppContext;
+  usersApp: UsersAppContext;
 };
 
 const DiContext = createContext<DiContextValue | null>(null);
@@ -52,6 +55,7 @@ export function DiProvider({ children }: Props) {
     analyticsApp: createAnalyticsAppContext(),
     quickbooksApp: createQuickbooksAppContext(),
     notesApp: createNotesAppContext(),
+    usersApp: createUsersAppContext(),
   }), []);
 
   return <DiContext.Provider value={value}>{children}</DiContext.Provider>;
@@ -127,4 +131,12 @@ export function useNotesApp(): NotesAppContext {
     throw new Error("useNotesApp must be used within DiProvider");
   }
   return context.notesApp;
+}
+
+export function useUsersApp(): UsersAppContext {
+  const context = useContext(DiContext);
+  if (!context) {
+    throw new Error("useUsersApp must be used within DiProvider");
+  }
+  return context.usersApp;
 }
