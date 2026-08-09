@@ -1,5 +1,5 @@
-import { unstable_cache } from "next/cache";
-import { serverApiClient } from "@/shared/infra/http";
+import { headers } from "next/headers";
+import { createServerApiClient } from "@/shared/infra/http";
 import { ProjectHttpRepository, makeProjectsAppContext } from "@/project";
 import { LeadHttpRepository } from "@/leads";
 import { listProjects } from "@/project/application";
@@ -10,10 +10,11 @@ export interface ProjectsPageData {
 }
 
 async function fetchProjectsData(): Promise<ProjectsPageData> {
+  const apiClient = createServerApiClient(await headers());
   const ctx = makeProjectsAppContext({
     repos: {
-      project: new ProjectHttpRepository(serverApiClient),
-      lead: new LeadHttpRepository(serverApiClient),
+      project: new ProjectHttpRepository(apiClient),
+      lead: new LeadHttpRepository(apiClient),
     },
   });
 
@@ -27,8 +28,4 @@ async function fetchProjectsData(): Promise<ProjectsPageData> {
   };
 }
 
-export const loadProjectsData = unstable_cache(
-  fetchProjectsData,
-  ["projects-page-data"],
-  { revalidate: 60 }
-);
+export const loadProjectsData = fetchProjectsData;

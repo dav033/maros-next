@@ -1,4 +1,5 @@
-import { serverApiClient } from "@/shared/infra/http";
+import { createServerApiClient } from "@/shared/infra/http";
+import { headers } from "next/headers";
 import { LeadHttpRepository, makeLeadsAppContext, LeadNumberAvailabilityHttpService } from "@/leads";
 import { listLeadsByType } from "@/leads/application";
 import { ContactHttpRepository, makeContactsAppContext } from "@/contact";
@@ -18,11 +19,12 @@ export interface LeadsPageData {
 }
 
 export async function loadLeadsData(leadType: LeadType): Promise<LeadsPageData> {
+  const apiClient = createServerApiClient(await headers());
   const leadsCtx = makeLeadsAppContext({
     clock: SystemClock,
     repos: {
-      lead: new LeadHttpRepository(serverApiClient),
-      contact: new ContactHttpRepository(serverApiClient),
+      lead: new LeadHttpRepository(apiClient),
+      contact: new ContactHttpRepository(apiClient),
       projectType: new ProjectTypeHttpRepository(),
     },
     services: {
@@ -32,7 +34,7 @@ export async function loadLeadsData(leadType: LeadType): Promise<LeadsPageData> 
 
   const contactsCtx = makeContactsAppContext({
     repos: {
-      contact: new ContactHttpRepository(serverApiClient),
+      contact: new ContactHttpRepository(apiClient),
     },
   });
 
@@ -54,4 +56,3 @@ export async function loadLeadsData(leadType: LeadType): Promise<LeadsPageData> 
     projectTypes: projectTypes ?? [],
   };
 }
-
