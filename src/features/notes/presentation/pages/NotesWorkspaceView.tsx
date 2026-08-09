@@ -1,12 +1,25 @@
 "use client";
 
 import Link from "next/link";
-import { Briefcase, ChevronRight, FileText, Folder, Plus, Star, Trash2, X } from "lucide-react";
+import {
+  Briefcase,
+  ChevronRight,
+  Eye,
+  FileText,
+  Folder,
+  Globe,
+  Plus,
+  Share2,
+  Star,
+  Trash2,
+  X,
+} from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { NoteEditor } from "../organisms/NoteEditor";
+import { ShareNoteDialog } from "../organisms/ShareNoteDialog";
 import { NoteFolderView } from "./NoteFolderView";
 import { TagPicker } from "../molecules/TagPicker";
 import { NoteEntityPicker } from "../molecules/NoteEntityPicker";
@@ -63,13 +76,21 @@ export function NotesWorkspaceView({ logic }: { logic: UseNotesWorkspaceLogicRet
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent text-primary">
               {isFolder ? <Folder className="h-5 w-5" /> : <FileText className="h-5 w-5" />}
             </div>
-            <Input
-              value={logic.title}
-              onChange={(e) => logic.setTitle(e.target.value)}
-              onBlur={logic.onTitleBlur}
-              placeholder="Untitled"
-              className="border-none px-0 text-3xl font-semibold shadow-none focus-visible:ring-0"
-            />
+            {logic.canEdit ? (
+              <Input
+                value={logic.title}
+                onChange={(e) => logic.setTitle(e.target.value)}
+                onBlur={logic.onTitleBlur}
+                placeholder="Untitled"
+                className="border-none px-0 text-3xl font-semibold shadow-none focus-visible:ring-0"
+              />
+            ) : (
+              // A disabled Input still reads as a field you might be able to use. A
+              // read-only page simply has no field.
+              <h1 className="truncate text-3xl font-semibold">
+                {logic.title || "Untitled"}
+              </h1>
+            )}
           </div>
 
           <div className="mb-4 flex items-center justify-between gap-4">
@@ -96,6 +117,15 @@ export function NotesWorkspaceView({ logic }: { logic: UseNotesWorkspaceLogicRet
               )}
             </div>
             <div className="flex shrink-0 items-center gap-1">
+              {logic.activePage?.isPublished && (
+                <span
+                  className="inline-flex items-center gap-1 rounded-md bg-emerald-500/10 px-2 py-1 text-[11px] font-medium text-emerald-700 dark:text-emerald-300"
+                  title="This note is published on the web"
+                >
+                  <Globe className="h-3 w-3" />
+                  Published
+                </span>
+              )}
               <Button
                 variant="ghost"
                 size="icon"
@@ -109,11 +139,40 @@ export function NotesWorkspaceView({ logic }: { logic: UseNotesWorkspaceLogicRet
                   )}
                 />
               </Button>
-              <Button variant="ghost" size="icon" onClick={logic.onTrash} title="Move to trash">
-                <Trash2 className="h-4 w-4" />
-              </Button>
+              {logic.canEdit && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={() => logic.setShareOpen(true)}
+                  title="Share"
+                >
+                  <Share2 className="h-4 w-4" />
+                  Share
+                </Button>
+              )}
+              {logic.canEdit && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={logic.onTrash}
+                  title="Move to trash"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              )}
             </div>
           </div>
+
+          {!logic.canEdit && (
+            <div className="mb-4 flex items-center gap-2 rounded-lg border border-border/60 bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+              <Eye className="h-3.5 w-3.5 shrink-0" />
+              <span>
+                This note was shared with you as read-only. Ask its owner if you need to
+                make changes.
+              </span>
+            </div>
+          )}
 
           <div className="mb-4 flex flex-wrap items-center gap-2">
             {logic.activePage?.entityKind && logic.activePage.entityId != null ? (
@@ -126,17 +185,21 @@ export function NotesWorkspaceView({ logic }: { logic: UseNotesWorkspaceLogicRet
                 ) : (
                   <span className="max-w-[16rem] truncate">{entity.label ?? "Loading…"}</span>
                 )}
-                <button
-                  type="button"
-                  onClick={() => logic.onEntityLinkChange({ entityKind: null, entityId: null })}
-                  title="Unassign"
-                  aria-label="Unassign from lead or project"
-                  className="rounded p-0.5 text-muted-foreground hover:bg-background hover:text-foreground"
-                >
-                  <X className="h-3 w-3" />
-                </button>
+                {logic.canEdit && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      logic.onEntityLinkChange({ entityKind: null, entityId: null })
+                    }
+                    title="Unassign"
+                    aria-label="Unassign from lead or project"
+                    className="rounded p-0.5 text-muted-foreground hover:bg-background hover:text-foreground"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                )}
               </span>
-            ) : (
+            ) : logic.canEdit ? (
               <NoteEntityPicker
                 onSelect={logic.onEntityLinkChange}
                 trigger={
@@ -149,7 +212,7 @@ export function NotesWorkspaceView({ logic }: { logic: UseNotesWorkspaceLogicRet
                   </button>
                 }
               />
-            )}
+            ) : null}
           </div>
 
           <div className="mb-6 flex flex-wrap items-center gap-3">
@@ -165,19 +228,21 @@ export function NotesWorkspaceView({ logic }: { logic: UseNotesWorkspaceLogicRet
                 {tag.name}
               </span>
             ))}
-            <TagPicker
-              selectedTagIds={logic.activePage?.tags.map((t) => t.id) ?? []}
-              onChange={logic.onTagsChange}
-              trigger={
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-1 text-[12.5px] text-muted-foreground hover:text-foreground"
-                >
-                  <Plus className="h-3 w-3" />
-                  Add label
-                </button>
-              }
-            />
+            {logic.canEdit && (
+              <TagPicker
+                selectedTagIds={logic.activePage?.tags.map((t) => t.id) ?? []}
+                onChange={logic.onTagsChange}
+                trigger={
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1 text-[12.5px] text-muted-foreground hover:text-foreground"
+                  >
+                    <Plus className="h-3 w-3" />
+                    Add label
+                  </button>
+                }
+              />
+            )}
           </div>
 
           {!logic.activePageLoading &&
@@ -193,8 +258,18 @@ export function NotesWorkspaceView({ logic }: { logic: UseNotesWorkspaceLogicRet
                 pageId={logic.activePageId}
                 initialContent={logic.activePage?.content ?? emptyNoteDoc()}
                 onChange={logic.onContentChange}
+                editable={logic.canEdit}
               />
             ))}
+
+          {logic.activePageId != null && (
+            <ShareNoteDialog
+              pageId={logic.activePageId}
+              pageTitle={logic.title}
+              open={logic.shareOpen}
+              onOpenChange={logic.setShareOpen}
+            />
+          )}
         </div>
       )}
     </main>

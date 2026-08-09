@@ -1,6 +1,11 @@
 import { headers } from "next/headers";
 import { createServerApiClient } from "@/shared/infra/http";
-import { NotePageHttpRepository, makeNotesAppContext, NoteTagHttpRepository } from "@/notes";
+import {
+  NotePageHttpRepository,
+  NoteSharingHttpRepository,
+  NoteTagHttpRepository,
+  makeNotesAppContext,
+} from "@/notes";
 import { listNoteTree, getNotePage } from "@/notes/application";
 import { SystemClock } from "@/shared/domain";
 import type { NotePage, NotePageSummary } from "@/notes/domain";
@@ -17,6 +22,7 @@ export async function loadNotePageData(pageId: number): Promise<NotePageRouteDat
     repos: {
       notePage: new NotePageHttpRepository(api),
       noteTag: new NoteTagHttpRepository(api),
+      noteSharing: new NoteSharingHttpRepository(api),
     },
   });
 

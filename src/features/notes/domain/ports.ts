@@ -1,6 +1,11 @@
 import type {
+  NoteAccessPanel,
+  NoteDirectoryUser,
   NoteEntityKind,
   NoteEntityLink,
+  NoteLinkDraft,
+  NoteLinkPatch,
+  NoteLinkStats,
   NoteMoveResult,
   NotePage,
   NotePageDraft,
@@ -8,7 +13,11 @@ import type {
   NotePagePatch,
   NotePageSummary,
   NoteSearchHit,
+  NoteShareAccess,
+  NoteShareLink,
+  NoteShareSubjectType,
   NoteTag,
+  NoteVisibility,
 } from "./models";
 
 export interface NotePageRepositoryPort {
@@ -37,6 +46,40 @@ export interface NotePageRepositoryPort {
   trash(id: NotePageId): Promise<void>;
   restore(id: NotePageId): Promise<NotePage>;
   purge(id: NotePageId): Promise<void>;
+}
+
+export interface NoteSharingRepositoryPort {
+  /** Notes reachable only through a grant — nothing already visible to the whole team. */
+  listSharedWithMe(): Promise<NotePageSummary[]>;
+  getAccessPanel(id: NotePageId): Promise<NoteAccessPanel>;
+  setVisibility(id: NotePageId, visibility: NoteVisibility): Promise<NotePage>;
+
+  addShare(
+    id: NotePageId,
+    grant: {
+      subjectType: NoteShareSubjectType;
+      subjectId: number;
+      access: NoteShareAccess;
+      expiresAt?: string;
+    }
+  ): Promise<NoteAccessPanel>;
+  updateShare(
+    id: NotePageId,
+    shareId: number,
+    patch: { access?: NoteShareAccess; expiresAt?: string | null }
+  ): Promise<NoteAccessPanel>;
+  removeShare(id: NotePageId, shareId: number): Promise<void>;
+
+  /** The returned link is the only time its URL is ever available. */
+  createLink(id: NotePageId, draft: NoteLinkDraft): Promise<NoteShareLink>;
+  updateLink(id: NotePageId, linkId: number, patch: NoteLinkPatch): Promise<NoteShareLink>;
+  rotateLink(id: NotePageId, linkId: number): Promise<NoteShareLink>;
+  revokeLink(id: NotePageId, linkId: number): Promise<void>;
+  getLinkStats(id: NotePageId, linkId: number): Promise<NoteLinkStats>;
+  listAllLinks(): Promise<import("./models").NoteAdminLink[]>;
+  adminRevokeLink(linkId: number): Promise<void>;
+
+  listDirectory(): Promise<NoteDirectoryUser[]>;
 }
 
 export interface NoteTagRepositoryPort {

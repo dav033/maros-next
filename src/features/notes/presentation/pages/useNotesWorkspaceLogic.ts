@@ -2,10 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { useInstantNoteTree } from "../hooks/data/useInstantNoteTree";
 import { useInstantNotePage } from "../hooks/data/useInstantNotePage";
 import { useNoteMutations } from "../hooks/mutations/useNoteMutations";
 import { useNoteAutosave } from "../hooks/mutations/useNoteAutosave";
+import { hasNoteAccess } from "@/notes/domain";
 import type { NoteEntityLink, NoteKind, NotePage, NotePageSummary } from "@/notes/domain";
 
 export interface UseNotesWorkspaceLogicOptions {
@@ -34,6 +36,7 @@ export function useNotesWorkspaceLogic({
   const autosave = useNoteAutosave(activePageId ?? -1);
 
   const [title, setTitle] = useState("");
+  const [shareOpen, setShareOpen] = useState(false);
   const loadedPageIdRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -122,8 +125,31 @@ export function useNotesWorkspaceLogic({
   ) => {
     // `void` only discards the return value — it doesn't attach a catch, so
     // a rejection here would still surface as an unhandled promise rejection.
-    moveMutation.mutate({ id, parentId, beforeId, afterId });
+    moveMutation.mutate(
+      { id, parentId, beforeId, afterId },
+      {
+        onSuccess: (result) => {
+          // Grants are inherited downward, so dragging a page out of a shared folder
+          // takes it away from everyone that folder was shared with. Saying so is the
+          // difference between a deliberate change and a note someone can no longer
+          // open for reasons nobody remembers.
+          if (result.accessChanged) {
+            toast.warning(
+              "Moved out of a shared folder — people who reached this note through it have lost access."
+            );
+          }
+        },
+      }
+    );
   };
+
+  /**
+   * What the open page allows. Defaults to `owner` while it loads so the toolbar does
+   * not flicker from read-only into editable on every navigation; the server is the
+   * real gate either way, this only decides what the UI offers.
+   */
+  const myAccess = activePage.page?.myAccess ?? "owner";
+  const canEdit = hasNoteAccess(myAccess, "editor");
 
   return {
     tree: tree.pages,
@@ -142,6 +168,11 @@ export function useNotesWorkspaceLogic({
     onToggleFavorite: handleToggleFavorite,
     onTagsChange: handleTagsChange,
     onEntityLinkChange: handleEntityLinkChange,
+    myAccess,
+    canEdit,
+    canManage: hasNoteAccess(myAccess, "owner"),
+    shareOpen,
+    setShareOpen,
     onSetFavorite: (id: number, isFavorite: boolean) =>
       favoriteMutation.mutate({ id, isFavorite }),
     saveStatus: autosave.status,

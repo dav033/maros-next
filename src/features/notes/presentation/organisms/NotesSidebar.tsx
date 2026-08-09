@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Star, Trash } from "lucide-react";
+import { Star, Trash, Users } from "lucide-react";
 import { NoteTreePanel } from "./NoteTreePanel";
 import { useInstantNoteTree } from "../hooks/data/useInstantNoteTree";
 import { useNoteMutations } from "../hooks/mutations/useNoteMutations";
@@ -76,6 +76,13 @@ export function NotesSidebar() {
         />
       </div>
       <div className="border-t border-border/60">
+        <Link
+          href="/notes/shared"
+          className="flex items-center gap-2 px-3 py-2 text-xs text-muted-foreground hover:text-foreground"
+        >
+          <Users className="h-3.5 w-3.5" />
+          Shared with me
+        </Link>
         <Link
           href="/notes/favorites"
           className="flex items-center gap-2 px-3 py-2 text-xs text-muted-foreground hover:text-foreground"

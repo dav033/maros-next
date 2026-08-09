@@ -12,6 +12,7 @@ import {
   CheckCircle2,
   NotebookPen,
   ShieldCheck,
+  Globe,
 } from "lucide-react";
 import type { Permission } from "@/shared/auth/permissions";
 
@@ -167,6 +168,12 @@ const settingsSection: SidebarSection = {
       href: "/settings/roles",
       icon: ShieldCheck,
       permission: "users:read",
+    },
+    {
+      title: "Public links",
+      href: "/settings/public-links",
+      icon: Globe,
+      permission: "users:write",
     },
   ],
 };

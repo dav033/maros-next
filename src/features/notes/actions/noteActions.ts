@@ -2,7 +2,12 @@
 
 import { headers } from "next/headers";
 import { createServerApiClient } from "@/shared/infra/http";
-import { NotePageHttpRepository, NoteTagHttpRepository, makeNotesAppContext } from "@/notes";
+import {
+  NotePageHttpRepository,
+  NoteSharingHttpRepository,
+  NoteTagHttpRepository,
+  makeNotesAppContext,
+} from "@/notes";
 import { SystemClock } from "@/shared/domain";
 import type { ActionResult } from "@/shared/actions/types";
 import { success, handleActionError } from "@/shared/actions/utils";
@@ -26,6 +31,7 @@ async function createServerNotesAppContext() {
     repos: {
       notePage: new NotePageHttpRepository(api),
       noteTag: new NoteTagHttpRepository(api),
+      noteSharing: new NoteSharingHttpRepository(api),
     },
   });
 }

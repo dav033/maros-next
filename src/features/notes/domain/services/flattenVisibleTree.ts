@@ -7,6 +7,8 @@ export interface VisibleNoteRow {
   title: string;
   icon: string | null;
   isFavorite: boolean;
+  isShared: boolean;
+  isPublished: boolean;
   depth: number;
   hasChildren: boolean;
 }
@@ -27,6 +29,8 @@ export function flattenVisibleTree(
       title: node.title,
       icon: node.icon,
       isFavorite: node.isFavorite,
+      isShared: node.isShared,
+      isPublished: node.isPublished,
       depth,
       hasChildren: node.children.length > 0,
     });

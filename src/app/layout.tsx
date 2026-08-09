@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import Script from "next/script";
 import { Work_Sans } from "next/font/google";
 import "../styles/globals.css";
@@ -28,9 +29,14 @@ export const metadata: Metadata = {
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  // Published notes are read by people with no account here, so asking the API who
+  // they are would be a guaranteed 401 on every one of those requests. Middleware
+  // stamps the pathname precisely so this can be skipped.
+  const isPublicReader = (await headers()).get("x-pathname")?.startsWith("/p/") ?? false;
+
   // Only real on pages behind middleware's auth check — on /login there is
   // no session cookie yet, and fetchCurrentUser resolves to null.
-  const currentUser = await fetchCurrentUser();
+  const currentUser = isPublicReader ? null : await fetchCurrentUser();
 
   return (
     <html lang="en" className={`dark ${workSans.variable}`}>

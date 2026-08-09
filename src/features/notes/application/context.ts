@@ -1,4 +1,8 @@
-import type { NotePageRepositoryPort, NoteTagRepositoryPort } from "@/features/notes/domain";
+import type {
+  NotePageRepositoryPort,
+  NoteSharingRepositoryPort,
+  NoteTagRepositoryPort,
+} from "@/features/notes/domain";
 import type { Clock } from "@/shared/domain";
 
 export type NotesAppContext = Readonly<{
@@ -6,6 +10,7 @@ export type NotesAppContext = Readonly<{
   repos: {
     notePage: NotePageRepositoryPort;
     noteTag: NoteTagRepositoryPort;
+    noteSharing: NoteSharingRepositoryPort;
   };
 }>;
 

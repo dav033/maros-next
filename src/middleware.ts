@@ -10,6 +10,18 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Published notes. The share token in the URL is the whole authorisation, checked by
+  // NoteShareLinkGuard on the API side — an unknown, revoked or expired one gets
+  // nothing. Redirecting these to /login would break the one thing the feature is for:
+  // sending a note to somebody who has no account here.
+  if (pathname.startsWith('/p/')) {
+    // Server components cannot read the pathname, and the root layout needs it to skip
+    // resolving a signed-in user that a public reader will never have.
+    const headers = new Headers(request.headers);
+    headers.set('x-pathname', pathname);
+    return NextResponse.next({ request: { headers } });
+  }
+
   const sessionCookie = request.cookies.get(SESSION_COOKIE)?.value;
   const session = sessionCookie ? await verifySessionToken(sessionCookie) : null;
 

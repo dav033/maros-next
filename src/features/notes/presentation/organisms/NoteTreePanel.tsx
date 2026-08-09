@@ -7,11 +7,13 @@ import {
   Folder,
   FolderOpen,
   FolderPlus,
+  Globe,
   GripVertical,
   MoreHorizontal,
   Plus,
   Star,
   Trash2,
+  Users,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -118,6 +120,21 @@ function SortableNoteTreeRow({
             <RowIcon row={row} isOpen={isOpen} />
           </span>
           <span className="truncate">{row.title || "Untitled"}</span>
+          {/* Two states worth seeing at a glance from the tree: this note left the
+              building, and this note was handed to someone. Both stay visible rather
+              than appearing on hover — that is the point of them. */}
+          {row.isPublished && (
+            <Globe
+              className="h-3 w-3 shrink-0 text-emerald-600 dark:text-emerald-400"
+              aria-label="Published on the web"
+            />
+          )}
+          {row.isShared && !row.isPublished && (
+            <Users
+              className="h-3 w-3 shrink-0 text-muted-foreground"
+              aria-label="Shared with specific people"
+            />
+          )}
         </Link>
         <button
           type="button"

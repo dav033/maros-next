@@ -14,4 +14,9 @@ export const notesKeys = {
     [...base.all, "byEntity", kind, entityId] as const,
   search: (query: string) => [...base.all, "search", query] as const,
   tags: () => [...base.all, "tags"] as const,
+  sharedWithMe: () => [...base.all, "shared-with-me"] as const,
+  access: (id: number) => [...base.all, "access", id] as const,
+  linkViews: (id: number, linkId: number) =>
+    [...base.all, "access", id, "links", linkId, "views"] as const,
+  directory: () => [...base.all, "directory"] as const,
 } as const;

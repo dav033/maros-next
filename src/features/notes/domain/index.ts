@@ -9,3 +9,5 @@ export {
   type ReparentProjection,
 } from "./services/projectNoteReparent";
 export { resolveNoteAncestors } from "./services/resolveNoteAncestors";
+export { extractPublicNoteSummary } from "./services/publicNoteSummary";
+export { buildNoteToc, type NoteTocEntry } from "./services/buildNoteToc";

@@ -559,3 +559,42 @@ button[role="tab"][data-state="active"],
   color: hsl(var(--muted-foreground));
   text-decoration: line-through;
 }
+/* ---------------------------------------------------------------------------
+   Printing a published note
+   ---------------------------------------------------------------------------
+   Customers print quotes and scopes of work, and "Save as PDF" is the same code
+   path. Without this the page prints the app's dark theme: white text on a
+   background most printers drop, i.e. a blank sheet.
+   Anything marked print:hidden (navigation, contents list, the print button
+   itself) is already removed by Tailwind's print variant.
+--------------------------------------------------------------------------- */
+@media print {
+  :root {
+    color-scheme: light;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  /* Keep hyperlinks readable on paper: underlined and dark, not theme-blue. */
+  .ProseMirror a {
+    color: #000 !important;
+    text-decoration: underline;
+  }
+
+  /* A heading stranded at the foot of a page reads as belonging to the wrong
+     section, and tables split mid-row are unusable. */
+  .ProseMirror h1,
+  .ProseMirror h2,
+  .ProseMirror h3 {
+    break-after: avoid;
+  }
+
+  .ProseMirror table,
+  .ProseMirror img {
+    break-inside: avoid;
+  }
+}
