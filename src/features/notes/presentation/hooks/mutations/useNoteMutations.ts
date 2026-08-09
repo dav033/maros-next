@@ -3,7 +3,8 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useEntityMutation } from "@/shared/presentation/hooks/useEntityMutation";
 import { notesKeys } from "@/notes/application";
-import type { NoteEntityLink, NotePageDraft, NotePagePatch } from "@/notes/domain";
+import { noteSubtreeIds } from "@/notes/domain";
+import type { NoteEntityLink, NotePageDraft, NotePagePatch, NotePageSummary } from "@/notes/domain";
 import {
   createNotePageAction,
   updateNotePageMetaAction,
@@ -43,8 +44,22 @@ export function useNoteMutations() {
     entityLabel: "Note",
     action: "deleted",
     mutationFn: (id: number) => trashNotePageAction(id),
+    // Notes and folders are soft-deleted as a subtree on the server. Mirror that
+    // cascade in the cached tree first, then restore the exact previous tree if the
+    // request fails — no waiting for the network before the UI responds.
+    optimistic: (qc, id) => {
+      const key = notesKeys.tree();
+      const previous = qc.getQueryData<NotePageSummary[]>(key);
+      const removedIds = noteSubtreeIds(previous ?? [], id);
+      void qc.cancelQueries({ queryKey: key });
+      qc.setQueryData<NotePageSummary[]>(key, (pages) =>
+        pages?.filter((page) => !removedIds.has(page.id)) ?? []
+      );
+      return { restore: () => qc.setQueryData(key, previous) };
+    },
     invalidate: (qc) => {
       void qc.invalidateQueries({ queryKey: notesKeys.tree() });
+      void qc.invalidateQueries({ queryKey: notesKeys.trash() });
     },
   });
 

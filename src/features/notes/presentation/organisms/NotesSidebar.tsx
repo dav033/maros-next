@@ -53,11 +53,12 @@ export function NotesSidebar() {
   };
 
   const handleTrash = async (id: number) => {
+    const request = trashMutation.mutateAsync(id);
     try {
-      await trashMutation.mutateAsync(id);
       // Only navigate away when the page that just went to the trash is the one on
       // screen — trashing from the sidebar shouldn't yank the user off another note.
       if (pathname === `/notes/${id}`) router.push("/notes");
+      await request;
     } catch {
       // handled by onError
     }

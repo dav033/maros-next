@@ -94,9 +94,13 @@ export function useNotesWorkspaceLogic({
 
   const handleTrash = async () => {
     if (activePageId == null) return;
+    // Start the mutation, then leave the page immediately. Its onMutate removes the
+    // note/folder from the tree before the request reaches the server; on failure the
+    // mutation restores that exact cached tree and shows the error toast.
+    const request = trashMutation.mutateAsync(activePageId);
+    router.push("/notes");
     try {
-      await trashMutation.mutateAsync(activePageId);
-      router.push("/notes");
+      await request;
     } catch {
       // handled by onError
     }
