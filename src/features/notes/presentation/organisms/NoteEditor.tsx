@@ -11,6 +11,7 @@ import { Placeholder } from "@tiptap/extensions";
 import { emptyNoteDoc } from "@/notes/domain";
 import { SlashCommand } from "@/features/notes/config/slashCommandExtension";
 import { NoteImage } from "@/features/notes/config/noteImageExtension";
+import { Callout } from "@/features/notes/config/calloutExtension";
 import { useNoteImageUpload } from "../hooks/editor/useNoteImageUpload";
 
 export interface NoteEditorProps {
@@ -49,6 +50,7 @@ export function NoteEditor({
       TaskItem.configure({ nested: true }),
       TableKit.configure({ table: { resizable: false } }),
       NoteImage,
+      Callout,
       Placeholder.configure({
         placeholder: "Write something, or press '/' for commands…",
       }),

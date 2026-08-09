@@ -8,3 +8,4 @@ export {
   projectNoteReparent,
   type ReparentProjection,
 } from "./services/projectNoteReparent";
+export { resolveNoteAncestors } from "./services/resolveNoteAncestors";

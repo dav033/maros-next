@@ -13,6 +13,7 @@ import {
   Code,
   Minus,
   Type,
+  AlertTriangle,
 } from "lucide-react";
 
 export interface NoteSlashCommandItem {
@@ -110,6 +111,15 @@ export const NOTE_SLASH_COMMANDS: NoteSlashCommandItem[] = [
       if (!url) return;
       editor.chain().focus().deleteRange(range).setImage({ src: url }).run();
     },
+  },
+  {
+    id: "callout",
+    title: "Callout",
+    description: "Highlighted note or warning",
+    icon: AlertTriangle,
+    keywords: ["callout", "notice", "warning", "alert"],
+    run: (editor, range) =>
+      editor.chain().focus().deleteRange(range).setNode("callout").run(),
   },
   {
     id: "blockquote",
