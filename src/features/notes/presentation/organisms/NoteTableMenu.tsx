@@ -14,14 +14,17 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { notifyEditorUndo } from "./noteEditorUndo";
 
 type TableAction = {
   id: string;
   label: string;
   icon: LucideIcon;
-  run: (editor: Editor) => void;
+  run: (editor: Editor) => boolean;
   /** Destructive actions get the red hover treatment. */
   danger?: boolean;
+  /** Destructive table edits remain immediate and can be undone with the editor history. */
+  undoable?: boolean;
 };
 
 const ACTIONS: TableAction[] = [
@@ -67,6 +70,7 @@ const ACTIONS: TableAction[] = [
     icon: Rows3,
     run: (editor) => editor.chain().focus().deleteRow().run(),
     danger: true,
+    undoable: true,
   },
   {
     id: "deleteColumn",
@@ -74,6 +78,7 @@ const ACTIONS: TableAction[] = [
     icon: Columns3,
     run: (editor) => editor.chain().focus().deleteColumn().run(),
     danger: true,
+    undoable: true,
   },
 ];
 
@@ -111,7 +116,10 @@ export function NoteTableMenu({ editor }: { editor: Editor }) {
           }
           title={action.label}
           aria-label={action.label}
-          onClick={() => action.run(editor)}
+          onClick={() => {
+            const changed = action.run(editor);
+            if (changed && action.undoable) notifyEditorUndo();
+          }}
         >
           <action.icon className="h-3.5 w-3.5" />
         </Button>

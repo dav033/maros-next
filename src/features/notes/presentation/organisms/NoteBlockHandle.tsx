@@ -10,6 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { notifyEditorUndo } from "./noteEditorUndo";
 
 /**
  * Hover-revealed grip + delete for whatever block the cursor is over — a paragraph,
@@ -25,7 +26,8 @@ export function NoteBlockHandle({ editor }: { editor: Editor }) {
   const handleDelete = useCallback(() => {
     const pos = targetPos.current;
     if (pos === null) return;
-    editor.chain().focus().setNodeSelection(pos).deleteSelection().run();
+    const deleted = editor.chain().focus().setNodeSelection(pos).deleteSelection().run();
+    if (deleted) notifyEditorUndo();
   }, [editor]);
 
   return (
