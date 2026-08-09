@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Briefcase, Building2, FolderKanban, UserRound } from "lucide-react";
 import {
   Command,
@@ -39,10 +39,34 @@ export function NoteEntityPicker({
 
   // Both lists load only once the popover opens: the notes workspace shouldn't pay
   // for the whole pipeline on every page view.
-  const { leads } = useInstantLeads(undefined, { enabled: open });
-  const { projects } = useInstantProjects(undefined, { enabled: open });
-  const { contacts } = useInstantContacts(undefined, { enabled: open });
-  const { companies } = useInstantCompanies(undefined, { enabled: open });
+  const leadsQuery = useInstantLeads(undefined, { enabled: open });
+  const projectsQuery = useInstantProjects(undefined, { enabled: open });
+  const contactsQuery = useInstantContacts(undefined, { enabled: open });
+  const companiesQuery = useInstantCompanies(undefined, { enabled: open });
+
+  // A notes page may be open for a while, while leads and projects are changed in a
+  // different tab. Refresh on opening rather than trusting an empty cached list — the
+  // picker should never look empty merely because its first background request raced.
+  useEffect(() => {
+    if (!open) return;
+    void leadsQuery.refetch();
+    void projectsQuery.refetch();
+    void contactsQuery.refetch();
+    void companiesQuery.refetch();
+  }, [open]);
+
+  const leads = leadsQuery.leads;
+  const projects = projectsQuery.projects;
+  const contacts = contactsQuery.contacts;
+  const companies = companiesQuery.companies;
+  const activeQuery =
+    tab === "lead"
+      ? leadsQuery
+      : tab === "project"
+        ? projectsQuery
+        : tab === "contact"
+          ? contactsQuery
+          : companiesQuery;
 
   const choose = (entityKind: PickerTab, entityId: number) => {
     onSelect({ entityKind, entityId });
@@ -67,7 +91,13 @@ export function NoteEntityPicker({
         <Command>
           <CommandInput placeholder={`Search ${tab}s…`} />
           <CommandList>
-            <CommandEmpty>No matches.</CommandEmpty>
+            <CommandEmpty>
+              {activeQuery.isLoading || activeQuery.isFetching
+                ? "Loading records…"
+                : activeQuery.error
+                  ? "Couldn’t load records. Try again."
+                  : "No matches."}
+            </CommandEmpty>
             {tab === "lead" ? (
               <CommandGroup>
                 {(leads ?? []).map((lead) => (
