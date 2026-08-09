@@ -14,11 +14,12 @@ import { NoteImage } from "@/features/notes/config/noteImageExtension";
 import { Callout } from "@/features/notes/config/calloutExtension";
 import { NOTE_SLASH_COMMANDS } from "@/features/notes/config/noteSlashCommands";
 import { useNoteImageUpload } from "../hooks/editor/useNoteImageUpload";
+import { NoteTableMenu } from "./NoteTableMenu";
 import { Button } from "@/components/ui/button";
 
-// Same three commands the "/" menu offers — surfaced as one-click buttons too,
-// since not every user thinks to type "/" to discover them.
-const QUICK_INSERT_IDS = ["table", "taskList", "callout"];
+// A few of the "/" menu's commands, surfaced as one-click buttons too, since not
+// every user thinks to type "/" to discover them.
+const QUICK_INSERT_IDS = ["table", "taskList", "callout", "reminder"];
 const QUICK_INSERT_COMMANDS = NOTE_SLASH_COMMANDS.filter((cmd) =>
   QUICK_INSERT_IDS.includes(cmd.id)
 );
@@ -57,7 +58,7 @@ export function NoteEditor({
       }),
       TaskList,
       TaskItem.configure({ nested: true }),
-      TableKit.configure({ table: { resizable: false } }),
+      TableKit.configure({ table: { resizable: true } }),
       NoteImage,
       Callout,
       Placeholder.configure({
@@ -117,6 +118,7 @@ export function NoteEditor({
           <GripVertical className="h-4 w-4 cursor-grab text-muted-foreground" />
         </DragHandle>
       )}
+      {editable && editor && <NoteTableMenu editor={editor} />}
       {editable && editor && (
         <div className="mb-4 flex items-center gap-1 border-b border-border/60 pb-3">
           {QUICK_INSERT_COMMANDS.map((cmd) => (

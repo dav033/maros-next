@@ -1,5 +1,6 @@
 import type {
   NoteEntityKind,
+  NoteEntityLink,
   NoteMoveResult,
   NotePage,
   NotePageDraft,
@@ -32,6 +33,7 @@ export interface NotePageRepositoryPort {
   ): Promise<NoteMoveResult>;
   setFavorite(id: NotePageId, isFavorite: boolean): Promise<NotePageSummary>;
   setTags(id: NotePageId, tagIds: number[]): Promise<NotePageSummary>;
+  setEntityLink(id: NotePageId, link: NoteEntityLink): Promise<NotePageSummary>;
   trash(id: NotePageId): Promise<void>;
   restore(id: NotePageId): Promise<NotePage>;
   purge(id: NotePageId): Promise<void>;

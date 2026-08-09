@@ -6,7 +6,7 @@ import { useInstantNoteTree } from "../hooks/data/useInstantNoteTree";
 import { useInstantNotePage } from "../hooks/data/useInstantNotePage";
 import { useNoteMutations } from "../hooks/mutations/useNoteMutations";
 import { useNoteAutosave } from "../hooks/mutations/useNoteAutosave";
-import type { NotePage, NotePageSummary } from "@/notes/domain";
+import type { NoteEntityLink, NoteKind, NotePage, NotePageSummary } from "@/notes/domain";
 
 export interface UseNotesWorkspaceLogicOptions {
   activePageId: number | null;
@@ -29,6 +29,7 @@ export function useNotesWorkspaceLogic({
     moveMutation,
     favoriteMutation,
     setTagsMutation,
+    setEntityLinkMutation,
   } = useNoteMutations();
   const autosave = useNoteAutosave(activePageId ?? -1);
 
@@ -43,21 +44,28 @@ export function useNotesWorkspaceLogic({
     autosave.setBaseline(activePage.page);
   }, [activePage.page]);
 
-  const handleCreateRoot = async () => {
+  const handleCreateRoot = async (kind: NoteKind = "page") => {
     // useEntityMutation's onError already surfaces the failure (toast, or a
     // redirect to /login on an expired session) — this catch only stops the
     // rejection from reaching the console and skips the navigation below.
     try {
-      const page = await createMutation.mutateAsync({ title: "Untitled" });
+      const page = await createMutation.mutateAsync({
+        title: kind === "folder" ? "New folder" : "Untitled",
+        kind,
+      });
       router.push(`/notes/${page.id}`);
     } catch {
       // handled by onError
     }
   };
 
-  const handleCreateChild = async (parentId: number) => {
+  const handleCreateChild = async (parentId: number, kind: NoteKind = "page") => {
     try {
-      const page = await createMutation.mutateAsync({ title: "Untitled", parentId });
+      const page = await createMutation.mutateAsync({
+        title: kind === "folder" ? "New folder" : "Untitled",
+        kind,
+        parentId,
+      });
       router.push(`/notes/${page.id}`);
     } catch {
       // handled by onError
@@ -101,6 +109,11 @@ export function useNotesWorkspaceLogic({
     setTagsMutation.mutate({ id: activePageId, tagIds });
   };
 
+  const handleEntityLinkChange = (link: NoteEntityLink) => {
+    if (activePageId == null) return;
+    setEntityLinkMutation.mutate({ id: activePageId, link });
+  };
+
   const handleMove = (
     id: number,
     parentId: number | null,
@@ -128,6 +141,9 @@ export function useNotesWorkspaceLogic({
     onMove: handleMove,
     onToggleFavorite: handleToggleFavorite,
     onTagsChange: handleTagsChange,
+    onEntityLinkChange: handleEntityLinkChange,
+    onSetFavorite: (id: number, isFavorite: boolean) =>
+      favoriteMutation.mutate({ id, isFavorite }),
     saveStatus: autosave.status,
   };
 }

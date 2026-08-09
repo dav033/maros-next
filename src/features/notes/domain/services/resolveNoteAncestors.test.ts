@@ -5,6 +5,7 @@ import type { NotePageSummary } from "../models";
 function page(overrides: Partial<NotePageSummary> & { id: number }): NotePageSummary {
   return {
     parentId: null,
+    kind: "page",
     title: `Page ${overrides.id}`,
     icon: null,
     position: 0,
@@ -14,6 +15,7 @@ function page(overrides: Partial<NotePageSummary> & { id: number }): NotePageSum
     deletedAt: null,
     createdAt: "2024-01-01T00:00:00.000Z",
     updatedAt: "2024-01-01T00:00:00.000Z",
+    lastEditedBy: null,
     tags: [],
     ...overrides,
   };

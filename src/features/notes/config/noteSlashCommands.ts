@@ -14,6 +14,7 @@ import {
   Minus,
   Type,
   AlertTriangle,
+  BellRing,
 } from "lucide-react";
 
 export interface NoteSlashCommandItem {
@@ -114,12 +115,31 @@ export const NOTE_SLASH_COMMANDS: NoteSlashCommandItem[] = [
   },
   {
     id: "callout",
-    title: "Callout",
+    title: "Warning",
     description: "Highlighted note or warning",
     icon: AlertTriangle,
-    keywords: ["callout", "notice", "warning", "alert"],
+    keywords: ["callout", "notice", "warning", "alert", "advertencia"],
     run: (editor, range) =>
-      editor.chain().focus().deleteRange(range).setNode("callout").run(),
+      editor
+        .chain()
+        .focus()
+        .deleteRange(range)
+        .setNode("callout", { variant: "warning", dueDate: null })
+        .run(),
+  },
+  {
+    id: "reminder",
+    title: "Reminder",
+    description: "Follow-up with a due date",
+    icon: BellRing,
+    keywords: ["reminder", "due", "follow up", "recordatorio"],
+    run: (editor, range) =>
+      editor
+        .chain()
+        .focus()
+        .deleteRange(range)
+        .setNode("callout", { variant: "reminder", dueDate: null })
+        .run(),
   },
   {
     id: "blockquote",

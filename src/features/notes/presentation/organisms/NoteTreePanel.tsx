@@ -2,7 +2,24 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FileText, GripVertical, Plus } from "lucide-react";
+import {
+  FileText,
+  Folder,
+  FolderOpen,
+  FolderPlus,
+  GripVertical,
+  MoreHorizontal,
+  Plus,
+  Star,
+  Trash2,
+} from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   DndContext,
   PointerSensor,
@@ -19,7 +36,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { cn } from "@/lib/utils";
 import { buildNoteTree, flattenVisibleTree, excludeDescendantRows, projectNoteReparent } from "@/notes/domain";
-import type { NotePageSummary, VisibleNoteRow } from "@/notes/domain";
+import type { NoteKind, NotePageSummary, VisibleNoteRow } from "@/notes/domain";
 
 // Matches the 16px-per-depth indentation used to render each row below, so a
 // horizontal drag of roughly one indent's worth of pixels nests/un-nests a page.
@@ -29,18 +46,31 @@ import { Button } from "@/components/ui/button";
 
 const EXPANDED_STORAGE_KEY = "maros.notes.expanded";
 
+function RowIcon({ row, isOpen }: { row: VisibleNoteRow; isOpen: boolean }) {
+  if (row.icon) return <>{row.icon}</>;
+  if (row.kind === "folder") {
+    const Icon = isOpen ? FolderOpen : Folder;
+    return <Icon className="h-3.5 w-3.5 text-muted-foreground" />;
+  }
+  return <FileText className="h-3.5 w-3.5 text-muted-foreground" />;
+}
+
 function SortableNoteTreeRow({
   row,
   isOpen,
   isActive,
   onToggle,
   onCreateChild,
+  onSetFavorite,
+  onTrash,
 }: {
   row: VisibleNoteRow;
   isOpen: boolean;
   isActive: boolean;
   onToggle: (id: number) => void;
-  onCreateChild: (parentId: number) => void;
+  onCreateChild: (parentId: number, kind?: NoteKind) => void;
+  onSetFavorite: (id: number, isFavorite: boolean) => void;
+  onTrash: (id: number) => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: row.id,
@@ -85,10 +115,25 @@ function SortableNoteTreeRow({
           className="flex min-w-0 flex-1 items-center gap-1.5 truncate"
         >
           <span className="shrink-0">
-            {row.icon ?? <FileText className="h-3.5 w-3.5 text-muted-foreground" />}
+            <RowIcon row={row} isOpen={isOpen} />
           </span>
           <span className="truncate">{row.title || "Untitled"}</span>
         </Link>
+        <button
+          type="button"
+          onClick={() => onSetFavorite(row.id, !row.isFavorite)}
+          // A starred page keeps its star visible; the rest only reveal it on hover,
+          // so the tree doesn't turn into a wall of icons.
+          className={cn(
+            "h-5 w-5 shrink-0 items-center justify-center rounded text-muted-foreground hover:bg-accent group-hover:flex",
+            row.isFavorite ? "flex" : "hidden"
+          )}
+          title={row.isFavorite ? "Remove from favorites" : "Add to favorites"}
+        >
+          <Star
+            className={cn("h-3.5 w-3.5", row.isFavorite && "fill-amber-400 text-amber-400")}
+          />
+        </button>
         <button
           type="button"
           onClick={() => onCreateChild(row.id)}
@@ -97,6 +142,39 @@ function SortableNoteTreeRow({
         >
           <Plus className="h-3.5 w-3.5" />
         </button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              className="hidden h-5 w-5 shrink-0 items-center justify-center rounded text-muted-foreground hover:bg-accent group-hover:flex data-[state=open]:flex"
+              title="More actions"
+            >
+              <MoreHorizontal className="h-3.5 w-3.5" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-44">
+            <DropdownMenuItem onSelect={() => onCreateChild(row.id, "page")}>
+              <Plus className="mr-2 h-3.5 w-3.5" />
+              New page inside
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => onCreateChild(row.id, "folder")}>
+              <FolderPlus className="mr-2 h-3.5 w-3.5" />
+              New folder inside
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => onSetFavorite(row.id, !row.isFavorite)}>
+              <Star className="mr-2 h-3.5 w-3.5" />
+              {row.isFavorite ? "Remove from favorites" : "Add to favorites"}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              className="text-destructive focus:text-destructive"
+              onSelect={() => onTrash(row.id)}
+            >
+              <Trash2 className="mr-2 h-3.5 w-3.5" />
+              Move to trash
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );
@@ -107,16 +185,20 @@ export function NoteTreePanel({
   onCreateRoot,
   onCreateChild,
   onMove,
+  onSetFavorite,
+  onTrash,
 }: {
   pages: NotePageSummary[];
-  onCreateRoot: () => void;
-  onCreateChild: (parentId: number) => void;
+  onCreateRoot: (kind?: NoteKind) => void;
+  onCreateChild: (parentId: number, kind?: NoteKind) => void;
   onMove: (
     id: number,
     parentId: number | null,
     beforeId: number | null,
     afterId: number | null
   ) => void;
+  onSetFavorite: (id: number, isFavorite: boolean) => void;
+  onTrash: (id: number) => void;
 }) {
   const pathname = usePathname();
   const [expandedIds, setExpandedIds] = usePersistedState<Set<string>>(
@@ -172,9 +254,26 @@ export function NoteTreePanel({
         <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
           Notes
         </span>
-        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onCreateRoot}>
-          <Plus className="h-4 w-4" />
-        </Button>
+        <div className="flex items-center gap-0.5">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6"
+            title="New folder"
+            onClick={() => onCreateRoot("folder")}
+          >
+            <FolderPlus className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6"
+            title="New page"
+            onClick={() => onCreateRoot("page")}
+          >
+            <Plus className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
       <div className="flex-1 overflow-y-auto px-1 pb-4">
         {visibleRows.length === 0 ? (
@@ -193,6 +292,8 @@ export function NoteTreePanel({
                   isActive={pathname === `/notes/${row.id}`}
                   onToggle={toggle}
                   onCreateChild={onCreateChild}
+                  onSetFavorite={onSetFavorite}
+                  onTrash={onTrash}
                 />
               ))}
             </SortableContext>

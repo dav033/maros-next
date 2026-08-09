@@ -6,6 +6,7 @@ function page(overrides: Partial<NotePageSummary>): NotePageSummary {
   return {
     id: 1,
     parentId: null,
+    kind: "page",
     title: "Untitled",
     icon: null,
     position: 0,
@@ -15,6 +16,7 @@ function page(overrides: Partial<NotePageSummary>): NotePageSummary {
     deletedAt: null,
     createdAt: "2026-01-01T00:00:00.000Z",
     updatedAt: "2026-01-01T00:00:00.000Z",
+    lastEditedBy: null,
     tags: [],
     ...overrides,
   };

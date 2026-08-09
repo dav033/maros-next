@@ -16,12 +16,16 @@ export type UseInstantProjectsResult = {
   refetch: () => Promise<void>;
 };
 
-export function useInstantProjects(initialData?: Project[]): UseInstantProjectsResult {
+export function useInstantProjects(
+  initialData?: Project[],
+  options?: { enabled?: boolean },
+): UseInstantProjectsResult {
   const ctx = useProjectsApp();
   const r = useInstantList<Project>({
     queryKey: projectsKeys.list(),
     queryFn: () => listProjects(ctx),
     initialData,
+    enabled: options?.enabled,
   });
   return { ...r, projects: r.data };
 }

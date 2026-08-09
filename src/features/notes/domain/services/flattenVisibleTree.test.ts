@@ -5,6 +5,7 @@ import type { NoteTreeNode } from "../models";
 function node(overrides: Partial<NoteTreeNode> & { id: number }): NoteTreeNode {
   return {
     parentId: null,
+    kind: "page",
     title: "Untitled",
     icon: null,
     position: 0,
@@ -14,6 +15,7 @@ function node(overrides: Partial<NoteTreeNode> & { id: number }): NoteTreeNode {
     deletedAt: null,
     createdAt: "",
     updatedAt: "",
+    lastEditedBy: null,
     tags: [],
     children: [],
     ...overrides,
@@ -31,8 +33,26 @@ describe("flattenVisibleTree", () => {
     const tree = [node({ id: 1, children: [node({ id: 2, parentId: 1 })] })];
     const rows = flattenVisibleTree(tree, new Set(["1"]));
     expect(rows).toEqual([
-      { id: 1, parentId: null, title: "Untitled", icon: null, depth: 0, hasChildren: true },
-      { id: 2, parentId: 1, title: "Untitled", icon: null, depth: 1, hasChildren: false },
+      {
+        id: 1,
+        parentId: null,
+        kind: "page",
+        title: "Untitled",
+        icon: null,
+        isFavorite: false,
+        depth: 0,
+        hasChildren: true,
+      },
+      {
+        id: 2,
+        parentId: 1,
+        kind: "page",
+        title: "Untitled",
+        icon: null,
+        isFavorite: false,
+        depth: 1,
+        hasChildren: false,
+      },
     ]);
   });
 

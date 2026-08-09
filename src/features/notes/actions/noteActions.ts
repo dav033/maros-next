@@ -7,6 +7,7 @@ import { SystemClock } from "@/shared/domain";
 import type { ActionResult } from "@/shared/actions/types";
 import { success, handleActionError } from "@/shared/actions/utils";
 import type {
+  NoteEntityLink,
   NoteMoveResult,
   NotePage,
   NotePageDraft,
@@ -120,6 +121,19 @@ export async function setNoteFavoriteAction(
   try {
     const ctx = await createServerNotesAppContext();
     const page = await ctx.repos.notePage.setFavorite(id, isFavorite);
+    return success(page);
+  } catch (error) {
+    return handleActionError(error);
+  }
+}
+
+export async function setNoteEntityLinkAction(
+  id: number,
+  link: NoteEntityLink
+): Promise<ActionResult<NotePageSummary>> {
+  try {
+    const ctx = await createServerNotesAppContext();
+    const page = await ctx.repos.notePage.setEntityLink(id, link);
     return success(page);
   } catch (error) {
     return handleActionError(error);

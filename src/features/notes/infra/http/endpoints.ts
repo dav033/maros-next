@@ -14,6 +14,7 @@ export const endpoints = {
   move: (id: number) => `${BASE}/${id}/move`,
   favorite: (id: number) => `${BASE}/${id}/favorite`,
   setTags: (id: number) => `${BASE}/${id}/tags`,
+  entity: (id: number) => `${BASE}/${id}/entity`,
   restore: (id: number) => `${BASE}/${id}/restore`,
   purge: (id: number) => `${BASE}/${id}/purge`,
 } as const;

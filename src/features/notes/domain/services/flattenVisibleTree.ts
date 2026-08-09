@@ -1,10 +1,12 @@
-import type { NoteTreeNode } from "../models";
+import type { NoteKind, NoteTreeNode } from "../models";
 
 export interface VisibleNoteRow {
   id: number;
   parentId: number | null;
+  kind: NoteKind;
   title: string;
   icon: string | null;
+  isFavorite: boolean;
   depth: number;
   hasChildren: boolean;
 }
@@ -21,8 +23,10 @@ export function flattenVisibleTree(
     rows.push({
       id: node.id,
       parentId: node.parentId,
+      kind: node.kind,
       title: node.title,
       icon: node.icon,
+      isFavorite: node.isFavorite,
       depth,
       hasChildren: node.children.length > 0,
     });

@@ -2,6 +2,7 @@ import type { HttpClientLike, ResourceRepository } from "@/shared/infra";
 import { optimizedApiClient, makeHttpResourceRepository } from "@/shared/infra";
 import type {
   NoteEntityKind,
+  NoteEntityLink,
   NoteMoveResult,
   NotePage,
   NotePageDraft,
@@ -115,6 +116,16 @@ export class NotePageHttpRepository implements NotePageRepositoryPort {
   async setTags(id: NotePageId, tagIds: number[]): Promise<NotePageSummary> {
     const { data } = await this.api.patch<ApiNotePageSummaryDTO>(noteEndpoints.setTags(id), {
       tagIds,
+    });
+    return mapNotePageFromApi(data as ApiNotePageDTO);
+  }
+
+  async setEntityLink(id: NotePageId, link: NoteEntityLink): Promise<NotePageSummary> {
+    // Both fields go on the wire even when null — the backend reads an explicit
+    // null pair as "unlink", and a missing key as a validation error.
+    const { data } = await this.api.patch<ApiNotePageSummaryDTO>(noteEndpoints.entity(id), {
+      entityKind: link.entityKind,
+      entityId: link.entityId,
     });
     return mapNotePageFromApi(data as ApiNotePageDTO);
   }

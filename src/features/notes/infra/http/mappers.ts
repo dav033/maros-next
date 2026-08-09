@@ -1,5 +1,7 @@
 import type {
+  NoteAuthor,
   NoteEntityKind,
+  NoteKind,
   NoteMoveResult,
   NotePage,
   NotePageDraft,
@@ -11,9 +13,17 @@ import type {
 
 export type ApiNoteTagDTO = { id: number; name: string; color: string };
 
+export type ApiNoteAuthorDTO = {
+  id: number;
+  name: string | null;
+  email: string;
+  picture: string | null;
+};
+
 export type ApiNotePageSummaryDTO = {
   id: number;
   parentId: number | null;
+  kind?: NoteKind;
   title: string;
   icon: string | null;
   position: number;
@@ -23,6 +33,7 @@ export type ApiNotePageSummaryDTO = {
   deletedAt: string | null;
   createdAt: string;
   updatedAt: string;
+  lastEditedBy?: ApiNoteAuthorDTO | null;
   tags: ApiNoteTagDTO[];
 };
 
@@ -42,6 +53,7 @@ export type ApiNoteSearchHitDTO = {
 export type CreateNotePagePayload = {
   title?: string;
   icon?: string;
+  kind?: NoteKind;
   parentId?: number | null;
   entityKind?: NoteEntityKind;
   entityId?: number;
@@ -56,10 +68,17 @@ export function mapNoteTagFromApi(dto: ApiNoteTagDTO): NoteTag {
   return { id: dto.id, name: dto.name, color: dto.color };
 }
 
+export function mapNoteAuthorFromApi(dto: ApiNoteAuthorDTO): NoteAuthor {
+  return { id: dto.id, name: dto.name, email: dto.email, picture: dto.picture };
+}
+
 export function mapNotePageSummaryFromApi(dto: ApiNotePageSummaryDTO): NotePageSummary {
   return {
     id: dto.id,
     parentId: dto.parentId,
+    // Defaulted rather than required: a cached response written before folders
+    // existed has no `kind`, and every one of those rows is a page.
+    kind: dto.kind ?? "page",
     title: dto.title,
     icon: dto.icon,
     position: dto.position,
@@ -69,6 +88,7 @@ export function mapNotePageSummaryFromApi(dto: ApiNotePageSummaryDTO): NotePageS
     deletedAt: dto.deletedAt,
     createdAt: dto.createdAt,
     updatedAt: dto.updatedAt,
+    lastEditedBy: dto.lastEditedBy ? mapNoteAuthorFromApi(dto.lastEditedBy) : null,
     tags: (dto.tags ?? []).map(mapNoteTagFromApi),
   };
 }
@@ -99,6 +119,7 @@ export function mapNotePageDraftToCreatePayload(draft: NotePageDraft): CreateNot
   return {
     title: draft.title,
     icon: draft.icon,
+    kind: draft.kind,
     parentId: draft.parentId,
     entityKind: draft.entityKind,
     entityId: draft.entityId,
