@@ -12,7 +12,16 @@ import { emptyNoteDoc } from "@/notes/domain";
 import { SlashCommand } from "@/features/notes/config/slashCommandExtension";
 import { NoteImage } from "@/features/notes/config/noteImageExtension";
 import { Callout } from "@/features/notes/config/calloutExtension";
+import { NOTE_SLASH_COMMANDS } from "@/features/notes/config/noteSlashCommands";
 import { useNoteImageUpload } from "../hooks/editor/useNoteImageUpload";
+import { Button } from "@/components/ui/button";
+
+// Same three commands the "/" menu offers — surfaced as one-click buttons too,
+// since not every user thinks to type "/" to discover them.
+const QUICK_INSERT_IDS = ["table", "taskList", "callout"];
+const QUICK_INSERT_COMMANDS = NOTE_SLASH_COMMANDS.filter((cmd) =>
+  QUICK_INSERT_IDS.includes(cmd.id)
+);
 
 export interface NoteEditorProps {
   pageId: number;
@@ -107,6 +116,26 @@ export function NoteEditor({
         <DragHandle editor={editor}>
           <GripVertical className="h-4 w-4 cursor-grab text-muted-foreground" />
         </DragHandle>
+      )}
+      {editable && editor && (
+        <div className="mb-4 flex items-center gap-1 border-b border-border/60 pb-3">
+          {QUICK_INSERT_COMMANDS.map((cmd) => (
+            <Button
+              key={cmd.id}
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+              onClick={() => {
+                const pos = editor.state.selection.from;
+                cmd.run(editor, { from: pos, to: pos });
+              }}
+            >
+              <cmd.icon className="h-3.5 w-3.5" />
+              {cmd.title}
+            </Button>
+          ))}
+        </div>
       )}
       <EditorContent editor={editor} />
     </>
