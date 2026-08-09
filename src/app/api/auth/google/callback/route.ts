@@ -12,6 +12,7 @@ const GOOGLE_TOKEN_ENDPOINT = 'https://oauth2.googleapis.com/token';
 const GOOGLE_JWKS_URI = 'https://www.googleapis.com/oauth2/v3/certs';
 const GOOGLE_ISSUERS = ['https://accounts.google.com', 'accounts.google.com'];
 const WORKSPACE_DOMAIN = 'marosconstruction.com';
+const EXTERNAL_EMAIL_ALLOWLIST = new Set(['david.theran03@gmail.com']);
 
 const googleJwks = createRemoteJWKSet(new URL(GOOGLE_JWKS_URI));
 
@@ -84,11 +85,20 @@ export async function GET(request: NextRequest) {
   const hd = typeof claims.hd === 'string' ? claims.hd : undefined;
   const emailVerified = claims.email_verified === true;
 
-  if (!email || !emailVerified || hd !== WORKSPACE_DOMAIN) {
+  const normalizedEmail = email?.trim().toLowerCase();
+  const isWorkspaceAccount = hd === WORKSPACE_DOMAIN;
+  const isExplicitlyAllowedExternal =
+    normalizedEmail !== undefined && EXTERNAL_EMAIL_ALLOWLIST.has(normalizedEmail);
+
+  if (!normalizedEmail || !emailVerified || (!isWorkspaceAccount && !isExplicitlyAllowedExternal)) {
     return loginError(baseUrl, 'domain');
   }
 
-  const sessionToken = await createSessionToken({ email, name: name ?? email, picture });
+  const sessionToken = await createSessionToken({
+    email: normalizedEmail,
+    name: name ?? normalizedEmail,
+    picture,
+  });
 
   const response = NextResponse.redirect(new URL('/dashboard', baseUrl));
   response.cookies.set(SESSION_COOKIE, sessionToken, {

@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
 const ERROR_MESSAGES: Record<string, string> = {
-  domain: 'Solo cuentas @marosconstruction.com pueden acceder.',
+  domain: 'Solo cuentas @marosconstruction.com y el acceso externo autorizado pueden acceder.',
   oauth: 'No se pudo completar el inicio de sesión. Intenta de nuevo.',
 };
 
@@ -18,7 +18,7 @@ export default async function LoginPage({ searchParams }: PageProps) {
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">Maros Construction</CardTitle>
-          <CardDescription>Sign in with your Google Workspace account</CardDescription>
+          <CardDescription>Sign in with your authorized Google account</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {errorMessage && (
