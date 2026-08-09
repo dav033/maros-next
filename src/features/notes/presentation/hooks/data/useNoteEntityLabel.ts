@@ -1,10 +1,9 @@
 "use client";
 
-import { useInstantLeads } from "@/features/leads/presentation/hooks/data/useInstantLeads";
-import { useInstantProjects } from "@/features/project/presentation/hooks/data/useInstantProjects";
 import { useInstantContacts } from "@/features/contact/presentation/hooks";
 import { useInstantCompanies } from "@/features/company/presentation/hooks";
 import type { NoteEntityKind } from "@/notes/domain";
+import { useNoteLinkableRecords } from "./useNoteLinkableRecords";
 
 export type NoteEntityLabel = {
   /** Human name for the chip, or null while the lists are still loading. */
@@ -24,10 +23,9 @@ export function useNoteEntityLabel(
   entityId: number | null,
 ): NoteEntityLabel {
   const linked = entityKind != null && entityId != null;
-  const { leads } = useInstantLeads(undefined, { enabled: linked && entityKind === "lead" });
-  const { projects } = useInstantProjects(undefined, {
-    enabled: linked && entityKind === "project",
-  });
+  const { leads, projects } = useNoteLinkableRecords(
+    linked && (entityKind === "lead" || entityKind === "project"),
+  );
   const { contacts } = useInstantContacts(undefined, {
     enabled: linked && entityKind === "contact",
   });
@@ -48,7 +46,7 @@ export function useNoteEntityLabel(
   if (entityKind === "project") {
     const project = projects?.find((item) => item.id === entityId);
     return {
-      label: project ? (project.lead?.name ?? `Project ${entityId}`) : null,
+      label: project?.name ?? null,
       href: `/project/${entityId}`,
     };
   }

@@ -12,11 +12,10 @@ import {
 } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useInstantLeads } from "@/features/leads/presentation/hooks/data/useInstantLeads";
-import { useInstantProjects } from "@/features/project/presentation/hooks/data/useInstantProjects";
 import { useInstantContacts } from "@/features/contact/presentation/hooks";
 import { useInstantCompanies } from "@/features/company/presentation/hooks";
 import type { NoteEntityKind, NoteEntityLink } from "@/notes/domain";
+import { useNoteLinkableRecords } from "../hooks/data/useNoteLinkableRecords";
 
 type PickerTab = NoteEntityKind;
 
@@ -39,8 +38,7 @@ export function NoteEntityPicker({
 
   // Both lists load only once the popover opens: the notes workspace shouldn't pay
   // for the whole pipeline on every page view.
-  const leadsQuery = useInstantLeads(undefined, { enabled: open });
-  const projectsQuery = useInstantProjects(undefined, { enabled: open });
+  const recordsQuery = useNoteLinkableRecords(open);
   const contactsQuery = useInstantContacts(undefined, { enabled: open });
   const companiesQuery = useInstantCompanies(undefined, { enabled: open });
 
@@ -49,21 +47,18 @@ export function NoteEntityPicker({
   // picker should never look empty merely because its first background request raced.
   useEffect(() => {
     if (!open) return;
-    void leadsQuery.refetch();
-    void projectsQuery.refetch();
+    void recordsQuery.refetch();
     void contactsQuery.refetch();
     void companiesQuery.refetch();
   }, [open]);
 
-  const leads = leadsQuery.leads;
-  const projects = projectsQuery.projects;
+  const leads = recordsQuery.leads;
+  const projects = recordsQuery.projects;
   const contacts = contactsQuery.contacts;
   const companies = companiesQuery.companies;
   const activeQuery =
-    tab === "lead"
-      ? leadsQuery
-      : tab === "project"
-        ? projectsQuery
+    tab === "lead" || tab === "project"
+      ? recordsQuery
         : tab === "contact"
           ? contactsQuery
           : companiesQuery;
@@ -122,15 +117,15 @@ export function NoteEntityPicker({
                 {(projects ?? []).map((project) => (
                   <CommandItem
                     key={project.id}
-                    value={`${project.lead?.leadNumber ?? ""} ${project.lead?.name ?? `Project ${project.id}`}`}
+                    value={`${project.leadNumber ?? ""} ${project.name}`}
                     onSelect={() => choose("project", project.id)}
                   >
                     <span className="truncate">
-                      {project.lead?.name ?? `Project ${project.id}`}
+                      {project.name}
                     </span>
-                    {project.lead?.leadNumber && (
+                    {project.leadNumber && (
                       <span className="ml-auto shrink-0 text-xs text-muted-foreground">
-                        {project.lead.leadNumber}
+                        {project.leadNumber}
                       </span>
                     )}
                   </CommandItem>
