@@ -63,7 +63,7 @@ export function PublicNoteReader({ token, data, tree }: PublicNoteReaderProps) {
 
   return (
     <PublicNoteImageSource token={token}>
-      <div className="mx-auto flex max-w-6xl gap-10 px-5 py-10 sm:px-8 lg:py-14">
+      <div className="mx-auto flex max-w-6xl gap-10 px-4 py-6 sm:px-8 sm:py-10 lg:py-14">
         {navRows.length > 1 && (
           <nav
             aria-label="Pages"
@@ -101,7 +101,7 @@ export function PublicNoteReader({ token, data, tree }: PublicNoteReaderProps) {
           <header className="mb-8 border-b border-border/60 pb-6">
             <div className="mb-3 flex items-start gap-3">
               {page.icon && <span className="text-3xl leading-none">{page.icon}</span>}
-              <h1 className="text-3xl font-semibold leading-tight sm:text-4xl">
+              <h1 className="min-w-0 break-words text-3xl font-semibold leading-tight sm:text-4xl">
                 {page.title || "Untitled"}
               </h1>
             </div>
@@ -158,7 +158,7 @@ export function PublicNoteReader({ token, data, tree }: PublicNoteReaderProps) {
                   >
                     <a
                       href={`#${entry.id}`}
-                      className="text-[13px] text-muted-foreground hover:text-foreground hover:underline"
+                      className="break-words text-[13px] text-muted-foreground hover:text-foreground hover:underline"
                     >
                       {entry.text}
                     </a>

@@ -37,17 +37,17 @@ export function PublicLinksSettingsView({ initialLinks }: { initialLinks: NoteAd
   };
 
   return (
-    <div className="mx-auto max-w-5xl px-8 py-10">
-      <div className="mb-6 flex items-start justify-between gap-4">
-        <div>
+    <div className="mx-auto max-w-5xl px-4 py-6 sm:px-8 sm:py-10">
+      <div className="mb-6 flex flex-col items-stretch justify-between gap-4 sm:flex-row sm:items-start">
+        <div className="min-w-0">
           <h1 className="flex items-center gap-2 text-2xl font-semibold"><Globe className="h-6 w-6" />Public links</h1>
           <p className="mt-1 text-sm text-muted-foreground">Active note links across the workspace. Tokens are never shown or exported.</p>
         </div>
-        <Button variant="outline" onClick={exportCsv} disabled={links.length === 0}><Download className="mr-2 h-4 w-4" />Export CSV</Button>
+        <Button variant="outline" className="w-full shrink-0 sm:w-auto" onClick={exportCsv} disabled={links.length === 0}><Download className="mr-2 h-4 w-4" />Export CSV</Button>
       </div>
       {links.length === 0 ? <p className="text-sm text-muted-foreground">There are no active public note links.</p> : (
         <div className="overflow-hidden rounded-lg border">
-          {links.map((link) => <div key={link.id} className="flex items-center gap-4 border-b p-4 last:border-0">
+          {links.map((link) => <div key={link.id} className="flex min-w-0 items-center gap-3 border-b p-3 last:border-0 sm:gap-4 sm:p-4">
             <div className="min-w-0 flex-1"><p className="truncate font-medium">{link.page?.title || "Untitled note"}</p><p className="text-xs text-muted-foreground">{link.createdBy?.email ?? "Unknown author"} · {link.viewCount} views · {link.expiresAt ? `expires ${new Date(link.expiresAt).toLocaleDateString()}` : "never expires"}</p></div>
             <Button variant="ghost" size="icon" className="text-destructive" aria-label="Revoke public link" disabled={revoking === link.id} onClick={() => void revoke(link)}><Trash2 className="h-4 w-4" /></Button>
           </div>)}

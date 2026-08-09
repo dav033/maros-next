@@ -32,9 +32,10 @@ function ColorSwatchPicker({
           key={color}
           type="button"
           title={color}
+          aria-label={`Use ${color} color`}
           onClick={() => onChange(color)}
           className={cn(
-            "h-4 w-4 shrink-0 rounded-full ring-offset-2 ring-offset-background transition-all",
+            "h-6 w-6 shrink-0 rounded-full ring-offset-2 ring-offset-background transition-all",
             value === color && "ring-2 ring-ring"
           )}
           style={{ backgroundColor: noteTagColor(color) }}
@@ -81,7 +82,7 @@ function TagRow({ tag, noteCount }: { tag: NoteTag; noteCount: number }) {
 
   if (isEditing) {
     return (
-      <div className="flex items-center gap-3 rounded-lg px-2 py-2">
+      <div className="flex flex-wrap items-center gap-3 rounded-lg px-2 py-2">
         <Input
           value={name}
           onChange={(e) => setName(e.target.value)}
@@ -96,14 +97,15 @@ function TagRow({ tag, noteCount }: { tag: NoteTag; noteCount: number }) {
           autoFocus
         />
         <ColorSwatchPicker value={color} onChange={setColor} />
-        <Button size="icon" variant="ghost" className="h-7 w-7 shrink-0" onClick={save}>
+        <Button size="icon" variant="ghost" className="h-8 w-8 shrink-0" onClick={save} aria-label="Save label">
           <Check className="h-3.5 w-3.5" />
         </Button>
         <Button
           size="icon"
           variant="ghost"
-          className="h-7 w-7 shrink-0"
+          className="h-8 w-8 shrink-0"
           onClick={() => setIsEditing(false)}
+          aria-label="Cancel editing label"
         >
           <X className="h-3.5 w-3.5" />
         </Button>
@@ -121,14 +123,15 @@ function TagRow({ tag, noteCount }: { tag: NoteTag; noteCount: number }) {
       <span className="text-xs text-muted-foreground">
         {noteCount} note{noteCount === 1 ? "" : "s"}
       </span>
-      <Button size="icon" variant="ghost" className="h-7 w-7 shrink-0" onClick={startEditing}>
+      <Button size="icon" variant="ghost" className="h-8 w-8 shrink-0" onClick={startEditing} aria-label={`Edit ${tag.name}`}>
         <Pencil className="h-3.5 w-3.5" />
       </Button>
       <Button
         size="icon"
         variant="ghost"
-        className="h-7 w-7 shrink-0 hover:bg-destructive/15 hover:text-destructive"
+        className="h-8 w-8 shrink-0 hover:bg-destructive/15 hover:text-destructive"
         onClick={remove}
+        aria-label={`Delete ${tag.name}`}
       >
         <Trash2 className="h-3.5 w-3.5" />
       </Button>
@@ -173,7 +176,7 @@ export function ManageLabelsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-h-[calc(100svh-1rem)] w-[calc(100%-1rem)] max-w-md overflow-y-auto overscroll-contain p-4 sm:max-h-[calc(100svh-2rem)] sm:p-6">
         <DialogHeader>
           <DialogTitle>Labels</DialogTitle>
           <DialogDescription>
@@ -194,7 +197,7 @@ export function ManageLabelsDialog({
           <div className="text-[10.5px] font-semibold uppercase tracking-wide text-muted-foreground/80">
             New label
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Input
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
@@ -205,7 +208,7 @@ export function ManageLabelsDialog({
                 }
               }}
               placeholder="Label name…"
-              className="h-9 flex-1 text-sm"
+              className="h-9 min-w-[10rem] flex-1 text-sm"
             />
             <ColorSwatchPicker value={newColor} onChange={setNewColor} />
             <Button size="sm" className="shrink-0 gap-1.5" onClick={handleCreate}>

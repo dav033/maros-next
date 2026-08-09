@@ -49,7 +49,7 @@ export function NotesWorkspaceView({ logic }: { logic: UseNotesWorkspaceLogicRet
   );
 
   return (
-    <main className="flex-1 overflow-y-auto">
+    <main className="min-w-0 flex-1 overflow-y-auto">
       {logic.activePageId == null ? (
         <div className="flex h-full flex-col items-center justify-center gap-3 text-muted-foreground">
           <FileText className="h-10 w-10" />
@@ -57,7 +57,7 @@ export function NotesWorkspaceView({ logic }: { logic: UseNotesWorkspaceLogicRet
           <Button onClick={() => logic.onCreateRoot("page")}>New page</Button>
         </div>
       ) : (
-        <div className="mx-auto max-w-3xl px-8 py-10">
+        <div className="mx-auto max-w-3xl px-4 py-6 sm:px-8 sm:py-10">
           <div className="mb-5 flex items-center gap-1.5 text-xs text-muted-foreground">
             <span>Notes</span>
             {ancestors.map((ancestor) => (
@@ -72,9 +72,9 @@ export function NotesWorkspaceView({ logic }: { logic: UseNotesWorkspaceLogicRet
             </span>
           </div>
 
-          <div className="mb-4 flex items-center gap-4">
+          <div className="mb-4 flex min-w-0 items-center gap-3 sm:gap-4">
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent text-primary">
-              {isFolder ? <Folder className="h-5 w-5" /> : <FileText className="h-5 w-5" />}
+              {isFolder ? <Folder className="h-5 w-5" aria-hidden="true" /> : <FileText className="h-5 w-5" aria-hidden="true" />}
             </div>
             {logic.canEdit ? (
               <Input
@@ -82,18 +82,18 @@ export function NotesWorkspaceView({ logic }: { logic: UseNotesWorkspaceLogicRet
                 onChange={(e) => logic.setTitle(e.target.value)}
                 onBlur={logic.onTitleBlur}
                 placeholder="Untitled"
-                className="border-none px-0 text-3xl font-semibold shadow-none focus-visible:ring-0"
+                className="min-w-0 border-none px-0 text-2xl font-semibold shadow-none focus-visible:ring-0 sm:text-3xl"
               />
             ) : (
               // A disabled Input still reads as a field you might be able to use. A
               // read-only page simply has no field.
-              <h1 className="truncate text-3xl font-semibold">
+              <h1 className="min-w-0 truncate text-2xl font-semibold sm:text-3xl">
                 {logic.title || "Untitled"}
               </h1>
             )}
           </div>
 
-          <div className="mb-4 flex items-center justify-between gap-4">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3 sm:gap-4">
             <div className="flex min-h-5 min-w-0 items-center gap-2 text-xs text-muted-foreground">
               {logic.saveStatus !== "idle" ? (
                 <span>{SAVE_LABEL[logic.saveStatus]}</span>
@@ -122,7 +122,7 @@ export function NotesWorkspaceView({ logic }: { logic: UseNotesWorkspaceLogicRet
                   className="inline-flex items-center gap-1 rounded-md bg-emerald-500/10 px-2 py-1 text-[11px] font-medium text-emerald-700 dark:text-emerald-300"
                   title="This note is published on the web"
                 >
-                  <Globe className="h-3 w-3" />
+                  <Globe className="h-3 w-3" aria-hidden="true" />
                   Published
                 </span>
               )}
@@ -131,8 +131,10 @@ export function NotesWorkspaceView({ logic }: { logic: UseNotesWorkspaceLogicRet
                 size="icon"
                 onClick={logic.onToggleFavorite}
                 title="Toggle favorite"
+                aria-label={logic.activePage?.isFavorite ? "Remove from favorites" : "Add to favorites"}
               >
-                <Star
+                  <Star
+                    aria-hidden="true"
                   className={cn(
                     "h-4 w-4",
                     logic.activePage?.isFavorite && "fill-current text-amber-400"
@@ -147,7 +149,7 @@ export function NotesWorkspaceView({ logic }: { logic: UseNotesWorkspaceLogicRet
                   onClick={() => logic.setShareOpen(true)}
                   title="Share"
                 >
-                  <Share2 className="h-4 w-4" />
+                  <Share2 className="h-4 w-4" aria-hidden="true" />
                   Share
                 </Button>
               )}
@@ -157,8 +159,9 @@ export function NotesWorkspaceView({ logic }: { logic: UseNotesWorkspaceLogicRet
                   size="icon"
                   onClick={logic.onTrash}
                   title="Move to trash"
+                  aria-label="Move to trash"
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-4 w-4" aria-hidden="true" />
                 </Button>
               )}
             </div>
@@ -177,7 +180,7 @@ export function NotesWorkspaceView({ logic }: { logic: UseNotesWorkspaceLogicRet
           <div className="mb-4 flex flex-wrap items-center gap-2">
             {logic.activePage?.entityKind && logic.activePage.entityId != null ? (
               <span className="inline-flex items-center gap-1.5 rounded-md bg-accent py-1 pl-2 pr-1 text-[12.5px]">
-                <Briefcase className="h-3.5 w-3.5 text-muted-foreground" />
+              <Briefcase className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
                 {entity.href ? (
                   <Link href={entity.href} className="max-w-[16rem] truncate hover:underline">
                     {entity.label ?? "Loading…"}
@@ -195,7 +198,7 @@ export function NotesWorkspaceView({ logic }: { logic: UseNotesWorkspaceLogicRet
                     aria-label="Unassign from lead or project"
                     className="rounded p-0.5 text-muted-foreground hover:bg-background hover:text-foreground"
                   >
-                    <X className="h-3 w-3" />
+                    <X className="h-3 w-3" aria-hidden="true" />
                   </button>
                 )}
               </span>
@@ -207,7 +210,7 @@ export function NotesWorkspaceView({ logic }: { logic: UseNotesWorkspaceLogicRet
                     type="button"
                     className="inline-flex items-center gap-1.5 rounded-md border border-dashed border-border px-2 py-1 text-[12.5px] text-muted-foreground hover:border-solid hover:text-foreground"
                   >
-                    <Briefcase className="h-3.5 w-3.5" />
+                    <Briefcase className="h-3.5 w-3.5" aria-hidden="true" />
                     Link to a lead, project, contact or company
                   </button>
                 }
@@ -237,7 +240,7 @@ export function NotesWorkspaceView({ logic }: { logic: UseNotesWorkspaceLogicRet
                     type="button"
                     className="inline-flex items-center gap-1 text-[12.5px] text-muted-foreground hover:text-foreground"
                   >
-                    <Plus className="h-3 w-3" />
+                    <Plus className="h-3 w-3" aria-hidden="true" />
                     Add label
                   </button>
                 }

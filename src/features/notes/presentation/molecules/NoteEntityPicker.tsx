@@ -71,12 +71,12 @@ export function NoteEntityPicker({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>{trigger}</PopoverTrigger>
-      <PopoverContent className="w-80 p-0" align="start">
+      <PopoverContent className="w-[min(20rem,calc(100vw-2rem))] max-w-[calc(100vw-2rem)] p-0" align="start">
         <Tabs value={tab} onValueChange={(value) => setTab(value as PickerTab)}>
           <TabsList className="grid w-full grid-cols-4 rounded-none border-b bg-transparent p-0">
             {ENTITY_TABS.map(({ value, label, icon: Icon }) => (
               <TabsTrigger key={value} value={value} className="gap-1 text-xs">
-                <Icon className="h-3.5 w-3.5" />
+                <Icon className="h-3.5 w-3.5" aria-hidden="true" />
                 {label}
               </TabsTrigger>
             ))}

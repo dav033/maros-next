@@ -97,7 +97,8 @@ function SortableNoteTreeRow({
           type="button"
           {...attributes}
           {...listeners}
-          className="hidden h-4 w-4 shrink-0 cursor-grab touch-none text-muted-foreground group-hover:block"
+          className="flex h-6 w-6 shrink-0 cursor-grab touch-none items-center justify-center rounded text-muted-foreground hover:bg-accent sm:hidden sm:h-5 sm:w-5 sm:group-hover:flex"
+          aria-label="Drag to reorder"
           title="Drag to reorder"
         >
           <GripVertical className="h-3.5 w-3.5" />
@@ -105,8 +106,9 @@ function SortableNoteTreeRow({
         <button
           type="button"
           onClick={() => onToggle(row.id)}
+          aria-label={row.hasChildren ? (isOpen ? "Collapse" : "Expand") : undefined}
           className={cn(
-            "h-4 w-4 shrink-0 text-muted-foreground group-hover:hidden",
+            "flex h-6 w-6 shrink-0 items-center justify-center rounded text-muted-foreground hover:bg-accent sm:h-5 sm:w-5 sm:group-hover:hidden",
             !row.hasChildren && "invisible"
           )}
         >
@@ -142,10 +144,11 @@ function SortableNoteTreeRow({
           // A starred page keeps its star visible; the rest only reveal it on hover,
           // so the tree doesn't turn into a wall of icons.
           className={cn(
-            "h-5 w-5 shrink-0 items-center justify-center rounded text-muted-foreground hover:bg-accent group-hover:flex",
-            row.isFavorite ? "flex" : "hidden"
+            "flex h-6 w-6 shrink-0 items-center justify-center rounded text-muted-foreground hover:bg-accent sm:hidden sm:h-5 sm:w-5 sm:group-hover:flex",
+            row.isFavorite && "sm:flex"
           )}
           title={row.isFavorite ? "Remove from favorites" : "Add to favorites"}
+          aria-label={row.isFavorite ? "Remove from favorites" : "Add to favorites"}
         >
           <Star
             className={cn("h-3.5 w-3.5", row.isFavorite && "fill-amber-400 text-amber-400")}
@@ -154,8 +157,9 @@ function SortableNoteTreeRow({
         <button
           type="button"
           onClick={() => onCreateChild(row.id)}
-          className="hidden h-5 w-5 shrink-0 items-center justify-center rounded text-muted-foreground hover:bg-accent group-hover:flex"
+          className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-muted-foreground hover:bg-accent sm:hidden sm:h-5 sm:w-5 sm:group-hover:flex"
           title="Add sub-page"
+          aria-label="Add sub-page"
         >
           <Plus className="h-3.5 w-3.5" />
         </button>
@@ -163,8 +167,9 @@ function SortableNoteTreeRow({
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              className="hidden h-5 w-5 shrink-0 items-center justify-center rounded text-muted-foreground hover:bg-accent group-hover:flex data-[state=open]:flex"
+              className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-muted-foreground hover:bg-accent sm:hidden sm:h-5 sm:w-5 sm:group-hover:flex data-[state=open]:flex"
               title="More actions"
+              aria-label="More actions"
             >
               <MoreHorizontal className="h-3.5 w-3.5" />
             </button>

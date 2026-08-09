@@ -66,9 +66,9 @@ export function NoteCalloutView({ node, updateAttributes, editor }: NodeViewProp
         onClick={cycleVariant}
         title={`${style.label} — click to change`}
         aria-label={`Callout type: ${style.label}. Click to change.`}
-        className={cn("mt-0.5 shrink-0", style.tone, editor.isEditable && "cursor-pointer")}
+        className={cn("mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded", style.tone, editor.isEditable && "cursor-pointer hover:bg-accent/60")}
       >
-        <Icon className="h-4 w-4" />
+        <Icon className="h-4 w-4" aria-hidden="true" />
       </button>
 
       <div className="flex-1">
@@ -81,13 +81,13 @@ export function NoteCalloutView({ node, updateAttributes, editor }: NodeViewProp
                 <button
                   type="button"
                   className={cn(
-                    "inline-flex items-center gap-1.5 rounded-md px-1.5 py-0.5 text-xs",
+                    "inline-flex min-h-8 items-center gap-1.5 rounded-md px-2 py-1 text-xs",
                     isOverdue
                       ? "text-destructive"
                       : "text-muted-foreground hover:text-foreground"
                   )}
                 >
-                  <CalendarPlus className="h-3.5 w-3.5" />
+                  <CalendarPlus className="h-3.5 w-3.5" aria-hidden="true" />
                   {dueDate ? `Due ${format(dueDate, "MMM d, yyyy")}` : "Set a due date"}
                   {isOverdue && <span className="font-medium">· overdue</span>}
                 </button>
@@ -111,7 +111,7 @@ export function NoteCalloutView({ node, updateAttributes, editor }: NodeViewProp
                 onClick={() => updateAttributes({ dueDate: null })}
                 title="Clear due date"
                 aria-label="Clear due date"
-                className="text-muted-foreground hover:text-foreground"
+                className="flex h-6 w-6 items-center justify-center rounded text-muted-foreground hover:bg-accent hover:text-foreground"
               >
                 <X className="h-3 w-3" />
               </button>

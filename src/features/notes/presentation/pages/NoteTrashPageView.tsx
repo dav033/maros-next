@@ -32,8 +32,8 @@ export function NoteTrashPageView() {
 
   return (
     <main className="flex-1 overflow-y-auto">
-      <div className="mx-auto max-w-2xl px-8 py-10">
-        <div className="mb-1 flex items-center justify-between gap-4">
+      <div className="mx-auto max-w-2xl px-4 py-6 sm:px-8 sm:py-10">
+        <div className="mb-1 flex flex-wrap items-center justify-between gap-3 sm:gap-4">
           <div className="flex items-center gap-2.5">
             <Trash className="h-[22px] w-[22px] text-muted-foreground" />
             <h1 className="text-[26px] font-semibold">Trash</h1>
@@ -81,7 +81,7 @@ export function NoteTrashPageView() {
                 <button
                   type="button"
                   onClick={() => restoreMutation.mutate(page.id)}
-                  className="flex shrink-0 items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+                  className="flex min-h-9 shrink-0 items-center gap-1.5 rounded-md px-2 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
                 >
                   <RotateCcw className="h-3.5 w-3.5" />
                   Restore
@@ -91,6 +91,7 @@ export function NoteTrashPageView() {
                   size="icon"
                   className="shrink-0 hover:bg-destructive/15 hover:text-destructive"
                   title="Delete permanently"
+                  aria-label="Delete permanently"
                   onClick={() => handlePurge(page.id, page.title)}
                 >
                   <Trash2 className="h-3.5 w-3.5" />

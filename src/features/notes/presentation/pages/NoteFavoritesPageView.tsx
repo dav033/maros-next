@@ -17,7 +17,7 @@ export function NoteFavoritesPageView() {
 
   return (
     <main className="flex-1 overflow-y-auto">
-      <div className="mx-auto max-w-2xl px-8 py-10">
+      <div className="mx-auto max-w-2xl px-4 py-6 sm:px-8 sm:py-10">
         <div className="mb-1 flex items-center gap-2.5">
           <Star className="h-[22px] w-[22px] fill-amber-400 text-amber-400" />
           <h1 className="text-[26px] font-semibold">Favorites</h1>
@@ -39,7 +39,7 @@ export function NoteFavoritesPageView() {
             return (
               <div
                 key={page.id}
-                className="flex items-center gap-3.5 border-b border-border/60 py-3 px-2 last:border-b-0 hover:rounded-lg hover:bg-accent/35"
+                className="flex min-w-0 items-center gap-3 border-b border-border/60 py-3 px-2 last:border-b-0 hover:rounded-lg hover:bg-accent/35 sm:gap-3.5"
               >
                 <div className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-lg bg-accent text-muted-foreground">
                   {page.icon ?? <FileText className="h-4 w-4" />}
@@ -72,6 +72,7 @@ export function NoteFavoritesPageView() {
                   size="icon"
                   className="shrink-0"
                   title="Remove from favorites"
+                  aria-label="Remove from favorites"
                   onClick={() => favoriteMutation.mutate({ id: page.id, isFavorite: false })}
                 >
                   <Star className="h-4 w-4 fill-amber-400 text-amber-400" />

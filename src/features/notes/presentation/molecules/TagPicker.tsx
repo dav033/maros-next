@@ -54,12 +54,12 @@ export function TagPicker({
       <Popover>
         <PopoverTrigger asChild>
           {trigger ?? (
-            <Button variant="ghost" size="icon" title="Tags">
+            <Button variant="ghost" size="icon" title="Tags" aria-label="Tags">
               <TagIcon className="h-4 w-4" />
             </Button>
           )}
         </PopoverTrigger>
-        <PopoverContent align="end" className="w-64 p-2">
+        <PopoverContent align="end" className="w-[min(16rem,calc(100vw-2rem))] max-w-[calc(100vw-2rem)] p-2">
           <div className="space-y-1">
             {tags.length === 0 && (
               <p className="px-1 py-2 text-sm text-muted-foreground">No tags yet.</p>
@@ -94,7 +94,7 @@ export function TagPicker({
               placeholder="New tag…"
               className="h-8 text-sm"
             />
-            <Button size="icon" variant="ghost" className="h-8 w-8 shrink-0" onClick={handleCreate}>
+            <Button size="icon" variant="ghost" className="h-8 w-8 shrink-0" onClick={handleCreate} aria-label="Create label">
               <Plus className="h-4 w-4" />
             </Button>
           </div>
@@ -104,7 +104,7 @@ export function TagPicker({
               onClick={() => setIsManagingLabels(true)}
               className="flex w-full items-center gap-2 rounded-sm px-1 py-1.5 text-sm text-muted-foreground hover:bg-accent/50 hover:text-foreground"
             >
-              <Settings className="h-3.5 w-3.5" />
+              <Settings className="h-3.5 w-3.5" aria-hidden="true" />
               Manage labels
             </button>
           </div>

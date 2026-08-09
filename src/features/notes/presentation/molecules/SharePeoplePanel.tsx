@@ -93,7 +93,7 @@ export function SharePeoplePanel({
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center gap-2">
+      <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
         <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
           <PopoverTrigger asChild>
             <Button
@@ -144,7 +144,7 @@ export function SharePeoplePanel({
         </Popover>
 
         <Select value={access} onValueChange={(v) => setAccess(v as NoteShareAccess)}>
-          <SelectTrigger className="w-[9.5rem]">
+            <SelectTrigger className="w-full sm:w-[9.5rem]">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -224,6 +224,7 @@ export function SharePeoplePanel({
                   ? `Managed on “${share.inheritedFrom}”`
                   : "Remove access"
               }
+              aria-label={share.inheritedFrom ? `Managed on ${share.inheritedFrom}` : "Remove access"}
               onClick={() =>
                 revokeShareMutation.mutate({ id: pageId, shareId: share.id })
               }

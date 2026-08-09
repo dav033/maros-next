@@ -56,7 +56,6 @@ export function PublicNoteUnlockForm({ token }: { token: string }) {
             type="password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
-            autoFocus
             autoComplete="off"
             aria-invalid={error !== null}
             aria-describedby={error ? "note-password-error" : undefined}

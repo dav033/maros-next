@@ -115,7 +115,7 @@ export function NoteEditor({
       {editable && editor && <NoteBlockHandle editor={editor} />}
       {editable && editor && <NoteTableMenu editor={editor} />}
       {editable && editor && (
-        <div className="mb-4 flex items-center gap-1 border-b border-border/60 pb-3">
+        <div className="mb-4 flex flex-wrap items-center gap-1 border-b border-border/60 pb-3">
           {QUICK_INSERT_COMMANDS.map((cmd) => (
             <Button
               key={cmd.id}

@@ -221,13 +221,14 @@ export function SharePublicLinkPanel({
           {freshUrl ? (
             <div className="space-y-1.5">
               <Label className="text-xs">Public link</Label>
-              <div className="flex gap-2">
-                <Input readOnly value={freshUrl} className="font-mono text-xs" />
+              <div className="flex min-w-0 gap-2">
+                <Input readOnly value={freshUrl} className="min-w-0 flex-1 font-mono text-xs" />
                 <Button
                   variant="outline"
                   size="icon"
                   onClick={() => void copy(freshUrl)}
                   title="Copy link"
+                  aria-label={copied ? "Link copied" : "Copy link"}
                 >
                   {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                 </Button>

@@ -65,7 +65,7 @@ export function NotesSidebar() {
   };
 
   return (
-    <aside className="flex w-64 shrink-0 flex-col border-r border-border/60">
+    <aside className="flex h-48 w-full shrink-0 flex-col border-b border-border/60 md:h-auto md:w-64 md:border-b-0 md:border-r">
       <div className="flex-1 overflow-hidden">
         <NoteTreePanel
           pages={tree.pages}

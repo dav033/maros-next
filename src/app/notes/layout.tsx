@@ -9,7 +9,7 @@ const NOTES_BACKGROUND_OVERRIDE = { "--background": "0 0% 3%" } as React.CSSProp
 export default function NotesLayout({ children }: { children: React.ReactNode }) {
   return (
     <div
-      className="flex h-[calc(100vh-3.5rem)] bg-background rounded-lg border border-border/60"
+      className="flex h-[calc(100vh-3.5rem)] min-h-0 flex-col overflow-hidden rounded-lg border border-border/60 bg-background md:flex-row"
       style={NOTES_BACKGROUND_OVERRIDE}
     >
       <NoteSearchPalette />

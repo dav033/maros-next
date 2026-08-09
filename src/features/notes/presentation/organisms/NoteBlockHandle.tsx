@@ -40,7 +40,7 @@ export function NoteBlockHandle({ editor }: { editor: Editor }) {
           className="flex h-5 w-4 cursor-grab items-center justify-center text-muted-foreground"
           title="Drag to reorder"
         >
-          <GripVertical className="h-4 w-4" />
+          <GripVertical className="h-4 w-4" aria-hidden="true" />
         </span>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -53,7 +53,7 @@ export function NoteBlockHandle({ editor }: { editor: Editor }) {
               aria-label="Delete block"
               className="flex h-5 w-4 items-center justify-center rounded text-muted-foreground hover:bg-accent hover:text-foreground"
             >
-              <Trash2 className="h-3.5 w-3.5" />
+              <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" side="right" className="w-36">

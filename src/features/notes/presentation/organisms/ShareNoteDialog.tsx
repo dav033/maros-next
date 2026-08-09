@@ -40,7 +40,7 @@ export function ShareNoteDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="max-h-[calc(100svh-1rem)] w-[calc(100%-1rem)] max-w-lg overflow-y-auto overscroll-contain p-4 sm:max-h-[calc(100svh-2rem)] sm:p-6">
         <DialogHeader>
           <DialogTitle className="truncate">Share “{pageTitle || "Untitled"}”</DialogTitle>
           <DialogDescription>
@@ -51,11 +51,11 @@ export function ShareNoteDialog({
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="people" className="gap-1.5">
-              <Users className="h-3.5 w-3.5" />
+              <Users className="h-3.5 w-3.5" aria-hidden="true" />
               People
             </TabsTrigger>
             <TabsTrigger value="link" className="gap-1.5">
-              <Globe className="h-3.5 w-3.5" />
+              <Globe className="h-3.5 w-3.5" aria-hidden="true" />
               Public link
             </TabsTrigger>
           </TabsList>

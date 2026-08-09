@@ -19,7 +19,7 @@ export function NoteSharedPageView() {
 
   return (
     <main className="flex-1 overflow-y-auto">
-      <div className="mx-auto max-w-2xl px-8 py-10">
+      <div className="mx-auto max-w-2xl px-4 py-6 sm:px-8 sm:py-10">
         <div className="mb-1 flex items-center gap-2.5">
           <Users className="h-[22px] w-[22px] text-primary" />
           <h1 className="text-[26px] font-semibold">Shared with me</h1>
@@ -39,7 +39,7 @@ export function NoteSharedPageView() {
           {pages.map((page) => (
             <div
               key={page.id}
-              className="flex items-center gap-3.5 border-b border-border/60 px-2 py-3 last:border-b-0 hover:rounded-lg hover:bg-accent/35"
+              className="flex min-w-0 flex-wrap items-center gap-3 border-b border-border/60 px-2 py-3 last:border-b-0 hover:rounded-lg hover:bg-accent/35 sm:flex-nowrap sm:gap-3.5"
             >
               <div className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-lg bg-accent text-muted-foreground">
                 {page.icon ??
@@ -83,7 +83,7 @@ export function NoteSharedPageView() {
                 </div>
               </div>
 
-              <span className="shrink-0 text-xs text-muted-foreground">
+              <span className="ml-auto shrink-0 text-xs text-muted-foreground">
                 {formatRelativeTime(page.updatedAt)}
               </span>
             </div>
