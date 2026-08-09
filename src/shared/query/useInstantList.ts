@@ -31,6 +31,11 @@ export function useInstantList<T>({
     queryKey,
     queryFn: async () => (await queryFn()) ?? [],
     initialData,
+    // An empty SSR response can be a transient auth/network failure that the
+    // page loader intentionally converts to []. Do not cache that fallback as
+    // fresh: let the browser retry immediately with its session cookie.
+    initialDataUpdatedAt:
+      initialData === undefined ? undefined : initialData.length > 0 ? undefined : 0,
     enabled,
     staleTime,
     gcTime,
