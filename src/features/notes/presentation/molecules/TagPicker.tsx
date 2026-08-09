@@ -34,9 +34,13 @@ export function TagPicker({
   const handleCreate = async () => {
     const name = newTagName.trim();
     if (!name) return;
-    const tag = await createTagMutation.mutateAsync({ name });
-    setNewTagName("");
-    onChange([...selectedTagIds, tag.id]);
+    try {
+      const tag = await createTagMutation.mutateAsync({ name });
+      setNewTagName("");
+      onChange([...selectedTagIds, tag.id]);
+    } catch {
+      // handled by useEntityMutation's onError (toast / session redirect)
+    }
   };
 
   return (

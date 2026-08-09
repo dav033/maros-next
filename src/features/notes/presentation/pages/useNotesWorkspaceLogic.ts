@@ -44,13 +44,24 @@ export function useNotesWorkspaceLogic({
   }, [activePage.page]);
 
   const handleCreateRoot = async () => {
-    const page = await createMutation.mutateAsync({ title: "Untitled" });
-    router.push(`/notes/${page.id}`);
+    // useEntityMutation's onError already surfaces the failure (toast, or a
+    // redirect to /login on an expired session) — this catch only stops the
+    // rejection from reaching the console and skips the navigation below.
+    try {
+      const page = await createMutation.mutateAsync({ title: "Untitled" });
+      router.push(`/notes/${page.id}`);
+    } catch {
+      // handled by onError
+    }
   };
 
   const handleCreateChild = async (parentId: number) => {
-    const page = await createMutation.mutateAsync({ title: "Untitled", parentId });
-    router.push(`/notes/${page.id}`);
+    try {
+      const page = await createMutation.mutateAsync({ title: "Untitled", parentId });
+      router.push(`/notes/${page.id}`);
+    } catch {
+      // handled by onError
+    }
   };
 
   const handleContentChange = (content: Record<string, unknown>) => {
@@ -63,13 +74,21 @@ export function useNotesWorkspaceLogic({
     if (activePageId == null) return;
     const trimmed = title.trim() || "Untitled";
     if (trimmed === activePage.page?.title) return;
-    await renameMutation.mutateAsync({ id: activePageId, patch: { title: trimmed } });
+    try {
+      await renameMutation.mutateAsync({ id: activePageId, patch: { title: trimmed } });
+    } catch {
+      // handled by onError
+    }
   };
 
   const handleTrash = async () => {
     if (activePageId == null) return;
-    await trashMutation.mutateAsync(activePageId);
-    router.push("/notes");
+    try {
+      await trashMutation.mutateAsync(activePageId);
+      router.push("/notes");
+    } catch {
+      // handled by onError
+    }
   };
 
   const handleToggleFavorite = () => {
@@ -88,7 +107,9 @@ export function useNotesWorkspaceLogic({
     beforeId: number | null,
     afterId: number | null
   ) => {
-    void moveMutation.mutateAsync({ id, parentId, beforeId, afterId });
+    // `void` only discards the return value — it doesn't attach a catch, so
+    // a rejection here would still surface as an unhandled promise rejection.
+    moveMutation.mutate({ id, parentId, beforeId, afterId });
   };
 
   return {

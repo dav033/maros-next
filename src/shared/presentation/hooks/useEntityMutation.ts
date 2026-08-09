@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-query";
 
 import type { ActionResult } from "@/shared/actions/types";
+import { AppError, emitUnauthorized } from "@/shared/errors";
 
 import { entityToast, type EntityAction } from "../toast";
 import type { Snapshot } from "@/shared/query/optimistic";
@@ -50,7 +51,19 @@ export function useEntityMutation<TInput, TEntity>({
     mutationFn: async (input) => {
       const result = await mutationFn(input);
       if (!result.success) {
-        throw new Error(result.error);
+        // Server actions already resolve the backend response to a
+        // user-facing message and a kind (see handleActionError). Throwing an
+        // AppError instead of a plain Error preserves both — AppError.from()
+        // short-circuits on an existing AppError, whereas a plain Error would
+        // fall through to the generic fallback and lose the real reason, and
+        // onError below needs `kind` to detect an expired session.
+        throw new AppError({
+          userMessage: result.error,
+          kind: result.kind ?? "unknown",
+          code: result.code,
+          status: result.status,
+          fieldErrors: result.fieldErrors,
+        });
       }
       return result.data;
     },
@@ -60,6 +73,14 @@ export function useEntityMutation<TInput, TEntity>({
     },
     onError: (error, _input, context) => {
       context?.snapshot?.restore();
+      // Server actions can't touch `window`, so an expired session detected
+      // there can't dispatch the unauthorized event itself (unlike direct
+      // client fetches via OptimizedApiClient). Do it here instead, once the
+      // error is back on the client — same redirect-to-login flow either way.
+      if (error instanceof AppError && error.kind === "unauthorized") {
+        emitUnauthorized(error);
+        return;
+      }
       if (errorMessage) {
         entityToast.error(entityLabel, action, new Error(errorMessage));
       } else {

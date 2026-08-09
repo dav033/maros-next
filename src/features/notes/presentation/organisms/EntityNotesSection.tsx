@@ -24,12 +24,16 @@ export function EntityNotesSection({
   const { createMutation } = useNoteMutations();
 
   const handleCreate = async () => {
-    const page = await createMutation.mutateAsync({
-      title: defaultTitle || "Untitled",
-      entityKind,
-      entityId,
-    });
-    router.push(`/notes/${page.id}`);
+    try {
+      const page = await createMutation.mutateAsync({
+        title: defaultTitle || "Untitled",
+        entityKind,
+        entityId,
+      });
+      router.push(`/notes/${page.id}`);
+    } catch {
+      // handled by useEntityMutation's onError (toast / session redirect)
+    }
   };
 
   return (
