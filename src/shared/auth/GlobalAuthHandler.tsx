@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { toast } from "sonner";
 import {
   UNAUTHORIZED_EVENT,
@@ -9,7 +9,6 @@ import {
 } from "@/shared/errors";
 
 export function GlobalAuthHandler() {
-  const router = useRouter();
   const pathname = usePathname();
   const redirectingRef = useRef(false);
 
@@ -23,14 +22,16 @@ export function GlobalAuthHandler() {
       toast.error(message);
 
       redirectingRef.current = true;
-      router.replace("/login");
+      // The session cookie is HTTP-only, so client code cannot remove it itself.
+      // Navigating through this route clears it first and then lands on login.
+      window.location.replace("/api/auth/logout");
     }
 
     window.addEventListener(UNAUTHORIZED_EVENT, handleUnauthorized);
     return () => {
       window.removeEventListener(UNAUTHORIZED_EVENT, handleUnauthorized);
     };
-  }, [pathname, router]);
+  }, [pathname]);
 
   return null;
 }
