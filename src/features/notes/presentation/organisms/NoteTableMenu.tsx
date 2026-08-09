@@ -11,7 +11,6 @@ import {
   Combine,
   Heading,
   Rows3,
-  Trash2,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -76,19 +75,16 @@ const ACTIONS: TableAction[] = [
     run: (editor) => editor.chain().focus().deleteColumn().run(),
     danger: true,
   },
-  {
-    id: "deleteTable",
-    label: "Delete table",
-    icon: Trash2,
-    run: (editor) => editor.chain().focus().deleteTable().run(),
-    danger: true,
-  },
 ];
 
 /**
  * Row/column controls for the editor's tables. Inserting a table was already possible
  * from the "/" menu, but nothing could reshape one afterwards — this is the only way
  * to add or remove rows and columns.
+ *
+ * Deleting the whole table isn't here: that's now the hover-revealed block handle
+ * (NoteBlockHandle) shared by every block type, not a table-specific action buried
+ * among row/column icons.
  *
  * Rendered as a bubble menu rather than a fixed toolbar so it only exists while the
  * caret is actually inside a table.

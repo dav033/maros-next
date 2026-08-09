@@ -1,8 +1,6 @@
 "use client";
 
 import { useEditor, EditorContent } from "@tiptap/react";
-import { DragHandle } from "@tiptap/extension-drag-handle-react";
-import { GripVertical } from "lucide-react";
 import StarterKit from "@tiptap/starter-kit";
 import { TaskList } from "@tiptap/extension-task-list";
 import { TaskItem } from "@tiptap/extension-task-item";
@@ -14,6 +12,7 @@ import { NoteImage } from "@/features/notes/config/noteImageExtension";
 import { Callout } from "@/features/notes/config/calloutExtension";
 import { NOTE_SLASH_COMMANDS } from "@/features/notes/config/noteSlashCommands";
 import { useNoteImageUpload } from "../hooks/editor/useNoteImageUpload";
+import { NoteBlockHandle } from "./NoteBlockHandle";
 import { NoteTableMenu } from "./NoteTableMenu";
 import { Button } from "@/components/ui/button";
 
@@ -113,11 +112,7 @@ export function NoteEditor({
 
   return (
     <>
-      {editor && (
-        <DragHandle editor={editor}>
-          <GripVertical className="h-4 w-4 cursor-grab text-muted-foreground" />
-        </DragHandle>
-      )}
+      {editable && editor && <NoteBlockHandle editor={editor} />}
       {editable && editor && <NoteTableMenu editor={editor} />}
       {editable && editor && (
         <div className="mb-4 flex items-center gap-1 border-b border-border/60 pb-3">
