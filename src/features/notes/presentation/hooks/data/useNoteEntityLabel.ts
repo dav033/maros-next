@@ -2,6 +2,8 @@
 
 import { useInstantLeads } from "@/features/leads/presentation/hooks/data/useInstantLeads";
 import { useInstantProjects } from "@/features/project/presentation/hooks/data/useInstantProjects";
+import { useInstantContacts } from "@/features/contact/presentation/hooks";
+import { useInstantCompanies } from "@/features/company/presentation/hooks";
 import type { NoteEntityKind } from "@/notes/domain";
 
 export type NoteEntityLabel = {
@@ -26,6 +28,12 @@ export function useNoteEntityLabel(
   const { projects } = useInstantProjects(undefined, {
     enabled: linked && entityKind === "project",
   });
+  const { contacts } = useInstantContacts(undefined, {
+    enabled: linked && entityKind === "contact",
+  });
+  const { companies } = useInstantCompanies(undefined, {
+    enabled: linked && entityKind === "company",
+  });
 
   if (!linked) return { label: null, href: null };
 
@@ -45,7 +53,15 @@ export function useNoteEntityLabel(
     };
   }
 
-  // Contacts and companies can still hold a link (notes created from their detail
-  // pages), but this workspace has no picker for them — show the kind, not a name.
-  return { label: `${entityKind} #${entityId}`, href: null };
+  if (entityKind === "contact") {
+    const contact = contacts?.find((item) => item.id === entityId);
+    return { label: contact?.name ?? null, href: `/contact/${entityId}` };
+  }
+
+  if (entityKind === "company") {
+    const company = companies?.find((item) => item.id === entityId);
+    return { label: company?.name ?? null, href: `/company/${entityId}` };
+  }
+
+  return { label: null, href: null };
 }

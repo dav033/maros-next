@@ -16,12 +16,16 @@ export type UseInstantContactsResult = {
   refetch: () => Promise<void>;
 };
 
-export function useInstantContacts(initialData?: Contact[]): UseInstantContactsResult {
+export function useInstantContacts(
+  initialData?: Contact[],
+  options?: { enabled?: boolean },
+): UseInstantContactsResult {
   const ctx = useContactsApp();
   const r = useInstantList<Contact>({
     queryKey: contactsKeys.list,
     queryFn: () => listContacts(ctx),
     initialData,
+    enabled: options?.enabled,
   });
   return { ...r, contacts: r.data };
 }

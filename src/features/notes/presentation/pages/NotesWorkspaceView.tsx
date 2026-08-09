@@ -208,7 +208,7 @@ export function NotesWorkspaceView({ logic }: { logic: UseNotesWorkspaceLogicRet
                     className="inline-flex items-center gap-1.5 rounded-md border border-dashed border-border px-2 py-1 text-[12.5px] text-muted-foreground hover:border-solid hover:text-foreground"
                   >
                     <Briefcase className="h-3.5 w-3.5" />
-                    Assign to lead or project
+                    Link to a lead, project, contact or company
                   </button>
                 }
               />

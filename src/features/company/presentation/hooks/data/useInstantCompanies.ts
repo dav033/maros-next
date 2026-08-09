@@ -18,12 +18,16 @@ export type UseInstantCompaniesResult = {
   refetch: () => Promise<void>;
 };
 
-export function useInstantCompanies(initialData?: Company[]): UseInstantCompaniesResult {
+export function useInstantCompanies(
+  initialData?: Company[],
+  options?: { enabled?: boolean },
+): UseInstantCompaniesResult {
   const ctx = useCompanyApp();
   const r = useInstantList<Company>({
     queryKey: companyKeys.lists(),
     queryFn: () => companyCrudUseCases.list(ctx)(),
     initialData,
+    enabled: options?.enabled,
   });
   return { ...r, companies: r.data };
 }
