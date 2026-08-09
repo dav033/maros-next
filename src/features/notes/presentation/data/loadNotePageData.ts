@@ -1,4 +1,5 @@
-import { serverApiClient } from "@/shared/infra/http";
+import { headers } from "next/headers";
+import { createServerApiClient } from "@/shared/infra/http";
 import { NotePageHttpRepository, makeNotesAppContext, NoteTagHttpRepository } from "@/notes";
 import { listNoteTree, getNotePage } from "@/notes/application";
 import { SystemClock } from "@/shared/domain";
@@ -10,11 +11,12 @@ export interface NotePageRouteData {
 }
 
 export async function loadNotePageData(pageId: number): Promise<NotePageRouteData> {
+  const api = createServerApiClient(await headers());
   const ctx = makeNotesAppContext({
     clock: SystemClock,
     repos: {
-      notePage: new NotePageHttpRepository(serverApiClient),
-      noteTag: new NoteTagHttpRepository(serverApiClient),
+      notePage: new NotePageHttpRepository(api),
+      noteTag: new NoteTagHttpRepository(api),
     },
   });
 

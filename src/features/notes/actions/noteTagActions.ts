@@ -1,13 +1,14 @@
 "use server";
 
-import { serverApiClient } from "@/shared/infra/http";
+import { headers } from "next/headers";
+import { createServerApiClient } from "@/shared/infra/http";
 import { NoteTagHttpRepository } from "@/notes";
 import type { ActionResult } from "@/shared/actions/types";
 import { success, handleActionError } from "@/shared/actions/utils";
 import type { NoteTag } from "@/notes/domain";
 
-function repo() {
-  return new NoteTagHttpRepository(serverApiClient);
+async function repo() {
+  return new NoteTagHttpRepository(createServerApiClient(await headers()));
 }
 
 export async function createNoteTagAction(
@@ -15,7 +16,7 @@ export async function createNoteTagAction(
   color?: string
 ): Promise<ActionResult<NoteTag>> {
   try {
-    return success(await repo().create(name, color));
+    return success(await (await repo()).create(name, color));
   } catch (error) {
     return handleActionError(error);
   }
@@ -26,7 +27,7 @@ export async function updateNoteTagAction(
   patch: { name?: string; color?: string }
 ): Promise<ActionResult<NoteTag>> {
   try {
-    return success(await repo().update(id, patch));
+    return success(await (await repo()).update(id, patch));
   } catch (error) {
     return handleActionError(error);
   }
@@ -34,7 +35,7 @@ export async function updateNoteTagAction(
 
 export async function deleteNoteTagAction(id: number): Promise<ActionResult<void>> {
   try {
-    await repo().delete(id);
+    await (await repo()).delete(id);
     return success(undefined);
   } catch (error) {
     return handleActionError(error);
