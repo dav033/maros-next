@@ -90,8 +90,8 @@ function SortableNoteTreeRow({
     <div ref={setNodeRef} style={style}>
       <div
         className={cn(
-          "group flex items-center gap-1 rounded-md px-1 py-1.5 text-sm hover:bg-accent/50",
-          isActive && "bg-accent text-accent-foreground"
+          "group flex items-center gap-1 rounded-md px-1.5 py-1.5 text-sm transition-colors hover:bg-accent/70",
+          isActive && "bg-primary/10 text-primary"
         )}
         style={{ paddingLeft: 4 + row.depth * 16 }}
       >
@@ -275,34 +275,41 @@ export function NoteTreePanel({
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex items-center justify-between px-2 py-2">
-        <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          Notes
+      <div className="flex h-12 items-center justify-between border-b border-border/40 px-3">
+        <span className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+          Pages
         </span>
         <div className="flex items-center gap-0.5">
           <Button
             variant="ghost"
             size="icon"
-            className="h-6 w-6"
+            className="h-8 w-8 text-muted-foreground hover:text-foreground"
             title="New folder"
+            aria-label="New folder"
             onClick={() => onCreateRoot("folder")}
           >
-            <FolderPlus className="h-4 w-4" />
+            <FolderPlus className="h-3.5 w-3.5" aria-hidden="true" />
           </Button>
           <Button
             variant="ghost"
             size="icon"
-            className="h-6 w-6"
+            className="h-8 w-8 text-muted-foreground hover:text-foreground"
             title="New page"
+            aria-label="New page"
             onClick={() => onCreateRoot("page")}
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="h-3.5 w-3.5" aria-hidden="true" />
           </Button>
         </div>
       </div>
       <div className="flex-1 overflow-y-auto px-1 pb-4">
         {visibleRows.length === 0 ? (
-          <p className="px-2 py-4 text-sm text-muted-foreground">No pages yet.</p>
+          <div className="mx-2 mt-3 rounded-lg border border-dashed border-border/70 bg-background/30 px-3 py-4 text-center">
+            <p className="text-sm font-medium text-foreground/80">No pages yet</p>
+            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+              Create a page to start your workspace.
+            </p>
+          </div>
         ) : (
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
             <SortableContext
