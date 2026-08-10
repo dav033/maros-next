@@ -39,7 +39,12 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { cn } from "@/lib/utils";
-import { buildNoteTree, flattenVisibleTree, excludeDescendantRows, projectNoteReparent } from "@/notes/domain";
+import {
+  buildNoteTree,
+  flattenVisibleTree,
+  excludeDescendantRows,
+  projectNoteReparent,
+} from "@/notes/domain";
 import type { NoteKind, NotePageSummary, VisibleNoteRow } from "@/notes/domain";
 
 // Matches the 16px-per-depth indentation used to render each row below, so a
@@ -65,6 +70,7 @@ function SortableNoteTreeRow({
   isActive,
   onToggle,
   onCreateChild,
+  onOpenShare,
   onSetFavorite,
   onTrash,
 }: {
@@ -73,10 +79,18 @@ function SortableNoteTreeRow({
   isActive: boolean;
   onToggle: (id: number) => void;
   onCreateChild: (parentId: number, kind?: NoteKind) => void;
+  onOpenShare: (id: number, title: string) => void;
   onSetFavorite: (id: number, isFavorite: boolean) => void;
   onTrash: (id: number) => void;
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
     id: row.id,
   });
 
@@ -91,7 +105,7 @@ function SortableNoteTreeRow({
       <div
         className={cn(
           "group flex items-center gap-1 rounded-md px-1.5 py-1.5 text-sm transition-colors hover:bg-accent/70",
-          isActive && "bg-primary/10 text-primary"
+          isActive && "bg-primary/10 text-primary",
         )}
         style={{ paddingLeft: 4 + row.depth * 16 }}
       >
@@ -108,10 +122,12 @@ function SortableNoteTreeRow({
         <button
           type="button"
           onClick={() => onToggle(row.id)}
-          aria-label={row.hasChildren ? (isOpen ? "Collapse" : "Expand") : undefined}
+          aria-label={
+            row.hasChildren ? (isOpen ? "Collapse" : "Expand") : undefined
+          }
           className={cn(
             "flex h-6 w-6 shrink-0 items-center justify-center rounded text-muted-foreground hover:bg-accent sm:h-5 sm:w-5 sm:group-hover:hidden",
-            !row.hasChildren && "invisible"
+            !row.hasChildren && "invisible",
           )}
         >
           {isOpen ? "▾" : "▸"}
@@ -147,13 +163,18 @@ function SortableNoteTreeRow({
           // so the tree doesn't turn into a wall of icons.
           className={cn(
             "flex h-6 w-6 shrink-0 items-center justify-center rounded text-muted-foreground hover:bg-accent sm:hidden sm:h-5 sm:w-5 sm:group-hover:flex",
-            row.isFavorite && "sm:flex"
+            row.isFavorite && "sm:flex",
           )}
           title={row.isFavorite ? "Remove from favorites" : "Add to favorites"}
-          aria-label={row.isFavorite ? "Remove from favorites" : "Add to favorites"}
+          aria-label={
+            row.isFavorite ? "Remove from favorites" : "Add to favorites"
+          }
         >
           <Star
-            className={cn("h-3.5 w-3.5", row.isFavorite && "fill-amber-400 text-amber-400")}
+            className={cn(
+              "h-3.5 w-3.5",
+              row.isFavorite && "fill-amber-400 text-amber-400",
+            )}
           />
         </button>
         <button
@@ -176,7 +197,7 @@ function SortableNoteTreeRow({
               <MoreHorizontal className="h-3.5 w-3.5" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-44">
+          <DropdownMenuContent align="start" className="w-52">
             <DropdownMenuItem onSelect={() => onCreateChild(row.id, "page")}>
               <Plus className="mr-2 h-3.5 w-3.5" />
               New page inside
@@ -185,9 +206,15 @@ function SortableNoteTreeRow({
               <FolderPlus className="mr-2 h-3.5 w-3.5" />
               New folder inside
             </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => onSetFavorite(row.id, !row.isFavorite)}>
+            <DropdownMenuItem
+              onSelect={() => onSetFavorite(row.id, !row.isFavorite)}
+            >
               <Star className="mr-2 h-3.5 w-3.5" />
               {row.isFavorite ? "Remove from favorites" : "Add to favorites"}
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => onOpenShare(row.id, row.title)}>
+              <Globe className="mr-2 h-3.5 w-3.5" />
+              {row.isPublished ? "Manage public link" : "Publish on the web"}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
@@ -208,6 +235,7 @@ export function NoteTreePanel({
   pages,
   onCreateRoot,
   onCreateChild,
+  onOpenShare,
   onMove,
   onSetFavorite,
   onTrash,
@@ -215,11 +243,12 @@ export function NoteTreePanel({
   pages: NotePageSummary[];
   onCreateRoot: (kind?: NoteKind) => void;
   onCreateChild: (parentId: number, kind?: NoteKind) => void;
+  onOpenShare: (id: number, title: string) => void;
   onMove: (
     id: number,
     parentId: number | null,
     beforeId: number | null,
-    afterId: number | null
+    afterId: number | null,
   ) => void;
   onSetFavorite: (id: number, isFavorite: boolean) => void;
   onTrash: (id: number) => void;
@@ -228,12 +257,14 @@ export function NoteTreePanel({
   const [expandedIds, setExpandedIds] = usePersistedState<Set<string>>(
     EXPANDED_STORAGE_KEY,
     new Set<string>(),
-    setStorageCodec
+    setStorageCodec,
   );
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
   );
 
   const tree = buildNoteTree(pages);
@@ -262,15 +293,25 @@ export function NoteTreePanel({
     // detection correct for everything below the dragged subtree.
     const rowsForProjection = excludeDescendantRows(
       visibleRows.map((r) => ({ id: r.id, depth: r.depth })),
-      activeId
+      activeId,
     );
     // Dragging right nests the page one level deeper per indent-width of horizontal
     // movement; dragging left un-nests it. Vertical-only drags (delta.x ≈ 0) just reorder.
     const dragDepthDelta = Math.round(delta.x / INDENT_WIDTH);
-    const projection = projectNoteReparent(rowsForProjection, activeId, overId, dragDepthDelta);
+    const projection = projectNoteReparent(
+      rowsForProjection,
+      activeId,
+      overId,
+      dragDepthDelta,
+    );
     if (!projection) return;
 
-    onMove(activeId, projection.parentId, projection.beforeId, projection.afterId);
+    onMove(
+      activeId,
+      projection.parentId,
+      projection.beforeId,
+      projection.afterId,
+    );
   };
 
   return (
@@ -305,13 +346,19 @@ export function NoteTreePanel({
       <div className="notes-scrollbar flex-1 overflow-y-auto px-1 pb-4">
         {visibleRows.length === 0 ? (
           <div className="mx-2 mt-3 rounded-lg border border-dashed border-border/70 bg-background/30 px-3 py-4 text-center">
-            <p className="text-sm font-medium text-foreground/80">No pages yet</p>
+            <p className="text-sm font-medium text-foreground/80">
+              No pages yet
+            </p>
             <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
               Create a page to start your workspace.
             </p>
           </div>
         ) : (
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
             <SortableContext
               items={visibleRows.map((r) => r.id)}
               strategy={verticalListSortingStrategy}
@@ -324,6 +371,7 @@ export function NoteTreePanel({
                   isActive={pathname === `/notes/${row.id}`}
                   onToggle={toggle}
                   onCreateChild={onCreateChild}
+                  onOpenShare={onOpenShare}
                   onSetFavorite={onSetFavorite}
                   onTrash={onTrash}
                 />

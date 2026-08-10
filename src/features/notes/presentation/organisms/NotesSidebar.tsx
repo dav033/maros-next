@@ -1,12 +1,14 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Star, Trash, Users } from "lucide-react";
 import { NoteTreePanel } from "./NoteTreePanel";
+import { ShareNoteDialog } from "./ShareNoteDialog";
 import { useInstantNoteTree } from "../hooks/data/useInstantNoteTree";
 import { useNoteMutations } from "../hooks/mutations/useNoteMutations";
-import type { NoteKind } from "@/notes/domain";
+import type { NoteKind, NotePageSummary } from "@/notes/domain";
 import { cn } from "@/lib/utils";
 
 /**
@@ -18,20 +20,32 @@ export function NotesSidebar() {
   const router = useRouter();
   const pathname = usePathname();
   const tree = useInstantNoteTree();
-  const { createMutation, moveMutation, favoriteMutation, trashMutation } = useNoteMutations();
+  const { createMutation, moveMutation, favoriteMutation, trashMutation } =
+    useNoteMutations();
+  const [shareTarget, setShareTarget] = useState<Pick<
+    NotePageSummary,
+    "id" | "title"
+  > | null>(null);
 
-  const titleFor = (kind: NoteKind) => (kind === "folder" ? "New folder" : "Untitled");
+  const titleFor = (kind: NoteKind) =>
+    kind === "folder" ? "New folder" : "Untitled";
 
   const handleCreateRoot = async (kind: NoteKind = "page") => {
     try {
-      const page = await createMutation.mutateAsync({ title: titleFor(kind), kind });
+      const page = await createMutation.mutateAsync({
+        title: titleFor(kind),
+        kind,
+      });
       router.push(`/notes/${page.id}`);
     } catch {
       // handled by onError
     }
   };
 
-  const handleCreateChild = async (parentId: number, kind: NoteKind = "page") => {
+  const handleCreateChild = async (
+    parentId: number,
+    kind: NoteKind = "page",
+  ) => {
     try {
       const page = await createMutation.mutateAsync({
         title: titleFor(kind),
@@ -48,7 +62,7 @@ export function NotesSidebar() {
     id: number,
     parentId: number | null,
     beforeId: number | null,
-    afterId: number | null
+    afterId: number | null,
   ) => {
     moveMutation.mutate({ id, parentId, beforeId, afterId });
   };
@@ -78,12 +92,18 @@ export function NotesSidebar() {
           pages={tree.pages}
           onCreateRoot={handleCreateRoot}
           onCreateChild={handleCreateChild}
+          onOpenShare={(id, title) => setShareTarget({ id, title })}
           onMove={handleMove}
-          onSetFavorite={(id, isFavorite) => favoriteMutation.mutate({ id, isFavorite })}
+          onSetFavorite={(id, isFavorite) =>
+            favoriteMutation.mutate({ id, isFavorite })
+          }
           onTrash={handleTrash}
         />
       </div>
-      <nav aria-label="Note collections" className="space-y-1 border-t border-border/60 p-2">
+      <nav
+        aria-label="Note collections"
+        className="space-y-1 border-t border-border/60 p-2"
+      >
         {secondaryLinks.map(({ href, label, icon: Icon }) => {
           const isActive = pathname === href;
           return (
@@ -104,6 +124,16 @@ export function NotesSidebar() {
           );
         })}
       </nav>
+      {shareTarget && (
+        <ShareNoteDialog
+          key={shareTarget.id}
+          pageId={shareTarget.id}
+          pageTitle={shareTarget.title}
+          defaultTab="link"
+          open
+          onOpenChange={(open) => !open && setShareTarget(null)}
+        />
+      )}
     </aside>
   );
 }

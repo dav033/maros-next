@@ -17,6 +17,7 @@ import { SharePublicLinkPanel } from "../molecules/SharePublicLinkPanel";
 export interface ShareNoteDialogProps {
   pageId: number;
   pageTitle: string;
+  defaultTab?: "people" | "link";
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -30,10 +31,14 @@ export interface ShareNoteDialogProps {
 export function ShareNoteDialog({
   pageId,
   pageTitle,
+  defaultTab = "people",
   open,
   onOpenChange,
 }: ShareNoteDialogProps) {
-  const [tab, setTab] = useState("people");
+  const [tab, setTab] = useState<"people" | "link">(defaultTab);
+  const handleTabChange = (value: string) => {
+    if (value === "people" || value === "link") setTab(value);
+  };
   const { panel, isLoading } = useNoteAccess(pageId, open);
 
   const canManage = panel?.myAccess === "owner";
@@ -42,13 +47,15 @@ export function ShareNoteDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[calc(100svh-1rem)] w-[calc(100%-1rem)] max-w-lg overflow-y-auto overscroll-contain p-4 sm:max-h-[calc(100svh-2rem)] sm:p-6">
         <DialogHeader>
-          <DialogTitle className="truncate">Share “{pageTitle || "Untitled"}”</DialogTitle>
+          <DialogTitle className="truncate">
+            Share “{pageTitle || "Untitled"}”
+          </DialogTitle>
           <DialogDescription>
             Grants apply to this page and everything nested under it.
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs value={tab} onValueChange={setTab}>
+        <Tabs value={tab} onValueChange={handleTabChange}>
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="people" className="gap-1.5">
               <Users className="h-3.5 w-3.5" aria-hidden="true" />
