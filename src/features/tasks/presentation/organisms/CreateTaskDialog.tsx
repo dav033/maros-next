@@ -32,20 +32,26 @@ export function CreateTaskDialog({
   onCreated,
   defaultEntityKind,
   defaultEntityId,
+  defaultAssigneeId,
+  defaultAssigneeLabel,
   trigger,
 }: {
   onCreated?: (id: number) => void;
   /** Preselects the linked record — e.g. EntityTasksSection on a lead/project page. */
   defaultEntityKind?: TaskEntityKind;
   defaultEntityId?: number;
+  /** Preselects the assignee — e.g. MyTasksPageView defaults to yourself, since an
+   *  unassigned task created there would immediately disappear from that same view. */
+  defaultAssigneeId?: number;
+  defaultAssigneeLabel?: string;
   trigger?: ReactNode;
 }) {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [kind, setKind] = useState<TaskKind>("general");
   const [priority, setPriority] = useState<TaskPriority>("normal");
-  const [assigneeUserId, setAssigneeUserId] = useState<number | null>(null);
-  const [assigneeLabel, setAssigneeLabel] = useState("Unassigned");
+  const [assigneeUserId, setAssigneeUserId] = useState<number | null>(defaultAssigneeId ?? null);
+  const [assigneeLabel, setAssigneeLabel] = useState(defaultAssigneeLabel ?? "Unassigned");
   const [dueDate, setDueDate] = useState("");
 
   const { createMutation } = useTaskMutations();
@@ -54,8 +60,8 @@ export function CreateTaskDialog({
     setTitle("");
     setKind("general");
     setPriority("normal");
-    setAssigneeUserId(null);
-    setAssigneeLabel("Unassigned");
+    setAssigneeUserId(defaultAssigneeId ?? null);
+    setAssigneeLabel(defaultAssigneeLabel ?? "Unassigned");
     setDueDate("");
   };
 

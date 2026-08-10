@@ -4,11 +4,13 @@ import { useMemo } from "react";
 import { CheckCheck, UserCheck } from "lucide-react";
 import { PageHeaderCard } from "@/components/shared";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useCurrentUser } from "@/shared/auth/CurrentUserProvider";
 import { useInstantLeads } from "@/leads/presentation/hooks/data/useInstantLeads";
 import { useInstantProjects } from "@/project/presentation/hooks/data/useInstantProjects";
 import { useInstantMyTasks, type MyTasksBucketKey } from "../hooks/data/useInstantMyTasks";
 import { useTaskMutations } from "../hooks/mutations/useTaskMutations";
 import { useTaskDetailRoute } from "../hooks/useTaskDetailRoute";
+import { CreateTaskDialog } from "../organisms/CreateTaskDialog";
 import { MyTaskRow } from "../organisms/MyTaskRow";
 import { TaskDetailSheet } from "../organisms/TaskDetailSheet";
 
@@ -26,6 +28,7 @@ const SECTIONS: Array<{ key: MyTasksBucketKey; label: string }> = [
  * drag & drop.
  */
 export function MyTasksPageView() {
+  const { user } = useCurrentUser();
   const { taskId, openTask, closeTask } = useTaskDetailRoute();
   const { buckets, showSkeleton } = useInstantMyTasks();
   const { moveMutation } = useTaskMutations();
@@ -49,6 +52,13 @@ export function MyTasksPageView() {
         icon={UserCheck}
         title="My tasks"
         description="What's yours, grouped by when it's due."
+        rightSlot={
+          <CreateTaskDialog
+            onCreated={openTask}
+            defaultAssigneeId={user?.id}
+            defaultAssigneeLabel={user?.name ?? user?.email}
+          />
+        }
       />
 
       {showSkeleton ? (
