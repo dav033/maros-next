@@ -18,5 +18,4 @@ export const notesKeys = {
   access: (id: number) => [...base.all, "access", id] as const,
   linkViews: (id: number, linkId: number) =>
     [...base.all, "access", id, "links", linkId, "views"] as const,
-  directory: () => [...base.all, "directory"] as const,
 } as const;

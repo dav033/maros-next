@@ -1,7 +1,7 @@
 import type { HttpClientLike } from "@/shared/infra";
 import { optimizedApiClient } from "@/shared/infra";
 import type { UsersRepositoryPort } from "@/features/users/domain";
-import type { AppUser, UserPatch } from "@/features/users/domain";
+import type { AppUser, DirectoryUser, UserPatch } from "@/features/users/domain";
 
 import { endpoints } from "./endpoints";
 
@@ -16,5 +16,10 @@ export class UsersHttpRepository implements UsersRepositoryPort {
   async update(id: number, patch: UserPatch): Promise<AppUser> {
     const { data } = await this.api.patch<AppUser>(endpoints.user(id), patch);
     return data;
+  }
+
+  async listDirectory(): Promise<DirectoryUser[]> {
+    const { data } = await this.api.get<DirectoryUser[]>(endpoints.directory());
+    return Array.isArray(data) ? data : [];
   }
 }

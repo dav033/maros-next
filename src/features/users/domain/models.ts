@@ -46,3 +46,11 @@ export type RolePatch = Readonly<{
   description?: string;
   permissions?: Permission[];
 }>;
+
+/** A colleague, as returned by /users/directory — no role, no permissions, no status. */
+export interface DirectoryUser {
+  id: number;
+  name: string | null;
+  email: string;
+  picture: string | null;
+}

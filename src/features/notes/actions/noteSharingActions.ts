@@ -8,7 +8,6 @@ import { success, handleActionError } from "@/shared/actions/utils";
 import type {
   NoteAccessPanel,
   NoteAdminLink,
-  NoteDirectoryUser,
   NoteLinkDraft,
   NoteLinkPatch,
   NoteLinkStats,
@@ -161,16 +160,6 @@ export async function getNoteLinkStatsAction(
 ): Promise<ActionResult<NoteLinkStats>> {
   try {
     return success(await (await sharingRepo()).getLinkStats(id, linkId));
-  } catch (error) {
-    return handleActionError(error);
-  }
-}
-
-export async function listNoteDirectoryAction(): Promise<
-  ActionResult<NoteDirectoryUser[]>
-> {
-  try {
-    return success(await (await sharingRepo()).listDirectory());
   } catch (error) {
     return handleActionError(error);
   }

@@ -30,7 +30,4 @@ export const endpoints = {
   link: (id: number, linkId: number) => `${BASE}/${id}/links/${linkId}`,
   rotateLink: (id: number, linkId: number) => `${BASE}/${id}/links/${linkId}/rotate`,
   linkViews: (id: number, linkId: number) => `${BASE}/${id}/links/${linkId}/views`,
-
-  /** Colleagues for the people picker — see UsersController.findUserDirectory. */
-  userDirectory: () => api.resource("users/directory"),
 } as const;

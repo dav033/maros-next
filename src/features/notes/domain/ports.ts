@@ -1,6 +1,5 @@
 import type {
   NoteAccessPanel,
-  NoteDirectoryUser,
   NoteEntityKind,
   NoteEntityLink,
   NoteLinkDraft,
@@ -78,8 +77,6 @@ export interface NoteSharingRepositoryPort {
   getLinkStats(id: NotePageId, linkId: number): Promise<NoteLinkStats>;
   listAllLinks(): Promise<import("./models").NoteAdminLink[]>;
   adminRevokeLink(linkId: number): Promise<void>;
-
-  listDirectory(): Promise<NoteDirectoryUser[]>;
 }
 
 export interface NoteTagRepositoryPort {

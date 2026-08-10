@@ -1,6 +1,7 @@
 import type {
   AppRole,
   AppUser,
+  DirectoryUser,
   PermissionCatalog,
   RoleDraft,
   RolePatch,
@@ -10,6 +11,8 @@ import type {
 export interface UsersRepositoryPort {
   list(): Promise<AppUser[]>;
   update(id: number, patch: UserPatch): Promise<AppUser>;
+  /** Plain name/email/picture for people pickers — see UsersController.findUserDirectory. */
+  listDirectory(): Promise<DirectoryUser[]>;
 }
 
 export interface RolesRepositoryPort {

@@ -22,12 +22,9 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import type {
-  NoteAccessPanel,
-  NoteDirectoryUser,
-  NoteShareAccess,
-} from "@/notes/domain";
-import { useNoteDirectory } from "../hooks/data/useNoteDirectory";
+import type { NoteAccessPanel, NoteShareAccess } from "@/notes/domain";
+import type { DirectoryUser } from "@/features/users/domain";
+import { useUserDirectory } from "@/features/users/presentation/hooks/data/useUserDirectory";
 import { useNoteSharingMutations } from "../hooks/mutations/useNoteSharingMutations";
 
 const ACCESS_LABELS: Record<NoteShareAccess, string> = {
@@ -57,7 +54,7 @@ export function SharePeoplePanel({
 }: SharePeoplePanelProps) {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [access, setAccess] = useState<NoteShareAccess>("viewer");
-  const { users, isLoading: directoryLoading } = useNoteDirectory(true);
+  const { users, isLoading: directoryLoading } = useUserDirectory(true);
   const {
     shareMutation,
     updateShareMutation,
@@ -77,7 +74,7 @@ export function SharePeoplePanel({
 
   const candidates = users.filter((user) => !alreadyShared.has(user.id));
 
-  const grant = (user: NoteDirectoryUser) => {
+  const grant = (user: DirectoryUser) => {
     setPickerOpen(false);
     shareMutation.mutate({ id: pageId, userId: user.id, access });
   };

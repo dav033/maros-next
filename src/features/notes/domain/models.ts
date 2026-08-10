@@ -217,14 +217,6 @@ export type NoteLinkPatch = Readonly<{
   expiresAt?: string | null;
 }>;
 
-/** A colleague, as returned by /users/directory — no role, no permissions, no status. */
-export interface NoteDirectoryUser {
-  id: number;
-  name: string | null;
-  email: string;
-  picture: string | null;
-}
-
 /**
  * What a share link exposes. Notice what is missing: no owner, no entity link, no
  * emails, no favorites. It is built from an allow-list on the server, not by omitting

@@ -3,7 +3,6 @@ import { optimizedApiClient } from "@/shared/infra";
 import type {
   NoteAccessPanel,
   NoteAdminLink,
-  NoteDirectoryUser,
   NoteLinkDraft,
   NoteLinkPatch,
   NoteLinkStats,
@@ -134,12 +133,5 @@ export class NoteSharingHttpRepository implements NoteSharingRepositoryPort {
 
   async adminRevokeLink(linkId: number): Promise<void> {
     await this.api.delete<void>(`${noteEndpoints.allLinks()}/${linkId}`);
-  }
-
-  async listDirectory(): Promise<NoteDirectoryUser[]> {
-    const { data } = await this.api.get<NoteDirectoryUser[]>(
-      noteEndpoints.userDirectory()
-    );
-    return Array.isArray(data) ? data : [];
   }
 }

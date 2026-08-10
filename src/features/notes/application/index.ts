@@ -12,7 +12,6 @@ export { listNotesByEntity } from "./usecases/queries/listNotesByEntity";
 export { listSharedWithMe } from "./usecases/queries/listSharedWithMe";
 export { getNoteAccess } from "./usecases/queries/getNoteAccess";
 export { listNoteLinkViews } from "./usecases/queries/listNoteLinkViews";
-export { listNoteDirectory } from "./usecases/queries/listNoteDirectory";
 
 export { createNotePage } from "./usecases/commands/createNotePage";
 export { updateNotePageMeta } from "./usecases/commands/updateNotePageMeta";
