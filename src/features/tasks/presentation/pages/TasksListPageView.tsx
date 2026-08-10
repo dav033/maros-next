@@ -121,7 +121,7 @@ export function TasksListPageView() {
         <TaskListTable tasks={filtered} isLoading={showSkeleton} onOpenTask={openTask} />
       </section>
 
-      <TaskDetailSheet taskId={taskId} onClose={closeTask} />
+      <TaskDetailSheet taskId={taskId} onClose={closeTask} onOpenTask={openTask} />
     </main>
   );
 }

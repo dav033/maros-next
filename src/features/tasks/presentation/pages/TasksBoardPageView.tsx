@@ -25,7 +25,7 @@ export function TasksBoardPageView() {
         <TaskBoard onOpenTask={openTask} />
       </section>
 
-      <TaskDetailSheet taskId={taskId} onClose={closeTask} />
+      <TaskDetailSheet taskId={taskId} onClose={closeTask} onOpenTask={openTask} />
     </main>
   );
 }

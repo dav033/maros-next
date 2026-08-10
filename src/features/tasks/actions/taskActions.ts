@@ -6,6 +6,7 @@ import { TasksHttpRepository, TaskLabelsHttpRepository, makeTasksAppContext } fr
 import type { ActionResult } from "@/shared/actions/types";
 import { success, handleActionError } from "@/shared/actions/utils";
 import type {
+  TaskComment,
   TaskDetail,
   TaskDraft,
   TaskEntityLink,
@@ -144,6 +145,46 @@ export async function deleteTaskLabelAction(id: number): Promise<ActionResult<nu
   try {
     const ctx = await createServerTasksAppContext();
     await ctx.repos.label.delete(id);
+    return success(null);
+  } catch (error) {
+    return handleActionError(error);
+  }
+}
+
+export async function addTaskCommentAction(
+  taskId: number,
+  body: Record<string, unknown>
+): Promise<ActionResult<TaskComment>> {
+  try {
+    const ctx = await createServerTasksAppContext();
+    const comment = await ctx.repos.task.addComment(taskId, body);
+    return success(comment);
+  } catch (error) {
+    return handleActionError(error);
+  }
+}
+
+export async function updateTaskCommentAction(
+  taskId: number,
+  commentId: number,
+  body: Record<string, unknown>
+): Promise<ActionResult<TaskComment>> {
+  try {
+    const ctx = await createServerTasksAppContext();
+    const comment = await ctx.repos.task.updateComment(taskId, commentId, body);
+    return success(comment);
+  } catch (error) {
+    return handleActionError(error);
+  }
+}
+
+export async function deleteTaskCommentAction(
+  taskId: number,
+  commentId: number
+): Promise<ActionResult<null>> {
+  try {
+    const ctx = await createServerTasksAppContext();
+    await ctx.repos.task.deleteComment(taskId, commentId);
     return success(null);
   } catch (error) {
     return handleActionError(error);

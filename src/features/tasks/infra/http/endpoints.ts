@@ -13,4 +13,6 @@ export const endpoints = {
   assignee: (id: number) => `${BASE}/${id}/assignee`,
   setLabels: (id: number) => `${BASE}/${id}/labels`,
   entity: (id: number) => `${BASE}/${id}/entity`,
+  comments: (id: number) => `${BASE}/${id}/comments`,
+  comment: (id: number, commentId: number) => `${BASE}/${id}/comments/${commentId}`,
 } as const;

@@ -3,6 +3,7 @@ import { optimizedApiClient } from "@/shared/infra";
 import type {
   Task,
   TaskBoardColumns,
+  TaskComment,
   TaskDetail,
   TaskDraft,
   TaskEntityLink,
@@ -89,5 +90,30 @@ export class TasksHttpRepository implements TasksRepositoryPort {
 
   async delete(id: number): Promise<void> {
     await this.api.delete<void>(endpoints.remove(id));
+  }
+
+  async listComments(taskId: number): Promise<TaskComment[]> {
+    const { data } = await this.api.get<TaskComment[]>(endpoints.comments(taskId));
+    return Array.isArray(data) ? data : [];
+  }
+
+  async addComment(taskId: number, body: Record<string, unknown>): Promise<TaskComment> {
+    const { data } = await this.api.post<TaskComment>(endpoints.comments(taskId), { body });
+    return data;
+  }
+
+  async updateComment(
+    taskId: number,
+    commentId: number,
+    body: Record<string, unknown>,
+  ): Promise<TaskComment> {
+    const { data } = await this.api.patch<TaskComment>(endpoints.comment(taskId, commentId), {
+      body,
+    });
+    return data;
+  }
+
+  async deleteComment(taskId: number, commentId: number): Promise<void> {
+    await this.api.delete<void>(endpoints.comment(taskId, commentId));
   }
 }

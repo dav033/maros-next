@@ -21,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,6 +32,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { EntityAttachmentsSection } from "@/features/attachments/presentation/EntityAttachmentsSection";
+import { textToTipTapDoc, tiptapDocToText } from "@/shared/domain";
 import { TASK_KINDS, TASK_PRIORITIES, TASK_STATUSES } from "@/tasks/domain";
 import { useInstantTask } from "../hooks/data/useInstantTask";
 import { useInstantTaskLabels } from "../hooks/data/useInstantTaskLabels";
@@ -41,37 +44,10 @@ import { AssigneePicker } from "../molecules/AssigneePicker";
 import { LabelPicker } from "../molecules/LabelPicker";
 import { TaskEntityPicker } from "../molecules/TaskEntityPicker";
 import { BlockedReasonDialog } from "../molecules/BlockedReasonDialog";
+import { SubtaskList } from "./SubtaskList";
+import { TaskCommentList } from "./TaskCommentList";
+import { TaskActivityFeed } from "./TaskActivityFeed";
 import { TASK_KIND_LABELS, TASK_PRIORITY_LABELS, TASK_STATUS_LABELS, taskLabelColor } from "../atoms/taskVisualTokens";
-
-/**
- * A task description is one paragraph of plain text for now — no slash commands, no
- * tables, none of NoteEditor's richness. Round-tripped through the same minimal TipTap
- * shape the backend already stores, so a richer editor can replace this later without
- * a data migration.
- */
-function plainTextToDoc(text: string): Record<string, unknown> {
-  const trimmed = text.trim();
-  return {
-    type: "doc",
-    content: [
-      trimmed
-        ? { type: "paragraph", content: [{ type: "text", text: trimmed }] }
-        : { type: "paragraph" },
-    ],
-  };
-}
-
-function docToPlainText(doc: Record<string, unknown>): string {
-  const lines: string[] = [];
-  const walk = (node: unknown): void => {
-    if (!node || typeof node !== "object") return;
-    const n = node as { text?: string; content?: unknown[] };
-    if (typeof n.text === "string") lines.push(n.text);
-    if (Array.isArray(n.content)) n.content.forEach(walk);
-  };
-  walk(doc);
-  return lines.join("");
-}
 
 const ENTITY_KIND_LABEL: Record<string, string> = {
   lead: "Lead",
@@ -83,9 +59,12 @@ const ENTITY_KIND_LABEL: Record<string, string> = {
 export function TaskDetailSheet({
   taskId,
   onClose,
+  onOpenTask,
 }: {
   taskId: number | null;
   onClose: () => void;
+  /** Lets the Subtasks tab open a child task in this same sheet. */
+  onOpenTask: (id: number) => void;
 }) {
   const { data: task, showSkeleton } = useInstantTask(taskId);
   const { labels: allLabels } = useInstantTaskLabels();
@@ -106,7 +85,7 @@ export function TaskDetailSheet({
   useEffect(() => {
     if (!task) return;
     setTitle(task.title);
-    setDescription(docToPlainText(task.description));
+    setDescription(tiptapDocToText(task.description));
   }, [task]);
 
   const open = taskId !== null;
@@ -118,7 +97,7 @@ export function TaskDetailSheet({
 
   const saveDescription = () => {
     if (!task) return;
-    updateMutation.mutate({ id: task.id, patch: { description: plainTextToDoc(description) } });
+    updateMutation.mutate({ id: task.id, patch: { description: textToTipTapDoc(description) } });
   };
 
   const changeStatus = (status: string) => {
@@ -151,7 +130,18 @@ export function TaskDetailSheet({
           ) : (
             <>
               <SheetHeader className="gap-1">
-                <SheetDescription className="font-mono text-xs">T-{task.id}</SheetDescription>
+                <SheetDescription className="font-mono text-xs">
+                  T-{task.id}
+                  {task.parentId ? (
+                    <button
+                      type="button"
+                      onClick={() => onOpenTask(task.parentId as number)}
+                      className="ml-2 underline decoration-dotted hover:text-foreground"
+                    >
+                      subtask of T-{task.parentId}
+                    </button>
+                  ) : null}
+                </SheetDescription>
                 <SheetTitle asChild>
                   <Input
                     value={title}
@@ -162,214 +152,252 @@ export function TaskDetailSheet({
                 </SheetTitle>
               </SheetHeader>
 
-              <div className="mt-6 grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <Label className="text-xs text-muted-foreground">Status</Label>
-                  <Select value={task.status} onValueChange={changeStatus}>
-                    <SelectTrigger className="h-9">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {TASK_STATUSES.map((status) => (
-                        <SelectItem key={status} value={status}>
-                          {TASK_STATUS_LABELS[status]}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+              <Tabs defaultValue="details" className="mt-4">
+                <TabsList>
+                  <TabsTrigger value="details">Details</TabsTrigger>
+                  <TabsTrigger value="subtasks">
+                    Subtasks{task.subtasks.length > 0 ? ` (${task.subtasks.length})` : ""}
+                  </TabsTrigger>
+                  <TabsTrigger value="comments">
+                    Comments{task.comments.length > 0 ? ` (${task.comments.length})` : ""}
+                  </TabsTrigger>
+                  <TabsTrigger value="activity">Activity</TabsTrigger>
+                </TabsList>
 
-                <div className="space-y-1.5">
-                  <Label className="text-xs text-muted-foreground">Priority</Label>
-                  <Select
-                    value={task.priority}
-                    onValueChange={(priority) =>
-                      updateMutation.mutate({
-                        id: task.id,
-                        patch: { priority: priority as (typeof TASK_PRIORITIES)[number] },
-                      })
-                    }
-                  >
-                    <SelectTrigger className="h-9">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {TASK_PRIORITIES.map((priority) => (
-                        <SelectItem key={priority} value={priority}>
-                          {TASK_PRIORITY_LABELS[priority]}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                <TabsContent value="details" className="space-y-5">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs text-muted-foreground">Status</Label>
+                      <Select value={task.status} onValueChange={changeStatus}>
+                        <SelectTrigger className="h-9">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {TASK_STATUSES.map((status) => (
+                            <SelectItem key={status} value={status}>
+                              {TASK_STATUS_LABELS[status]}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-                <div className="space-y-1.5">
-                  <Label className="text-xs text-muted-foreground">Kind</Label>
-                  <Select
-                    value={task.kind}
-                    onValueChange={(kind) =>
-                      updateMutation.mutate({
-                        id: task.id,
-                        patch: { kind: kind as (typeof TASK_KINDS)[number] },
-                      })
-                    }
-                  >
-                    <SelectTrigger className="h-9">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {TASK_KINDS.map((kind) => (
-                        <SelectItem key={kind} value={kind}>
-                          <span className="inline-flex items-center gap-1.5">
-                            <TaskKindIcon kind={kind} />
-                            {TASK_KIND_LABELS[kind]}
-                          </span>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label className="text-xs text-muted-foreground">Assignee</Label>
-                  <AssigneePicker
-                    onSelect={(user) =>
-                      setAssigneeMutation.mutate({ id: task.id, userId: user?.id ?? null })
-                    }
-                    trigger={
-                      <button
-                        type="button"
-                        className="flex h-9 w-full items-center gap-2 rounded-md border border-input bg-transparent px-3 text-sm hover:bg-accent/40"
+                    <div className="space-y-1.5">
+                      <Label className="text-xs text-muted-foreground">Priority</Label>
+                      <Select
+                        value={task.priority}
+                        onValueChange={(priority) =>
+                          updateMutation.mutate({
+                            id: task.id,
+                            patch: { priority: priority as (typeof TASK_PRIORITIES)[number] },
+                          })
+                        }
                       >
-                        <AssigneeAvatar person={task.assignee} />
-                        <span className="truncate">
-                          {task.assignee?.name ?? task.assignee?.email ?? "Unassigned"}
+                        <SelectTrigger className="h-9">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {TASK_PRIORITIES.map((priority) => (
+                            <SelectItem key={priority} value={priority}>
+                              {TASK_PRIORITY_LABELS[priority]}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label className="text-xs text-muted-foreground">Kind</Label>
+                      <Select
+                        value={task.kind}
+                        onValueChange={(kind) =>
+                          updateMutation.mutate({
+                            id: task.id,
+                            patch: { kind: kind as (typeof TASK_KINDS)[number] },
+                          })
+                        }
+                      >
+                        <SelectTrigger className="h-9">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {TASK_KINDS.map((kind) => (
+                            <SelectItem key={kind} value={kind}>
+                              <span className="inline-flex items-center gap-1.5">
+                                <TaskKindIcon kind={kind} />
+                                {TASK_KIND_LABELS[kind]}
+                              </span>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label className="text-xs text-muted-foreground">Assignee</Label>
+                      <AssigneePicker
+                        onSelect={(user) =>
+                          setAssigneeMutation.mutate({ id: task.id, userId: user?.id ?? null })
+                        }
+                        trigger={
+                          <button
+                            type="button"
+                            className="flex h-9 w-full items-center gap-2 rounded-md border border-input bg-transparent px-3 text-sm hover:bg-accent/40"
+                          >
+                            <AssigneeAvatar person={task.assignee} />
+                            <span className="truncate">
+                              {task.assignee?.name ?? task.assignee?.email ?? "Unassigned"}
+                            </span>
+                          </button>
+                        }
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label className="text-xs text-muted-foreground">Start date</Label>
+                      <Input
+                        type="date"
+                        value={task.startDate ?? ""}
+                        onChange={(e) =>
+                          updateMutation.mutate({
+                            id: task.id,
+                            patch: { startDate: e.target.value || null },
+                          })
+                        }
+                        className="h-9"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label className="text-xs text-muted-foreground">Due date</Label>
+                      <Input
+                        type="date"
+                        value={task.dueDate ?? ""}
+                        onChange={(e) =>
+                          updateMutation.mutate({
+                            id: task.id,
+                            patch: { dueDate: e.target.value || null },
+                          })
+                        }
+                        className="h-9"
+                      />
+                    </div>
+                  </div>
+
+                  {task.status === "blocked" ? (
+                    <div className="flex items-start gap-2 rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                      <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium">Blocked</p>
+                        <p className="text-xs">{task.blockedReason}</p>
+                      </div>
+                    </div>
+                  ) : null}
+
+                  <div className="space-y-1.5">
+                    <Label className="text-xs text-muted-foreground">Labels</Label>
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      {task.labels.map((label) => (
+                        <span
+                          key={label.id}
+                          className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium"
+                          style={{
+                            backgroundColor: `${taskLabelColor(label.color)}22`,
+                            color: taskLabelColor(label.color),
+                          }}
+                        >
+                          {label.name}
+                          <button
+                            type="button"
+                            onClick={() => toggleLabel(label.id)}
+                            aria-label={`Remove ${label.name}`}
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
                         </span>
-                      </button>
-                    }
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label className="text-xs text-muted-foreground">Start date</Label>
-                  <Input
-                    type="date"
-                    value={task.startDate ?? ""}
-                    onChange={(e) =>
-                      updateMutation.mutate({
-                        id: task.id,
-                        patch: { startDate: e.target.value || null },
-                      })
-                    }
-                    className="h-9"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label className="text-xs text-muted-foreground">Due date</Label>
-                  <Input
-                    type="date"
-                    value={task.dueDate ?? ""}
-                    onChange={(e) =>
-                      updateMutation.mutate({
-                        id: task.id,
-                        patch: { dueDate: e.target.value || null },
-                      })
-                    }
-                    className="h-9"
-                  />
-                </div>
-              </div>
-
-              {task.status === "blocked" ? (
-                <div className="mt-4 flex items-start gap-2 rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-                  <div className="min-w-0 flex-1">
-                    <p className="font-medium">Blocked</p>
-                    <p className="text-xs">{task.blockedReason}</p>
+                      ))}
+                      <LabelPicker
+                        labels={allLabels}
+                        selectedIds={new Set(task.labels.map((l) => l.id))}
+                        onToggle={toggleLabel}
+                        trigger={
+                          <Button type="button" variant="outline" size="sm" className="h-6 text-xs">
+                            + Label
+                          </Button>
+                        }
+                      />
+                    </div>
                   </div>
-                </div>
-              ) : null}
 
-              <div className="mt-5 space-y-1.5">
-                <Label className="text-xs text-muted-foreground">Labels</Label>
-                <div className="flex flex-wrap items-center gap-1.5">
-                  {task.labels.map((label) => (
-                    <span
-                      key={label.id}
-                      className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium"
-                      style={{
-                        backgroundColor: `${taskLabelColor(label.color)}22`,
-                        color: taskLabelColor(label.color),
-                      }}
-                    >
-                      {label.name}
-                      <button
-                        type="button"
-                        onClick={() => toggleLabel(label.id)}
-                        aria-label={`Remove ${label.name}`}
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </span>
-                  ))}
-                  <LabelPicker
-                    labels={allLabels}
-                    selectedIds={new Set(task.labels.map((l) => l.id))}
-                    onToggle={toggleLabel}
-                    trigger={
-                      <Button type="button" variant="outline" size="sm" className="h-6 text-xs">
-                        + Label
-                      </Button>
-                    }
-                  />
-                </div>
-              </div>
-
-              <div className="mt-5 space-y-1.5">
-                <Label className="text-xs text-muted-foreground">Linked record</Label>
-                {task.entityKind && task.entityId ? (
-                  <div className="flex items-center gap-2 rounded-md border border-border/60 px-3 py-2 text-sm">
-                    <Link2 className="h-3.5 w-3.5 text-muted-foreground" />
-                    <span className="flex-1 truncate">
-                      {ENTITY_KIND_LABEL[task.entityKind]} #{task.entityId}
-                    </span>
-                    <button
-                      type="button"
-                      className="text-xs text-muted-foreground hover:text-foreground"
-                      onClick={() => setEntityMutation.mutate({ id: task.id, link: null })}
-                    >
-                      Unlink
-                    </button>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs text-muted-foreground">Linked record</Label>
+                    {task.entityKind && task.entityId ? (
+                      <div className="flex items-center gap-2 rounded-md border border-border/60 px-3 py-2 text-sm">
+                        <Link2 className="h-3.5 w-3.5 text-muted-foreground" />
+                        <span className="flex-1 truncate">
+                          {ENTITY_KIND_LABEL[task.entityKind]} #{task.entityId}
+                        </span>
+                        <button
+                          type="button"
+                          className="text-xs text-muted-foreground hover:text-foreground"
+                          onClick={() => setEntityMutation.mutate({ id: task.id, link: null })}
+                        >
+                          Unlink
+                        </button>
+                      </div>
+                    ) : (
+                      <TaskEntityPicker
+                        onSelect={(link) => setEntityMutation.mutate({ id: task.id, link })}
+                        trigger={
+                          <Button type="button" variant="outline" size="sm" className="gap-1.5">
+                            <Link2 className="h-3.5 w-3.5" />
+                            Link to a record
+                          </Button>
+                        }
+                      />
+                    )}
                   </div>
-                ) : (
-                  <TaskEntityPicker
-                    onSelect={(link) => setEntityMutation.mutate({ id: task.id, link })}
-                    trigger={
-                      <Button type="button" variant="outline" size="sm" className="gap-1.5">
-                        <Link2 className="h-3.5 w-3.5" />
-                        Link to a record
-                      </Button>
-                    }
+
+                  <div className="space-y-1.5">
+                    <Label className="text-xs text-muted-foreground">Description</Label>
+                    <Textarea
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      onBlur={saveDescription}
+                      rows={5}
+                      placeholder="Add details…"
+                    />
+                  </div>
+
+                  <EntityAttachmentsSection
+                    entityKind="task"
+                    entityId={task.id}
+                    attachments={task.attachments}
+                    onAttachmentsChange={async (attachments) => {
+                      await updateMutation.mutateAsync({ id: task.id, patch: { attachments } });
+                    }}
                   />
-                )}
-              </div>
+                </TabsContent>
 
-              <div className="mt-5 space-y-1.5">
-                <Label className="text-xs text-muted-foreground">Description</Label>
-                <Textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  onBlur={saveDescription}
-                  rows={5}
-                  placeholder="Add details…"
-                />
-              </div>
+                <TabsContent value="subtasks">
+                  <SubtaskList
+                    parentId={task.id}
+                    subtasks={task.subtasks}
+                    onOpenSubtask={onOpenTask}
+                  />
+                </TabsContent>
 
-              <div className="mt-8 flex items-center justify-between border-t border-border/60 pt-4 text-xs text-muted-foreground">
-                <span>
-                  Reported by {task.reporter?.name ?? task.reporter?.email ?? "—"}
-                </span>
+                <TabsContent value="comments">
+                  <TaskCommentList taskId={task.id} comments={task.comments} />
+                </TabsContent>
+
+                <TabsContent value="activity">
+                  <TaskActivityFeed activity={task.activity} />
+                </TabsContent>
+              </Tabs>
+
+              <div className="mt-6 flex items-center justify-between border-t border-border/60 pt-4 text-xs text-muted-foreground">
+                <span>Reported by {task.reporter?.name ?? task.reporter?.email ?? "—"}</span>
                 <Button
                   type="button"
                   variant="ghost"

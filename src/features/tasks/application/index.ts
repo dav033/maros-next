@@ -17,3 +17,6 @@ export { deleteTask } from "./usecases/commands/deleteTask";
 export { createTaskLabel } from "./usecases/commands/createTaskLabel";
 export { updateTaskLabel } from "./usecases/commands/updateTaskLabel";
 export { deleteTaskLabel } from "./usecases/commands/deleteTaskLabel";
+export { addTaskComment } from "./usecases/commands/addTaskComment";
+export { updateTaskComment } from "./usecases/commands/updateTaskComment";
+export { deleteTaskComment } from "./usecases/commands/deleteTaskComment";

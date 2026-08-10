@@ -1,6 +1,7 @@
 import type {
   Task,
   TaskBoardColumns,
+  TaskComment,
   TaskDetail,
   TaskDraft,
   TaskEntityLink,
@@ -28,6 +29,16 @@ export interface TasksRepositoryPort {
   setLabels(id: number, labelIds: number[]): Promise<TaskDetail>;
   setEntityLink(id: number, link: TaskEntityLink | null): Promise<TaskDetail>;
   delete(id: number): Promise<void>;
+
+  /** Comments also arrive bundled in `get()`'s TaskDetail — these exist for the mutations. */
+  listComments(taskId: number): Promise<TaskComment[]>;
+  addComment(taskId: number, body: Record<string, unknown>): Promise<TaskComment>;
+  updateComment(
+    taskId: number,
+    commentId: number,
+    body: Record<string, unknown>
+  ): Promise<TaskComment>;
+  deleteComment(taskId: number, commentId: number): Promise<void>;
 }
 
 export interface TaskLabelsRepositoryPort {

@@ -72,6 +72,15 @@ export interface TaskActivityEntry {
   createdAt: string;
 }
 
+export interface TaskComment {
+  id: number;
+  taskId: number;
+  body: Record<string, unknown>;
+  author: TaskPersonRef | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 /** The board/list row shape — no description, no subtasks, no activity. */
 export interface Task {
   id: number;
@@ -101,6 +110,7 @@ export interface TaskDetail extends Task {
   attachments: string[];
   subtasks: Task[];
   activity: TaskActivityEntry[];
+  comments: TaskComment[];
 }
 
 /** GET /tasks/board's shape: one array per column, `cancelled` never appears. */
@@ -130,6 +140,7 @@ export type TaskPatch = Readonly<{
   startDate?: string | null;
   dueDate?: string | null;
   blockedReason?: string | null;
+  attachments?: string[];
 }>;
 
 /**

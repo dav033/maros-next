@@ -12,6 +12,9 @@ import {
   setTaskLabelsAction,
   setTaskEntityAction,
   deleteTaskAction,
+  addTaskCommentAction,
+  updateTaskCommentAction,
+  deleteTaskCommentAction,
 } from "@/tasks/actions/taskActions";
 
 function invalidateAfterChange(qc: QueryClient, id?: number) {
@@ -83,6 +86,37 @@ export function useTaskMutations() {
     invalidate: (qc) => invalidateAfterChange(qc),
   });
 
+  const addCommentMutation = useEntityMutation({
+    entityLabel: "Comment",
+    action: "created",
+    mutationFn: ({ taskId, body }: { taskId: number; body: Record<string, unknown> }) =>
+      addTaskCommentAction(taskId, body),
+    invalidate: (qc, data) => invalidateAfterChange(qc, data.taskId),
+  });
+
+  const updateCommentMutation = useEntityMutation({
+    entityLabel: "Comment",
+    action: "updated",
+    mutationFn: ({
+      taskId,
+      commentId,
+      body,
+    }: {
+      taskId: number;
+      commentId: number;
+      body: Record<string, unknown>;
+    }) => updateTaskCommentAction(taskId, commentId, body),
+    invalidate: (qc, data) => invalidateAfterChange(qc, data.taskId),
+  });
+
+  const deleteCommentMutation = useEntityMutation({
+    entityLabel: "Comment",
+    action: "deleted",
+    mutationFn: ({ taskId, commentId }: { taskId: number; commentId: number }) =>
+      deleteTaskCommentAction(taskId, commentId),
+    invalidate: (qc, _data, input) => invalidateAfterChange(qc, input.taskId),
+  });
+
   return {
     createMutation,
     updateMutation,
@@ -91,5 +125,8 @@ export function useTaskMutations() {
     setLabelsMutation,
     setEntityMutation,
     deleteMutation,
+    addCommentMutation,
+    updateCommentMutation,
+    deleteCommentMutation,
   };
 }
