@@ -1,10 +1,11 @@
 import type { NotePageSummary, NoteTreeNode } from "../models";
 
 /**
- * Turns a flat list of pages into a nested tree, sorted by position within each
- * sibling group. Pages whose parentId doesn't resolve to another page in the list
- * (orphans — usually a page whose parent was concurrently trashed) are surfaced as roots
- * rather than silently dropped.
+ * Turns a flat list of pages into a nested tree. Starred pages lead each sibling group,
+ * while position still controls the order within the starred and unstarred sections.
+ * Pages whose parentId doesn't resolve to another page in the list (orphans — usually a
+ * page whose parent was concurrently trashed) are surfaced as roots rather than silently
+ * dropped.
  */
 export function buildNoteTree(pages: NotePageSummary[]): NoteTreeNode[] {
   const nodeById = new Map<number, NoteTreeNode>();
@@ -17,7 +18,8 @@ export function buildNoteTree(pages: NotePageSummary[]): NoteTreeNode[] {
     const node = nodeById.get(page.id);
     if (!node) continue;
 
-    const parent = page.parentId != null ? nodeById.get(page.parentId) : undefined;
+    const parent =
+      page.parentId != null ? nodeById.get(page.parentId) : undefined;
     if (parent) {
       parent.children.push(node);
     } else {
@@ -25,11 +27,14 @@ export function buildNoteTree(pages: NotePageSummary[]): NoteTreeNode[] {
     }
   }
 
-  const sortByPosition = (nodes: NoteTreeNode[]): void => {
-    nodes.sort((a, b) => a.position - b.position);
-    for (const node of nodes) sortByPosition(node.children);
+  const sortByFavoriteThenPosition = (nodes: NoteTreeNode[]): void => {
+    nodes.sort(
+      (a, b) =>
+        Number(b.isFavorite) - Number(a.isFavorite) || a.position - b.position,
+    );
+    for (const node of nodes) sortByFavoriteThenPosition(node.children);
   };
-  sortByPosition(roots);
+  sortByFavoriteThenPosition(roots);
 
   return roots;
 }

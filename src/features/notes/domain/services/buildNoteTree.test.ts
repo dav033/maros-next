@@ -42,9 +42,25 @@ describe("buildNoteTree", () => {
   });
 
   it("sorts root pages by position", () => {
-    const pages = [page({ id: 1, position: 2000 }), page({ id: 2, position: 1000 })];
+    const pages = [
+      page({ id: 1, position: 2000 }),
+      page({ id: 2, position: 1000 }),
+    ];
     const tree = buildNoteTree(pages);
     expect(tree.map((n) => n.id)).toEqual([2, 1]);
+  });
+
+  it("puts starred siblings first and preserves position within each group", () => {
+    const pages = [
+      page({ id: 1, position: 1000 }),
+      page({ id: 2, position: 3000, isFavorite: true }),
+      page({ id: 3, position: 2000, isFavorite: true }),
+      page({ id: 4, position: 500 }),
+    ];
+
+    const tree = buildNoteTree(pages);
+
+    expect(tree.map((n) => n.id)).toEqual([3, 2, 4, 1]);
   });
 
   it("surfaces a page as a root when its parentId does not resolve", () => {
