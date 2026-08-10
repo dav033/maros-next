@@ -115,11 +115,15 @@ export function AppSidebar() {
   };
 
   const isActiveItem = (item: SidebarItemProps) => {
-    if (isActiveRoute(item.href)) return true;
-    if (!item.activePrefix || !pathname?.startsWith(item.activePrefix)) {
+    // Checked first: when href and activePrefix are the same string (Tasks' "Board"
+    // links to /tasks with activePrefix "/tasks"), isActiveRoute below already matches
+    // every nested path via its own startsWith, which would make activeExclude
+    // unreachable for exactly the sibling routes ("/tasks/mine") it exists to rule out.
+    if ((item.activeExclude ?? []).some((prefix) => pathname?.startsWith(prefix))) {
       return false;
     }
-    return !(item.activeExclude ?? []).some((prefix) => pathname.startsWith(prefix));
+    if (isActiveRoute(item.href)) return true;
+    return Boolean(item.activePrefix && pathname?.startsWith(item.activePrefix));
   };
 
   const renderItems = (items: SidebarDropdownConfig[], nested = false) => {

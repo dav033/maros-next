@@ -33,6 +33,7 @@ import { LeadInfoSection } from "./sections/LeadInfoSection";
 import { LeadContactSection } from "./sections/LeadContactSection";
 import { LeadAttachmentsSection } from "./sections/LeadAttachmentsSection";
 import { EntityNotesSection } from "@/features/notes/presentation/organisms/EntityNotesSection";
+import { EntityTasksSection } from "@/features/tasks/presentation/organisms/EntityTasksSection";
 import { PostConversionEstimateModal } from "../organisms/PostConversionEstimateModal";
 
 
@@ -382,6 +383,8 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
         entityId={leadDetails.id}
         defaultTitle={leadDetails.name || undefined}
       />
+
+      <EntityTasksSection entityKind="lead" entityId={leadDetails.id} />
 
       <CompanyModal
         controller={companyModalController}

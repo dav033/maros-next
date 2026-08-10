@@ -30,6 +30,7 @@ import type { Contact as DomainContact } from "@/contact/domain";
 import { EntityAttachmentsSection } from "@/features/attachments/presentation/EntityAttachmentsSection";
 import { QuickbooksProjectAttachments } from "@/features/quickbooks/presentation/components/QuickbooksProjectAttachments";
 import { EntityNotesSection } from "@/features/notes/presentation/organisms/EntityNotesSection";
+import { EntityTasksSection } from "@/features/tasks/presentation/organisms/EntityTasksSection";
 
 interface ProjectDetails {
   id: number;
@@ -830,6 +831,8 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
         entityId={projectDetails.id}
         defaultTitle={projectDetails.lead?.name || undefined}
       />
+
+      <EntityTasksSection entityKind="project" entityId={projectDetails.id} />
 
       {lead?.leadNumber ? (
         <QuickbooksProjectAttachments projectNumber={lead.leadNumber} />

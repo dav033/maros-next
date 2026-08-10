@@ -20,6 +20,7 @@ import {
 function invalidateAfterChange(qc: QueryClient, id?: number) {
   void qc.invalidateQueries({ queryKey: tasksKeys.board() });
   void qc.invalidateQueries({ queryKey: tasksKeys.lists() });
+  void qc.invalidateQueries({ queryKey: tasksKeys.mine() });
   if (id != null) void qc.invalidateQueries({ queryKey: tasksKeys.detail(id) });
 }
 

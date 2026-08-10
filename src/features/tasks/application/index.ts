@@ -4,6 +4,8 @@ export { tasksKeys, taskLabelsKeys } from "./keys/tasksKeys";
 
 export { listTasks } from "./usecases/queries/listTasks";
 export { getBoard } from "./usecases/queries/getBoard";
+export { getMyTasks } from "./usecases/queries/getMyTasks";
+export { listTasksByEntity } from "./usecases/queries/listTasksByEntity";
 export { getTask } from "./usecases/queries/getTask";
 export { listTaskLabels } from "./usecases/queries/listTaskLabels";
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Plus } from "lucide-react";
 import {
   Dialog,
@@ -21,14 +21,25 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { TASK_KINDS, TASK_PRIORITIES } from "@/tasks/domain";
-import type { TaskKind, TaskPriority } from "@/tasks/domain";
+import type { TaskEntityKind, TaskKind, TaskPriority } from "@/tasks/domain";
 import { useTaskMutations } from "../hooks/mutations/useTaskMutations";
 import { AssigneeAvatar } from "../atoms/AssigneeAvatar";
 import { TaskKindIcon } from "../atoms/TaskKindIcon";
 import { AssigneePicker } from "../molecules/AssigneePicker";
 import { TASK_KIND_LABELS, TASK_PRIORITY_LABELS } from "../atoms/taskVisualTokens";
 
-export function CreateTaskDialog({ onCreated }: { onCreated?: (id: number) => void }) {
+export function CreateTaskDialog({
+  onCreated,
+  defaultEntityKind,
+  defaultEntityId,
+  trigger,
+}: {
+  onCreated?: (id: number) => void;
+  /** Preselects the linked record — e.g. EntityTasksSection on a lead/project page. */
+  defaultEntityKind?: TaskEntityKind;
+  defaultEntityId?: number;
+  trigger?: ReactNode;
+}) {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [kind, setKind] = useState<TaskKind>("general");
@@ -56,6 +67,8 @@ export function CreateTaskDialog({ onCreated }: { onCreated?: (id: number) => vo
       priority,
       assigneeUserId: assigneeUserId ?? undefined,
       dueDate: dueDate || undefined,
+      entityKind: defaultEntityKind,
+      entityId: defaultEntityId,
     });
     setOpen(false);
     reset();
@@ -71,10 +84,12 @@ export function CreateTaskDialog({ onCreated }: { onCreated?: (id: number) => vo
       }}
     >
       <DialogTrigger asChild>
-        <Button className="h-9 gap-2">
-          <Plus className="h-4 w-4" />
-          New task
-        </Button>
+        {trigger ?? (
+          <Button className="h-9 gap-2">
+            <Plus className="h-4 w-4" />
+            New task
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>

@@ -13,7 +13,8 @@ import {
   NotebookPen,
   ShieldCheck,
   Globe,
-  ListTodo,
+  KanbanSquare,
+  UserCheck,
 } from "lucide-react";
 import type { Permission } from "@/shared/auth/permissions";
 
@@ -97,10 +98,17 @@ const menuSection: SidebarSection = {
       permission: "notes:read",
     },
     {
-      title: "Tasks",
+      title: "Board",
       href: "/tasks",
-      icon: ListTodo,
+      icon: KanbanSquare,
       activePrefix: "/tasks",
+      activeExclude: ["/tasks/mine"],
+      permission: "tasks:read",
+    },
+    {
+      title: "My tasks",
+      href: "/tasks/mine",
+      icon: UserCheck,
       permission: "tasks:read",
     },
   ],
