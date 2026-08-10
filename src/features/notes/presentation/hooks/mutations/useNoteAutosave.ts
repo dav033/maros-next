@@ -56,6 +56,10 @@ function retryDelay(attempt: number): number {
   return Math.min(30_000, 1_000 * 2 ** Math.min(attempt - 1, 4));
 }
 
+function isBlankDocument(content: Record<string, unknown>): boolean {
+  return Object.keys(content).length === 0;
+}
+
 /**
  * Debounced, page-scoped content autosave.
  *
@@ -78,6 +82,7 @@ export function useNoteAutosave(pageId: number) {
   const desiredRef = useRef<PendingSave | null>(null);
   const lastSavedJsonRef = useRef<string | null>(null);
   const lastKnownUpdatedAtRef = useRef<string | undefined>(undefined);
+  const initialBlankWriteRef = useRef(false);
   const requestTokenRef = useRef(0);
   const flushRef = useRef<() => void>(() => undefined);
 
@@ -116,11 +121,15 @@ export function useNoteAutosave(pageId: number) {
     activeRef.current = active;
     setSafeStatus("saving");
 
-    void saveNoteContentAction(
-      active.pageId,
-      active.content,
-      lastKnownUpdatedAtRef.current,
-    )
+    // A newly created page has no document yet (`content = {}`). Its first content
+    // write may race the create/detail timestamp or a title metadata write. There is
+    // no existing document to protect in that case, so the first PATCH intentionally
+    // omits optimistic concurrency; every later write uses the confirmed version.
+    const expectedUpdatedAt = initialBlankWriteRef.current
+      ? undefined
+      : lastKnownUpdatedAtRef.current;
+
+    void saveNoteContentAction(active.pageId, active.content, expectedUpdatedAt)
       .then((result) => {
         if (!result.success) throw appErrorFromActionResult(result);
 
@@ -133,6 +142,7 @@ export function useNoteAutosave(pageId: number) {
 
         lastKnownUpdatedAtRef.current = page.updatedAt;
         lastSavedJsonRef.current = active.json;
+        initialBlankWriteRef.current = false;
         queryClient.setQueryData(notesKeys.detail(active.pageId), page);
 
         const desired = desiredRef.current;
@@ -203,6 +213,7 @@ export function useNoteAutosave(pageId: number) {
     activeRef.current = null;
     lastSavedJsonRef.current = null;
     lastKnownUpdatedAtRef.current = undefined;
+    initialBlankWriteRef.current = false;
     setSafeStatus("idle");
   }, [clearScheduledSave, pageId, setSafeStatus]);
 
@@ -256,9 +267,19 @@ export function useNoteAutosave(pageId: number) {
     if (page.id !== pageIdRef.current) return;
     lastKnownUpdatedAtRef.current = page.updatedAt;
     lastSavedJsonRef.current = JSON.stringify(page.content);
+    initialBlankWriteRef.current = isBlankDocument(page.content);
     desiredRef.current = null;
     pendingRef.current = null;
   }, []);
 
-  return { status, scheduleSave, setBaseline };
+  const syncServerVersion = useCallback(
+    (updatedAt: string) => {
+      if (pageIdRef.current === pageId) {
+        lastKnownUpdatedAtRef.current = updatedAt;
+      }
+    },
+    [pageId],
+  );
+
+  return { status, scheduleSave, setBaseline, syncServerVersion };
 }

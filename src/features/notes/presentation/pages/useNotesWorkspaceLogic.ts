@@ -8,7 +8,12 @@ import { useInstantNotePage } from "../hooks/data/useInstantNotePage";
 import { useNoteMutations } from "../hooks/mutations/useNoteMutations";
 import { useNoteAutosave } from "../hooks/mutations/useNoteAutosave";
 import { hasNoteAccess } from "@/notes/domain";
-import type { NoteEntityLink, NoteKind, NotePage, NotePageSummary } from "@/notes/domain";
+import type {
+  NoteEntityLink,
+  NoteKind,
+  NotePage,
+  NotePageSummary,
+} from "@/notes/domain";
 
 export interface UseNotesWorkspaceLogicOptions {
   activePageId: number | null;
@@ -62,7 +67,10 @@ export function useNotesWorkspaceLogic({
     }
   };
 
-  const handleCreateChild = async (parentId: number, kind: NoteKind = "page") => {
+  const handleCreateChild = async (
+    parentId: number,
+    kind: NoteKind = "page",
+  ) => {
     try {
       const page = await createMutation.mutateAsync({
         title: kind === "folder" ? "New folder" : "Untitled",
@@ -86,7 +94,11 @@ export function useNotesWorkspaceLogic({
     const trimmed = title.trim() || "Untitled";
     if (trimmed === activePage.page?.title) return;
     try {
-      await renameMutation.mutateAsync({ id: activePageId, patch: { title: trimmed } });
+      const page = await renameMutation.mutateAsync({
+        id: activePageId,
+        patch: { title: trimmed },
+      });
+      autosave.syncServerVersion(page.updatedAt);
     } catch {
       // handled by onError
     }
@@ -108,7 +120,10 @@ export function useNotesWorkspaceLogic({
 
   const handleToggleFavorite = () => {
     if (activePageId == null || !activePage.page) return;
-    favoriteMutation.mutate({ id: activePageId, isFavorite: !activePage.page.isFavorite });
+    favoriteMutation.mutate({
+      id: activePageId,
+      isFavorite: !activePage.page.isFavorite,
+    });
   };
 
   const handleTagsChange = (tagIds: number[]) => {
@@ -125,7 +140,7 @@ export function useNotesWorkspaceLogic({
     id: number,
     parentId: number | null,
     beforeId: number | null,
-    afterId: number | null
+    afterId: number | null,
   ) => {
     // `void` only discards the return value — it doesn't attach a catch, so
     // a rejection here would still surface as an unhandled promise rejection.
@@ -139,11 +154,11 @@ export function useNotesWorkspaceLogic({
           // open for reasons nobody remembers.
           if (result.accessChanged) {
             toast.warning(
-              "Moved out of a shared folder — people who reached this note through it have lost access."
+              "Moved out of a shared folder — people who reached this note through it have lost access.",
             );
           }
         },
-      }
+      },
     );
   };
 
@@ -183,4 +198,6 @@ export function useNotesWorkspaceLogic({
   };
 }
 
-export type UseNotesWorkspaceLogicReturn = ReturnType<typeof useNotesWorkspaceLogic>;
+export type UseNotesWorkspaceLogicReturn = ReturnType<
+  typeof useNotesWorkspaceLogic
+>;

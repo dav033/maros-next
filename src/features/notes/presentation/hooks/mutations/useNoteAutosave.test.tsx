@@ -41,7 +41,9 @@ const baseline = {
   updatedAt: "2026-08-09T20:00:00.000Z",
   lastEditedBy: null,
   tags: [],
-  content: { type: "doc", content: [] },
+  // The API stores a newly created page as `{}`; NoteEditor turns that into an
+  // empty TipTap document only at render time.
+  content: {},
   myAccess: "owner",
 } satisfies NotePage;
 
@@ -85,6 +87,7 @@ describe("useNoteAutosave", () => {
     });
 
     expect(saveNoteContentMock).toHaveBeenCalledTimes(1);
+    expect(saveNoteContentMock.mock.calls[0]?.[2]).toBeUndefined();
     expect(result.current.status).toBe("retrying");
 
     await act(async () => {
@@ -96,5 +99,32 @@ describe("useNoteAutosave", () => {
 
     expect(saveNoteContentMock).toHaveBeenCalledTimes(2);
     expect(result.current.status).toBe("saved");
+
+    const laterDraft = {
+      type: "doc",
+      content: [{ type: "paragraph" }, { type: "paragraph" }],
+    };
+    saveNoteContentMock.mockResolvedValueOnce({
+      success: true,
+      data: {
+        ...baseline,
+        content: laterDraft,
+        updatedAt: "2026-08-09T20:00:02.000Z",
+      },
+    });
+    act(() => {
+      result.current.scheduleSave(laterDraft);
+      vi.advanceTimersByTime(800);
+    });
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(saveNoteContentMock).toHaveBeenCalledTimes(3);
+    expect(saveNoteContentMock.mock.calls[2]?.[2]).toBe(
+      "2026-08-09T20:00:01.000Z",
+    );
   });
 });
