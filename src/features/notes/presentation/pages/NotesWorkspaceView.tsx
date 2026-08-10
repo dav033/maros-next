@@ -49,7 +49,7 @@ export function NotesWorkspaceView({ logic }: { logic: UseNotesWorkspaceLogicRet
   );
 
   return (
-    <main className="min-w-0 flex-1 overflow-y-auto bg-background/20">
+    <main className="notes-scrollbar min-w-0 flex-1 overflow-y-auto bg-background/20">
       {logic.activePageId == null ? (
         <div className="flex h-full min-h-[22rem] items-center justify-center px-4 py-10">
           <div className="w-full max-w-sm rounded-2xl border border-dashed border-border/80 bg-card/40 p-8 text-center shadow-sm">

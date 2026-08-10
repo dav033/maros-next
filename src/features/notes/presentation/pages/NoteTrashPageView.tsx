@@ -31,7 +31,7 @@ export function NoteTrashPageView() {
   };
 
   return (
-    <main className="flex-1 overflow-y-auto">
+    <main className="notes-scrollbar flex-1 overflow-y-auto">
       <div className="mx-auto max-w-2xl px-4 py-6 sm:px-8 sm:py-10">
         <div className="mb-1 flex flex-wrap items-center justify-between gap-3 sm:gap-4">
           <div className="flex items-center gap-2.5">

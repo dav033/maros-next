@@ -77,6 +77,9 @@ html {
   font-family: var(--font-work-sans), system-ui, sans-serif;
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
+  color-scheme: dark;
+  scrollbar-color: hsl(var(--border)) hsl(var(--background));
+  scrollbar-width: thin;
 }
 
 body {
@@ -103,6 +106,42 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-gray-alt);
+}
+
+/* Notes use nested scroll regions. Keep their scrollbar quiet and aligned with
+   the dark panel instead of exposing the browser's light native track. */
+.notes-scrollbar {
+  scrollbar-color: hsl(var(--muted-foreground) / 0.35) transparent;
+  scrollbar-width: thin;
+}
+
+.notes-scrollbar::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.notes-scrollbar::-webkit-scrollbar-track,
+.notes-scrollbar::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+.notes-scrollbar::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.3);
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background-clip: padding-box;
+}
+
+.notes-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--primary) / 0.5);
+  border-color: transparent;
+  background-clip: padding-box;
+}
+
+.notes-scrollbar::-webkit-scrollbar-thumb:active {
+  background: hsl(var(--primary) / 0.7);
+  border-color: transparent;
+  background-clip: padding-box;
 }
 
 /* Bridge: mantener clases legacy, pero que ya usen tokens shadcn */

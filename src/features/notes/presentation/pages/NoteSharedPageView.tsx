@@ -18,7 +18,7 @@ export function NoteSharedPageView() {
   const { pages, isLoading } = useInstantSharedWithMe();
 
   return (
-    <main className="flex-1 overflow-y-auto">
+    <main className="notes-scrollbar flex-1 overflow-y-auto">
       <div className="mx-auto max-w-2xl px-4 py-6 sm:px-8 sm:py-10">
         <div className="mb-1 flex items-center gap-2.5">
           <Users className="h-[22px] w-[22px] text-primary" />

@@ -302,7 +302,7 @@ export function NoteTreePanel({
           </Button>
         </div>
       </div>
-      <div className="flex-1 overflow-y-auto px-1 pb-4">
+      <div className="notes-scrollbar flex-1 overflow-y-auto px-1 pb-4">
         {visibleRows.length === 0 ? (
           <div className="mx-2 mt-3 rounded-lg border border-dashed border-border/70 bg-background/30 px-3 py-4 text-center">
             <p className="text-sm font-medium text-foreground/80">No pages yet</p>
