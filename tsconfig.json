@@ -91,6 +91,12 @@
       ],
       "@/tasks/*": [
         "./src/features/tasks/*"
+      ],
+      "@/notifications": [
+        "./src/features/notifications/index.ts"
+      ],
+      "@/notifications/*": [
+        "./src/features/notifications/*"
       ]
     }
   },

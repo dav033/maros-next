@@ -26,6 +26,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useCurrentUser } from "@/shared/auth/CurrentUserProvider";
+import { NotificationBell } from "@/features/notifications/presentation/organisms/NotificationBell";
 import type { Permission } from "@/shared/auth/permissions";
 import { logoutAction } from "@/app/actions/auth";
 import { SIDEBAR_CONFIG } from "./sidebarConfig";
@@ -216,34 +217,39 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="border-t p-2">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <SidebarMenuButton className="h-auto py-2">
-              <Avatar className="h-7 w-7">
-                <AvatarImage src={user?.picture ?? undefined} alt={user?.name ?? user?.email} />
-                <AvatarFallback>
-                  {(user?.name ?? user?.email ?? "?").charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex min-w-0 flex-col items-start group-data-[collapsible=icon]:hidden">
-                <span className="truncate text-sm font-medium">
-                  {user?.name ?? user?.email ?? "Unknown"}
-                </span>
-                <span className="truncate text-xs text-muted-foreground">{user?.role?.name}</span>
-              </div>
-            </SidebarMenuButton>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent side="top" align="start" className="w-56">
-            <DropdownMenuLabel className="truncate font-normal text-muted-foreground">
-              {user?.email}
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onSelect={() => void logoutAction()}>
-              <LogOut className="h-4 w-4" />
-              Sign out
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex items-center gap-1">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <SidebarMenuButton className="h-auto flex-1 py-2">
+                <Avatar className="h-7 w-7">
+                  <AvatarImage src={user?.picture ?? undefined} alt={user?.name ?? user?.email} />
+                  <AvatarFallback>
+                    {(user?.name ?? user?.email ?? "?").charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex min-w-0 flex-col items-start group-data-[collapsible=icon]:hidden">
+                  <span className="truncate text-sm font-medium">
+                    {user?.name ?? user?.email ?? "Unknown"}
+                  </span>
+                  <span className="truncate text-xs text-muted-foreground">{user?.role?.name}</span>
+                </div>
+              </SidebarMenuButton>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent side="top" align="start" className="w-56">
+              <DropdownMenuLabel className="truncate font-normal text-muted-foreground">
+                {user?.email}
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onSelect={() => void logoutAction()}>
+                <LogOut className="h-4 w-4" />
+                Sign out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <div className="group-data-[collapsible=icon]:hidden">
+            <NotificationBell />
+          </div>
+        </div>
       </SidebarFooter>
     </Sidebar>
   );

@@ -11,4 +11,5 @@ export {
   useNotesApp,
   useUsersApp,
   useTasksApp,
+  useNotificationsApp,
 } from "./DiProvider";

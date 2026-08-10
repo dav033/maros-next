@@ -13,6 +13,7 @@ import type { QuickbooksAppContext } from "@/quickbooks";
 import type { NotesAppContext } from "@/notes";
 import type { UsersAppContext } from "@/features/users";
 import type { TasksAppContext } from "@/tasks";
+import type { NotificationsAppContext } from "@/notifications";
 import {
   createContactsAppContext,
   createLeadsAppContext,
@@ -25,6 +26,7 @@ import {
   createNotesAppContext,
   createUsersAppContext,
   createTasksAppContext,
+  createNotificationsAppContext,
 } from "./factories";
 
 type DiContextValue = {
@@ -39,6 +41,7 @@ type DiContextValue = {
   notesApp: NotesAppContext;
   usersApp: UsersAppContext;
   tasksApp: TasksAppContext;
+  notificationsApp: NotificationsAppContext;
 };
 
 const DiContext = createContext<DiContextValue | null>(null);
@@ -60,6 +63,7 @@ export function DiProvider({ children }: Props) {
     notesApp: createNotesAppContext(),
     usersApp: createUsersAppContext(),
     tasksApp: createTasksAppContext(),
+    notificationsApp: createNotificationsAppContext(),
   }), []);
 
   return <DiContext.Provider value={value}>{children}</DiContext.Provider>;
@@ -151,4 +155,12 @@ export function useTasksApp(): TasksAppContext {
     throw new Error("useTasksApp must be used within DiProvider");
   }
   return context.tasksApp;
+}
+
+export function useNotificationsApp(): NotificationsAppContext {
+  const context = useContext(DiContext);
+  if (!context) {
+    throw new Error("useNotificationsApp must be used within DiProvider");
+  }
+  return context.notificationsApp;
 }

@@ -9,3 +9,4 @@ export { createQuickbooksAppContext } from "./quickbooksFactory";
 export { createNotesAppContext } from "./notesFactory";
 export { createUsersAppContext } from "./usersFactory";
 export { createTasksAppContext } from "./tasksFactory";
+export { createNotificationsAppContext } from "./notificationsFactory";
