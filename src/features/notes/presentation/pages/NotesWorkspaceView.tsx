@@ -25,7 +25,10 @@ import { TagPicker } from "../molecules/TagPicker";
 import { NoteEntityPicker } from "../molecules/NoteEntityPicker";
 import { useNoteEntityLabel } from "../hooks/data/useNoteEntityLabel";
 import { formatRelativeTime } from "../atoms/formatRelativeTime";
-import { noteAuthorInitials, noteAuthorName } from "../atoms/noteAuthorInitials";
+import {
+  noteAuthorInitials,
+  noteAuthorName,
+} from "../atoms/noteAuthorInitials";
 import { noteTagColor } from "../atoms/noteVisualTokens";
 import { emptyNoteDoc, resolveNoteAncestors } from "@/notes/domain";
 import type { UseNotesWorkspaceLogicReturn } from "./useNotesWorkspaceLogic";
@@ -34,13 +37,20 @@ const SAVE_LABEL: Record<string, string> = {
   idle: "",
   saving: "Saving…",
   saved: "Saved",
+  retrying: "Retrying…",
   conflict: "This page changed elsewhere — reload to see the latest version",
-  error: "Couldn't save — retrying on next edit",
+  error: "Couldn't save — edit again to retry",
 };
 
-export function NotesWorkspaceView({ logic }: { logic: UseNotesWorkspaceLogicReturn }) {
+export function NotesWorkspaceView({
+  logic,
+}: {
+  logic: UseNotesWorkspaceLogicReturn;
+}) {
   const ancestors =
-    logic.activePageId != null ? resolveNoteAncestors(logic.tree, logic.activePageId) : [];
+    logic.activePageId != null
+      ? resolveNoteAncestors(logic.tree, logic.activePageId)
+      : [];
   const editor = logic.activePage?.lastEditedBy ?? null;
   const isFolder = logic.activePage?.kind === "folder";
   const entity = useNoteEntityLabel(
@@ -56,9 +66,12 @@ export function NotesWorkspaceView({ logic }: { logic: UseNotesWorkspaceLogicRet
             <span className="mx-auto grid h-11 w-11 place-items-center rounded-xl bg-primary/15 text-primary">
               <FileText className="h-5 w-5" aria-hidden="true" />
             </span>
-            <h2 className="mt-4 text-base font-semibold text-foreground">Your workspace is ready</h2>
+            <h2 className="mt-4 text-base font-semibold text-foreground">
+              Your workspace is ready
+            </h2>
             <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-              Select a page from the sidebar, or create a new one to get started.
+              Select a page from the sidebar, or create a new one to get
+              started.
             </p>
             <Button className="mt-5" onClick={() => logic.onCreateRoot("page")}>
               New page
@@ -67,12 +80,17 @@ export function NotesWorkspaceView({ logic }: { logic: UseNotesWorkspaceLogicRet
         </div>
       ) : (
         <div className="mx-auto max-w-4xl px-4 py-5 sm:px-8 sm:py-8 lg:px-10">
-          <nav aria-label="Note location" className="mb-5 flex items-center gap-1.5 text-xs text-muted-foreground">
+          <nav
+            aria-label="Note location"
+            className="mb-5 flex items-center gap-1.5 text-xs text-muted-foreground"
+          >
             <span className="font-medium text-foreground/70">Notes</span>
             {ancestors.map((ancestor) => (
               <span key={ancestor.id} className="flex items-center gap-1.5">
                 <ChevronRight className="h-3 w-3" aria-hidden="true" />
-                <span className="max-w-[14rem] truncate">{ancestor.title || "Untitled"}</span>
+                <span className="max-w-[14rem] truncate">
+                  {ancestor.title || "Untitled"}
+                </span>
               </span>
             ))}
             <ChevronRight className="h-3 w-3" aria-hidden="true" />
@@ -83,7 +101,11 @@ export function NotesWorkspaceView({ logic }: { logic: UseNotesWorkspaceLogicRet
 
           <div className="mb-4 flex min-w-0 items-center gap-3 sm:gap-4">
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary">
-              {isFolder ? <Folder className="h-5 w-5" aria-hidden="true" /> : <FileText className="h-5 w-5" aria-hidden="true" />}
+              {isFolder ? (
+                <Folder className="h-5 w-5" aria-hidden="true" />
+              ) : (
+                <FileText className="h-5 w-5" aria-hidden="true" />
+              )}
             </div>
             {logic.canEdit ? (
               <Input
@@ -111,7 +133,9 @@ export function NotesWorkspaceView({ logic }: { logic: UseNotesWorkspaceLogicRet
                   <>
                     {editor && (
                       <Avatar className="h-5 w-5">
-                        {editor.picture && <AvatarImage src={editor.picture} alt="" />}
+                        {editor.picture && (
+                          <AvatarImage src={editor.picture} alt="" />
+                        )}
                         <AvatarFallback className="text-[9px] font-semibold">
                           {noteAuthorInitials(editor)}
                         </AvatarFallback>
@@ -141,13 +165,18 @@ export function NotesWorkspaceView({ logic }: { logic: UseNotesWorkspaceLogicRet
                 className="h-8 w-8"
                 onClick={logic.onToggleFavorite}
                 title="Toggle favorite"
-                aria-label={logic.activePage?.isFavorite ? "Remove from favorites" : "Add to favorites"}
+                aria-label={
+                  logic.activePage?.isFavorite
+                    ? "Remove from favorites"
+                    : "Add to favorites"
+                }
               >
-                  <Star
-                    aria-hidden="true"
+                <Star
+                  aria-hidden="true"
                   className={cn(
                     "h-4 w-4",
-                    logic.activePage?.isFavorite && "fill-current text-amber-400"
+                    logic.activePage?.isFavorite &&
+                      "fill-current text-amber-400",
                   )}
                 />
               </Button>
@@ -181,28 +210,40 @@ export function NotesWorkspaceView({ logic }: { logic: UseNotesWorkspaceLogicRet
             <div className="mb-4 flex items-center gap-2 rounded-lg border border-border/60 bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
               <Eye className="h-3.5 w-3.5 shrink-0" />
               <span>
-                This note was shared with you as read-only. Ask its owner if you need to
-                make changes.
+                This note was shared with you as read-only. Ask its owner if you
+                need to make changes.
               </span>
             </div>
           )}
 
           <div className="mb-4 flex flex-wrap items-center gap-2">
-            {logic.activePage?.entityKind && logic.activePage.entityId != null ? (
+            {logic.activePage?.entityKind &&
+            logic.activePage.entityId != null ? (
               <span className="inline-flex items-center gap-1.5 rounded-md border border-border/60 bg-muted/30 py-1 pl-2 pr-1 text-[12.5px]">
-              <Briefcase className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
+                <Briefcase
+                  className="h-3.5 w-3.5 text-muted-foreground"
+                  aria-hidden="true"
+                />
                 {entity.href ? (
-                  <Link href={entity.href} className="max-w-[16rem] truncate hover:underline">
+                  <Link
+                    href={entity.href}
+                    className="max-w-[16rem] truncate hover:underline"
+                  >
                     {entity.label ?? "Loading…"}
                   </Link>
                 ) : (
-                  <span className="max-w-[16rem] truncate">{entity.label ?? "Loading…"}</span>
+                  <span className="max-w-[16rem] truncate">
+                    {entity.label ?? "Loading…"}
+                  </span>
                 )}
                 {logic.canEdit && (
                   <button
                     type="button"
                     onClick={() =>
-                      logic.onEntityLinkChange({ entityKind: null, entityId: null })
+                      logic.onEntityLinkChange({
+                        entityKind: null,
+                        entityId: null,
+                      })
                     }
                     title="Unassign"
                     aria-label="Unassign from lead or project"
