@@ -61,6 +61,7 @@
      tables (e.g. blue = "Contacted" status and "Plumbing" lead type). */
   --badge-neutral: 218 10% 59%;
   --badge-blue: 217 91% 60%;
+  --badge-sky: 199 89% 60%;
   --badge-indigo: 239 84% 67%;
   --badge-amber: 38 92% 50%;
   --badge-orange: 25 95% 53%;

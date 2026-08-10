@@ -13,6 +13,7 @@ import {
   NotebookPen,
   ShieldCheck,
   Globe,
+  ListTodo,
 } from "lucide-react";
 import type { Permission } from "@/shared/auth/permissions";
 
@@ -94,6 +95,13 @@ const menuSection: SidebarSection = {
       icon: NotebookPen,
       activePrefix: "/notes",
       permission: "notes:read",
+    },
+    {
+      title: "Tasks",
+      href: "/tasks",
+      icon: ListTodo,
+      activePrefix: "/tasks",
+      permission: "tasks:read",
     },
   ],
 };

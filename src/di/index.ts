@@ -10,4 +10,5 @@ export {
   useQuickbooksApp,
   useNotesApp,
   useUsersApp,
+  useTasksApp,
 } from "./DiProvider";

@@ -85,6 +85,12 @@
       ],
       "@/notes/*": [
         "./src/features/notes/*"
+      ],
+      "@/tasks": [
+        "./src/features/tasks/index.ts"
+      ],
+      "@/tasks/*": [
+        "./src/features/tasks/*"
       ]
     }
   },

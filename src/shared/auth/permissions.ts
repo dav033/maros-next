@@ -23,6 +23,9 @@ export type Permission =
   | "notes:read"
   | "notes:write"
   | "notes:delete"
+  | "tasks:read"
+  | "tasks:write"
+  | "tasks:delete"
   | "reports:read"
   | "users:read"
   | "users:write";
