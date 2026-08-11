@@ -64,7 +64,7 @@ export function MyTasksPageView() {
       />
 
       {showSkeleton ? (
-        <div className="flex flex-col gap-3">
+        <div className="flex w-full max-w-xl flex-col gap-3">
           {[1, 2, 3].map((i) => (
             <Skeleton key={i} className="h-32 w-full rounded-xl" />
           ))}
@@ -76,7 +76,10 @@ export function MyTasksPageView() {
           <p className="text-xs text-muted-foreground">You&apos;re all caught up.</p>
         </div>
       ) : (
-        <div className="dashboard-section-enter flex flex-1 flex-col gap-5">
+        // Capped width: rows carry a full-bleed h-12 CTA button by design (mobile-first,
+        // one-tap — see PLAN-TAREAS.md §6.3), which reads fine on a phone but stretches
+        // into an absurdly wide, mostly-empty bar on a desktop-width column.
+        <div className="dashboard-section-enter flex w-full max-w-xl flex-1 flex-col gap-5">
           {SECTIONS.map(({ key, label }) => {
             const tasks = buckets[key];
             if (tasks.length === 0) return null;
