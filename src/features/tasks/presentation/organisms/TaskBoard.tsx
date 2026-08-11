@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { isValid, parse, startOfDay } from "date-fns";
+import { Filter, Search, X } from "lucide-react";
 import {
   DndContext,
   KeyboardSensor,
@@ -19,6 +21,9 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { PageToolbarCard } from "@/components/shared";
 import { cn } from "@/lib/utils";
 import { BOARD_STATUSES } from "@/tasks/domain";
 import type { Task, TaskStatus } from "@/tasks/domain";
@@ -29,6 +34,55 @@ import { BlockedReasonDialog } from "../molecules/BlockedReasonDialog";
 import { TASK_STATUS_LABELS } from "../atoms/taskVisualTokens";
 
 const COLUMN_PREFIX = "column:";
+
+type QuickFilter = "overdue" | "today" | "in_progress" | "blocked" | null;
+
+const DATE_FORMAT = "yyyy-MM-dd";
+
+function isActiveTask(task: Task): boolean {
+  return task.status !== "done" && task.status !== "cancelled";
+}
+
+function dueRelation(dueDate: string | null): "overdue" | "today" | "future" | null {
+  if (!dueDate) return null;
+  const parsed = parse(dueDate, DATE_FORMAT, new Date());
+  if (!isValid(parsed)) return null;
+  const today = startOfDay(new Date());
+  if (parsed < today) return "overdue";
+  if (parsed.getTime() === today.getTime()) return "today";
+  return "future";
+}
+
+/** Quick-filter pill: a togglable stat button, same on/off pair of styles per color. */
+function QuickFilterPill({
+  label,
+  count,
+  active,
+  activeClassName,
+  countClassName,
+  onClick,
+}: {
+  label: string;
+  count: number;
+  active: boolean;
+  activeClassName: string;
+  countClassName: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition-colors",
+        active ? activeClassName : "text-muted-foreground hover:bg-muted/60"
+      )}
+    >
+      <span className={cn("font-semibold", active ? undefined : countClassName)}>{count}</span>
+      {label}
+    </button>
+  );
+}
 
 function SortableTaskCard({ task, onClick }: { task: Task; onClick: () => void }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -114,6 +168,9 @@ export function TaskBoard({ onOpenTask }: { onOpenTask: (id: number) => void }) 
     beforeId?: number;
   } | null>(null);
 
+  const [search, setSearch] = useState("");
+  const [quickFilter, setQuickFilter] = useState<QuickFilter>(null);
+
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
@@ -121,7 +178,8 @@ export function TaskBoard({ onOpenTask }: { onOpenTask: (id: number) => void }) 
 
   // Flat id -> status lookup, so onDragEnd can tell which column a dropped-on card
   // belongs to (over.id is the card's id, not the column's, whenever there's a card
-  // under the pointer).
+  // under the pointer). Built off the unfiltered board — a dragged card's true
+  // column never depends on what search/quick-filter currently hide.
   const taskStatusById = useMemo(() => {
     const map = new Map<number, TaskStatus>();
     for (const status of BOARD_STATUSES) {
@@ -129,6 +187,57 @@ export function TaskBoard({ onOpenTask }: { onOpenTask: (id: number) => void }) 
     }
     return map;
   }, [board]);
+
+  // Search narrows first, quick-filter counts are read off that (matches the count
+  // badges to what search already excluded), then quick-filter narrows what's shown.
+  const searched = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    const result: Partial<Record<TaskStatus, Task[]>> = {};
+    for (const status of BOARD_STATUSES) {
+      const tasks = board[status] ?? [];
+      result[status] = q ? tasks.filter((t) => t.title.toLowerCase().includes(q)) : tasks;
+    }
+    return result;
+  }, [board, search]);
+
+  const stats = useMemo(() => {
+    let overdue = 0;
+    let today = 0;
+    let inProgress = 0;
+    let blocked = 0;
+    for (const status of BOARD_STATUSES) {
+      for (const task of searched[status] ?? []) {
+        if (task.status === "in_progress") inProgress += 1;
+        if (task.status === "blocked") blocked += 1;
+        if (isActiveTask(task)) {
+          const relation = dueRelation(task.dueDate);
+          if (relation === "overdue") overdue += 1;
+          if (relation === "today") today += 1;
+        }
+      }
+    }
+    return { overdue, today, inProgress, blocked };
+  }, [searched]);
+
+  const matchesQuickFilter = (task: Task): boolean => {
+    if (!quickFilter) return true;
+    if (quickFilter === "overdue") return isActiveTask(task) && dueRelation(task.dueDate) === "overdue";
+    if (quickFilter === "today") return isActiveTask(task) && dueRelation(task.dueDate) === "today";
+    if (quickFilter === "in_progress") return task.status === "in_progress";
+    if (quickFilter === "blocked") return task.status === "blocked";
+    return true;
+  };
+
+  const filteredBoard = useMemo(() => {
+    const result: Partial<Record<TaskStatus, Task[]>> = {};
+    for (const status of BOARD_STATUSES) {
+      result[status] = (searched[status] ?? []).filter(matchesQuickFilter);
+    }
+    return result;
+  }, [searched, quickFilter]);
+
+  const toggleQuickFilter = (value: Exclude<QuickFilter, null>) =>
+    setQuickFilter((current) => (current === value ? null : value));
 
   const resolveTargetStatus = (overId: string | number): TaskStatus | null => {
     if (typeof overId === "string" && overId.startsWith(COLUMN_PREFIX)) {
@@ -175,14 +284,73 @@ export function TaskBoard({ onOpenTask }: { onOpenTask: (id: number) => void }) 
   }
 
   return (
-    <>
+    <div className="flex flex-col gap-3">
+      <PageToolbarCard icon={Filter} label="Filters & search">
+        <div className="relative min-w-[200px] flex-1">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search tasks…"
+            className="h-9 border-border/60 bg-background/60 pl-9"
+          />
+          {search.trim().length > 0 && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setSearch("")}
+              aria-label="Clear search"
+              className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 px-0 text-muted-foreground hover:text-foreground"
+            >
+              <X className="h-3.5 w-3.5" />
+            </Button>
+          )}
+        </div>
+
+        <div className="flex flex-wrap items-center gap-1.5">
+          <QuickFilterPill
+            label="overdue"
+            count={stats.overdue}
+            active={quickFilter === "overdue"}
+            activeClassName="bg-destructive/15 text-destructive"
+            countClassName="text-destructive"
+            onClick={() => toggleQuickFilter("overdue")}
+          />
+          <QuickFilterPill
+            label="today"
+            count={stats.today}
+            active={quickFilter === "today"}
+            activeClassName="bg-amber-500/15 text-amber-500"
+            countClassName="text-amber-500"
+            onClick={() => toggleQuickFilter("today")}
+          />
+          <QuickFilterPill
+            label="in progress"
+            count={stats.inProgress}
+            active={quickFilter === "in_progress"}
+            activeClassName="bg-foreground/10 text-foreground"
+            countClassName="text-foreground"
+            onClick={() => toggleQuickFilter("in_progress")}
+          />
+          <QuickFilterPill
+            label="blocked"
+            count={stats.blocked}
+            active={quickFilter === "blocked"}
+            activeClassName="bg-destructive/15 text-destructive"
+            countClassName="text-destructive"
+            onClick={() => toggleQuickFilter("blocked")}
+          />
+        </div>
+      </PageToolbarCard>
+
       <DndContext sensors={sensors} collisionDetection={closestCorners} onDragEnd={handleDragEnd}>
         <div className="flex gap-3 overflow-x-auto pb-2">
           {BOARD_STATUSES.map((status) => (
             <BoardColumn
               key={status}
               status={status}
-              tasks={board[status] ?? []}
+              tasks={filteredBoard[status] ?? []}
               onCardClick={onOpenTask}
             />
           ))}
@@ -198,6 +366,6 @@ export function TaskBoard({ onOpenTask }: { onOpenTask: (id: number) => void }) 
           setPendingBlock(null);
         }}
       />
-    </>
+    </div>
   );
 }

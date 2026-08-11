@@ -13,6 +13,7 @@ import { useTaskDetailRoute } from "../hooks/useTaskDetailRoute";
 import { CreateTaskDialog } from "../organisms/CreateTaskDialog";
 import { MyTaskRow } from "../organisms/MyTaskRow";
 import { TaskDetailSheet } from "../organisms/TaskDetailSheet";
+import { TaskViewSwitcher } from "../molecules/TaskViewSwitcher";
 
 const SECTIONS: Array<{ key: MyTasksBucketKey; label: string }> = [
   { key: "overdue", label: "Overdue" },
@@ -59,6 +60,7 @@ export function MyTasksPageView() {
             defaultAssigneeLabel={user?.name ?? user?.email}
           />
         }
+        belowSlot={<TaskViewSwitcher current="mine" />}
       />
 
       {showSkeleton ? (

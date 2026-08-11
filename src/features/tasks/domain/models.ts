@@ -99,6 +99,10 @@ export interface Task {
   blockedReason: string | null;
   completedAt: string | null;
   labels: TaskLabel[];
+  /** Direct-child subtask progress and comment count — 0 unless the backend counted them for this read. */
+  subtasksTotal: number;
+  subtasksDone: number;
+  commentsCount: number;
   createdAt: string;
   updatedAt: string;
 }

@@ -4,6 +4,7 @@ import type { Task } from "@/tasks/domain";
 import { AssigneeAvatar } from "../atoms/AssigneeAvatar";
 import { DueDatePill } from "../atoms/DueDatePill";
 import { TaskKindIcon } from "../atoms/TaskKindIcon";
+import { TaskPriorityBadge } from "../atoms/TaskPriorityBadge";
 import { taskLabelColor } from "../atoms/taskVisualTokens";
 
 /**
@@ -20,6 +21,13 @@ export function TaskCard({
   onClick?: () => void;
   className?: string;
 }) {
+  const metaParts: string[] = [];
+  if (task.subtasksTotal > 0) metaParts.push(`${task.subtasksDone}/${task.subtasksTotal} subtasks`);
+  if (task.commentsCount > 0) {
+    metaParts.push(`${task.commentsCount} ${task.commentsCount === 1 ? "comment" : "comments"}`);
+  }
+  const footerMetaText = metaParts.join(" · ");
+
   return (
     <div
       role={onClick ? "button" : undefined}
@@ -55,6 +63,10 @@ export function TaskCard({
         {task.title}
       </p>
 
+      {task.priority === "urgent" || task.priority === "high" ? (
+        <TaskPriorityBadge priority={task.priority} />
+      ) : null}
+
       {task.status === "blocked" && task.blockedReason ? (
         <div className="flex items-start gap-1.5 rounded-md bg-destructive/10 px-2 py-1 text-xs text-destructive">
           <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" />
@@ -79,9 +91,12 @@ export function TaskCard({
         </div>
       ) : null}
 
-      {task.dueDate ? (
-        <div className="flex items-center justify-between">
-          <DueDatePill dueDate={task.dueDate} />
+      {task.dueDate || footerMetaText ? (
+        <div className="flex items-center justify-between gap-2">
+          {task.dueDate ? <DueDatePill dueDate={task.dueDate} /> : <span />}
+          {footerMetaText ? (
+            <span className="shrink-0 text-[11px] text-muted-foreground">{footerMetaText}</span>
+          ) : null}
         </div>
       ) : null}
     </div>

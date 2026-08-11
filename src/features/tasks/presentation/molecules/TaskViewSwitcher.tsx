@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { KanbanSquare, Rows3 } from "lucide-react";
+import { KanbanSquare, Rows3, UserCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export function TaskViewSwitcher({ current }: { current: "board" | "list" }) {
+export function TaskViewSwitcher({ current }: { current: "board" | "list" | "mine" }) {
   const options = [
     { value: "board" as const, label: "Board", href: "/tasks", icon: KanbanSquare },
     { value: "list" as const, label: "List", href: "/tasks/list", icon: Rows3 },
+    { value: "mine" as const, label: "Mine", href: "/tasks/mine", icon: UserCheck },
   ];
 
   return (
