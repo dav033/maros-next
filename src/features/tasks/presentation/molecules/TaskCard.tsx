@@ -44,7 +44,7 @@ export function TaskCard({
           : undefined
       }
       className={cn(
-        "flex flex-col gap-2 rounded-lg border border-border/60 bg-card/60 p-3 text-left shadow-sm transition-colors hover:border-border hover:bg-card",
+        "flex flex-col gap-2 rounded-xl border border-border/60 bg-card/60 p-3 text-left shadow-sm transition-colors hover:border-border hover:bg-card",
         onClick && "cursor-pointer",
         className
       )}
@@ -64,7 +64,7 @@ export function TaskCard({
       </p>
 
       {task.priority === "urgent" || task.priority === "high" ? (
-        <TaskPriorityBadge priority={task.priority} />
+        <TaskPriorityBadge priority={task.priority} pill />
       ) : null}
 
       {task.status === "blocked" && task.blockedReason ? (
