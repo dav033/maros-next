@@ -216,7 +216,6 @@ export type TaskMoveResult = Task & { openSubtasksWarning?: number };
 
 export type TaskEntityLink = Readonly<{ entityKind: TaskEntityKind; entityId: number }>;
 
-/** Query filters behind GET /tasks — every field is an AND with the rest. */
 /** Multi-valued fields OR together (any match); every field is AND'd with the rest — see SearchTasksDto. */
 export type TaskFilters = Readonly<{
   status?: TaskStatus[];
@@ -233,3 +232,13 @@ export type TaskFilters = Readonly<{
 
 export type TaskLabelDraft = Readonly<{ name: string; color?: string }>;
 export type TaskLabelPatch = Readonly<{ name?: string; color?: string }>;
+
+/**
+ * Every bulk action runs each task independently server-side and reports its own
+ * outcome — one stale row or invalid transition in a 15-task selection doesn't fail
+ * the other 14. See TasksService.runBulk on the backend.
+ */
+export interface TaskBulkResult {
+  succeeded: number[];
+  failed: Array<{ taskId: number; error: string }>;
+}

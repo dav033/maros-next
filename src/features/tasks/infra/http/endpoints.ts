@@ -18,4 +18,8 @@ export const endpoints = {
   attachmentsOrder: (id: number) => `${BASE}/${id}/attachments/order`,
   comments: (id: number) => `${BASE}/${id}/comments`,
   comment: (id: number, commentId: number) => `${BASE}/${id}/comments/${commentId}`,
+  bulkAssignee: () => `${BASE}/bulk/assignee`,
+  bulkStatus: () => `${BASE}/bulk/status`,
+  bulkLabels: () => `${BASE}/bulk/labels`,
+  bulkDelete: () => `${BASE}/bulk/delete`,
 } as const;

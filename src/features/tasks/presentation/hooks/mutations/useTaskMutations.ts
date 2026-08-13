@@ -3,7 +3,7 @@
 import type { QueryClient } from "@tanstack/react-query";
 import { useEntityMutation } from "@/shared/presentation/hooks/useEntityMutation";
 import { tasksKeys } from "@/tasks/application";
-import type { TaskDraft, TaskEntityLink, TaskMoveInput, TaskPatch } from "@/tasks/domain";
+import type { TaskDraft, TaskEntityLink, TaskMoveInput, TaskPatch, TaskStatus } from "@/tasks/domain";
 import {
   createTaskAction,
   updateTaskAction,
@@ -18,6 +18,10 @@ import {
   addTaskCommentAction,
   updateTaskCommentAction,
   deleteTaskCommentAction,
+  bulkSetTaskAssigneeAction,
+  bulkSetTaskStatusAction,
+  bulkAddTaskLabelsAction,
+  bulkDeleteTasksAction,
 } from "@/tasks/actions/taskActions";
 import { scopeForTaskPatch, type TaskInvalidationScope } from "./taskInvalidationScope";
 import { optimisticMoveTask } from "../../organisms/taskBoardOptimisticMove";
@@ -194,6 +198,51 @@ export function useTaskMutations() {
     },
   });
 
+  // Bulk mutations report per-task success/failure (TaskBulkResult) rather than one
+  // pass/fail — the caller (the list's selection toolbar) reads that to show which
+  // tasks, if any, didn't go through, on top of the generic success toast below.
+  const bulkSetAssigneeMutation = useEntityMutation({
+    entityLabel: "Task",
+    action: "updated",
+    successMessage: "Assignee updated",
+    mutationFn: ({ taskIds, userId }: { taskIds: number[]; userId: number | null }) =>
+      bulkSetTaskAssigneeAction(taskIds, userId),
+    invalidate: (qc) => invalidateByScope(qc, "all"),
+  });
+
+  const bulkSetStatusMutation = useEntityMutation({
+    entityLabel: "Task",
+    action: "updated",
+    successMessage: "Tasks moved",
+    mutationFn: ({
+      taskIds,
+      status,
+      blockedReason,
+    }: {
+      taskIds: number[];
+      status: TaskStatus;
+      blockedReason?: string;
+    }) => bulkSetTaskStatusAction(taskIds, status, blockedReason),
+    invalidate: (qc) => invalidateByScope(qc, "all"),
+  });
+
+  const bulkAddLabelsMutation = useEntityMutation({
+    entityLabel: "Task",
+    action: "updated",
+    successMessage: "Labels added",
+    mutationFn: ({ taskIds, labelIds }: { taskIds: number[]; labelIds: number[] }) =>
+      bulkAddTaskLabelsAction(taskIds, labelIds),
+    // Labels render on the board and the list, not on "Mine" — matches setLabelsMutation.
+    invalidate: (qc) => invalidateByScope(qc, "detail+board+lists"),
+  });
+
+  const bulkDeleteMutation = useEntityMutation({
+    entityLabel: "Task",
+    action: "deleted",
+    mutationFn: ({ taskIds }: { taskIds: number[] }) => bulkDeleteTasksAction(taskIds),
+    invalidate: (qc) => invalidateByScope(qc, "all"),
+  });
+
   return {
     createMutation,
     updateMutation,
@@ -208,5 +257,9 @@ export function useTaskMutations() {
     addCommentMutation,
     updateCommentMutation,
     deleteCommentMutation,
+    bulkSetAssigneeMutation,
+    bulkSetStatusMutation,
+    bulkAddLabelsMutation,
+    bulkDeleteMutation,
   };
 }

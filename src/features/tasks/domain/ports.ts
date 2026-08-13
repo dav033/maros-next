@@ -1,6 +1,7 @@
 import type {
   Task,
   TaskBoardResult,
+  TaskBulkResult,
   TaskComment,
   TaskDetail,
   TaskDraft,
@@ -13,6 +14,7 @@ import type {
   TaskMoveInput,
   TaskMoveResult,
   TaskPatch,
+  TaskStatus,
 } from "./models";
 
 export interface TasksRepositoryPort {
@@ -45,6 +47,12 @@ export interface TasksRepositoryPort {
     body: Record<string, unknown>
   ): Promise<TaskComment>;
   deleteComment(taskId: number, commentId: number): Promise<void>;
+
+  /** The list's multi-select toolbar — each runs every task independently server-side, see TaskBulkResult. */
+  bulkSetAssignee(taskIds: number[], userId: number | null): Promise<TaskBulkResult>;
+  bulkSetStatus(taskIds: number[], status: TaskStatus, blockedReason?: string): Promise<TaskBulkResult>;
+  bulkAddLabels(taskIds: number[], labelIds: number[]): Promise<TaskBulkResult>;
+  bulkDelete(taskIds: number[]): Promise<TaskBulkResult>;
 }
 
 export interface TaskLabelsRepositoryPort {

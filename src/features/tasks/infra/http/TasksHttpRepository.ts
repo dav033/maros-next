@@ -3,6 +3,7 @@ import { optimizedApiClient } from "@/shared/infra";
 import type {
   Task,
   TaskBoardResult,
+  TaskBulkResult,
   TaskComment,
   TaskDetail,
   TaskDraft,
@@ -13,6 +14,7 @@ import type {
   TaskMoveResult,
   TaskPatch,
   TasksRepositoryPort,
+  TaskStatus,
 } from "@/features/tasks/domain";
 
 import { endpoints } from "./endpoints";
@@ -131,5 +133,33 @@ export class TasksHttpRepository implements TasksRepositoryPort {
 
   async deleteComment(taskId: number, commentId: number): Promise<void> {
     await this.api.delete<void>(endpoints.comment(taskId, commentId));
+  }
+
+  async bulkSetAssignee(taskIds: number[], userId: number | null): Promise<TaskBulkResult> {
+    const { data } = await this.api.post<TaskBulkResult>(endpoints.bulkAssignee(), { taskIds, userId });
+    return data;
+  }
+
+  async bulkSetStatus(
+    taskIds: number[],
+    status: TaskStatus,
+    blockedReason?: string,
+  ): Promise<TaskBulkResult> {
+    const { data } = await this.api.post<TaskBulkResult>(endpoints.bulkStatus(), {
+      taskIds,
+      status,
+      blockedReason,
+    });
+    return data;
+  }
+
+  async bulkAddLabels(taskIds: number[], labelIds: number[]): Promise<TaskBulkResult> {
+    const { data } = await this.api.post<TaskBulkResult>(endpoints.bulkLabels(), { taskIds, labelIds });
+    return data;
+  }
+
+  async bulkDelete(taskIds: number[]): Promise<TaskBulkResult> {
+    const { data } = await this.api.post<TaskBulkResult>(endpoints.bulkDelete(), { taskIds });
+    return data;
   }
 }

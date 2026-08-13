@@ -10,6 +10,7 @@ import { TASK_KINDS, TASK_PRIORITIES, TASK_STATUSES } from "@/tasks/domain";
 import type { TaskKind, TaskPriority, TaskStatus } from "@/tasks/domain";
 import { useInstantTasksList } from "../hooks/data/useInstantTasksList";
 import { TaskListTable } from "../organisms/TaskListTable";
+import { TaskBulkActionBar } from "../organisms/TaskBulkActionBar";
 import { CreateTaskDialog } from "../organisms/CreateTaskDialog";
 import { TaskDetailSheet } from "../organisms/TaskDetailSheet";
 import { TaskViewSwitcher } from "../molecules/TaskViewSwitcher";
@@ -51,6 +52,9 @@ export function TasksListPageView() {
   });
   const [priorityFilter, setPriorityFilter] = useState<Set<TaskPriority>>(new Set());
   const [kindFilter, setKindFilter] = useState<Set<TaskKind>>(new Set());
+  // Owns the checkbox selection for TaskBulkActionBar — EntityTable clears entries
+  // that scroll out of the current filtered/loaded set on its own.
+  const [selectedIds, setSelectedIds] = useState<Set<number | string>>(new Set());
 
   const { tasks, totalCount, showSkeleton } = useInstantTasksList({
     status: statusFilter.size > 0 ? Array.from(statusFilter) : undefined,
@@ -139,10 +143,20 @@ export function TasksListPageView() {
       ) : null}
 
       <section className="dashboard-section-enter mt-2 flex-1">
-        <TaskListTable tasks={filtered} isLoading={showSkeleton} onOpenTask={openTask} />
+        <TaskListTable
+          tasks={filtered}
+          isLoading={showSkeleton}
+          onOpenTask={openTask}
+          selection={{ selectedIds, onSelectionChange: setSelectedIds }}
+        />
       </section>
 
       <TaskDetailSheet taskId={taskId} onClose={closeTask} onOpenTask={openTask} />
+
+      <TaskBulkActionBar
+        selectedIds={selectedIds}
+        onClear={() => setSelectedIds(new Set())}
+      />
     </main>
   );
 }

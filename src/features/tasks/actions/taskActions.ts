@@ -6,6 +6,7 @@ import { TasksHttpRepository, TaskLabelsHttpRepository, makeTasksAppContext } fr
 import type { ActionResult } from "@/shared/actions/types";
 import { success, handleActionError } from "@/shared/actions/utils";
 import type {
+  TaskBulkResult,
   TaskComment,
   TaskDetail,
   TaskDraft,
@@ -16,6 +17,7 @@ import type {
   TaskMoveInput,
   TaskMoveResult,
   TaskPatch,
+  TaskStatus,
 } from "@/tasks/domain";
 
 // The plain `serverApiClient` singleton carries no request context and forwards no
@@ -225,6 +227,58 @@ export async function deleteTaskCommentAction(
     const ctx = await createServerTasksAppContext();
     await ctx.repos.task.deleteComment(taskId, commentId);
     return success(null);
+  } catch (error) {
+    return handleActionError(error);
+  }
+}
+
+export async function bulkSetTaskAssigneeAction(
+  taskIds: number[],
+  userId: number | null
+): Promise<ActionResult<TaskBulkResult>> {
+  try {
+    const ctx = await createServerTasksAppContext();
+    const result = await ctx.repos.task.bulkSetAssignee(taskIds, userId);
+    return success(result);
+  } catch (error) {
+    return handleActionError(error);
+  }
+}
+
+export async function bulkSetTaskStatusAction(
+  taskIds: number[],
+  status: TaskStatus,
+  blockedReason?: string
+): Promise<ActionResult<TaskBulkResult>> {
+  try {
+    const ctx = await createServerTasksAppContext();
+    const result = await ctx.repos.task.bulkSetStatus(taskIds, status, blockedReason);
+    return success(result);
+  } catch (error) {
+    return handleActionError(error);
+  }
+}
+
+export async function bulkAddTaskLabelsAction(
+  taskIds: number[],
+  labelIds: number[]
+): Promise<ActionResult<TaskBulkResult>> {
+  try {
+    const ctx = await createServerTasksAppContext();
+    const result = await ctx.repos.task.bulkAddLabels(taskIds, labelIds);
+    return success(result);
+  } catch (error) {
+    return handleActionError(error);
+  }
+}
+
+export async function bulkDeleteTasksAction(
+  taskIds: number[]
+): Promise<ActionResult<TaskBulkResult>> {
+  try {
+    const ctx = await createServerTasksAppContext();
+    const result = await ctx.repos.task.bulkDelete(taskIds);
+    return success(result);
   } catch (error) {
     return handleActionError(error);
   }

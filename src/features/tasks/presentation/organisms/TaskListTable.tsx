@@ -2,7 +2,12 @@
 
 import Link from "next/link";
 import { ListTodo } from "lucide-react";
-import { DefaultTableLoading, EntityTable, type EntityTableGroupBy } from "@/components/shared";
+import {
+  DefaultTableLoading,
+  EntityTable,
+  type EntityTableGroupBy,
+  type EntityTableSelection,
+} from "@/components/shared";
 import type { SimpleTableColumn } from "@/types/table";
 import type { Task, TaskEntityKind } from "@/tasks/domain";
 import { BOARD_STATUSES } from "@/tasks/domain";
@@ -146,10 +151,13 @@ export function TaskListTable({
   tasks,
   isLoading,
   onOpenTask,
+  selection,
 }: {
   tasks: Task[];
   isLoading?: boolean;
   onOpenTask: (id: number) => void;
+  /** Enables the row checkboxes + "select all" — see TaskBulkActionBar, which acts on whatever this holds. */
+  selection?: EntityTableSelection;
 }) {
   return (
     <EntityTable<Task>
@@ -158,6 +166,7 @@ export function TaskListTable({
       rowKey={(task) => task.id}
       isLoading={isLoading}
       onRowClick={(task) => onOpenTask(task.id)}
+      selection={selection}
       groupBy={groupByStatus}
       defaultSort={{ key: "id", dir: "desc" }}
       loadingState={<DefaultTableLoading label="Loading tasks…" />}
