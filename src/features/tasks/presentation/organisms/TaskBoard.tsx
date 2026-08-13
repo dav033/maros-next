@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { isValid, parse } from "date-fns";
-import { Filter, Search, X } from "lucide-react";
+import { Filter, Rows3, Search, X } from "lucide-react";
 import {
   DndContext,
   DragOverlay,
@@ -32,15 +32,21 @@ import { PageToolbarCard } from "@/components/shared";
 import { cn } from "@/lib/utils";
 import { todayInBusinessTimezone } from "@/shared/lib/businessDate";
 import { usePrefersReducedMotion } from "@/shared/presentation/hooks/usePrefersReducedMotion";
+import { useCurrentUser } from "@/shared/auth/CurrentUserProvider";
+import { useUserDirectory } from "@/features/users/presentation/hooks/data/useUserDirectory";
 import { BOARD_STATUSES } from "@/tasks/domain";
 import type { Task, TaskBoardColumns, TaskStatus } from "@/tasks/domain";
 import { useInstantTasksBoard } from "../hooks/data/useInstantTasksBoard";
 import { useTaskMutations } from "../hooks/mutations/useTaskMutations";
 import { TaskCard } from "../molecules/TaskCard";
+import { AssigneeFilterDropdown } from "../molecules/AssigneeFilterDropdown";
+import { AssigneeAvatar } from "../atoms/AssigneeAvatar";
 import { BlockedReasonDialog } from "../molecules/BlockedReasonDialog";
 import { TASK_STATUS_LABELS } from "../atoms/taskVisualTokens";
 import { resolveCardDropSide } from "./taskBoardDragUtil";
 import { applyOptimisticMove } from "./taskBoardOptimisticMove";
+import { matchesAssigneeFilter, type AssigneeFilterKey } from "./taskBoardAssigneeFilter";
+import { groupTasksByAssignee } from "./taskBoardAssigneeGroups";
 
 const COLUMN_PREFIX = "column:";
 
@@ -178,6 +184,64 @@ function BoardColumn({
   );
 }
 
+/**
+ * One row per assignee, read-only — the workload-distribution view from the plan.
+ * Deliberately no dnd-kit here: a card dropped into another assignee's row would
+ * need to both change status AND reassign in one step, and the board's optimistic
+ * preview machinery (applyOptimisticMove) only knows about status/position, not
+ * assignee. Switch back to the normal board to drag; use this one to see who's
+ * carrying what.
+ */
+function AssigneeSwimlane({
+  group,
+  onCardClick,
+}: {
+  group: ReturnType<typeof groupTasksByAssignee>[number];
+  onCardClick: (id: number) => void;
+}) {
+  return (
+    <div className="flex flex-col gap-2 rounded-xl border border-border/50 bg-muted/10 p-3">
+      <div className="flex items-center gap-2">
+        <AssigneeAvatar person={group.person} size="md" />
+        <span className="text-sm font-medium text-foreground">
+          {group.person ? (group.person.name ?? group.person.email) : "Unassigned"}
+        </span>
+        <span className="rounded-full bg-background/60 px-1.5 py-0.5 text-[10px] text-muted-foreground">
+          {group.total}
+        </span>
+      </div>
+      <div className="flex gap-3 overflow-x-auto pb-1">
+        {BOARD_STATUSES.map((status) => {
+          const tasks = group.columns[status] ?? [];
+          return (
+            <div
+              key={status}
+              className="flex w-56 shrink-0 flex-col gap-2 rounded-lg border border-border/40 bg-background/40 p-2"
+            >
+              <div className="flex items-center justify-between px-1">
+                <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  {TASK_STATUS_LABELS[status]}
+                </span>
+                <span className="text-[10px] text-muted-foreground">{tasks.length}</span>
+              </div>
+              <div className="flex flex-col gap-2">
+                {tasks.map((task) => (
+                  <TaskCard key={task.id} task={task} onClick={() => onCardClick(task.id)} />
+                ))}
+                {tasks.length === 0 ? (
+                  <div className="rounded-md border border-dashed border-border/30 px-2 py-3 text-center text-[10px] text-muted-foreground">
+                    —
+                  </div>
+                ) : null}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function BoardSkeleton() {
   return (
     <div className="flex gap-3 overflow-x-auto pb-2">
@@ -195,6 +259,10 @@ function BoardSkeleton() {
 export function TaskBoard({ onOpenTask }: { onOpenTask: (id: number) => void }) {
   const { board, doneTotalCount, showSkeleton } = useInstantTasksBoard();
   const { moveMutation } = useTaskMutations();
+  const { user } = useCurrentUser();
+  // Always on (not gated behind a picker opening) — the assignee filter and the
+  // swimlane view both need names/avatars up front, not just once someone clicks in.
+  const { users: directoryUsers } = useUserDirectory(true);
 
   const [pendingBlock, setPendingBlock] = useState<{
     taskId: number;
@@ -204,6 +272,8 @@ export function TaskBoard({ onOpenTask }: { onOpenTask: (id: number) => void }) 
 
   const [search, setSearch] = useState("");
   const [quickFilter, setQuickFilter] = useState<QuickFilter>(null);
+  const [assigneeFilter, setAssigneeFilter] = useState<Set<AssigneeFilterKey>>(new Set());
+  const [groupByAssignee, setGroupByAssignee] = useState(false);
 
   // Which card is being dragged (for DragOverlay) and where it would land if dropped
   // right now (for the live reorder preview) — both reset on drop or cancel. Neither
@@ -263,10 +333,12 @@ export function TaskBoard({ onOpenTask }: { onOpenTask: (id: number) => void }) 
     let today = 0;
     let inProgress = 0;
     let blocked = 0;
+    let mine = 0;
     for (const status of BOARD_STATUSES) {
       for (const task of searched[status] ?? []) {
         if (task.status === "in_progress") inProgress += 1;
         if (task.status === "blocked") blocked += 1;
+        if (user && task.assignee?.id === user.id) mine += 1;
         if (isActiveTask(task)) {
           const relation = dueRelation(task.dueDate);
           if (relation === "overdue") overdue += 1;
@@ -274,8 +346,8 @@ export function TaskBoard({ onOpenTask }: { onOpenTask: (id: number) => void }) 
         }
       }
     }
-    return { overdue, today, inProgress, blocked };
-  }, [searched]);
+    return { overdue, today, inProgress, blocked, mine };
+  }, [searched, user]);
 
   const matchesQuickFilter = (task: Task): boolean => {
     if (!quickFilter) return true;
@@ -289,13 +361,26 @@ export function TaskBoard({ onOpenTask }: { onOpenTask: (id: number) => void }) 
   const filteredBoard = useMemo(() => {
     const result: Partial<Record<TaskStatus, Task[]>> = {};
     for (const status of BOARD_STATUSES) {
-      result[status] = (searched[status] ?? []).filter(matchesQuickFilter);
+      result[status] = (searched[status] ?? []).filter(
+        (t) => matchesQuickFilter(t) && matchesAssigneeFilter(t, assigneeFilter)
+      );
     }
     return result;
-  }, [searched, quickFilter]);
+  }, [searched, quickFilter, assigneeFilter]);
 
   const toggleQuickFilter = (value: Exclude<QuickFilter, null>) =>
     setQuickFilter((current) => (current === value ? null : value));
+
+  const onlyMineActive = user != null && assigneeFilter.size === 1 && assigneeFilter.has(user.id);
+  const toggleOnlyMine = () => {
+    if (!user) return;
+    setAssigneeFilter(onlyMineActive ? new Set() : new Set([user.id]));
+  };
+
+  const assigneeGroups = useMemo(
+    () => (groupByAssignee ? groupTasksByAssignee(filteredBoard) : []),
+    [groupByAssignee, filteredBoard]
+  );
 
   const resolveTargetStatus = (overId: string | number): TaskStatus | null => {
     if (typeof overId === "string" && overId.startsWith(COLUMN_PREFIX)) {
@@ -475,33 +560,76 @@ export function TaskBoard({ onOpenTask }: { onOpenTask: (id: number) => void }) 
             countClassName="text-destructive"
             onClick={() => toggleQuickFilter("blocked")}
           />
+          {user ? (
+            <QuickFilterPill
+              label="only mine"
+              count={stats.mine}
+              active={onlyMineActive}
+              activeClassName="bg-primary/15 text-primary"
+              countClassName="text-primary"
+              onClick={toggleOnlyMine}
+            />
+          ) : null}
         </div>
+
+        <div className="w-44 shrink-0">
+          <AssigneeFilterDropdown
+            users={directoryUsers}
+            selected={assigneeFilter}
+            onChange={setAssigneeFilter}
+          />
+        </div>
+
+        <Button
+          type="button"
+          variant={groupByAssignee ? "secondary" : "outline"}
+          size="sm"
+          className="h-9 gap-1.5 border-border/60"
+          onClick={() => setGroupByAssignee((current) => !current)}
+        >
+          <Rows3 className="h-3.5 w-3.5" />
+          Group by assignee
+        </Button>
       </PageToolbarCard>
 
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCorners}
-        accessibility={{ announcements }}
-        onDragStart={handleDragStart}
-        onDragOver={handleDragOver}
-        onDragEnd={handleDragEnd}
-        onDragCancel={handleDragCancel}
-      >
-        <div className="flex gap-3 overflow-x-auto pb-2">
-          {BOARD_STATUSES.map((status) => (
-            <BoardColumn
-              key={status}
-              status={status}
-              tasks={filteredBoard[status] ?? []}
-              totalCount={status === "done" ? doneTotalCount : undefined}
-              onCardClick={onOpenTask}
-            />
-          ))}
+      {groupByAssignee ? (
+        <div className="flex flex-col gap-3">
+          {assigneeGroups.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-border/50 px-4 py-10 text-center text-sm text-muted-foreground">
+              No tasks match the current filters.
+            </div>
+          ) : (
+            assigneeGroups.map((group) => (
+              <AssigneeSwimlane key={group.key} group={group} onCardClick={onOpenTask} />
+            ))
+          )}
         </div>
-        <DragOverlay dropAnimation={{ duration: 150, easing: "ease" }}>
-          {activeTask ? <TaskCard task={activeTask} className="shadow-lg" /> : null}
-        </DragOverlay>
-      </DndContext>
+      ) : (
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCorners}
+          accessibility={{ announcements }}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDragEnd={handleDragEnd}
+          onDragCancel={handleDragCancel}
+        >
+          <div className="flex gap-3 overflow-x-auto pb-2">
+            {BOARD_STATUSES.map((status) => (
+              <BoardColumn
+                key={status}
+                status={status}
+                tasks={filteredBoard[status] ?? []}
+                totalCount={status === "done" ? doneTotalCount : undefined}
+                onCardClick={onOpenTask}
+              />
+            ))}
+          </div>
+          <DragOverlay dropAnimation={{ duration: 150, easing: "ease" }}>
+            {activeTask ? <TaskCard task={activeTask} className="shadow-lg" /> : null}
+          </DragOverlay>
+        </DndContext>
+      )}
 
       <BlockedReasonDialog
         open={pendingBlock !== null}
