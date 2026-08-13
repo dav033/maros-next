@@ -13,6 +13,7 @@ import type { Task, TaskEntityKind } from "@/tasks/domain";
 import { BOARD_STATUSES } from "@/tasks/domain";
 import { AssigneeAvatar } from "../atoms/AssigneeAvatar";
 import { DueDatePill } from "../atoms/DueDatePill";
+import { TaskEmptyState } from "../atoms/TaskEmptyState";
 import { TaskKindIcon } from "../atoms/TaskKindIcon";
 import { TaskPriorityBadge } from "../atoms/TaskPriorityBadge";
 import { TaskStatusBadge } from "../atoms/TaskStatusBadge";
@@ -171,13 +172,12 @@ export function TaskListTable({
       defaultSort={{ key: "id", dir: "desc" }}
       loadingState={<DefaultTableLoading label="Loading tasks…" />}
       emptyState={
-        <div className="flex flex-col items-center justify-center rounded-lg border border-border bg-card/40 p-8 text-center">
-          <ListTodo className="size-12 text-muted-foreground/50 mb-4" />
-          <h3 className="text-lg font-medium text-foreground">No tasks found.</h3>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Use the button above to create one.
-          </p>
-        </div>
+        <TaskEmptyState
+          icon={ListTodo}
+          title="No tasks found."
+          description="Use the button above to create one."
+          className="bg-card/40"
+        />
       }
     />
   );

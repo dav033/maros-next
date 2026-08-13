@@ -41,6 +41,7 @@ import { useTaskMutations } from "../hooks/mutations/useTaskMutations";
 import { TaskCard } from "../molecules/TaskCard";
 import { AssigneeFilterDropdown } from "../molecules/AssigneeFilterDropdown";
 import { AssigneeAvatar } from "../atoms/AssigneeAvatar";
+import { TaskEmptyState } from "../atoms/TaskEmptyState";
 import { BlockedReasonDialog } from "../molecules/BlockedReasonDialog";
 import { TASK_STATUS_LABELS } from "../atoms/taskVisualTokens";
 import { resolveCardDropSide } from "./taskBoardDragUtil";
@@ -164,11 +165,7 @@ function BoardColumn({
             <SortableTaskCard key={task.id} task={task} onClick={() => onCardClick(task.id)} />
           ))}
         </SortableContext>
-        {tasks.length === 0 ? (
-          <div className="rounded-md border border-dashed border-border/40 px-2 py-6 text-center text-xs text-muted-foreground">
-            No tasks
-          </div>
-        ) : null}
+        {tasks.length === 0 ? <TaskEmptyState compact title="No tasks" /> : null}
       </div>
       {hasMoreThanShown ? (
         // Only the most recent DONE_LIMIT/DONE_WINDOW_DAYS worth of completed tasks
@@ -597,9 +594,7 @@ export function TaskBoard({ onOpenTask }: { onOpenTask: (id: number) => void }) 
       {groupByAssignee ? (
         <div className="flex flex-col gap-3">
           {assigneeGroups.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-border/50 px-4 py-10 text-center text-sm text-muted-foreground">
-              No tasks match the current filters.
-            </div>
+            <TaskEmptyState title="No tasks match the current filters." className="py-10" />
           ) : (
             assigneeGroups.map((group) => (
               <AssigneeSwimlane key={group.key} group={group} onCardClick={onOpenTask} />

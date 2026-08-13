@@ -8,6 +8,7 @@ import { useCurrentUser } from "@/shared/auth/CurrentUserProvider";
 import { useInstantMyTasks, type MyTasksBucketKey } from "../hooks/data/useInstantMyTasks";
 import { useTaskMutations } from "../hooks/mutations/useTaskMutations";
 import { useTaskDetailRoute } from "../hooks/useTaskDetailRoute";
+import { TaskEmptyState } from "../atoms/TaskEmptyState";
 import { CreateTaskDialog } from "../organisms/CreateTaskDialog";
 import { MyTaskRow } from "../organisms/MyTaskRow";
 import { TaskDetailSheet } from "../organisms/TaskDetailSheet";
@@ -58,11 +59,12 @@ export function MyTasksPageView() {
           ))}
         </div>
       ) : totalCount === 0 ? (
-        <div className="dashboard-section-enter flex flex-1 flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border/60 py-16 text-center">
-          <CheckCheck className="h-8 w-8 text-muted-foreground" />
-          <p className="text-sm font-medium text-foreground">Nothing due</p>
-          <p className="text-xs text-muted-foreground">You&apos;re all caught up.</p>
-        </div>
+        <TaskEmptyState
+          icon={CheckCheck}
+          title="Nothing due"
+          description="You're all caught up."
+          className="dashboard-section-enter flex-1 py-16"
+        />
       ) : (
         // Capped width: rows carry a full-bleed h-12 CTA button by design (mobile-first,
         // one-tap — see PLAN-TAREAS.md §6.3), which reads fine on a phone but stretches
