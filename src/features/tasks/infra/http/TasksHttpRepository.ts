@@ -2,12 +2,13 @@ import type { HttpClientLike } from "@/shared/infra";
 import { optimizedApiClient } from "@/shared/infra";
 import type {
   Task,
-  TaskBoardColumns,
+  TaskBoardResult,
   TaskComment,
   TaskDetail,
   TaskDraft,
   TaskEntityLink,
   TaskFilters,
+  TaskListResult,
   TaskMoveInput,
   TaskMoveResult,
   TaskPatch,
@@ -24,18 +25,18 @@ import { endpoints } from "./endpoints";
 export class TasksHttpRepository implements TasksRepositoryPort {
   constructor(private readonly api: HttpClientLike = optimizedApiClient) {}
 
-  async list(filters?: TaskFilters): Promise<Task[]> {
+  async list(filters?: TaskFilters): Promise<TaskListResult> {
     // .base directly: buildCrudEndpoints types `list` optional (it isn't, here, but
     // the type doesn't know that) — see NotePageHttpRepository.list for the same call.
-    const { data } = await this.api.get<Task[]>(endpoints.base, {
+    const { data } = await this.api.get<TaskListResult>(endpoints.base, {
       params: filters,
     });
-    return Array.isArray(data) ? data : [];
+    return data ?? { items: [], totalCount: 0 };
   }
 
-  async getBoard(): Promise<TaskBoardColumns> {
-    const { data } = await this.api.get<TaskBoardColumns>(endpoints.board());
-    return data ?? {};
+  async getBoard(): Promise<TaskBoardResult> {
+    const { data } = await this.api.get<TaskBoardResult>(endpoints.board());
+    return data ?? { columns: {}, doneTotalCount: 0 };
   }
 
   async getMine(): Promise<Record<string, Task[]>> {

@@ -1,7 +1,7 @@
 import type { QueryClient } from "@tanstack/react-query";
 import { tasksKeys } from "@/tasks/application";
 import { BOARD_STATUSES } from "@/tasks/domain";
-import type { Task, TaskBoardColumns, TaskStatus } from "@/tasks/domain";
+import type { Task, TaskBoardColumns, TaskBoardResult, TaskStatus } from "@/tasks/domain";
 import type { Snapshot } from "@/shared/query/optimistic";
 
 export interface OptimisticMoveInput {
@@ -71,9 +71,12 @@ export function optimisticMoveTask(queryClient: QueryClient, input: OptimisticMo
   const key = tasksKeys.board();
   void queryClient.cancelQueries({ queryKey: key });
 
-  const previous = queryClient.getQueryData<TaskBoardColumns>(key);
+  const previous = queryClient.getQueryData<TaskBoardResult>(key);
   if (previous) {
-    queryClient.setQueryData<TaskBoardColumns>(key, applyOptimisticMove(previous, input));
+    queryClient.setQueryData<TaskBoardResult>(key, {
+      ...previous,
+      columns: applyOptimisticMove(previous.columns, input),
+    });
   }
 
   return {

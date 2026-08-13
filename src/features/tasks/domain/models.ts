@@ -137,8 +137,28 @@ export interface TaskDetail extends Task {
   comments: TaskComment[];
 }
 
-/** GET /tasks/board's shape: one array per column, `cancelled` never appears. */
+/** One array per column, `cancelled` never appears. */
 export type TaskBoardColumns = Partial<Record<TaskStatus, Task[]>>;
+
+/**
+ * GET /tasks/board's shape. `columns.done` is windowed to a recent slice (see the
+ * backend's TasksRepository.findForBoard) — `doneTotalCount` is the true count behind
+ * it, for a "view all completed" link once the two numbers diverge.
+ */
+export interface TaskBoardResult {
+  columns: TaskBoardColumns;
+  doneTotalCount: number;
+}
+
+/**
+ * GET /tasks's shape. `items` is capped server-side (see the backend's
+ * TasksRepository.LIST_LIMIT) — `totalCount` is the true count behind that cap, for a
+ * "showing N of M, narrow with a filter to see the rest" hint once they diverge.
+ */
+export interface TaskListResult {
+  items: Task[];
+  totalCount: number;
+}
 
 export type TaskDraft = Readonly<{
   title?: string;
@@ -197,12 +217,13 @@ export type TaskMoveResult = Task & { openSubtasksWarning?: number };
 export type TaskEntityLink = Readonly<{ entityKind: TaskEntityKind; entityId: number }>;
 
 /** Query filters behind GET /tasks — every field is an AND with the rest. */
+/** Multi-valued fields OR together (any match); every field is AND'd with the rest — see SearchTasksDto. */
 export type TaskFilters = Readonly<{
-  status?: TaskStatus;
-  assigneeUserId?: number;
-  kind?: TaskKind;
-  priority?: TaskPriority;
-  labelId?: number;
+  status?: TaskStatus[];
+  assigneeUserId?: number[];
+  kind?: TaskKind[];
+  priority?: TaskPriority[];
+  labelId?: number[];
   entityKind?: TaskEntityKind;
   entityId?: number;
   dueBefore?: string;

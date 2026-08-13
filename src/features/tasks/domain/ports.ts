@@ -1,6 +1,6 @@
 import type {
   Task,
-  TaskBoardColumns,
+  TaskBoardResult,
   TaskComment,
   TaskDetail,
   TaskDraft,
@@ -9,14 +9,15 @@ import type {
   TaskLabel,
   TaskLabelDraft,
   TaskLabelPatch,
+  TaskListResult,
   TaskMoveInput,
   TaskMoveResult,
   TaskPatch,
 } from "./models";
 
 export interface TasksRepositoryPort {
-  list(filters?: TaskFilters): Promise<Task[]>;
-  getBoard(): Promise<TaskBoardColumns>;
+  list(filters?: TaskFilters): Promise<TaskListResult>;
+  getBoard(): Promise<TaskBoardResult>;
   /** overdue / today / thisWeek / later / noDueDate, in the business's timezone. */
   getMine(): Promise<Record<string, Task[]>>;
   listByEntity(entityKind: string, entityId: number): Promise<Task[]>;

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Filter, ListTodo, Search, X } from "lucide-react";
 import { PageHeaderCard, PageToolbarCard, MultiSelectFilter } from "@/components/shared";
 import { Input } from "@/components/ui/input";
@@ -29,29 +30,42 @@ const PRIORITY_OPTIONS = TASK_PRIORITIES.map((p) => ({ value: p, label: TASK_PRI
 const KIND_OPTIONS = TASK_KINDS.map((k) => ({ value: k, label: TASK_KIND_LABELS[k] }));
 
 /**
- * Filtering happens client-side over the full top-level list: the backend's filters
- * (SearchTasksDto) are single-valued, but the toolbar here needs multi-select — same
- * tradeoff LeadsPageView makes for its own status filter.
+ * Status/priority/kind filter on the server now (SearchTasksDto accepts several
+ * values per field — see toArray.util on the backend), so a narrow filter no longer
+ * means downloading every top-level task just to discard most of them client-side.
+ * Only the title search box stays client-side, over whatever the server already
+ * narrowed it to — a full round trip per keystroke isn't worth it for that.
  */
 export function TasksListPageView() {
   const { taskId, openTask, closeTask } = useTaskDetailRoute();
-  const { tasks, showSkeleton } = useInstantTasksList();
+  const searchParams = useSearchParams();
 
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<Set<TaskStatus>>(new Set());
+  // Seeds from ?status=… once, on first render — e.g. the board's "view all N
+  // completed" link (see TaskBoard) lands here with ?status=done pre-applied.
+  const [statusFilter, setStatusFilter] = useState<Set<TaskStatus>>(() => {
+    const fromUrl = searchParams.get("status");
+    return fromUrl && (TASK_STATUSES as readonly string[]).includes(fromUrl)
+      ? new Set([fromUrl as TaskStatus])
+      : new Set();
+  });
   const [priorityFilter, setPriorityFilter] = useState<Set<TaskPriority>>(new Set());
   const [kindFilter, setKindFilter] = useState<Set<TaskKind>>(new Set());
 
+  const { tasks, totalCount, showSkeleton } = useInstantTasksList({
+    status: statusFilter.size > 0 ? Array.from(statusFilter) : undefined,
+    priority: priorityFilter.size > 0 ? Array.from(priorityFilter) : undefined,
+    kind: kindFilter.size > 0 ? Array.from(kindFilter) : undefined,
+  });
+  // The server caps how many it'll ever return in one response (see the backend's
+  // TasksRepository.LIST_LIMIT) — this is true independent of the search box, which
+  // only narrows what's already loaded.
+  const isCapped = tasks.length < totalCount;
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return tasks.filter((task) => {
-      if (q && !task.title.toLowerCase().includes(q)) return false;
-      if (statusFilter.size > 0 && !statusFilter.has(task.status)) return false;
-      if (priorityFilter.size > 0 && !priorityFilter.has(task.priority)) return false;
-      if (kindFilter.size > 0 && !kindFilter.has(task.kind)) return false;
-      return true;
-    });
-  }, [tasks, search, statusFilter, priorityFilter, kindFilter]);
+    return q ? tasks.filter((task) => task.title.toLowerCase().includes(q)) : tasks;
+  }, [tasks, search]);
 
   return (
     <main className="flex min-h-[calc(100vh-80px)] w-full flex-col gap-3 bg-background px-3 py-3 pt-16 sm:gap-4 sm:px-4 sm:py-4 md:px-8 md:py-6 lg:pt-6">
@@ -116,6 +130,13 @@ export function TasksListPageView() {
           />
         </div>
       </PageToolbarCard>
+
+      {isCapped ? (
+        <p className="text-xs text-muted-foreground">
+          Showing the first {tasks.length.toLocaleString()} of {totalCount.toLocaleString()} matching
+          tasks — narrow the filters above to see the rest.
+        </p>
+      ) : null}
 
       <section className="dashboard-section-enter mt-2 flex-1">
         <TaskListTable tasks={filtered} isLoading={showSkeleton} onOpenTask={openTask} />

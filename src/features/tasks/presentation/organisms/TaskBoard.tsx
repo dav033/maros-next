@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { isValid, parse } from "date-fns";
 import { Filter, Search, X } from "lucide-react";
 import {
@@ -122,13 +123,17 @@ function SortableTaskCard({ task, onClick }: { task: Task; onClick: () => void }
 function BoardColumn({
   status,
   tasks,
+  totalCount,
   onCardClick,
 }: {
   status: TaskStatus;
   tasks: Task[];
+  /** Only set (and only ever exceeding tasks.length) for `done` — see TaskBoard. */
+  totalCount?: number;
   onCardClick: (id: number) => void;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: `${COLUMN_PREFIX}${status}` });
+  const hasMoreThanShown = totalCount != null && totalCount > tasks.length;
 
   return (
     <div
@@ -143,7 +148,7 @@ function BoardColumn({
           {TASK_STATUS_LABELS[status]}
         </span>
         <span className="rounded-full bg-background/60 px-1.5 py-0.5 text-[10px] text-muted-foreground">
-          {tasks.length}
+          {hasMoreThanShown ? `${tasks.length} of ${totalCount}` : tasks.length}
         </span>
       </div>
       <div className="flex min-h-24 flex-1 flex-col gap-2 overflow-y-auto p-2">
@@ -158,6 +163,17 @@ function BoardColumn({
           </div>
         ) : null}
       </div>
+      {hasMoreThanShown ? (
+        // Only the most recent DONE_LIMIT/DONE_WINDOW_DAYS worth of completed tasks
+        // load onto the board at all (see the backend's TasksRepository.findForBoard)
+        // — the rest are one click away in the list, not silently missing.
+        <Link
+          href="/tasks/list?status=done"
+          className="border-t border-border/40 px-3 py-2 text-center text-[11px] font-medium text-primary hover:underline"
+        >
+          View all {totalCount} completed
+        </Link>
+      ) : null}
     </div>
   );
 }
@@ -177,7 +193,7 @@ function BoardSkeleton() {
 }
 
 export function TaskBoard({ onOpenTask }: { onOpenTask: (id: number) => void }) {
-  const { board, showSkeleton } = useInstantTasksBoard();
+  const { board, doneTotalCount, showSkeleton } = useInstantTasksBoard();
   const { moveMutation } = useTaskMutations();
 
   const [pendingBlock, setPendingBlock] = useState<{
@@ -477,6 +493,7 @@ export function TaskBoard({ onOpenTask }: { onOpenTask: (id: number) => void }) 
               key={status}
               status={status}
               tasks={filteredBoard[status] ?? []}
+              totalCount={status === "done" ? doneTotalCount : undefined}
               onCardClick={onOpenTask}
             />
           ))}
