@@ -5,13 +5,17 @@ import { isValid, parse } from "date-fns";
 import { Filter, Search, X } from "lucide-react";
 import {
   DndContext,
+  DragOverlay,
   KeyboardSensor,
   PointerSensor,
   closestCorners,
   useDroppable,
   useSensor,
   useSensors,
+  type Announcements,
   type DragEndEvent,
+  type DragOverEvent,
+  type DragStartEvent,
 } from "@dnd-kit/core";
 import {
   SortableContext,
@@ -26,14 +30,16 @@ import { Button } from "@/components/ui/button";
 import { PageToolbarCard } from "@/components/shared";
 import { cn } from "@/lib/utils";
 import { todayInBusinessTimezone } from "@/shared/lib/businessDate";
+import { usePrefersReducedMotion } from "@/shared/presentation/hooks/usePrefersReducedMotion";
 import { BOARD_STATUSES } from "@/tasks/domain";
-import type { Task, TaskStatus } from "@/tasks/domain";
+import type { Task, TaskBoardColumns, TaskStatus } from "@/tasks/domain";
 import { useInstantTasksBoard } from "../hooks/data/useInstantTasksBoard";
 import { useTaskMutations } from "../hooks/mutations/useTaskMutations";
 import { TaskCard } from "../molecules/TaskCard";
 import { BlockedReasonDialog } from "../molecules/BlockedReasonDialog";
 import { TASK_STATUS_LABELS } from "../atoms/taskVisualTokens";
 import { resolveCardDropSide } from "./taskBoardDragUtil";
+import { applyOptimisticMove } from "./taskBoardOptimisticMove";
 
 const COLUMN_PREFIX = "column:";
 
@@ -95,10 +101,14 @@ function SortableTaskCard({ task, onClick }: { task: Task; onClick: () => void }
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: task.id,
   });
+  const prefersReducedMotion = usePrefersReducedMotion();
 
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition,
+    transition: prefersReducedMotion ? undefined : transition,
+    // The dragged card itself: DragOverlay renders the crisp, floating copy that
+    // follows the cursor (see TaskBoard) — this is just its dimmed, still-in-the-flow
+    // placeholder, so the layout doesn't jump.
     opacity: isDragging ? 0.4 : 1,
   };
 
@@ -179,22 +189,46 @@ export function TaskBoard({ onOpenTask }: { onOpenTask: (id: number) => void }) 
   const [search, setSearch] = useState("");
   const [quickFilter, setQuickFilter] = useState<QuickFilter>(null);
 
+  // Which card is being dragged (for DragOverlay) and where it would land if dropped
+  // right now (for the live reorder preview) — both reset on drop or cancel. Neither
+  // touches the query cache; that only happens on a real drop (see
+  // taskBoardOptimisticMove, wired in useTaskMutations' moveMutation).
+  const [activeId, setActiveId] = useState<number | null>(null);
+  const [dragPreview, setDragPreview] = useState<{
+    taskId: number;
+    toStatus: TaskStatus;
+    beforeId?: number;
+    afterId?: number;
+  } | null>(null);
+
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
-  // Flat id -> status lookup, so onDragEnd can tell which column a dropped-on card
-  // belongs to (over.id is the card's id, not the column's, whenever there's a card
-  // under the pointer). Built off the unfiltered board — a dragged card's true
-  // column never depends on what search/quick-filter currently hide.
-  const taskStatusById = useMemo(() => {
-    const map = new Map<number, TaskStatus>();
+  // Flat id -> status/task lookups, always off the pristine `board` — never
+  // `displayBoard` below, whose preview reordering must be recomputed fresh from the
+  // real positions on every dragover tick rather than compounding on itself.
+  const { taskStatusById, taskById } = useMemo(() => {
+    const statusMap = new Map<number, TaskStatus>();
+    const taskMap = new Map<number, Task>();
     for (const status of BOARD_STATUSES) {
-      for (const task of board[status] ?? []) map.set(task.id, status);
+      for (const task of board[status] ?? []) {
+        statusMap.set(task.id, status);
+        taskMap.set(task.id, task);
+      }
     }
-    return map;
+    return { taskStatusById: statusMap, taskById: taskMap };
   }, [board]);
+
+  // What actually renders: the real board, with the active drag's hypothetical
+  // placement previewed in — see dragPreview and applyOptimisticMove. Recomputed
+  // fresh from `board` each time, so a fast drag across several columns never
+  // compounds rounding/ordering drift from its own previous preview.
+  const displayBoard: TaskBoardColumns = useMemo(
+    () => (dragPreview ? applyOptimisticMove(board, dragPreview) : board),
+    [board, dragPreview]
+  );
 
   // Search narrows first, quick-filter counts are read off that (matches the count
   // badges to what search already excluded), then quick-filter narrows what's shown.
@@ -202,11 +236,11 @@ export function TaskBoard({ onOpenTask }: { onOpenTask: (id: number) => void }) 
     const q = search.trim().toLowerCase();
     const result: Partial<Record<TaskStatus, Task[]>> = {};
     for (const status of BOARD_STATUSES) {
-      const tasks = board[status] ?? [];
+      const tasks = displayBoard[status] ?? [];
       result[status] = q ? tasks.filter((t) => t.title.toLowerCase().includes(q)) : tasks;
     }
     return result;
-  }, [board, search]);
+  }, [displayBoard, search]);
 
   const stats = useMemo(() => {
     let overdue = 0;
@@ -264,8 +298,9 @@ export function TaskBoard({ onOpenTask }: { onOpenTask: (id: number) => void }) 
     moveMutation.mutate({ id: taskId, input: { status, beforeId, afterId, blockedReason } });
   };
 
-  // Never `filteredBoard` here — a quick filter or search can hide the very cards
-  // whose order resolveCardDropSide depends on to tell up from down.
+  // Always the pristine `board` here, never displayBoard/filteredBoard — a quick
+  // filter, search, or the preview's own hypothetical reordering can hide or move the
+  // very cards resolveCardDropSide depends on to tell up from down.
   const resolveDropTarget = (
     taskId: number,
     targetStatus: TaskStatus,
@@ -281,8 +316,40 @@ export function TaskBoard({ onOpenTask }: { onOpenTask: (id: number) => void }) 
     return side === "after" ? { afterId: overTaskId } : { beforeId: overTaskId };
   };
 
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(Number(event.active.id));
+  };
+
+  const handleDragOver = (event: DragOverEvent) => {
+    const { active, over } = event;
+    if (!over) {
+      setDragPreview(null);
+      return;
+    }
+
+    const taskId = Number(active.id);
+    const targetStatus = resolveTargetStatus(over.id);
+    if (!targetStatus) {
+      setDragPreview(null);
+      return;
+    }
+
+    const { beforeId, afterId } = resolveDropTarget(taskId, targetStatus, over.id);
+    setDragPreview({ taskId, toStatus: targetStatus, beforeId, afterId });
+  };
+
+  const resetDragState = () => {
+    setActiveId(null);
+    setDragPreview(null);
+  };
+
+  const handleDragCancel = () => {
+    resetDragState();
+  };
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
+    resetDragState();
     if (!over) return;
 
     const taskId = Number(active.id);
@@ -300,6 +367,34 @@ export function TaskBoard({ onOpenTask }: { onOpenTask: (id: number) => void }) 
     }
 
     commitMove(taskId, targetStatus, beforeId, afterId);
+  };
+
+  const activeTask = activeId != null ? taskById.get(activeId) ?? null : null;
+
+  const announcements: Announcements = {
+    onDragStart({ active }) {
+      const task = taskById.get(Number(active.id));
+      return task ? `Picked up task ${task.title}.` : undefined;
+    },
+    onDragOver({ active, over }) {
+      const task = taskById.get(Number(active.id));
+      const status = over ? resolveTargetStatus(over.id) : null;
+      if (!task || !status) return undefined;
+      return `Task ${task.title} is over the ${TASK_STATUS_LABELS[status]} column.`;
+    },
+    onDragEnd({ active, over }) {
+      const task = taskById.get(Number(active.id));
+      if (!task) return undefined;
+      if (!over) return `Moving task ${task.title} was cancelled.`;
+      const status = resolveTargetStatus(over.id);
+      return status
+        ? `Task ${task.title} was moved to the ${TASK_STATUS_LABELS[status]} column.`
+        : undefined;
+    },
+    onDragCancel({ active }) {
+      const task = taskById.get(Number(active.id));
+      return task ? `Moving task ${task.title} was cancelled.` : undefined;
+    },
   };
 
   if (showSkeleton) {
@@ -367,7 +462,15 @@ export function TaskBoard({ onOpenTask }: { onOpenTask: (id: number) => void }) 
         </div>
       </PageToolbarCard>
 
-      <DndContext sensors={sensors} collisionDetection={closestCorners} onDragEnd={handleDragEnd}>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCorners}
+        accessibility={{ announcements }}
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
+        onDragEnd={handleDragEnd}
+        onDragCancel={handleDragCancel}
+      >
         <div className="flex gap-3 overflow-x-auto pb-2">
           {BOARD_STATUSES.map((status) => (
             <BoardColumn
@@ -378,6 +481,9 @@ export function TaskBoard({ onOpenTask }: { onOpenTask: (id: number) => void }) 
             />
           ))}
         </div>
+        <DragOverlay dropAnimation={{ duration: 150, easing: "ease" }}>
+          {activeTask ? <TaskCard task={activeTask} className="shadow-lg" /> : null}
+        </DragOverlay>
       </DndContext>
 
       <BlockedReasonDialog
