@@ -25,6 +25,8 @@ function describe(notification: AppNotification): string {
       return `${who} blocked "${title}"`;
     case "task_commented":
       return `${who} commented on "${title}"`;
+    case "task_mentioned":
+      return `${who} mentioned you on "${title}"`;
     case "task_due_digest":
       return `"${title}" is due`;
     default:

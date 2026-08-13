@@ -1,15 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { Check, Pencil, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { textToTipTapDoc, tiptapDocToText } from "@/shared/domain";
 import { useCurrentUser } from "@/shared/auth/CurrentUserProvider";
 import type { TaskComment } from "@/tasks/domain";
 import { useTaskMutations } from "../hooks/mutations/useTaskMutations";
 import { AssigneeAvatar } from "../atoms/AssigneeAvatar";
+import { TaskRichTextEditor } from "../molecules/TaskRichTextEditor";
+import { isBlankDoc } from "../molecules/taskRichTextDoc";
+
+const EMPTY_DOC = { type: "doc", content: [{ type: "paragraph" }] };
 
 export function TaskCommentList({
   taskId,
@@ -21,28 +23,37 @@ export function TaskCommentList({
   const { user, hasPermission } = useCurrentUser();
   const canModerate = hasPermission("tasks:delete");
 
-  const [draft, setDraft] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [editingText, setEditingText] = useState("");
   const { addCommentMutation, updateCommentMutation, deleteCommentMutation } = useTaskMutations();
 
+  // The composer's own draft, kept only so "Comment" can be disabled while it's
+  // blank — TaskRichTextEditor itself is uncontrolled (see its own doc comment).
+  const draftRef = useRef<Record<string, unknown>>(EMPTY_DOC);
+  const [draftEmpty, setDraftEmpty] = useState(true);
+  const [composerKey, setComposerKey] = useState(0);
+
+  const editDraftRef = useRef<Record<string, unknown>>(EMPTY_DOC);
+
   const submit = async () => {
-    if (!draft.trim()) return;
-    await addCommentMutation.mutateAsync({ taskId, body: textToTipTapDoc(draft.trim()) });
-    setDraft("");
+    if (draftEmpty) return;
+    await addCommentMutation.mutateAsync({ taskId, body: draftRef.current });
+    // Remounts the composer with a fresh empty doc — there's no imperative "clear"
+    // on an uncontrolled TipTap instance short of replacing it.
+    draftRef.current = EMPTY_DOC;
+    setDraftEmpty(true);
+    setComposerKey((k) => k + 1);
   };
 
   const startEdit = (comment: TaskComment) => {
+    editDraftRef.current = comment.body;
     setEditingId(comment.id);
-    setEditingText(tiptapDocToText(comment.body));
   };
 
   const saveEdit = async (commentId: number) => {
-    if (!editingText.trim()) return;
     await updateCommentMutation.mutateAsync({
       taskId,
       commentId,
-      body: textToTipTapDoc(editingText.trim()),
+      body: editDraftRef.current,
     });
     setEditingId(null);
   };
@@ -68,17 +79,20 @@ export function TaskCommentList({
 
               {editingId === comment.id ? (
                 <div className="mt-1 space-y-1.5">
-                  <Textarea
-                    value={editingText}
-                    onChange={(e) => setEditingText(e.target.value)}
-                    rows={2}
+                  <TaskRichTextEditor
+                    content={comment.body}
+                    mentionable
                     autoFocus
+                    minHeightClassName="min-h-[50px]"
+                    onUpdate={(doc) => {
+                      editDraftRef.current = doc;
+                    }}
                   />
                   <div className="flex gap-1.5">
                     <Button
                       size="sm"
                       className="h-7 gap-1"
-                      disabled={!editingText.trim() || updateCommentMutation.isPending}
+                      disabled={updateCommentMutation.isPending}
                       onClick={() => void saveEdit(comment.id)}
                     >
                       <Check className="h-3 w-3" />
@@ -96,9 +110,9 @@ export function TaskCommentList({
                   </div>
                 </div>
               ) : (
-                <p className="mt-0.5 whitespace-pre-wrap text-sm text-foreground/90">
-                  {tiptapDocToText(comment.body)}
-                </p>
+                <div className="mt-0.5 text-sm text-foreground/90">
+                  <TaskRichTextEditor content={comment.body} editable={false} mentionable />
+                </div>
               )}
 
               {canEdit(comment) && editingId !== comment.id && (
@@ -128,16 +142,21 @@ export function TaskCommentList({
       </ul>
 
       <div className="space-y-1.5 border-t border-border/60 pt-3">
-        <Textarea
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          placeholder="Add a comment…"
-          rows={2}
+        <TaskRichTextEditor
+          key={composerKey}
+          content={EMPTY_DOC}
+          mentionable
+          placeholder="Add a comment… (@ to mention someone)"
+          minHeightClassName="min-h-[60px]"
+          onUpdate={(doc) => {
+            draftRef.current = doc;
+            setDraftEmpty(isBlankDoc(doc));
+          }}
         />
         <Button
           type="button"
           size="sm"
-          disabled={!draft.trim() || addCommentMutation.isPending}
+          disabled={draftEmpty || addCommentMutation.isPending}
           onClick={() => void submit()}
         >
           Comment

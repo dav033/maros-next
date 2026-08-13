@@ -14,7 +14,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
@@ -36,7 +35,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { EntityAttachmentsSection } from "@/features/attachments/presentation/EntityAttachmentsSection";
 import { useDraftField } from "@/shared/presentation/hooks/useDraftField";
-import { textToTipTapDoc, tiptapDocToText } from "@/shared/domain";
 import { tasksKeys } from "@/tasks/application";
 import { TASK_KINDS, TASK_PRIORITIES, TASK_STATUSES } from "@/tasks/domain";
 import type { TaskPatch } from "@/tasks/domain";
@@ -49,6 +47,8 @@ import { AssigneePicker } from "../molecules/AssigneePicker";
 import { LabelPicker } from "../molecules/LabelPicker";
 import { TaskEntityPicker } from "../molecules/TaskEntityPicker";
 import { BlockedReasonDialog } from "../molecules/BlockedReasonDialog";
+import { TaskRichTextEditor } from "../molecules/TaskRichTextEditor";
+import { TaskDatePicker } from "../molecules/TaskDatePicker";
 import { SubtaskList } from "./SubtaskList";
 import { TaskCommentList } from "./TaskCommentList";
 import { TaskActivityFeed } from "./TaskActivityFeed";
@@ -97,14 +97,15 @@ export function TaskDetailSheet({
   const [pendingBlock, setPendingBlock] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
-  // Each field tracks its own dirty state, keyed off the task's id — so a mutation
-  // that invalidates the whole detail query (any field, on any tab) never stomps text
-  // still being typed into a *different* field. See useDraftField.
+  // The title field tracks its own dirty state, keyed off the task's id — so a
+  // mutation that invalidates the whole detail query (any field, on any tab) never
+  // stomps text still being typed. See useDraftField. The description editor
+  // (TaskRichTextEditor) doesn't need this: it's uncontrolled and mounted once per
+  // task id (key={task.id} below), so there's no re-sync path for a refetch to
+  // clobber in the first place — same reasoning notes' own NoteEditor documents.
   const recordId = task?.id ?? -1;
   const titleField = useDraftField(recordId, task?.title ?? "");
-  const descriptionField = useDraftField(recordId, task ? tiptapDocToText(task.description) : "");
   const title = titleField.value;
-  const description = descriptionField.value;
 
   const open = taskId !== null;
 
@@ -144,12 +145,6 @@ export function TaskDetailSheet({
     }
     const landed = await saveTaskPatch({ title: title.trim() || "Untitled task" });
     if (landed) titleField.commit();
-  };
-
-  const saveDescription = async () => {
-    if (!task) return;
-    const landed = await saveTaskPatch({ description: textToTipTapDoc(description) });
-    if (landed) descriptionField.commit();
   };
 
   const changeStatus = (status: string) => {
@@ -301,21 +296,17 @@ export function TaskDetailSheet({
 
                     <div className="space-y-1.5">
                       <Label className="text-xs text-muted-foreground">Start date</Label>
-                      <Input
-                        type="date"
-                        value={task.startDate ?? ""}
-                        onChange={(e) => void saveTaskPatch({ startDate: e.target.value || null })}
-                        className="h-9"
+                      <TaskDatePicker
+                        value={task.startDate}
+                        onChange={(startDate) => void saveTaskPatch({ startDate })}
                       />
                     </div>
 
                     <div className="space-y-1.5">
                       <Label className="text-xs text-muted-foreground">Due date</Label>
-                      <Input
-                        type="date"
-                        value={task.dueDate ?? ""}
-                        onChange={(e) => void saveTaskPatch({ dueDate: e.target.value || null })}
-                        className="h-9"
+                      <TaskDatePicker
+                        value={task.dueDate}
+                        onChange={(dueDate) => void saveTaskPatch({ dueDate })}
                       />
                     </div>
                   </div>
@@ -433,12 +424,10 @@ export function TaskDetailSheet({
 
                   <div className="space-y-1.5">
                     <Label className="text-xs text-muted-foreground">Description</Label>
-                    <Textarea
-                      value={description}
-                      onChange={(e) => descriptionField.setValue(e.target.value)}
-                      onBlur={saveDescription}
-                      rows={5}
-                      placeholder="Add details…"
+                    <TaskRichTextEditor
+                      key={task.id}
+                      content={task.description}
+                      onSave={(doc) => void saveTaskPatch({ description: doc })}
                     />
                   </div>
 

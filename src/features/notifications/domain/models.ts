@@ -3,7 +3,8 @@ export type NotificationKind =
   | "task_commented"
   | "task_status_changed"
   | "task_blocked"
-  | "task_due_digest";
+  | "task_due_digest"
+  | "task_mentioned";
 
 export interface NotificationPersonRef {
   id: number;
