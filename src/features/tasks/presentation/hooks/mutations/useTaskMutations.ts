@@ -11,6 +11,9 @@ import {
   setTaskAssigneeAction,
   setTaskLabelsAction,
   setTaskEntityAction,
+  addTaskAttachmentsAction,
+  removeTaskAttachmentAction,
+  reorderTaskAttachmentsAction,
   deleteTaskAction,
   addTaskCommentAction,
   updateTaskCommentAction,
@@ -80,6 +83,29 @@ export function useTaskMutations() {
     invalidate: (qc, data) => invalidateAfterChange(qc, data.id),
   });
 
+  // Additive, never a full-list replace — see TaskPatch for why. No success toast:
+  // uploads/removals get their own feedback (EntityAttachmentsSection's own toasts).
+  const addAttachmentsMutation = useEntityMutation({
+    entityLabel: "Task",
+    action: "updated",
+    mutationFn: ({ id, keys }: { id: number; keys: string[] }) => addTaskAttachmentsAction(id, keys),
+    invalidate: (qc, data) => invalidateAfterChange(qc, data.id),
+  });
+
+  const removeAttachmentMutation = useEntityMutation({
+    entityLabel: "Task",
+    action: "updated",
+    mutationFn: ({ id, key }: { id: number; key: string }) => removeTaskAttachmentAction(id, key),
+    invalidate: (qc, data) => invalidateAfterChange(qc, data.id),
+  });
+
+  const reorderAttachmentsMutation = useEntityMutation({
+    entityLabel: "Task",
+    action: "updated",
+    mutationFn: ({ id, keys }: { id: number; keys: string[] }) => reorderTaskAttachmentsAction(id, keys),
+    invalidate: (qc, data) => invalidateAfterChange(qc, data.id),
+  });
+
   const deleteMutation = useEntityMutation({
     entityLabel: "Task",
     action: "deleted",
@@ -125,6 +151,9 @@ export function useTaskMutations() {
     setAssigneeMutation,
     setLabelsMutation,
     setEntityMutation,
+    addAttachmentsMutation,
+    removeAttachmentMutation,
+    reorderAttachmentsMutation,
     deleteMutation,
     addCommentMutation,
     updateCommentMutation,

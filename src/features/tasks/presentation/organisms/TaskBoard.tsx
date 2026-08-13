@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { isValid, parse, startOfDay } from "date-fns";
+import { isValid, parse } from "date-fns";
 import { Filter, Search, X } from "lucide-react";
 import {
   DndContext,
@@ -25,6 +25,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { PageToolbarCard } from "@/components/shared";
 import { cn } from "@/lib/utils";
+import { todayInBusinessTimezone } from "@/shared/lib/businessDate";
 import { BOARD_STATUSES } from "@/tasks/domain";
 import type { Task, TaskStatus } from "@/tasks/domain";
 import { useInstantTasksBoard } from "../hooks/data/useInstantTasksBoard";
@@ -32,6 +33,7 @@ import { useTaskMutations } from "../hooks/mutations/useTaskMutations";
 import { TaskCard } from "../molecules/TaskCard";
 import { BlockedReasonDialog } from "../molecules/BlockedReasonDialog";
 import { TASK_STATUS_LABELS } from "../atoms/taskVisualTokens";
+import { resolveCardDropSide } from "./taskBoardDragUtil";
 
 const COLUMN_PREFIX = "column:";
 
@@ -43,13 +45,18 @@ function isActiveTask(task: Task): boolean {
   return task.status !== "done" && task.status !== "cancelled";
 }
 
+/**
+ * Compares the raw `YYYY-MM-DD` strings against "today" in the business's timezone —
+ * not `new Date()` in the viewer's own timezone — so these counts agree with the
+ * backend's due-date bucketing (My tasks, the daily digest) instead of drifting by a
+ * day for anyone outside America/New_York, or near midnight for everyone.
+ */
 function dueRelation(dueDate: string | null): "overdue" | "today" | "future" | null {
   if (!dueDate) return null;
-  const parsed = parse(dueDate, DATE_FORMAT, new Date());
-  if (!isValid(parsed)) return null;
-  const today = startOfDay(new Date());
-  if (parsed < today) return "overdue";
-  if (parsed.getTime() === today.getTime()) return "today";
+  if (!isValid(parse(dueDate, DATE_FORMAT, new Date()))) return null;
+  const today = todayInBusinessTimezone();
+  if (dueDate < today) return "overdue";
+  if (dueDate === today) return "today";
   return "future";
 }
 
@@ -166,6 +173,7 @@ export function TaskBoard({ onOpenTask }: { onOpenTask: (id: number) => void }) 
   const [pendingBlock, setPendingBlock] = useState<{
     taskId: number;
     beforeId?: number;
+    afterId?: number;
   } | null>(null);
 
   const [search, setSearch] = useState("");
@@ -250,9 +258,27 @@ export function TaskBoard({ onOpenTask }: { onOpenTask: (id: number) => void }) 
     taskId: number,
     status: TaskStatus,
     beforeId?: number,
+    afterId?: number,
     blockedReason?: string
   ) => {
-    moveMutation.mutate({ id: taskId, input: { status, beforeId, blockedReason } });
+    moveMutation.mutate({ id: taskId, input: { status, beforeId, afterId, blockedReason } });
+  };
+
+  // Never `filteredBoard` here — a quick filter or search can hide the very cards
+  // whose order resolveCardDropSide depends on to tell up from down.
+  const resolveDropTarget = (
+    taskId: number,
+    targetStatus: TaskStatus,
+    overId: string | number
+  ): { beforeId?: number; afterId?: number } => {
+    const overIsCard = typeof overId !== "string" || !overId.startsWith(COLUMN_PREFIX);
+    if (!overIsCard) return {};
+
+    const overTaskId = Number(overId);
+    const targetList = board[targetStatus] ?? [];
+    const side = resolveCardDropSide(targetList, taskId, overTaskId);
+
+    return side === "after" ? { afterId: overTaskId } : { beforeId: overTaskId };
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -264,19 +290,16 @@ export function TaskBoard({ onOpenTask }: { onOpenTask: (id: number) => void }) 
     const targetStatus = resolveTargetStatus(over.id);
     if (!fromStatus || !targetStatus) return;
 
-    // Dropped on another card: the dragged task takes that card's spot. Dropped on
-    // the empty column area itself: append to the end.
-    const overIsCard = typeof over.id !== "string" || !over.id.startsWith(COLUMN_PREFIX);
-    const beforeId = overIsCard ? Number(over.id) : undefined;
+    const { beforeId, afterId } = resolveDropTarget(taskId, targetStatus, over.id);
 
-    if (fromStatus === targetStatus && beforeId === taskId) return;
+    if (fromStatus === targetStatus && (beforeId === taskId || afterId === taskId)) return;
 
     if (targetStatus === "blocked") {
-      setPendingBlock({ taskId, beforeId });
+      setPendingBlock({ taskId, beforeId, afterId });
       return;
     }
 
-    commitMove(taskId, targetStatus, beforeId);
+    commitMove(taskId, targetStatus, beforeId, afterId);
   };
 
   if (showSkeleton) {
@@ -362,7 +385,7 @@ export function TaskBoard({ onOpenTask }: { onOpenTask: (id: number) => void }) 
         onCancel={() => setPendingBlock(null)}
         onConfirm={(reason) => {
           if (!pendingBlock) return;
-          commitMove(pendingBlock.taskId, "blocked", pendingBlock.beforeId, reason);
+          commitMove(pendingBlock.taskId, "blocked", pendingBlock.beforeId, pendingBlock.afterId, reason);
           setPendingBlock(null);
         }}
       />

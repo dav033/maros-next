@@ -134,7 +134,13 @@ export type TaskDraft = Readonly<{
   dueDate?: string;
 }>;
 
-/** No `parentId`, no `status` — see UpdateTaskDto on the backend for why. */
+/**
+ * No `parentId`, no `status` — see UpdateTaskDto on the backend for why. No
+ * `attachments` either: two browsers editing the same task each hold their own
+ * (possibly stale) copy of the list, and a "send the whole array back" patch would let
+ * the second save silently erase the first upload — see addTaskAttachments /
+ * removeTaskAttachment / reorderTaskAttachments instead.
+ */
 export type TaskPatch = Readonly<{
   title?: string;
   description?: Record<string, unknown>;
@@ -144,7 +150,13 @@ export type TaskPatch = Readonly<{
   startDate?: string | null;
   dueDate?: string | null;
   blockedReason?: string | null;
-  attachments?: string[];
+  /**
+   * The task's `updatedAt` this edit was read from. When set, a save that lands after
+   * someone else's concurrent edit fails with a "conflict" AppError instead of
+   * silently overwriting it — see TaskDetailSheet's saveTaskPatch. Omit for callers
+   * where the last write is meant to win.
+   */
+  expectedUpdatedAt?: string;
 }>;
 
 /**

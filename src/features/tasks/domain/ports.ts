@@ -30,6 +30,11 @@ export interface TasksRepositoryPort {
   setEntityLink(id: number, link: TaskEntityLink | null): Promise<TaskDetail>;
   delete(id: number): Promise<void>;
 
+  /** Additive — see TaskPatch for why attachments never travel through update(). */
+  addAttachments(id: number, keys: string[]): Promise<TaskDetail>;
+  removeAttachment(id: number, key: string): Promise<TaskDetail>;
+  reorderAttachments(id: number, keys: string[]): Promise<TaskDetail>;
+
   /** Comments also arrive bundled in `get()`'s TaskDetail — these exist for the mutations. */
   listComments(taskId: number): Promise<TaskComment[]>;
   addComment(taskId: number, body: Record<string, unknown>): Promise<TaskComment>;

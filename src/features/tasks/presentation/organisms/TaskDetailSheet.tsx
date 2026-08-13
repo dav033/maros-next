@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, Link2, Trash2, X } from "lucide-react";
 import {
   Sheet,
@@ -33,8 +34,11 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { EntityAttachmentsSection } from "@/features/attachments/presentation/EntityAttachmentsSection";
+import { useDraftField } from "@/shared/presentation/hooks/useDraftField";
 import { textToTipTapDoc, tiptapDocToText } from "@/shared/domain";
+import { tasksKeys } from "@/tasks/application";
 import { TASK_KINDS, TASK_PRIORITIES, TASK_STATUSES } from "@/tasks/domain";
+import type { TaskPatch } from "@/tasks/domain";
 import { useInstantTask } from "../hooks/data/useInstantTask";
 import { useInstantTaskLabels } from "../hooks/data/useInstantTaskLabels";
 import { useTaskMutations } from "../hooks/mutations/useTaskMutations";
@@ -48,6 +52,8 @@ import { SubtaskList } from "./SubtaskList";
 import { TaskCommentList } from "./TaskCommentList";
 import { TaskActivityFeed } from "./TaskActivityFeed";
 import { TASK_KIND_LABELS, TASK_PRIORITY_LABELS, TASK_STATUS_LABELS, taskLabelColor } from "../atoms/taskVisualTokens";
+import { classifyAttachmentsChange } from "./taskAttachmentsDiff";
+import { isTaskConflictError } from "./taskConflict";
 
 const ENTITY_KIND_LABEL: Record<string, string> = {
   lead: "Lead",
@@ -68,36 +74,75 @@ export function TaskDetailSheet({
 }) {
   const { data: task, showSkeleton } = useInstantTask(taskId);
   const { labels: allLabels } = useInstantTaskLabels();
+  const queryClient = useQueryClient();
   const {
     updateMutation,
     moveMutation,
     setAssigneeMutation,
     setLabelsMutation,
     setEntityMutation,
+    addAttachmentsMutation,
+    removeAttachmentMutation,
+    reorderAttachmentsMutation,
     deleteMutation,
   } = useTaskMutations();
 
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
   const [pendingBlock, setPendingBlock] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
-  useEffect(() => {
-    if (!task) return;
-    setTitle(task.title);
-    setDescription(tiptapDocToText(task.description));
-  }, [task]);
+  // Each field tracks its own dirty state, keyed off the task's id — so a mutation
+  // that invalidates the whole detail query (any field, on any tab) never stomps text
+  // still being typed into a *different* field. See useDraftField.
+  const recordId = task?.id ?? -1;
+  const titleField = useDraftField(recordId, task?.title ?? "");
+  const descriptionField = useDraftField(recordId, task ? tiptapDocToText(task.description) : "");
+  const title = titleField.value;
+  const description = descriptionField.value;
 
   const open = taskId !== null;
 
-  const saveTitle = () => {
-    if (!task || title.trim() === task.title) return;
-    updateMutation.mutate({ id: task.id, patch: { title: title.trim() || "Untitled task" } });
+  /**
+   * Every field edit made from this sheet (a human deliberately changing one thing)
+   * carries `expectedUpdatedAt`, so a save that lands after someone else's concurrent
+   * edit fails loud instead of silently overwriting it — see TaskPatch. The board
+   * drag and "Mine"'s one-tap status button deliberately skip this (moveTaskAction):
+   * there, the last move legitimately wins.
+   *
+   * Returns whether the save actually landed, so callers with a local draft (title,
+   * description) know whether to keep the user's typed text or let it be replaced —
+   * on a conflict, the just-invalidated query brings back the true current value,
+   * which is what should win over a save that's now known to be based on stale data.
+   */
+  const saveTaskPatch = async (patch: TaskPatch): Promise<boolean> => {
+    if (!task) return false;
+    try {
+      await updateMutation.mutateAsync({
+        id: task.id,
+        patch: { ...patch, expectedUpdatedAt: task.updatedAt },
+      });
+      return true;
+    } catch (error) {
+      if (isTaskConflictError(error)) {
+        void queryClient.invalidateQueries({ queryKey: tasksKeys.detail(task.id) });
+        return true;
+      }
+      return false;
+    }
   };
 
-  const saveDescription = () => {
+  const saveTitle = async () => {
+    if (!task || title.trim() === task.title) {
+      titleField.commit();
+      return;
+    }
+    const landed = await saveTaskPatch({ title: title.trim() || "Untitled task" });
+    if (landed) titleField.commit();
+  };
+
+  const saveDescription = async () => {
     if (!task) return;
-    updateMutation.mutate({ id: task.id, patch: { description: textToTipTapDoc(description) } });
+    const landed = await saveTaskPatch({ description: textToTipTapDoc(description) });
+    if (landed) descriptionField.commit();
   };
 
   const changeStatus = (status: string) => {
@@ -145,7 +190,7 @@ export function TaskDetailSheet({
                 <SheetTitle asChild>
                   <Input
                     value={title}
-                    onChange={(e) => setTitle(e.target.value)}
+                    onChange={(e) => titleField.setValue(e.target.value)}
                     onBlur={saveTitle}
                     className="border-none px-0 text-lg font-semibold shadow-none focus-visible:ring-0"
                   />
@@ -187,10 +232,7 @@ export function TaskDetailSheet({
                       <Select
                         value={task.priority}
                         onValueChange={(priority) =>
-                          updateMutation.mutate({
-                            id: task.id,
-                            patch: { priority: priority as (typeof TASK_PRIORITIES)[number] },
-                          })
+                          void saveTaskPatch({ priority: priority as (typeof TASK_PRIORITIES)[number] })
                         }
                       >
                         <SelectTrigger className="h-9">
@@ -211,10 +253,7 @@ export function TaskDetailSheet({
                       <Select
                         value={task.kind}
                         onValueChange={(kind) =>
-                          updateMutation.mutate({
-                            id: task.id,
-                            patch: { kind: kind as (typeof TASK_KINDS)[number] },
-                          })
+                          void saveTaskPatch({ kind: kind as (typeof TASK_KINDS)[number] })
                         }
                       >
                         <SelectTrigger className="h-9">
@@ -258,12 +297,7 @@ export function TaskDetailSheet({
                       <Input
                         type="date"
                         value={task.startDate ?? ""}
-                        onChange={(e) =>
-                          updateMutation.mutate({
-                            id: task.id,
-                            patch: { startDate: e.target.value || null },
-                          })
-                        }
+                        onChange={(e) => void saveTaskPatch({ startDate: e.target.value || null })}
                         className="h-9"
                       />
                     </div>
@@ -273,12 +307,7 @@ export function TaskDetailSheet({
                       <Input
                         type="date"
                         value={task.dueDate ?? ""}
-                        onChange={(e) =>
-                          updateMutation.mutate({
-                            id: task.id,
-                            patch: { dueDate: e.target.value || null },
-                          })
-                        }
+                        onChange={(e) => void saveTaskPatch({ dueDate: e.target.value || null })}
                         className="h-9"
                       />
                     </div>
@@ -362,7 +391,7 @@ export function TaskDetailSheet({
                     <Label className="text-xs text-muted-foreground">Description</Label>
                     <Textarea
                       value={description}
-                      onChange={(e) => setDescription(e.target.value)}
+                      onChange={(e) => descriptionField.setValue(e.target.value)}
                       onBlur={saveDescription}
                       rows={5}
                       placeholder="Add details…"
@@ -374,7 +403,19 @@ export function TaskDetailSheet({
                     entityId={task.id}
                     attachments={task.attachments}
                     onAttachmentsChange={async (attachments) => {
-                      await updateMutation.mutateAsync({ id: task.id, patch: { attachments } });
+                      // EntityAttachmentsSection always hands back its idea of the
+                      // complete list — routed here to the additive endpoint that
+                      // matches what actually changed, so a concurrent upload from
+                      // someone else on the same task never gets overwritten. See
+                      // taskAttachmentsDiff and TaskPatch.
+                      const change = classifyAttachmentsChange(task.attachments, attachments);
+                      if (change.op === "add") {
+                        await addAttachmentsMutation.mutateAsync({ id: task.id, keys: change.keys });
+                      } else if (change.op === "remove") {
+                        await removeAttachmentMutation.mutateAsync({ id: task.id, key: change.key });
+                      } else if (change.op === "reorder") {
+                        await reorderAttachmentsMutation.mutateAsync({ id: task.id, keys: change.keys });
+                      }
                     }}
                   />
                 </TabsContent>

@@ -38,6 +38,8 @@ const CODE_MESSAGES: Record<string, string> = {
   CANCELED: "La operación fue cancelada.",
   tool_execution_failed:
     "No se pudo completar la acción. Intenta de nuevo más tarde.",
+  TASK_CONFLICT:
+    "Alguien más editó esta tarea mientras tanto. Se recargó con los últimos cambios.",
 };
 
 export function messageForStatus(status: number | undefined): string | undefined {

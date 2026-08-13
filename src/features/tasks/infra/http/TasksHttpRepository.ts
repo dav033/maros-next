@@ -92,6 +92,21 @@ export class TasksHttpRepository implements TasksRepositoryPort {
     await this.api.delete<void>(endpoints.remove(id));
   }
 
+  async addAttachments(id: number, keys: string[]): Promise<TaskDetail> {
+    const { data } = await this.api.post<TaskDetail>(endpoints.attachments(id), { keys });
+    return data;
+  }
+
+  async removeAttachment(id: number, key: string): Promise<TaskDetail> {
+    const { data } = await this.api.post<TaskDetail>(endpoints.attachmentsRemove(id), { key });
+    return data;
+  }
+
+  async reorderAttachments(id: number, keys: string[]): Promise<TaskDetail> {
+    const { data } = await this.api.put<TaskDetail>(endpoints.attachmentsOrder(id), { keys });
+    return data;
+  }
+
   async listComments(taskId: number): Promise<TaskComment[]> {
     const { data } = await this.api.get<TaskComment[]>(endpoints.comments(taskId));
     return Array.isArray(data) ? data : [];

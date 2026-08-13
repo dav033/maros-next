@@ -106,6 +106,45 @@ export async function setTaskEntityAction(
   }
 }
 
+export async function addTaskAttachmentsAction(
+  id: number,
+  keys: string[]
+): Promise<ActionResult<TaskDetail>> {
+  try {
+    const ctx = await createServerTasksAppContext();
+    const task = await ctx.repos.task.addAttachments(id, keys);
+    return success(task);
+  } catch (error) {
+    return handleActionError(error);
+  }
+}
+
+export async function removeTaskAttachmentAction(
+  id: number,
+  key: string
+): Promise<ActionResult<TaskDetail>> {
+  try {
+    const ctx = await createServerTasksAppContext();
+    const task = await ctx.repos.task.removeAttachment(id, key);
+    return success(task);
+  } catch (error) {
+    return handleActionError(error);
+  }
+}
+
+export async function reorderTaskAttachmentsAction(
+  id: number,
+  keys: string[]
+): Promise<ActionResult<TaskDetail>> {
+  try {
+    const ctx = await createServerTasksAppContext();
+    const task = await ctx.repos.task.reorderAttachments(id, keys);
+    return success(task);
+  } catch (error) {
+    return handleActionError(error);
+  }
+}
+
 export async function deleteTaskAction(id: number): Promise<ActionResult<null>> {
   try {
     const ctx = await createServerTasksAppContext();

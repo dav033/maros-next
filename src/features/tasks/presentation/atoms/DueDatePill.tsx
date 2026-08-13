@@ -1,6 +1,7 @@
-import { format, isValid, parse, startOfDay } from "date-fns";
+import { format, isValid, parse } from "date-fns";
 import { CalendarClock } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { todayInBusinessTimezone } from "@/shared/lib/businessDate";
 
 const DATE_FORMAT = "yyyy-MM-dd";
 
@@ -22,9 +23,12 @@ export function DueDatePill({
   const parsed = parseDate(dueDate);
   if (!parsed) return null;
 
-  const today = startOfDay(new Date());
-  const isOverdue = parsed < today;
-  const isToday = parsed.getTime() === today.getTime();
+  // String comparison against business-timezone "today" — see businessDate.ts. Keeps
+  // this pill's overdue/today styling in sync with the board's counts and the
+  // backend's own bucketing, instead of the viewer's local timezone.
+  const today = todayInBusinessTimezone();
+  const isOverdue = dueDate < today;
+  const isToday = dueDate === today;
 
   return (
     <span
