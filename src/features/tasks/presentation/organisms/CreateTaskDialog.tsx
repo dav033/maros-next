@@ -50,6 +50,8 @@ export function CreateTaskDialog({
   defaultAssigneeId,
   defaultAssigneeLabel,
   trigger,
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
 }: {
   onCreated?: (id: number) => void;
   /** Preselects the linked record — e.g. EntityTasksSection on a lead/project page. Locked in, not offered as a picker: the context that opened this dialog already decided it. */
@@ -60,8 +62,21 @@ export function CreateTaskDialog({
   defaultAssigneeId?: number;
   defaultAssigneeLabel?: string;
   trigger?: ReactNode;
+  /**
+   * Headless mode: pass both to drive the dialog from outside (no trigger button
+   * rendered at all) — see TaskKeyboardShortcuts' `c` shortcut. Omit both for the
+   * normal button-triggered dialog every page header already uses.
+   */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }) {
-  const [open, setOpen] = useState(false);
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+  const isControlled = controlledOpen !== undefined;
+  const open = isControlled ? controlledOpen : uncontrolledOpen;
+  const setOpen = (next: boolean) => {
+    if (!isControlled) setUncontrolledOpen(next);
+    controlledOnOpenChange?.(next);
+  };
   const [title, setTitle] = useState("");
   const [kind, setKind] = useState<TaskKind>("general");
   const [priority, setPriority] = useState<TaskPriority>("normal");
@@ -153,14 +168,16 @@ export function CreateTaskDialog({
         if (!next) resetAll();
       }}
     >
-      <DialogTrigger asChild>
-        {trigger ?? (
-          <Button className="h-9 gap-2">
-            <Plus className="h-4 w-4" />
-            New task
-          </Button>
-        )}
-      </DialogTrigger>
+      {isControlled ? null : (
+        <DialogTrigger asChild>
+          {trigger ?? (
+            <Button className="h-9 gap-2">
+              <Plus className="h-4 w-4" />
+              New task
+            </Button>
+          )}
+        </DialogTrigger>
+      )}
       <DialogContent
         className="sm:max-w-md"
         onKeyDown={(e) => {

@@ -15,6 +15,7 @@ import { CreateTaskDialog } from "../organisms/CreateTaskDialog";
 import { TaskDetailSheet } from "../organisms/TaskDetailSheet";
 import { TaskViewSwitcher } from "../molecules/TaskViewSwitcher";
 import { useTaskDetailRoute } from "../hooks/useTaskDetailRoute";
+import { TASK_SEARCH_INPUT_ID } from "../organisms/TaskKeyboardShortcuts";
 import {
   TASK_KIND_LABELS,
   TASK_PRIORITY_LABELS,
@@ -90,6 +91,7 @@ export function TasksListPageView() {
         <div className="relative min-w-[200px] flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
+            id={TASK_SEARCH_INPUT_ID}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search tasks…"

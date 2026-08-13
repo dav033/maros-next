@@ -47,6 +47,7 @@ import { resolveCardDropSide } from "./taskBoardDragUtil";
 import { applyOptimisticMove } from "./taskBoardOptimisticMove";
 import { matchesAssigneeFilter, type AssigneeFilterKey } from "./taskBoardAssigneeFilter";
 import { groupTasksByAssignee } from "./taskBoardAssigneeGroups";
+import { TASK_SEARCH_INPUT_ID } from "./TaskKeyboardShortcuts";
 
 const COLUMN_PREFIX = "column:";
 
@@ -508,6 +509,7 @@ export function TaskBoard({ onOpenTask }: { onOpenTask: (id: number) => void }) 
         <div className="relative min-w-[200px] flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
+            id={TASK_SEARCH_INPUT_ID}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search tasks…"
