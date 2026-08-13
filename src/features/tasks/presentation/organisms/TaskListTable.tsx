@@ -13,13 +13,6 @@ import { TaskPriorityBadge } from "../atoms/TaskPriorityBadge";
 import { TaskStatusBadge } from "../atoms/TaskStatusBadge";
 import { TASK_KIND_LABELS, TASK_STATUS_COLORS, TASK_STATUS_LABELS, taskLabelColor } from "../atoms/taskVisualTokens";
 
-const ENTITY_ROUTE_BASE: Record<TaskEntityKind, string> = {
-  lead: "/lead",
-  project: "/project",
-  contact: "/contact",
-  company: "/company",
-};
-
 const ENTITY_KIND_LABEL: Record<TaskEntityKind, string> = {
   lead: "Lead",
   project: "Project",
@@ -107,15 +100,20 @@ function buildColumns(onOpen: (id: number) => void): SimpleTableColumn<Task>[] {
     {
       key: "entity",
       header: "Linked record",
+      sortValue: (task) => task.entity?.label ?? "",
       render: (task) =>
-        task.entityKind && task.entityId ? (
+        task.entity ? (
           <Link
-            href={`${ENTITY_ROUTE_BASE[task.entityKind]}/${task.entityId}`}
+            href={task.entity.href}
             onClick={(e) => e.stopPropagation()}
-            className="text-xs text-primary hover:underline"
+            className="truncate text-xs text-primary hover:underline"
           >
-            {ENTITY_KIND_LABEL[task.entityKind]} #{task.entityId}
+            {task.entity.label}
           </Link>
+        ) : task.entityKind && task.entityId ? (
+          <span className="text-xs text-muted-foreground">
+            {ENTITY_KIND_LABEL[task.entityKind]} #{task.entityId} (not found)
+          </span>
         ) : (
           <span className="text-xs text-muted-foreground">—</span>
         ),

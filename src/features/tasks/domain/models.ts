@@ -81,6 +81,24 @@ export interface TaskComment {
   updatedAt: string;
 }
 
+/**
+ * The linked CRM record, resolved server-side (TaskEntityResolverService) — a name to
+ * show instead of the bare `entityKind`/`entityId` pair, plus whatever address the
+ * record carries. `null` when the task isn't linked, or when the linked record was
+ * deleted out from under it (entityKind/entityId still point at it, but nothing
+ * resolves).
+ */
+export interface TaskEntityRef {
+  kind: TaskEntityKind;
+  id: number;
+  label: string;
+  href: string;
+  leadNumber?: string;
+  address?: string;
+  addressLink?: string;
+  status?: string;
+}
+
 /** The board/list row shape — no description, no subtasks, no activity. */
 export interface Task {
   id: number;
@@ -94,6 +112,8 @@ export interface Task {
   reporter: TaskPersonRef | null;
   entityKind: TaskEntityKind | null;
   entityId: number | null;
+  /** Resolved from entityKind/entityId — see TaskEntityRef. */
+  entity: TaskEntityRef | null;
   startDate: string | null;
   dueDate: string | null;
   blockedReason: string | null;

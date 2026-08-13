@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, Link2, Trash2, X } from "lucide-react";
+import { AlertTriangle, Link2, MapPin, Trash2, X } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -51,7 +52,13 @@ import { BlockedReasonDialog } from "../molecules/BlockedReasonDialog";
 import { SubtaskList } from "./SubtaskList";
 import { TaskCommentList } from "./TaskCommentList";
 import { TaskActivityFeed } from "./TaskActivityFeed";
-import { TASK_KIND_LABELS, TASK_PRIORITY_LABELS, TASK_STATUS_LABELS, taskLabelColor } from "../atoms/taskVisualTokens";
+import {
+  TASK_KIND_LABELS,
+  TASK_PRIORITY_LABELS,
+  TASK_STATUS_LABELS,
+  humanizeEntityStatus,
+  taskLabelColor,
+} from "../atoms/taskVisualTokens";
 import { classifyAttachmentsChange } from "./taskAttachmentsDiff";
 import { isTaskConflictError } from "./taskConflict";
 
@@ -361,14 +368,51 @@ export function TaskDetailSheet({
                   <div className="space-y-1.5">
                     <Label className="text-xs text-muted-foreground">Linked record</Label>
                     {task.entityKind && task.entityId ? (
-                      <div className="flex items-center gap-2 rounded-md border border-border/60 px-3 py-2 text-sm">
-                        <Link2 className="h-3.5 w-3.5 text-muted-foreground" />
-                        <span className="flex-1 truncate">
-                          {ENTITY_KIND_LABEL[task.entityKind]} #{task.entityId}
-                        </span>
+                      <div className="flex items-start gap-2 rounded-md border border-border/60 px-3 py-2 text-sm">
+                        <Link2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                        <div className="min-w-0 flex-1">
+                          {task.entity ? (
+                            <Link
+                              href={task.entity.href}
+                              className="block truncate font-medium text-foreground hover:underline"
+                            >
+                              {task.entity.label}
+                            </Link>
+                          ) : (
+                            // entityKind/entityId still point at it, but nothing
+                            // resolved server-side — the record was deleted.
+                            <span className="block truncate text-muted-foreground">
+                              {ENTITY_KIND_LABEL[task.entityKind]} #{task.entityId} (not found)
+                            </span>
+                          )}
+                          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
+                            <span>{ENTITY_KIND_LABEL[task.entityKind]}</span>
+                            {task.entity?.leadNumber ? <span>{task.entity.leadNumber}</span> : null}
+                            {task.entity?.status ? (
+                              <span>{humanizeEntityStatus(task.entity.status)}</span>
+                            ) : null}
+                          </div>
+                          {task.entity?.address ? (
+                            <div className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+                              <MapPin className="h-3 w-3 shrink-0" />
+                              {task.entity.addressLink ? (
+                                <a
+                                  href={task.entity.addressLink}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="truncate underline decoration-dotted hover:text-foreground"
+                                >
+                                  {task.entity.address}
+                                </a>
+                              ) : (
+                                <span className="truncate">{task.entity.address}</span>
+                              )}
+                            </div>
+                          ) : null}
+                        </div>
                         <button
                           type="button"
-                          className="text-xs text-muted-foreground hover:text-foreground"
+                          className="shrink-0 text-xs text-muted-foreground hover:text-foreground"
                           onClick={() => setEntityMutation.mutate({ id: task.id, link: null })}
                         >
                           Unlink

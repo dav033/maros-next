@@ -5,8 +5,6 @@ import { CheckCheck, UserCheck } from "lucide-react";
 import { PageHeaderCard } from "@/components/shared";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCurrentUser } from "@/shared/auth/CurrentUserProvider";
-import { useInstantLeads } from "@/leads/presentation/hooks/data/useInstantLeads";
-import { useInstantProjects } from "@/project/presentation/hooks/data/useInstantProjects";
 import { useInstantMyTasks, type MyTasksBucketKey } from "../hooks/data/useInstantMyTasks";
 import { useTaskMutations } from "../hooks/mutations/useTaskMutations";
 import { useTaskDetailRoute } from "../hooks/useTaskDetailRoute";
@@ -35,16 +33,6 @@ export function MyTasksPageView() {
   const { moveMutation } = useTaskMutations();
 
   const allTasks = useMemo(() => Object.values(buckets).flat(), [buckets]);
-  const hasLinkedTask = allTasks.some(
-    (task) => task.entityKind === "lead" || task.entityKind === "project"
-  );
-
-  // Address lookups are a progressive enhancement, not the page's reason to exist — only
-  // paid for when a task actually links to a lead/project, and never allowed to block or
-  // error out the rows themselves (see JobAddressLink: no match just renders nothing).
-  const { leads } = useInstantLeads(undefined, { enabled: hasLinkedTask });
-  const { projects } = useInstantProjects(undefined, { enabled: hasLinkedTask });
-
   const totalCount = allTasks.length;
 
   return (
@@ -97,8 +85,6 @@ export function MyTasksPageView() {
                     <MyTaskRow
                       key={task.id}
                       task={task}
-                      leads={leads}
-                      projects={projects}
                       onOpen={() => openTask(task.id)}
                       onAdvance={(status) =>
                         moveMutation.mutate({ id: task.id, input: { status } })

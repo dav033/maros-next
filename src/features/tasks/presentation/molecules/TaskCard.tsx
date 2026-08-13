@@ -1,4 +1,4 @@
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Link2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Task } from "@/tasks/domain";
 import { AssigneeAvatar } from "../atoms/AssigneeAvatar";
@@ -62,6 +62,16 @@ export function TaskCard({
       <p className="line-clamp-2 text-sm font-medium leading-snug text-foreground">
         {task.title}
       </p>
+
+      {task.entity ? (
+        // Plain text, not a link: the card sits inside a dnd-kit sortable handle
+        // (see TaskBoard), where a nested interactive element competes with drag —
+        // opening the detail sheet (the card's own onClick) is where the real link is.
+        <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
+          <Link2 className="h-3 w-3 shrink-0" />
+          <span className="truncate">{task.entity.label}</span>
+        </span>
+      ) : null}
 
       {task.priority === "urgent" || task.priority === "high" ? (
         <TaskPriorityBadge priority={task.priority} pill />

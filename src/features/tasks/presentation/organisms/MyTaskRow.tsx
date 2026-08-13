@@ -1,11 +1,9 @@
 import { AlertTriangle, Camera, CheckCircle2, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { Lead } from "@/leads/domain";
-import type { Project } from "@/project/domain";
 import type { Task, TaskStatus } from "@/tasks/domain";
 import { TaskKindIcon } from "../atoms/TaskKindIcon";
 import { DueDatePill } from "../atoms/DueDatePill";
-import { JobAddressLink, deriveJobAddress } from "../molecules/JobAddressLink";
+import { JobAddressLink } from "../molecules/JobAddressLink";
 
 /** backlog/todo → Start, in_progress → Mark done. `findMine` never returns done/cancelled/blocked-without-a-next-step. */
 function nextAction(status: TaskStatus): { status: "in_progress" | "done"; label: string; icon: typeof Play } | null {
@@ -22,20 +20,19 @@ function nextAction(status: TaskStatus): { status: "in_progress" | "done"; label
  */
 export function MyTaskRow({
   task,
-  leads,
-  projects,
   onOpen,
   onAdvance,
   isAdvancing,
 }: {
   task: Task;
-  leads: Lead[] | undefined;
-  projects: Project[] | undefined;
   onOpen: () => void;
   onAdvance: (status: "in_progress" | "done") => void;
   isAdvancing: boolean;
 }) {
-  const address = deriveJobAddress(task, leads, projects);
+  // Resolved server-side, not derived here — see TaskEntityRef.
+  const address = task.entity?.address
+    ? { label: task.entity.address, href: task.entity.addressLink ?? null }
+    : null;
   const action = nextAction(task.status);
 
   return (

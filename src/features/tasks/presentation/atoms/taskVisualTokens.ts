@@ -83,6 +83,21 @@ export const TASK_KIND_LABELS: Record<TaskKind, string> = {
   general: "General",
 };
 
+/**
+ * Linked-entity statuses (LeadStatus, ProjectProgressStatus) come back
+ * SCREAMING_SNAKE_CASE from the backend — this feature deliberately doesn't import
+ * leads'/projects' own label maps just to show a small badge, so a generic humanize
+ * covers it: "ESTIMATING_PREPARING_PROPOSAL" → "Estimating preparing proposal".
+ */
+export function humanizeEntityStatus(status: string): string {
+  const words = status.toLowerCase().split('_');
+  return words.map((word, i) => (i === 0 ? capitalize(word) : word)).join(' ');
+}
+
+function capitalize(word: string): string {
+  return word.charAt(0).toUpperCase() + word.slice(1);
+}
+
 export const TASK_KIND_ICONS: Record<TaskKind, LucideIcon> = {
   site_visit: MapPin,
   estimate: Calculator,
