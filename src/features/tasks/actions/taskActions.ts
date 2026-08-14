@@ -17,6 +17,7 @@ import type {
   TaskMoveInput,
   TaskMoveResult,
   TaskPatch,
+  TaskReorderInput,
   TaskStatus,
 } from "@/tasks/domain";
 
@@ -64,6 +65,19 @@ export async function moveTaskAction(
     const ctx = await createServerTasksAppContext();
     const result = await ctx.repos.task.move(id, input);
     return success(result);
+  } catch (error) {
+    return handleActionError(error);
+  }
+}
+
+export async function reorderSubtaskAction(
+  id: number,
+  input: TaskReorderInput
+): Promise<ActionResult<TaskDetail>> {
+  try {
+    const ctx = await createServerTasksAppContext();
+    const parent = await ctx.repos.task.reorderSubtask(id, input);
+    return success(parent);
   } catch (error) {
     return handleActionError(error);
   }

@@ -11,6 +11,7 @@ import type {
   TaskFilters,
   TaskListResult,
   TaskMoveInput,
+  TaskReorderInput,
   TaskMoveResult,
   TaskPatch,
   TasksRepositoryPort,
@@ -70,6 +71,11 @@ export class TasksHttpRepository implements TasksRepositoryPort {
 
   async move(id: number, input: TaskMoveInput): Promise<TaskMoveResult> {
     const { data } = await this.api.patch<TaskMoveResult>(endpoints.move(id), input);
+    return data;
+  }
+
+  async reorderSubtask(id: number, input: TaskReorderInput): Promise<TaskDetail> {
+    const { data } = await this.api.patch<TaskDetail>(endpoints.reorderSubtask(id), input);
     return data;
   }
 

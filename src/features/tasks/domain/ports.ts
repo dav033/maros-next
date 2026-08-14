@@ -12,6 +12,7 @@ import type {
   TaskLabelPatch,
   TaskListResult,
   TaskMoveInput,
+  TaskReorderInput,
   TaskMoveResult,
   TaskPatch,
   TaskStatus,
@@ -28,6 +29,8 @@ export interface TasksRepositoryPort {
   create(draft: TaskDraft): Promise<TaskDetail>;
   update(id: number, patch: TaskPatch): Promise<TaskDetail>;
   move(id: number, input: TaskMoveInput): Promise<TaskMoveResult>;
+  /** Reorders a subtask among its parent's children; resolves to the parent's detail. */
+  reorderSubtask(id: number, input: TaskReorderInput): Promise<TaskDetail>;
   setAssignee(id: number, userId: number | null): Promise<TaskDetail>;
   setLabels(id: number, labelIds: number[]): Promise<TaskDetail>;
   setEntityLink(id: number, link: TaskEntityLink | null): Promise<TaskDetail>;

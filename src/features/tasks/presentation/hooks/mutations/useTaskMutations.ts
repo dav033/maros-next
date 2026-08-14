@@ -3,11 +3,19 @@
 import type { QueryClient } from "@tanstack/react-query";
 import { useEntityMutation } from "@/shared/presentation/hooks/useEntityMutation";
 import { tasksKeys } from "@/tasks/application";
-import type { TaskDraft, TaskEntityLink, TaskMoveInput, TaskPatch, TaskStatus } from "@/tasks/domain";
+import type {
+  TaskDraft,
+  TaskEntityLink,
+  TaskMoveInput,
+  TaskPatch,
+  TaskReorderInput,
+  TaskStatus,
+} from "@/tasks/domain";
 import {
   createTaskAction,
   updateTaskAction,
   moveTaskAction,
+  reorderSubtaskAction,
   setTaskAssigneeAction,
   setTaskLabelsAction,
   setTaskEntityAction,
@@ -92,6 +100,17 @@ export function useTaskMutations() {
     // Status change can flip whether the task appears in "Mine" at all (findMine
     // excludes done/cancelled) — always the full scope.
     invalidate: (qc, data) => invalidateByScope(qc, "all", data.id),
+  });
+
+  const reorderSubtaskMutation = useEntityMutation({
+    entityLabel: "Subtask",
+    action: "updated",
+    successMessage: "Subtask reordered",
+    mutationFn: ({ id, input }: { id: number; parentId: number; input: TaskReorderInput }) =>
+      reorderSubtaskAction(id, input),
+    // Subtask order shows nowhere but the parent's detail sheet — not on the board's
+    // card, which only counts them ("2/4 subtasks"), and not on the list or "Mine".
+    invalidate: (qc, _data, input) => invalidateByScope(qc, "detail", input.parentId),
   });
 
   const setAssigneeMutation = useEntityMutation({
@@ -253,6 +272,7 @@ export function useTaskMutations() {
     addAttachmentsMutation,
     removeAttachmentMutation,
     reorderAttachmentsMutation,
+    reorderSubtaskMutation,
     deleteMutation,
     addCommentMutation,
     updateCommentMutation,

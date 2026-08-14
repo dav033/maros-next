@@ -10,6 +10,7 @@ export const endpoints = {
   labels: () => `${BASE}/labels`,
   label: (labelId: number) => `${BASE}/labels/${labelId}`,
   move: (id: number) => `${BASE}/${id}/move`,
+  reorderSubtask: (id: number) => `${BASE}/${id}/reorder`,
   assignee: (id: number) => `${BASE}/${id}/assignee`,
   setLabels: (id: number) => `${BASE}/${id}/labels`,
   entity: (id: number) => `${BASE}/${id}/entity`,

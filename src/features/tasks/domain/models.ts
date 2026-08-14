@@ -214,6 +214,16 @@ export type TaskMoveInput = Readonly<{
 /** `openSubtasksWarning` is only ever present when a move closes a task with open subtasks. */
 export type TaskMoveResult = Task & { openSubtasksWarning?: number };
 
+/**
+ * Reordering a subtask within its parent. Deliberately not TaskMoveInput: a subtask
+ * has no board column, so there is no status to send — only where it sits among its
+ * siblings. Omitting both ids sends it to the end.
+ */
+export type TaskReorderInput = Readonly<{
+  beforeId?: number | null;
+  afterId?: number | null;
+}>;
+
 export type TaskEntityLink = Readonly<{ entityKind: TaskEntityKind; entityId: number }>;
 
 /** Multi-valued fields OR together (any match); every field is AND'd with the rest — see SearchTasksDto. */
