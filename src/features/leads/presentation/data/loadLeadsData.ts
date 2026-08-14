@@ -25,10 +25,10 @@ export async function loadLeadsData(leadType: LeadType): Promise<LeadsPageData> 
     repos: {
       lead: new LeadHttpRepository(apiClient),
       contact: new ContactHttpRepository(apiClient),
-      projectType: new ProjectTypeHttpRepository(),
+      projectType: new ProjectTypeHttpRepository(apiClient),
     },
     services: {
-      leadNumberAvailability: new LeadNumberAvailabilityHttpService(),
+      leadNumberAvailability: new LeadNumberAvailabilityHttpService(apiClient),
     },
   });
 
@@ -40,7 +40,7 @@ export async function loadLeadsData(leadType: LeadType): Promise<LeadsPageData> 
 
   const projectTypesCtx: ProjectTypesAppContext = {
     repos: {
-      projectType: new ProjectTypeHttpRepository(),
+      projectType: new ProjectTypeHttpRepository(apiClient),
     },
   };
 

@@ -1,6 +1,7 @@
 "use server";
 
-import { serverApiClient } from "@/shared/infra/http";
+import { headers } from "next/headers";
+import { createServerApiClient } from "@/shared/infra/http";
 import { LeadHttpRepository, makeLeadsAppContext, LeadNumberAvailabilityHttpService } from "@/leads";
 import { ContactHttpRepository } from "@/contact";
 import { ProjectTypeHttpRepository } from "@/projectType";
@@ -10,17 +11,21 @@ import type { Lead } from "@/leads/domain";
 import type { ActionResult } from "@/shared/actions/types";
 import { success, handleActionError } from "@/shared/actions/utils";
 
-// Create server-side app context
-function createServerLeadsAppContext() {
+// The plain `serverApiClient` singleton carries no request context and forwards no
+// cookie — every call through it comes back 401 ("Tu sesión expiró") no matter what
+// the browser's session is. createServerApiClient forwards this request's Cookie
+// header instead.
+async function createServerLeadsAppContext() {
+  const apiClient = createServerApiClient(await headers());
   return makeLeadsAppContext({
     clock: SystemClock,
     repos: {
-      lead: new LeadHttpRepository(serverApiClient),
-      contact: new ContactHttpRepository(serverApiClient),
-      projectType: new ProjectTypeHttpRepository(),
+      lead: new LeadHttpRepository(apiClient),
+      contact: new ContactHttpRepository(apiClient),
+      projectType: new ProjectTypeHttpRepository(apiClient),
     },
     services: {
-      leadNumberAvailability: new LeadNumberAvailabilityHttpService(),
+      leadNumberAvailability: new LeadNumberAvailabilityHttpService(apiClient),
     },
   });
 }
@@ -30,7 +35,7 @@ export async function updateLeadNotesAction(
   notes: string[]
 ): Promise<ActionResult<Lead>> {
   try {
-    const ctx = createServerLeadsAppContext();
+    const ctx = await createServerLeadsAppContext();
     const updated = await patchLead(ctx, id, { notes }, {});
     return success(updated);
   } catch (error) {

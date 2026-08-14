@@ -1,5 +1,5 @@
-import { unstable_cache } from "next/cache";
-import { serverApiClient } from "@/shared/infra/http";
+import { headers } from "next/headers";
+import { createServerApiClient } from "@/shared/infra/http";
 import { CompanyHttpRepository, CompanyServiceHttpRepository, makeCompanyAppContext } from "@/company";
 import { companyCrudUseCases, companyServiceCrudUseCases } from "@/company/application";
 import { ContactHttpRepository, makeContactsAppContext } from "@/contact";
@@ -13,17 +13,23 @@ export interface CompaniesPageData {
   services: CompanyService[];
 }
 
-async function fetchCompaniesData(): Promise<CompaniesPageData> {
+/**
+ * Not wrapped in `unstable_cache` any more — see loadContactsData for why: the
+ * cookieless singleton made every one of these calls 401, and the caching then
+ * pinned the resulting empty lists for a minute.
+ */
+export async function loadCompaniesData(): Promise<CompaniesPageData> {
+  const apiClient = createServerApiClient(await headers());
   const companyCtx = makeCompanyAppContext({
     repos: {
-      company: new CompanyHttpRepository(serverApiClient),
-      companyService: new CompanyServiceHttpRepository(serverApiClient),
+      company: new CompanyHttpRepository(apiClient),
+      companyService: new CompanyServiceHttpRepository(apiClient),
     },
   });
 
   const contactsCtx = makeContactsAppContext({
     repos: {
-      contact: new ContactHttpRepository(serverApiClient),
+      contact: new ContactHttpRepository(apiClient),
     },
   });
 
@@ -39,9 +45,3 @@ async function fetchCompaniesData(): Promise<CompaniesPageData> {
     contacts: contacts ?? [],
   };
 }
-
-export const loadCompaniesData = unstable_cache(
-  fetchCompaniesData,
-  ["companies-page-data"],
-  { revalidate: 60 }
-);

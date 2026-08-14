@@ -16,6 +16,7 @@ import { useProjectsApp } from "@/di";
 import { updateProject, deleteProject, revertProjectToLead } from "@/project/application";
 import type { ProjectPatch } from "@/project/domain";
 import { updateLeadNameAction } from "@/features/leads/actions/leadActions";
+import { reportActionFailure } from "@/shared/actions/clientResult";
 import { updateProjectEstimateAction } from "@/features/project/actions/estimateActions";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -349,7 +350,7 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
     setIsSavingName(true);
     try {
       const result = await updateLeadNameAction(leadId, editingName);
-      if (!result.success) throw new Error(result.error);
+      if (!result.success) throw new Error(reportActionFailure(result));
       setIsEditingName(false);
       toast.success("Project name updated!");
       router.refresh();

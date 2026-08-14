@@ -1,4 +1,5 @@
-import { serverApiClient } from "@/shared/infra";
+import { headers } from "next/headers";
+import { createServerApiClient } from "@/shared/infra";
 import { AppError } from "@/shared/errors";
 import { CompanyHttpRepository } from "@/features/company/infra/http/CompanyHttpRepository";
 
@@ -29,7 +30,10 @@ interface CompanyDetails {
 }
 
 export async function loadCompanyDetailsData(companyId: number) {
-  const companyRepository = new CompanyHttpRepository(serverApiClient);
+  // The cookieless `serverApiClient` singleton used to be wired in here, so every
+  // one of these server-side reads came back 401 regardless of the real session.
+  const apiClient = createServerApiClient(await headers());
+  const companyRepository = new CompanyHttpRepository(apiClient);
   
   try {
     const companyDetails = await companyRepository.getById(companyId);
@@ -44,7 +48,7 @@ export async function loadCompanyDetailsData(companyId: number) {
     // Fetch contacts for this company
     let contacts: any[] = [];
     try {
-      const contactsResponse = await serverApiClient.get<any[]>(
+      const contactsResponse = await apiClient.get<any[]>(
         `/contacts/company/${companyId}`
       );
       contacts = contactsResponse.data || [];

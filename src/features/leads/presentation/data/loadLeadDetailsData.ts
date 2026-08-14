@@ -1,9 +1,13 @@
-import { serverApiClient } from "@/shared/infra";
+import { headers } from "next/headers";
+import { createServerApiClient } from "@/shared/infra";
 import { AppError } from "@/shared/errors";
 import { LeadHttpRepository } from "@/leads/infra/http/LeadHttpRepository";
 
 export async function loadLeadDetailsData(leadId: number) {
-  const leadRepository = new LeadHttpRepository(serverApiClient);
+  // The cookieless `serverApiClient` singleton used to be wired in here, so every
+  // one of these server-side reads came back 401 regardless of the real session.
+  const apiClient = createServerApiClient(await headers());
+  const leadRepository = new LeadHttpRepository(apiClient);
   
   try {
     const leadDetails = await leadRepository.getDetails(leadId);

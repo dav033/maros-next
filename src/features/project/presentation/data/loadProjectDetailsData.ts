@@ -1,9 +1,13 @@
-import { serverApiClient } from "@/shared/infra";
+import { headers } from "next/headers";
+import { createServerApiClient } from "@/shared/infra";
 import { AppError } from "@/shared/errors";
 import { ProjectHttpRepository } from "@/project/infra/http/ProjectHttpRepository";
 
 export async function loadProjectDetailsData(projectId: number) {
-  const projectRepository = new ProjectHttpRepository(serverApiClient);
+  // The cookieless `serverApiClient` singleton used to be wired in here, so every
+  // one of these server-side reads came back 401 regardless of the real session.
+  const apiClient = createServerApiClient(await headers());
+  const projectRepository = new ProjectHttpRepository(apiClient);
   
   try {
     const projectDetails = await projectRepository.getDetails(projectId);

@@ -1,6 +1,7 @@
 "use server";
 
-import { serverApiClient } from "@/shared/infra/http";
+import { headers } from "next/headers";
+import { createServerApiClient } from "@/shared/infra/http";
 import { LeadHttpRepository, makeLeadsAppContext, LeadNumberAvailabilityHttpService } from "@/leads";
 import { ContactHttpRepository } from "@/contact";
 import { ProjectTypeHttpRepository } from "@/projectType";
@@ -10,17 +11,25 @@ import { success, handleActionError } from "@/shared/actions/utils";
 import { endpoints } from "@/leads/infra/http/endpoints";
 import { LeadStatus, canTransition } from "@/leads/domain";
 
-// Create server-side app context
-function createServerLeadsAppContext() {
+// The plain `serverApiClient` singleton carries no request context and forwards no
+// cookie — every call through it comes back 401 ("Tu sesión expiró") no matter what
+// the browser's session is. createServerApiClient forwards this request's Cookie
+// header instead.
+async function createServerApi() {
+  return createServerApiClient(await headers());
+}
+
+async function createServerLeadsAppContext() {
+  const apiClient = await createServerApi();
   return makeLeadsAppContext({
     clock: SystemClock,
     repos: {
-      lead: new LeadHttpRepository(serverApiClient),
-      contact: new ContactHttpRepository(serverApiClient),
-      projectType: new ProjectTypeHttpRepository(),
+      lead: new LeadHttpRepository(apiClient),
+      contact: new ContactHttpRepository(apiClient),
+      projectType: new ProjectTypeHttpRepository(apiClient),
     },
     services: {
-      leadNumberAvailability: new LeadNumberAvailabilityHttpService(),
+      leadNumberAvailability: new LeadNumberAvailabilityHttpService(apiClient),
     },
   });
 }
@@ -33,7 +42,8 @@ export interface LeadRejectionInfo {
 
 export async function getLeadRejectionInfoAction(id: number): Promise<ActionResult<LeadRejectionInfo>> {
   try {
-    const { data } = await serverApiClient.get<LeadRejectionInfo>(endpoints.getRejectionInfo(id));
+    const apiClient = await createServerApi();
+    const { data } = await apiClient.get<LeadRejectionInfo>(endpoints.getRejectionInfo(id));
     return success(data);
   } catch (error) {
     return handleActionError(error);
@@ -50,7 +60,8 @@ export async function deleteLeadAction(
     if (options?.deleteCompany) params.append('deleteCompany', 'true');
     
     const url = `${endpoints.remove(id)}${params.toString() ? `?${params.toString()}` : ''}`;
-    await serverApiClient.delete(url);
+    const apiClient = await createServerApi();
+    await apiClient.delete(url);
     return success(undefined);
   } catch (error) {
     return handleActionError(error);
@@ -59,7 +70,7 @@ export async function deleteLeadAction(
 
 export async function updateLeadNameAction(id: number, name: string): Promise<ActionResult<void>> {
   try {
-    const ctx = createServerLeadsAppContext();
+    const ctx = await createServerLeadsAppContext();
     await ctx.repos.lead.update(id, { name: name.trim() });
     return success(undefined);
   } catch (error) {
@@ -69,7 +80,7 @@ export async function updateLeadNameAction(id: number, name: string): Promise<Ac
 
 export async function acceptLeadAction(id: number): Promise<ActionResult<void>> {
   try {
-    const ctx = createServerLeadsAppContext();
+    const ctx = await createServerLeadsAppContext();
     await ctx.repos.lead.update(id, { inReview: false });
     return success(undefined);
   } catch (error) {
@@ -97,7 +108,7 @@ export async function updateLeadStatusAction(
     if (!Object.values(LeadStatus).includes(status)) {
       return { success: false, error: "Invalid lead status" };
     }
-    const ctx = createServerLeadsAppContext();
+    const ctx = await createServerLeadsAppContext();
     const lead = await ctx.repos.lead.getById(id);
     if (!lead) {
       return { success: false, error: "Lead not found" };
@@ -131,7 +142,7 @@ export async function updateLeadProjectTypeAction(
     if (!Number.isFinite(projectTypeId) || projectTypeId <= 0 || !Number.isInteger(projectTypeId)) {
       return { success: false, error: "Invalid project type" };
     }
-    const ctx = createServerLeadsAppContext();
+    const ctx = await createServerLeadsAppContext();
     await ctx.repos.lead.update(id, { projectTypeId });
     return success(undefined);
   } catch (error) {

@@ -33,6 +33,14 @@ export function useInstantCustomers(initialData?: CustomersPageData): UseInstant
     queryKey: customersKeys.all,
     queryFn: () => repository.getCustomers(),
     initialData: initialData ? { contacts: initialData.contacts, companies: initialData.companies } : undefined,
+    // Same guard useInstantList applies: loadCustomersData turns a failed server-side
+    // read into empty arrays, and counting that as fresh would pin an empty customers
+    // page for the whole stale window. Backdating it marks it stale right away so the
+    // browser refetches with its session cookie.
+    initialDataUpdatedAt:
+      initialData && (initialData.contacts.length > 0 || initialData.companies.length > 0)
+        ? undefined
+        : 0,
     staleTime: DEFAULT_STALE_TIME,
     gcTime: 10 * 60 * 1000,
   });

@@ -1,6 +1,7 @@
 "use server";
 
-import { serverApiClient } from "@/shared/infra/http";
+import { headers } from "next/headers";
+import { createServerApiClient } from "@/shared/infra/http";
 import { CompanyHttpRepository, CompanyServiceHttpRepository, makeCompanyAppContext } from "@/company";
 import { companyCrudUseCases, updateCompanyWithContacts } from "@/company/application";
 import type { Company, CompanyDraft, CompanyPatch } from "@/company";
@@ -8,11 +9,12 @@ import type { ActionResult } from "@/shared/actions/types";
 import { success, handleActionError } from "@/shared/actions/utils";
 
 // Create server-side app context
-function createServerCompanyAppContext() {
+async function createServerCompanyAppContext() {
+  const apiClient = createServerApiClient(await headers());
   return makeCompanyAppContext({
     repos: {
-      company: new CompanyHttpRepository(serverApiClient),
-      companyService: new CompanyServiceHttpRepository(serverApiClient),
+      company: new CompanyHttpRepository(apiClient),
+      companyService: new CompanyServiceHttpRepository(apiClient),
     },
   });
 }
@@ -22,7 +24,7 @@ export async function createCompanyAction(
   contactIds?: number[]
 ): Promise<ActionResult<Company>> {
   try {
-    const ctx = createServerCompanyAppContext();
+    const ctx = await createServerCompanyAppContext();
     const created = await companyCrudUseCases.create(ctx)(draft);
     
     if (contactIds && contactIds.length > 0) {
@@ -41,7 +43,7 @@ export async function updateCompanyAction(
   contactIds?: number[]
 ): Promise<ActionResult<Company>> {
   try {
-    const ctx = createServerCompanyAppContext();
+    const ctx = await createServerCompanyAppContext();
     const updated = await updateCompanyWithContacts(ctx, id, {
       companyPatch: Object.keys(patch).length > 0 ? patch : undefined,
       contactIds,
@@ -55,7 +57,7 @@ export async function updateCompanyAction(
 
 export async function deleteCompanyAction(id: number): Promise<ActionResult<void>> {
   try {
-    const ctx = createServerCompanyAppContext();
+    const ctx = await createServerCompanyAppContext();
     await companyCrudUseCases.delete(ctx)(id);
     return success(undefined);
   } catch (error) {

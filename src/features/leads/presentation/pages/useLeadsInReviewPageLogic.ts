@@ -16,6 +16,7 @@ import {
 import type { Lead } from "@/leads/domain";
 import { LeadStatus, LeadType, getLeadTypeFromNumber } from "@/leads/domain";
 import { getLeadRejectionInfoAction, type LeadRejectionInfo } from "../../actions/leadActions";
+import { reportActionFailure } from "@/shared/actions/clientResult";
 
 export interface UseLeadsInReviewPageLogicReturn {
   config: {
@@ -125,7 +126,7 @@ export function useLeadsInReviewPageLogic(): UseLeadsInReviewPageLogicReturn {
           if (result.success) {
             setRejectionInfo(result.data);
           } else {
-            toast.error(result.error ?? "Could not load rejection info");
+            toast.error(reportActionFailure(result) ?? "Could not load rejection info");
           }
         })
         .finally(() => {

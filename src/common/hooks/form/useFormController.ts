@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useMemo } from "react";
 import { useQueryClient, type QueryKey } from "@tanstack/react-query";
+import { AppError, emitUnauthorized } from "@/shared/errors";
 
 export interface UseFormControllerConfig<TForm, TResult> {
   initialForm: TForm;
@@ -70,8 +71,14 @@ export function useFormController<TForm extends Record<string, any>, TResult>({
       onSuccess?.(result);
       return true;
     } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : String(e);
-      setError(msg);
+      const appError = AppError.from(e);
+      // An expired session is not a form error — leaving it as red text under the
+      // fields let the user keep retrying a submit that can never succeed. Announce
+      // it so GlobalAuthHandler clears the cookie and sends them back to /login.
+      if (appError.kind === "unauthorized") {
+        emitUnauthorized(appError);
+      }
+      setError(appError.userMessage);
       return false;
     } finally {
       setIsLoading(false);

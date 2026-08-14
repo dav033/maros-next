@@ -1,8 +1,8 @@
-import { unstable_cache } from "next/cache";
-import { serverApiClient } from "@/shared/infra/http";
+import { headers } from "next/headers";
+import { createServerApiClient } from "@/shared/infra/http";
 import { ContactHttpRepository, makeContactsAppContext } from "@/contact";
 import { listContacts } from "@/contact/application";
-import { CompanyHttpRepository, makeCompanyAppContext } from "@/company";
+import { CompanyHttpRepository, CompanyServiceHttpRepository, makeCompanyAppContext } from "@/company";
 import { companyCrudUseCases } from "@/company/application";
 import type { Contact } from "@/contact/domain";
 import type { Company } from "@/company";
@@ -12,18 +12,23 @@ export interface CustomersPageData {
   companies: Company[];
 }
 
-async function fetchCustomersData(): Promise<CustomersPageData> {
+/**
+ * Not wrapped in `unstable_cache` any more — see loadContactsData for why: the
+ * cookieless singleton made every one of these calls 401, and the caching then
+ * pinned the resulting empty lists for a minute.
+ */
+export async function loadCustomersData(): Promise<CustomersPageData> {
+  const apiClient = createServerApiClient(await headers());
   const contactsCtx = makeContactsAppContext({
     repos: {
-      contact: new ContactHttpRepository(serverApiClient),
+      contact: new ContactHttpRepository(apiClient),
     },
   });
 
-  const { CompanyServiceHttpRepository } = await import("@/company");
   const companyCtx = makeCompanyAppContext({
     repos: {
-      company: new CompanyHttpRepository(serverApiClient),
-      companyService: new CompanyServiceHttpRepository(serverApiClient),
+      company: new CompanyHttpRepository(apiClient),
+      companyService: new CompanyServiceHttpRepository(apiClient),
     },
   });
 
@@ -37,9 +42,3 @@ async function fetchCustomersData(): Promise<CustomersPageData> {
     companies: companies ?? [],
   };
 }
-
-export const loadCustomersData = unstable_cache(
-  fetchCustomersData,
-  ["customers-page-data"],
-  { revalidate: 60 }
-);

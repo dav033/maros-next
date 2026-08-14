@@ -1,10 +1,19 @@
 "use server";
 
-import { serverApiClient } from "@/shared/infra/http";
+import { headers } from "next/headers";
+import { createServerApiClient } from "@/shared/infra/http";
 import type { ActionResult } from "@/shared/actions/types";
 import { success, handleActionError } from "@/shared/actions/utils";
 import { AppError } from "@/shared/errors";
 import { endpoints } from "@/features/project/infra/http/endpoints";
+
+// The plain `serverApiClient` singleton carries no request context and forwards no
+// cookie — every call through it comes back 401 ("Tu sesión expiró") no matter what
+// the browser's session is. createServerApiClient forwards this request's Cookie
+// header instead.
+async function createServerApi() {
+  return createServerApiClient(await headers());
+}
 
 export interface EstimateFileInfo {
   key: string;
@@ -19,7 +28,8 @@ export async function getProjectEstimateFileAction(
   projectId: number,
 ): Promise<ActionResult<EstimateFileInfo | null>> {
   try {
-    const { data } = await serverApiClient.get<EstimateFileResponse | null>(
+    const apiClient = await createServerApi();
+    const { data } = await apiClient.get<EstimateFileResponse | null>(
       endpoints.estimateFile(projectId),
     );
 
@@ -52,7 +62,8 @@ export async function updateProjectEstimateAction(
   amount: number,
 ): Promise<ActionResult<UpdateEstimateResult>> {
   try {
-    const { data } = await serverApiClient.patch<UpdateEstimateResult>(
+    const apiClient = await createServerApi();
+    const { data } = await apiClient.patch<UpdateEstimateResult>(
       endpoints.estimate(projectId),
       { amount },
     );
@@ -80,7 +91,8 @@ export async function sendProjectEstimateEmailAction(
   input: SendEstimateEmailInput,
 ): Promise<ActionResult<SendEstimateEmailResult>> {
   try {
-    const { data } = await serverApiClient.post<SendEstimateEmailResult>(
+    const apiClient = await createServerApi();
+    const { data } = await apiClient.post<SendEstimateEmailResult>(
       endpoints.sendEstimateEmail(projectId),
       input,
     );
@@ -95,14 +107,15 @@ export async function appendProjectAttachmentAction(
   key: string,
 ): Promise<ActionResult<string[]>> {
   try {
-    const { data } = await serverApiClient.get<{ attachments?: string[] | null }>(
+    const apiClient = await createServerApi();
+    const { data } = await apiClient.get<{ attachments?: string[] | null }>(
       endpoints.details(projectId),
     );
     const existing = Array.isArray(data?.attachments)
       ? data.attachments.filter((item): item is string => typeof item === "string")
       : [];
     const attachments = Array.from(new Set([...existing, key]));
-    await serverApiClient.put(endpoints.update(projectId), { attachments });
+    await apiClient.put(endpoints.update(projectId), { attachments });
     return success(attachments);
   } catch (error) {
     return handleActionError(error);
