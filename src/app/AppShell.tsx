@@ -22,7 +22,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <AppSidebar />
       </Suspense>
       <SidebarRail />
-      <SidebarInset className="min-h-svh flex flex-col w-full">
+      {/* min-w-0: this is a flex child of SidebarProvider's row, where the default
+          `min-width: auto` lets it grow to fit its widest descendant. A table wider
+          than the viewport would stretch the whole page and drag the header and each
+          page's toolbar sideways with it; pinning the minimum keeps that scrolling
+          inside the table's own container. */}
+      <SidebarInset className="min-h-svh flex min-w-0 flex-col w-full">
         <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 md:px-6 md:hidden">
           <SidebarTrigger className="-ml-1" />
           <div className="ml-auto">

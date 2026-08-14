@@ -81,6 +81,15 @@ export type EntityTableProps<T> = {
   /** Habilita checkboxes por fila + "select all" en el header. Opcional, no rompe consumidores existentes. */
   selection?: EntityTableSelection;
 
+  /**
+   * Width in px below which the table scrolls sideways instead of compressing.
+   * Without it the table is plain `w-full`, so on a narrow screen the browser
+   * ignores the columns' declared widths and squeezes them until the content
+   * wraps. Set it to roughly the sum of the column widths. The scroll lives on
+   * the table's own container, so nothing above it (toolbar, header) moves.
+   */
+  minWidth?: number;
+
   groupBy?: EntityTableGroupBy<T>;
   paginated?: boolean;
   defaultPageSize?: PageSizeOption;
@@ -142,6 +151,7 @@ function EntityTableInner<T>({
   onRowClick,
   getRowHref,
   selection,
+  minWidth,
   groupBy,
   paginated = false,
   defaultPageSize = 25,
@@ -423,7 +433,7 @@ function EntityTableInner<T>({
           className,
         )}
       >
-        <Table>
+        <Table style={minWidth ? { minWidth } : undefined}>
           <TableHeader className="bg-muted/50">
             <TableRow className="text-left text-xs uppercase tracking-wide text-muted-foreground h-12 border-b border-border">
               {selection ? (

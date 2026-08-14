@@ -100,6 +100,10 @@ export function LeadsTable({
       onRowClick={(l) => l.id && router.push(`/lead/${l.id}`)}
       getRowHref={(l) => (l.id ? `/lead/${l.id}` : undefined)}
       groupBy={buildGroupBy(groupBy)}
+      // Roughly the sum of the column widths in useLeadsTableColumns, plus the
+      // checkbox and actions cells. Below this the table scrolls sideways rather
+      // than crushing the columns — see EntityTable's minWidth.
+      minWidth={1280}
       paginated={pagination?.enabled}
       defaultSort={{ key: "leadNumber", dir: "desc" }}
       loadingState={<DefaultTableLoading label="Loading leads…" />}
