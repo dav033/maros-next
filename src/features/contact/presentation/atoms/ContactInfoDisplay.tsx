@@ -55,7 +55,9 @@ export function ContactInfoDisplay({
     <button
       type="button"
       onClick={handleClick}
-      className={`inline-flex items-center gap-2 rounded-md border border-indigo-500/30 bg-indigo-500/10 px-2.5 py-1 text-xs font-medium text-indigo-300 hover:bg-indigo-500/20 transition-colors cursor-pointer w-[160px] ${className}`}
+      // max-w-full lets the pill shrink inside a squeezed column instead of forcing
+      // its 160px onto the cell and pushing the rest of the row out of shape.
+      className={`inline-flex w-[160px] max-w-full items-center gap-2 rounded-md border border-indigo-500/30 bg-indigo-500/10 px-2.5 py-1 text-xs font-medium text-indigo-300 hover:bg-indigo-500/20 transition-colors cursor-pointer ${className}`}
     >
       <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-indigo-500/20 text-indigo-300">
         <User className="size-2.5" />

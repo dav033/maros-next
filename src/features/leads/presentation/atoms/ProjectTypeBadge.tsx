@@ -29,14 +29,17 @@ export function ProjectTypeBadge({ projectType }: ProjectTypeBadgeProps) {
   return (
     <Badge
       variant="outline"
-      className="gap-1.5 text-xs"
+      // Badges no longer wrap, so a long type name would widen the column instead;
+      // cap it and ellipsize, with the full name on hover.
+      className="max-w-full gap-1.5 text-xs"
       style={{ borderColor: color, color }}
+      title={projectType.name}
     >
       <span
-        className="h-2 w-2 rounded-full"
+        className="h-2 w-2 shrink-0 rounded-full"
         style={{ backgroundColor: color }}
       />
-      {projectType.name}
+      <span className="truncate">{projectType.name}</span>
     </Badge>
   );
 }

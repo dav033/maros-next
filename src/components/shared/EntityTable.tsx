@@ -297,15 +297,19 @@ function EntityTableInner<T>({
           <DropdownMenuSubTrigger
             disabled={item.disabled}
             className={cn(
-              "flex items-center gap-2",
+              "flex items-center gap-2 pr-2",
               item.variant === "danger" &&
                 "text-destructive focus:text-destructive focus:bg-destructive/10",
             )}
           >
-            {item.icon && <span className="mr-2">{resolveContextIcon(item.icon)}</span>}
-            <span>{item.label}</span>
+            {item.icon && (
+              <span className="shrink-0">{resolveContextIcon(item.icon)}</span>
+            )}
+            {/* Without this the label wraps rather than widening the menu, which is
+                how "Change Project Type" ended up stacked over three lines. */}
+            <span className="whitespace-nowrap">{item.label}</span>
           </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent>
+          <DropdownMenuSubContent collisionPadding={8}>
             {item.subItems.map((subItem, subIndex) => renderMenuItem(subItem, subIndex))}
           </DropdownMenuSubContent>
         </DropdownMenuSub>
@@ -327,9 +331,11 @@ function EntityTableInner<T>({
             "text-destructive focus:text-destructive focus:bg-destructive/10",
         )}
       >
-        {item.icon && <span className="mr-2">{resolveContextIcon(item.icon)}</span>}
-        <span className="flex-1">{item.label}</span>
-        {item.checked && <Check className="h-4 w-4 ml-auto" />}
+        {item.icon && (
+          <span className="shrink-0">{resolveContextIcon(item.icon)}</span>
+        )}
+        <span className="flex-1 whitespace-nowrap">{item.label}</span>
+        {item.checked && <Check className="ml-2 h-4 w-4 shrink-0" />}
       </DropdownMenuItem>
     );
   };
@@ -461,7 +467,10 @@ function EntityTableInner<T>({
                         : undefined
                     }
                   >
-                    <span className="inline-flex items-center gap-1">
+                    {/* nowrap: header labels are short and fixed, so wrapping one
+                        ("Lead #", "Project Type") only ever buys a taller header
+                        row — it never makes the table fit. */}
+                    <span className="inline-flex items-center gap-1 whitespace-nowrap">
                       {col.header}
                       {col.sortable &&
                         (isActive ? (
@@ -533,14 +542,20 @@ function EntityTableInner<T>({
       )}
 
       <DropdownMenu open={contextMenuOpen} onOpenChange={setContextMenuOpen}>
-        <DropdownMenuContent
-          className="min-w-[160px]"
-          style={{
-            position: "fixed",
-            left: contextPosition.x,
-            top: contextPosition.y,
-          }}
-        >
+        {/* An empty element parked at the cursor, used purely as the anchor Radix
+            measures against. The menu used to be placed by hand with `position:
+            fixed` + the raw click coordinates, which bypassed Radix's positioning
+            entirely: near the right or bottom edge — routine on a 14" screen — it
+            had nothing telling it to flip, so it opened off-screen or clipped.
+            Anchoring it instead gets collision handling back for free. */}
+        <DropdownMenuTrigger asChild>
+          <span
+            aria-hidden
+            className="pointer-events-none fixed h-0 w-0"
+            style={{ left: contextPosition.x, top: contextPosition.y }}
+          />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" collisionPadding={8}>
           {menuItems.map((item, index) => renderMenuItem(item, index))}
         </DropdownMenuContent>
       </DropdownMenu>

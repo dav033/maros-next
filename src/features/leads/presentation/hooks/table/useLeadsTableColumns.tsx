@@ -21,7 +21,7 @@ export function useLeadsTableColumns({
       {
         key: "notes",
         header: "Notes",
-        className: "w-[80px] text-center",
+        className: "w-[64px] text-center",
         render: (lead: Lead) => {
           const notesArray = Array.isArray(lead.notes) ? lead.notes : [];
           return (
@@ -38,19 +38,25 @@ export function useLeadsTableColumns({
       {
         key: "leadNumber",
         header: "Lead #",
-        className: "w-[110px]",
+        className: "w-[104px]",
         render: (lead: Lead) => (
-          <span className="font-mono text-foreground">{lead.leadNumber}</span>
+          <span className="whitespace-nowrap font-mono text-foreground">
+            {lead.leadNumber}
+          </span>
         ),
         sortable: true,
         sortValue: (lead: Lead) => lead.leadNumber ?? "",
       },
       {
+        // Free text, so it gets the truncate treatment (see `location`) rather than
+        // being allowed to stack into a multi-line cell.
         key: "name",
         header: "Name",
-        className: "w-[200px]",
+        className: "w-[180px] max-w-[180px]",
         render: (lead: Lead) => (
-          <span className="text-foreground">{lead.name}</span>
+          <span className="block truncate text-foreground" title={lead.name ?? undefined}>
+            {lead.name}
+          </span>
         ),
         sortable: true,
         sortValue: (lead: Lead) => lead.name ?? "",
@@ -58,7 +64,7 @@ export function useLeadsTableColumns({
       {
         key: "contact",
         header: "Contact",
-        className: "w-[180px] text-center",
+        className: "w-[172px] text-center",
         render: (lead: Lead) => (
           <ContactInfoDisplay
             contact={lead.contact}
@@ -70,17 +76,22 @@ export function useLeadsTableColumns({
       {
         key: "projectType",
         header: "Project Type",
-        className: "w-[150px] text-center",
+        className: "w-[140px] text-center",
         render: (lead: Lead) => <ProjectTypeBadge projectType={lead.projectType} />,
         sortable: true,
         sortValue: (lead: Lead) => lead.projectType?.name ?? "",
       },
       {
+        // The one column that reliably overflows: a full street address wrapped into
+        // four lines and set the height of every row around it. Truncated with the
+        // full value on hover instead.
         key: "location",
         header: "Location",
-        className: "w-[200px]",
+        className: "w-[190px] max-w-[190px]",
         render: (lead: Lead) => (
-          <span className="text-foreground">{lead.location ?? "—"}</span>
+          <span className="block truncate text-foreground" title={lead.location ?? undefined}>
+            {lead.location ?? "—"}
+          </span>
         ),
         sortable: true,
         sortValue: (lead: Lead) => lead.location ?? "",
@@ -88,9 +99,9 @@ export function useLeadsTableColumns({
       {
         key: "estimate",
         header: "Estimate",
-        className: "w-[120px] text-right",
+        className: "w-[112px] text-right",
         render: (lead: Lead) => (
-          <span className="text-foreground font-mono text-sm">
+          <span className="whitespace-nowrap font-mono text-sm text-foreground">
             {lead.estimate != null
               ? `$${Number(lead.estimate).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
               : "—"}
@@ -102,7 +113,7 @@ export function useLeadsTableColumns({
       {
         key: "status",
         header: "Status",
-        className: "w-[120px] text-center",
+        className: "w-[112px] text-center",
         render: (lead: Lead) => <LeadStatusBadge status={lead.status} />,
         sortable: true,
         sortValue: (lead: Lead) => lead.status ?? "",
