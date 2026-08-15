@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Loading() {
   return (
-    <main className="flex min-h-[calc(100vh-80px)] w-full flex-col gap-4 bg-background px-3 py-3 pt-16 sm:px-4 sm:py-4 md:px-8 md:py-6 lg:pt-6">
+    <div className="flex w-full flex-1 flex-col gap-4">
       <div className="rounded-xl border border-border/60 bg-card/40 p-4 sm:p-5">
         <div className="flex items-start gap-3">
           <Skeleton className="h-10 w-10 rounded-lg" />
@@ -48,6 +48,6 @@ export default function Loading() {
           <Skeleton key={i} className="h-10 w-full" />
         ))}
       </div>
-    </main>
+    </div>
   );
 }

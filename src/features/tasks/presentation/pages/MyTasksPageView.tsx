@@ -37,7 +37,7 @@ export function MyTasksPageView() {
   const totalCount = allTasks.length;
 
   return (
-    <main className="flex min-h-[calc(100vh-80px)] w-full flex-col gap-3 bg-background px-3 py-3 pt-16 sm:gap-4 sm:px-4 sm:py-4 md:px-8 md:py-6 lg:pt-6">
+    <div className="flex w-full flex-1 flex-col gap-3 sm:gap-4">
       <PageHeaderCard
         icon={UserCheck}
         title="My tasks"
@@ -104,6 +104,6 @@ export function MyTasksPageView() {
       )}
 
       <TaskDetailSheet taskId={taskId} onClose={closeTask} onOpenTask={openTask} />
-    </main>
+    </div>
   );
 }
