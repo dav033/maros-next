@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { fetchCurrentUser } from "@/shared/auth/currentUser";
-import { TasksBoardPageView } from "@/features/tasks/presentation/pages/TasksBoardPageView";
+import { TasksPageView } from "@/features/tasks/presentation/pages/TasksPageView";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +13,7 @@ export default async function TasksBoardPage() {
 
   return (
     <Suspense fallback={null}>
-      <TasksBoardPageView />
+      <TasksPageView />
     </Suspense>
   );
 }

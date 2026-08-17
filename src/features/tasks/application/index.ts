@@ -5,7 +5,10 @@ export { tasksKeys, taskLabelsKeys } from "./keys/tasksKeys";
 export { listTasks } from "./usecases/queries/listTasks";
 export { getBoard } from "./usecases/queries/getBoard";
 export { getMyTasks } from "./usecases/queries/getMyTasks";
+export { getTaskSchedule } from "./usecases/queries/getTaskSchedule";
+export { listTaskTemplates } from "./usecases/queries/listTaskTemplates";
 export { listTasksByEntity } from "./usecases/queries/listTasksByEntity";
+export { listTasksByParty } from "./usecases/queries/listTasksByEntity";
 export { getTask } from "./usecases/queries/getTask";
 export { listTaskLabels } from "./usecases/queries/listTaskLabels";
 
@@ -25,3 +28,4 @@ export { deleteTaskLabel } from "./usecases/commands/deleteTaskLabel";
 export { addTaskComment } from "./usecases/commands/addTaskComment";
 export { updateTaskComment } from "./usecases/commands/updateTaskComment";
 export { deleteTaskComment } from "./usecases/commands/deleteTaskComment";
+export { applyTaskTemplate } from "./usecases/commands/applyTaskTemplate";

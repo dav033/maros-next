@@ -1,6 +1,6 @@
 import type { HttpClientLike } from "@/shared/infra";
 import { optimizedApiClient } from "@/shared/infra";
-import type { AppNotification, NotificationsRepositoryPort } from "@/features/notifications/domain";
+import type { AppNotification, NotificationPreferences, NotificationsRepositoryPort } from "@/features/notifications/domain";
 
 import { endpoints } from "./endpoints";
 
@@ -25,5 +25,15 @@ export class NotificationsHttpRepository implements NotificationsRepositoryPort 
 
   async markAllRead(): Promise<void> {
     await this.api.post<void>(endpoints.markAllRead());
+  }
+
+  async getPreferences(): Promise<NotificationPreferences> {
+    const { data } = await this.api.get<NotificationPreferences>(endpoints.preferences());
+    return data;
+  }
+
+  async updatePreferences(patch: Partial<NotificationPreferences>): Promise<NotificationPreferences> {
+    const { data } = await this.api.put<NotificationPreferences>(endpoints.preferences(), patch);
+    return data;
   }
 }

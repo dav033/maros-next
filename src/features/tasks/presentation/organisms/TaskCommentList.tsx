@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { Check, Pencil, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -16,9 +16,12 @@ const EMPTY_DOC = { type: "doc", content: [{ type: "paragraph" }] };
 export function TaskCommentList({
   taskId,
   comments,
+  showComments = true,
 }: {
   taskId: number;
   comments: TaskComment[];
+  /** The merged task timeline already renders the comment entries. */
+  showComments?: boolean;
 }) {
   const { user, hasPermission } = useCurrentUser();
   const canModerate = hasPermission("tasks:delete");
@@ -31,6 +34,18 @@ export function TaskCommentList({
   const draftRef = useRef<Record<string, unknown>>(EMPTY_DOC);
   const [draftEmpty, setDraftEmpty] = useState(true);
   const [composerKey, setComposerKey] = useState(0);
+
+  useEffect(() => {
+    const handler = (event: KeyboardEvent) => {
+      if (!(event.metaKey || event.ctrlKey) || event.key !== "Enter") return;
+      const target = event.target as HTMLElement | null;
+      if (!target?.isContentEditable) return;
+      event.preventDefault();
+      document.querySelector<HTMLButtonElement>("[data-task-comment-submit]")?.click();
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, []);
 
   const editDraftRef = useRef<Record<string, unknown>>(EMPTY_DOC);
 
@@ -63,7 +78,7 @@ export function TaskCommentList({
 
   return (
     <div className="space-y-4">
-      <ul className="space-y-3">
+      {showComments ? <ul className="space-y-3">
         {comments.map((comment) => (
           <li key={comment.id} className="flex gap-2.5">
             <AssigneeAvatar person={comment.author} />
@@ -139,7 +154,7 @@ export function TaskCommentList({
           </li>
         ))}
         {comments.length === 0 && <p className="text-sm text-muted-foreground">No comments yet.</p>}
-      </ul>
+      </ul> : null}
 
       <div className="space-y-1.5 border-t border-border/60 pt-3">
         <TaskRichTextEditor
@@ -156,6 +171,7 @@ export function TaskCommentList({
         <Button
           type="button"
           size="sm"
+          data-task-comment-submit
           disabled={draftEmpty || addCommentMutation.isPending}
           onClick={() => void submit()}
         >

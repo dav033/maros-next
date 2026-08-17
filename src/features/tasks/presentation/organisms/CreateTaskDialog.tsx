@@ -33,20 +33,18 @@ import { TaskEntityPicker } from "../molecules/TaskEntityPicker";
 import { TaskRichTextEditor } from "../molecules/TaskRichTextEditor";
 import { isBlankDoc } from "../molecules/taskRichTextDoc";
 import { TASK_KIND_LABELS, TASK_PRIORITY_LABELS, taskLabelColor } from "../atoms/taskVisualTokens";
+import { taskEntityLabel } from "../atoms/taskEntityTokens";
 
 const EMPTY_DOC = { type: "doc", content: [{ type: "paragraph" }] };
-
-const ENTITY_KIND_LABEL: Record<TaskEntityKind, string> = {
-  lead: "Lead",
-  project: "Project",
-  contact: "Contact",
-  company: "Company",
-};
 
 export function CreateTaskDialog({
   onCreated,
   defaultEntityKind,
   defaultEntityId,
+  defaultEntityLabel,
+  defaultPartyKind,
+  defaultPartyId,
+  defaultPartyLabel,
   defaultAssigneeId,
   defaultAssigneeLabel,
   trigger,
@@ -57,6 +55,11 @@ export function CreateTaskDialog({
   /** Preselects the linked record — e.g. EntityTasksSection on a lead/project page. Locked in, not offered as a picker: the context that opened this dialog already decided it. */
   defaultEntityKind?: TaskEntityKind;
   defaultEntityId?: number;
+  defaultEntityLabel?: string;
+  /** Adds a company/contact relationship after creation without misusing the job link slot. */
+  defaultPartyKind?: "company" | "contact";
+  defaultPartyId?: number;
+  defaultPartyLabel?: string;
   /** Preselects the assignee — e.g. MyTasksPageView defaults to yourself, since an
    *  unassigned task created there would immediately disappear from that same view. */
   defaultAssigneeId?: number;
@@ -133,6 +136,9 @@ export function CreateTaskDialog({
       entityKind: linkedEntityKind ?? undefined,
       entityId: linkedEntityId ?? undefined,
       description: isBlankDoc(descriptionRef.current) ? undefined : descriptionRef.current,
+      parties: defaultPartyKind && defaultPartyId != null
+        ? [{ partyKind: defaultPartyKind, partyId: defaultPartyId }]
+        : undefined,
     });
 
     // Labels aren't part of creation (CreateTaskDto has no labelIds — see the domain
@@ -141,7 +147,6 @@ export function CreateTaskDialog({
     if (labelIds.size > 0) {
       await setLabelsMutation.mutateAsync({ id: result.id, labelIds: Array.from(labelIds) });
     }
-
     if (another) {
       resetPerTaskFields();
       return;
@@ -343,14 +348,14 @@ export function CreateTaskDialog({
                 <Label className="text-xs text-muted-foreground">Linked record</Label>
                 {entityIsLocked ? (
                   <p className="text-xs text-muted-foreground">
-                    {ENTITY_KIND_LABEL[defaultEntityKind as TaskEntityKind]} #{defaultEntityId} — set by
+                    {defaultEntityLabel ?? taskEntityLabel(null, defaultEntityKind as TaskEntityKind, defaultEntityId ?? null)} — set by
                     where you opened this from.
                   </p>
                 ) : entityLink ? (
                   <div className="flex items-center gap-2 rounded-md border border-border/60 px-3 py-2 text-sm">
                     <Link2 className="h-3.5 w-3.5 text-muted-foreground" />
                     <span className="flex-1 truncate">
-                      {ENTITY_KIND_LABEL[entityLink.entityKind]} #{entityLink.entityId}
+                      {entityLink.label ?? taskEntityLabel(null, entityLink.entityKind, entityLink.entityId)}
                     </span>
                     <button
                       type="button"
@@ -372,6 +377,11 @@ export function CreateTaskDialog({
                   />
                 )}
               </div>
+              {defaultPartyKind && defaultPartyId != null ? (
+                <p className="text-xs text-muted-foreground">
+                  Related to {defaultPartyLabel ?? `${defaultPartyKind} #${defaultPartyId}`}.
+                </p>
+              ) : null}
             </div>
           ) : null}
         </div>

@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { SidebarProvider, SidebarInset, SidebarTrigger, SidebarRail } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/sidebar/AppSidebar";
 import { NotificationBell } from "@/features/notifications/presentation/organisms/NotificationBell";
+import { PwaRegistration } from "./PwaRegistration";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -17,7 +18,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <SidebarProvider defaultOpen={true}>
+    <>
+      <PwaRegistration />
+      <SidebarProvider defaultOpen={true}>
       <Suspense fallback={null}>
         <AppSidebar />
       </Suspense>
@@ -38,6 +41,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           {children}
         </main>
       </SidebarInset>
-    </SidebarProvider>
+      </SidebarProvider>
+    </>
   );
 }

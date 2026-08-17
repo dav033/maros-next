@@ -1,9 +1,15 @@
 import type { ReactNode } from "react";
-import { renderHook } from "@testing-library/react";
+import { renderHook, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { tasksKeys } from "@/tasks/application";
+import type { TaskDetail } from "@/tasks/domain";
 import { useTaskEventsStream } from "./useTaskEventsStream";
+
+const { taskGet } = vi.hoisted(() => ({ taskGet: vi.fn() }));
+vi.mock("@/di", () => ({
+  useTasksApp: () => ({ repos: { task: { get: taskGet } } }),
+}));
 
 type Listener = (event: { data: string }) => void;
 
@@ -41,6 +47,7 @@ function wrapper({ children }: { children: ReactNode }) {
 describe("useTaskEventsStream", () => {
   beforeEach(() => {
     FakeEventSource.instances = [];
+    taskGet.mockReset();
     vi.stubGlobal("EventSource", FakeEventSource);
   });
 
@@ -56,9 +63,40 @@ describe("useTaskEventsStream", () => {
     expect(FakeEventSource.instances[0].options).toEqual({ withCredentials: true });
   });
 
-  it("invalidates board, lists, mine and the task's detail on a valid task.changed event", () => {
+  it("refreshes the affected task detail on a valid task.changed event", async () => {
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-    const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
+    const detail = {
+      id: 42,
+      parentId: null,
+      title: "Updated task",
+      kind: "general",
+      status: "todo",
+      priority: "normal",
+      position: 0,
+      assignee: null,
+      reporter: null,
+      entityKind: null,
+      entityId: null,
+      entity: null,
+      startDate: null,
+      dueDate: null,
+      blockedReason: null,
+      completedAt: null,
+      labels: [],
+      subtasksTotal: 0,
+      subtasksDone: 0,
+      commentsCount: 0,
+      createdAt: "2026-01-01T00:00:00.000Z",
+      updatedAt: "2026-01-01T00:00:01.000Z",
+      description: {},
+      createdBy: null,
+      attachments: [],
+      subtasks: [],
+      activity: [],
+      comments: [],
+      parties: [],
+    } as TaskDetail;
+    taskGet.mockResolvedValue(detail);
     renderHook(() => useTaskEventsStream(), {
       wrapper: ({ children }) => (
         <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
@@ -67,11 +105,8 @@ describe("useTaskEventsStream", () => {
 
     FakeEventSource.instances[0].emit("task.changed", '{"taskId":42,"actorId":7}');
 
-    const invalidatedKeys = invalidateSpy.mock.calls.map((call) => call[0]?.queryKey);
-    expect(invalidatedKeys).toContainEqual(tasksKeys.board());
-    expect(invalidatedKeys).toContainEqual(tasksKeys.lists());
-    expect(invalidatedKeys).toContainEqual(tasksKeys.mine());
-    expect(invalidatedKeys).toContainEqual(tasksKeys.detail(42));
+    await waitFor(() => expect(queryClient.getQueryData(tasksKeys.detail(42))).toEqual(detail));
+    expect(taskGet).toHaveBeenCalledWith(42);
   });
 
   it("ignores a malformed task.changed payload without invalidating anything", () => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Bell, Check } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
@@ -29,6 +29,8 @@ function describe(notification: AppNotification): string {
       return `${who} mentioned you on "${title}"`;
     case "task_due_digest":
       return `"${title}" is due`;
+    case "task_permit_due":
+      return `Permit task "${title}" is due soon`;
     default:
       return `Update on "${title}"`;
   }
@@ -41,22 +43,28 @@ function taskHref(notification: AppNotification): string | null {
 
 export function NotificationBell() {
   const [open, setOpen] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
   const unreadCount = useUnreadCount();
   const { notifications, isLoading } = useInstantNotifications(open);
   const { markReadMutation, markAllReadMutation } = useNotificationMutations();
+  const visibleUnreadCount = hydrated ? unreadCount : 0;
+
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <button
           type="button"
-          aria-label={unreadCount > 0 ? `${unreadCount} unread notifications` : "Notifications"}
+          aria-label={visibleUnreadCount > 0 ? `${visibleUnreadCount} unread notifications` : "Notifications"}
           className="relative grid h-8 w-8 shrink-0 place-items-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
         >
           <Bell className="h-4 w-4" />
-          {unreadCount > 0 ? (
+          {visibleUnreadCount > 0 ? (
             <span className="absolute -right-0.5 -top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-destructive px-1 text-[10px] font-medium text-destructive-foreground">
-              {unreadCount > 9 ? "9+" : unreadCount}
+              {visibleUnreadCount > 9 ? "9+" : visibleUnreadCount}
             </span>
           ) : null}
         </button>

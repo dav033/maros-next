@@ -14,7 +14,7 @@ import {
   ShieldCheck,
   Globe,
   KanbanSquare,
-  UserCheck,
+  BellRing,
 } from "lucide-react";
 import type { Permission } from "@/shared/auth/permissions";
 
@@ -98,17 +98,10 @@ const menuSection: SidebarSection = {
       permission: "notes:read",
     },
     {
-      title: "Board",
+      title: "Tasks",
       href: "/tasks",
       icon: KanbanSquare,
       activePrefix: "/tasks",
-      activeExclude: ["/tasks/mine"],
-      permission: "tasks:read",
-    },
-    {
-      title: "My tasks",
-      href: "/tasks/mine",
-      icon: UserCheck,
       permission: "tasks:read",
     },
   ],
@@ -190,6 +183,11 @@ const settingsSection: SidebarSection = {
       href: "/settings/public-links",
       icon: Globe,
       permission: "users:write",
+    },
+    {
+      title: "Notifications",
+      href: "/settings/notifications",
+      icon: BellRing,
     },
   ],
 };

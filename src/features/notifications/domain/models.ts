@@ -4,6 +4,7 @@ export type NotificationKind =
   | "task_status_changed"
   | "task_blocked"
   | "task_due_digest"
+  | "task_permit_due"
   | "task_mentioned";
 
 export interface NotificationPersonRef {
@@ -23,4 +24,16 @@ export interface AppNotification {
   payload: Record<string, unknown>;
   readAt: string | null;
   createdAt: string;
+}
+
+export type NotificationChannel = "in_app" | "email" | "none";
+export interface NotificationPreferences {
+  assignment: NotificationChannel;
+  status: NotificationChannel;
+  blocked: NotificationChannel;
+  comment: NotificationChannel;
+  mention: NotificationChannel;
+  permit: NotificationChannel;
+  digest: NotificationChannel;
+  digestHour: number;
 }

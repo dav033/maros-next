@@ -15,6 +15,9 @@ export class OptimizedApiClient implements HttpClientLike {
     this.axiosInstance = axios.create({
       baseURL,
       withCredentials: true,
+      // Nest's validation pipe expects repeated keys (`status=a&status=b`),
+      // not bracketed keys (`status[]=a&status[]=b`).
+      paramsSerializer: { indexes: null },
     });
 
     this.axiosInstance.interceptors.response.use(

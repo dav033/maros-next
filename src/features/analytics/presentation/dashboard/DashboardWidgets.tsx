@@ -21,6 +21,7 @@ import { ProjectHealthList } from "../widgets/ProjectHealthList";
 import { ProjectsStatusChart } from "../widgets/ProjectsStatusChart";
 import { RevenueTrendChart } from "../widgets/RevenueTrendChart";
 import { TopClientsTable } from "../widgets/TopClientsTable";
+import { TaskDashboardWidget } from "./TaskDashboardWidget";
 import {
   BarChartSkeleton,
   CostsBreakdownSkeleton,
@@ -141,6 +142,10 @@ export function DashboardWidgets({
             {(data) => <PipelineFunnelChart data={data} />}
           </AsyncWidget>
         </div>
+      </Section>
+
+      <Section icon={Activity} title="Tasks" description="This week's signals and team load" delay={180}>
+        <TaskDashboardWidget />
       </Section>
 
       <Section icon={BarChart3} title="Leads & projects" description="Monthly lead intake and project status mix" delay={220}>

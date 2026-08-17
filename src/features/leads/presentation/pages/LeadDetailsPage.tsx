@@ -384,7 +384,7 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
         defaultTitle={leadDetails.name || undefined}
       />
 
-      <EntityTasksSection entityKind="lead" entityId={leadDetails.id} />
+      <EntityTasksSection entityKind="lead" entityId={leadDetails.id} entityLabel={leadDetails.name} />
 
       <CompanyModal
         controller={companyModalController}

@@ -30,6 +30,7 @@ import { ContactNotesSection } from "./sections/ContactNotesSection";
 import { ContactLeadsSection } from "./sections/ContactLeadsSection";
 import { EntityAttachmentsSection } from "@/features/attachments/presentation/EntityAttachmentsSection";
 import { EntityNotesSection } from "@/features/notes/presentation/organisms/EntityNotesSection";
+import { EntityTasksSection } from "@/features/tasks/presentation/organisms/EntityTasksSection";
 
 
 interface ContactDetailsPageProps {
@@ -273,6 +274,14 @@ export function ContactDetailsPage({ contactId, initialData }: ContactDetailsPag
         entityKind="contact"
         entityId={contactDetails.id}
         defaultTitle={contactDetails.name || undefined}
+      />
+
+      <EntityTasksSection
+        entityKind="contact"
+        entityId={contactDetails.id}
+        partyKind="contact"
+        partyId={contactDetails.id}
+        entityLabel={contactDetails.name}
       />
     </div>
   );

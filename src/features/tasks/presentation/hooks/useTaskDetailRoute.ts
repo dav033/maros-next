@@ -15,14 +15,19 @@ export function useTaskDetailRoute() {
 
   const openTask = useCallback(
     (id: number) => {
-      router.push(`${pathname}?task=${id}`, { scroll: false });
+      const next = new URLSearchParams(searchParams.toString());
+      next.set("task", String(id));
+      router.replace(`${pathname}?${next.toString()}`, { scroll: false });
     },
     [router, pathname]
   );
 
   const closeTask = useCallback(() => {
-    router.push(pathname, { scroll: false });
-  }, [router, pathname]);
+    const next = new URLSearchParams(searchParams.toString());
+    next.delete("task");
+    const query = next.toString();
+    router.replace(`${pathname}${query ? `?${query}` : ""}`, { scroll: false });
+  }, [router, pathname, searchParams]);
 
   return { taskId, openTask, closeTask };
 }

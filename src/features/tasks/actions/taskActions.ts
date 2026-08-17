@@ -16,6 +16,7 @@ import type {
   TaskLabelPatch,
   TaskMoveInput,
   TaskMoveResult,
+  TaskRescheduleInput,
   TaskPatch,
   TaskReorderInput,
   TaskStatus,
@@ -117,6 +118,68 @@ export async function setTaskEntityAction(
     const ctx = await createServerTasksAppContext();
     const task = await ctx.repos.task.setEntityLink(id, link);
     return success(task);
+  } catch (error) {
+    return handleActionError(error);
+  }
+}
+
+export async function rescheduleTaskAction(
+  id: number,
+  input: TaskRescheduleInput,
+): Promise<ActionResult<TaskDetail>> {
+  try {
+    const ctx = await createServerTasksAppContext();
+    return success(await ctx.repos.task.reschedule(id, input));
+  } catch (error) {
+    return handleActionError(error);
+  }
+}
+
+export async function setTaskPartiesAction(
+  id: number,
+  parties: Array<{ partyKind: "company" | "contact"; partyId: number; role?: string }>,
+): Promise<ActionResult<Array<{ partyKind: "company" | "contact"; partyId: number; role: string }>>> {
+  try {
+    const ctx = await createServerTasksAppContext();
+    const result = await ctx.repos.task.setParties(id, parties);
+    return success(result);
+  } catch (error) {
+    return handleActionError(error);
+  }
+}
+
+export async function addTaskWatcherAction(id: number, userId: number): Promise<ActionResult<number[]>> {
+  try {
+    const ctx = await createServerTasksAppContext();
+    return success(await ctx.repos.task.addWatcher(id, userId));
+  } catch (error) {
+    return handleActionError(error);
+  }
+}
+
+export async function removeTaskWatcherAction(id: number, userId: number): Promise<ActionResult<number[]>> {
+  try {
+    const ctx = await createServerTasksAppContext();
+    return success(await ctx.repos.task.removeWatcher(id, userId));
+  } catch (error) {
+    return handleActionError(error);
+  }
+}
+
+export async function archiveTaskAction(id: number): Promise<ActionResult<null>> {
+  try {
+    const ctx = await createServerTasksAppContext();
+    await ctx.repos.task.archive(id);
+    return success(null);
+  } catch (error) {
+    return handleActionError(error);
+  }
+}
+
+export async function restoreTaskAction(id: number): Promise<ActionResult<TaskDetail>> {
+  try {
+    const ctx = await createServerTasksAppContext();
+    return success(await ctx.repos.task.restore(id));
   } catch (error) {
     return handleActionError(error);
   }

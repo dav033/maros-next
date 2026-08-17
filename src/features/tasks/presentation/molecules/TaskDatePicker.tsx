@@ -36,11 +36,13 @@ export function TaskDatePicker({
   onChange,
   placeholder = "No date",
   className,
+  dataTask,
 }: {
   value: string | null;
   onChange: (value: string | null) => void;
   placeholder?: string;
   className?: string;
+  dataTask?: string;
 }) {
   const [open, setOpen] = useState(false);
   const selected = toDate(value);
@@ -54,6 +56,7 @@ export function TaskDatePicker({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
+          data-task={dataTask}
           type="button"
           variant="outline"
           className={cn(

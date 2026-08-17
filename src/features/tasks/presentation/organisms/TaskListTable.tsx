@@ -9,7 +9,7 @@ import {
   type EntityTableSelection,
 } from "@/components/shared";
 import type { SimpleTableColumn } from "@/types/table";
-import type { Task, TaskEntityKind } from "@/tasks/domain";
+import type { Task } from "@/tasks/domain";
 import { BOARD_STATUSES } from "@/tasks/domain";
 import { AssigneeAvatar } from "../atoms/AssigneeAvatar";
 import { DueDatePill } from "../atoms/DueDatePill";
@@ -18,13 +18,7 @@ import { TaskKindIcon } from "../atoms/TaskKindIcon";
 import { TaskPriorityBadge } from "../atoms/TaskPriorityBadge";
 import { TaskStatusBadge } from "../atoms/TaskStatusBadge";
 import { TASK_KIND_LABELS, TASK_STATUS_COLORS, TASK_STATUS_LABELS, taskLabelColor } from "../atoms/taskVisualTokens";
-
-const ENTITY_KIND_LABEL: Record<TaskEntityKind, string> = {
-  lead: "Lead",
-  project: "Project",
-  contact: "Contact",
-  company: "Company",
-};
+import { taskEntityFallbackLabel } from "../atoms/taskEntityTokens";
 
 const groupByStatus: EntityTableGroupBy<Task> = {
   getKey: (task) => task.status,
@@ -118,7 +112,7 @@ function buildColumns(onOpen: (id: number) => void): SimpleTableColumn<Task>[] {
           </Link>
         ) : task.entityKind && task.entityId ? (
           <span className="text-xs text-muted-foreground">
-            {ENTITY_KIND_LABEL[task.entityKind]} #{task.entityId} (not found)
+            {taskEntityFallbackLabel(task.entityKind, task.entityId)} (not found)
           </span>
         ) : (
           <span className="text-xs text-muted-foreground">—</span>

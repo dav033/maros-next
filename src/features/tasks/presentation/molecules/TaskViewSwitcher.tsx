@@ -1,14 +1,16 @@
 "use client";
 
-import Link from "next/link";
-import { KanbanSquare, Rows3, UserCheck } from "lucide-react";
+import { CalendarDays, KanbanSquare, Rows3, UserCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTasksViewState, type TasksView } from "../hooks/useTasksViewState";
 
-export function TaskViewSwitcher({ current }: { current: "board" | "list" | "mine" }) {
+export function TaskViewSwitcher({ current }: { current: TasksView }) {
+  const { replaceState } = useTasksViewState();
   const options = [
-    { value: "board" as const, label: "Board", href: "/tasks", icon: KanbanSquare },
-    { value: "list" as const, label: "List", href: "/tasks/list", icon: Rows3 },
-    { value: "mine" as const, label: "Mine", href: "/tasks/mine", icon: UserCheck },
+    { value: "board" as const, label: "Board", icon: KanbanSquare },
+    { value: "list" as const, label: "List", icon: Rows3 },
+    { value: "mine" as const, label: "Mine", icon: UserCheck },
+    { value: "calendar" as const, label: "Calendar", icon: CalendarDays },
   ];
 
   return (
@@ -17,9 +19,9 @@ export function TaskViewSwitcher({ current }: { current: "board" | "list" | "min
         const active = option.value === current;
         const Icon = option.icon;
         return (
-          <Link
+          <button
             key={option.value}
-            href={option.href}
+            onClick={() => replaceState({ view: option.value })}
             aria-current={active ? "page" : undefined}
             className={cn(
               "inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
@@ -30,7 +32,7 @@ export function TaskViewSwitcher({ current }: { current: "board" | "list" | "min
           >
             <Icon className="h-3.5 w-3.5" />
             {option.label}
-          </Link>
+          </button>
         );
       })}
     </div>

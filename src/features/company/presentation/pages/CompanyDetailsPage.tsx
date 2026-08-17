@@ -19,6 +19,7 @@ import { CompanyContactsSection } from "./sections/CompanyContactsSection";
 import type { CompanyType, Company, CompanyDetails } from "../../domain/models";
 import { EntityAttachmentsSection } from "@/features/attachments/presentation/EntityAttachmentsSection";
 import { EntityNotesSection } from "@/features/notes/presentation/organisms/EntityNotesSection";
+import { EntityTasksSection } from "@/features/tasks/presentation/organisms/EntityTasksSection";
 
 
 
@@ -170,6 +171,14 @@ export function CompanyDetailsPage({
         entityKind="company"
         entityId={companyDetails.id}
         defaultTitle={companyDetails.name || undefined}
+      />
+
+      <EntityTasksSection
+        entityKind="company"
+        entityId={companyDetails.id}
+        partyKind="company"
+        partyId={companyDetails.id}
+        entityLabel={companyDetails.name}
       />
 
       {/* Notes Modal */}

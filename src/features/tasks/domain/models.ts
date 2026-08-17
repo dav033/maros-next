@@ -97,6 +97,7 @@ export interface TaskEntityRef {
   address?: string;
   addressLink?: string;
   status?: string;
+  jobKey?: string;
 }
 
 /** The board/list row shape — no description, no subtasks, no activity. */
@@ -117,7 +118,13 @@ export interface Task {
   startDate: string | null;
   dueDate: string | null;
   blockedReason: string | null;
+  cancelledReason?: string | null;
   completedAt: string | null;
+  recurrenceRule?: string | null;
+  recurrenceUntil?: string | null;
+  estimatedHours?: number | null;
+  actualHours?: number;
+  startedAt?: string | null;
   labels: TaskLabel[];
   /** Direct-child subtask progress and comment count — 0 unless the backend counted them for this read. */
   subtasksTotal: number;
@@ -135,6 +142,8 @@ export interface TaskDetail extends Task {
   subtasks: Task[];
   activity: TaskActivityEntry[];
   comments: TaskComment[];
+  parties: Array<{ partyKind: "company" | "contact"; partyId: number; role: string }>;
+  watcherIds?: number[];
 }
 
 /** One array per column, `cancelled` never appears. */
@@ -158,6 +167,40 @@ export interface TaskBoardResult {
 export interface TaskListResult {
   items: Task[];
   totalCount: number;
+  nextCursor?: string | null;
+}
+
+export type TaskScheduleFilters = Readonly<{
+  from: string;
+  to: string;
+  assigneeUserId?: number[];
+  jobId?: number;
+  leadType?: "CONSTRUCTION" | "ROOFING" | "PLUMBING";
+}>;
+
+export interface TaskTemplateItem {
+  id: number;
+  title: string;
+  kind: TaskKind;
+  priority: TaskPriority;
+  offsetDays: number;
+  position: number;
+}
+
+export interface TaskTemplate {
+  id: number;
+  name: string;
+  projectType?: string | null;
+  active: boolean;
+  items: TaskTemplateItem[];
+}
+
+export interface TaskSavedView {
+  id: number;
+  name: string;
+  ownerId: number;
+  shared: boolean;
+  state: Record<string, unknown>;
 }
 
 export type TaskDraft = Readonly<{
@@ -172,6 +215,10 @@ export type TaskDraft = Readonly<{
   entityId?: number;
   startDate?: string;
   dueDate?: string;
+  recurrenceRule?: string;
+  recurrenceUntil?: string;
+  estimatedHours?: number;
+  parties?: Array<{ partyKind: "company" | "contact"; partyId: number; role?: string }>;
 }>;
 
 /**
@@ -190,6 +237,7 @@ export type TaskPatch = Readonly<{
   startDate?: string | null;
   dueDate?: string | null;
   blockedReason?: string | null;
+  cancelledReason?: string | null;
   /**
    * The task's `updatedAt` this edit was read from. When set, a save that lands after
    * someone else's concurrent edit fails with a "conflict" AppError instead of
@@ -197,6 +245,9 @@ export type TaskPatch = Readonly<{
    * where the last write is meant to win.
    */
   expectedUpdatedAt?: string;
+  recurrenceRule?: string | null;
+  recurrenceUntil?: string | null;
+  estimatedHours?: number | null;
 }>;
 
 /**
@@ -209,6 +260,13 @@ export type TaskMoveInput = Readonly<{
   beforeId?: number | null;
   afterId?: number | null;
   blockedReason?: string;
+  cancelledReason?: string;
+}>;
+
+export type TaskRescheduleInput = Readonly<{
+  startDate: string | null;
+  dueDate: string | null;
+  assigneeUserId: number | null;
 }>;
 
 /** `openSubtasksWarning` is only ever present when a move closes a task with open subtasks. */
@@ -224,7 +282,7 @@ export type TaskReorderInput = Readonly<{
   afterId?: number | null;
 }>;
 
-export type TaskEntityLink = Readonly<{ entityKind: TaskEntityKind; entityId: number }>;
+export type TaskEntityLink = Readonly<{ entityKind: TaskEntityKind; entityId: number; label?: string }>;
 
 /** Multi-valued fields OR together (any match); every field is AND'd with the rest — see SearchTasksDto. */
 export type TaskFilters = Readonly<{
@@ -236,8 +294,14 @@ export type TaskFilters = Readonly<{
   entityKind?: TaskEntityKind;
   entityId?: number;
   dueBefore?: string;
+  dueOn?: string;
   includeSubtasks?: boolean;
   q?: string;
+  cursor?: string;
+  limit?: number;
+  sort?: "updatedAt" | "createdAt" | "dueDate" | "priority" | "title";
+  direction?: "asc" | "desc";
+  leadType?: "CONSTRUCTION" | "ROOFING" | "PLUMBING";
 }>;
 
 export type TaskLabelDraft = Readonly<{ name: string; color?: string }>;

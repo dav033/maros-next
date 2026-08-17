@@ -75,7 +75,7 @@
 }
 
 html {
-  font-family: var(--font-work-sans), system-ui, sans-serif;
+  font-family: ui-sans-serif, system-ui, sans-serif;
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
   color-scheme: dark;

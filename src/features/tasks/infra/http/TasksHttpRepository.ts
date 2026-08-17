@@ -11,11 +11,15 @@ import type {
   TaskFilters,
   TaskListResult,
   TaskMoveInput,
+  TaskRescheduleInput,
   TaskReorderInput,
   TaskMoveResult,
   TaskPatch,
   TasksRepositoryPort,
   TaskStatus,
+  TaskScheduleFilters,
+  TaskTemplate,
+  TaskSavedView,
 } from "@/features/tasks/domain";
 
 import { endpoints } from "./endpoints";
@@ -34,11 +38,11 @@ export class TasksHttpRepository implements TasksRepositoryPort {
     const { data } = await this.api.get<TaskListResult>(endpoints.base, {
       params: filters,
     });
-    return data ?? { items: [], totalCount: 0 };
+    return data ?? { items: [], totalCount: 0, nextCursor: null };
   }
 
-  async getBoard(): Promise<TaskBoardResult> {
-    const { data } = await this.api.get<TaskBoardResult>(endpoints.board());
+  async getBoard(filters?: TaskFilters): Promise<TaskBoardResult> {
+    const { data } = await this.api.get<TaskBoardResult>(endpoints.board(), { params: filters });
     return data ?? { columns: {}, doneTotalCount: 0 };
   }
 
@@ -50,6 +54,47 @@ export class TasksHttpRepository implements TasksRepositoryPort {
   async listByEntity(entityKind: string, entityId: number): Promise<Task[]> {
     const { data } = await this.api.get<Task[]>(endpoints.byEntity(), {
       params: { entityKind, entityId },
+    });
+    return Array.isArray(data) ? data : [];
+  }
+
+  async listArchived(): Promise<Task[]> {
+    const { data } = await this.api.get<Task[]>(endpoints.archived());
+    return Array.isArray(data) ? data : [];
+  }
+
+  async schedule(filters: TaskScheduleFilters): Promise<Task[]> {
+    const { data } = await this.api.get<Task[]>(endpoints.schedule(), { params: filters });
+    return Array.isArray(data) ? data : [];
+  }
+
+  async listTemplates(): Promise<TaskTemplate[]> {
+    const { data } = await this.api.get<TaskTemplate[]>(endpoints.templates());
+    return Array.isArray(data) ? data : [];
+  }
+
+  async applyTemplate(templateId: number, leadId: number, startDate?: string): Promise<TaskDetail[]> {
+    const { data } = await this.api.post<TaskDetail[]>(endpoints.applyTemplate(templateId), { leadId, startDate });
+    return Array.isArray(data) ? data : [];
+  }
+
+  async listSavedViews(): Promise<TaskSavedView[]> {
+    const { data } = await this.api.get<TaskSavedView[]>(endpoints.savedViews());
+    return Array.isArray(data) ? data : [];
+  }
+
+  async createSavedView(name: string, state: Record<string, unknown>, shared = false): Promise<TaskSavedView> {
+    const { data } = await this.api.post<TaskSavedView>(endpoints.savedViews(), { name, state, shared });
+    return data;
+  }
+
+  async deleteSavedView(id: number): Promise<void> {
+    await this.api.delete<void>(endpoints.savedView(id));
+  }
+
+  async listByParty(partyKind: "company" | "contact", partyId: number): Promise<Task[]> {
+    const { data } = await this.api.get<Task[]>(endpoints.byParty(), {
+      params: { partyKind, partyId },
     });
     return Array.isArray(data) ? data : [];
   }
@@ -94,6 +139,66 @@ export class TasksHttpRepository implements TasksRepositoryPort {
       endpoints.entity(id),
       link ?? { entityKind: null, entityId: null },
     );
+    return data;
+  }
+
+  async reschedule(id: number, input: TaskRescheduleInput): Promise<TaskDetail> {
+    const { data } = await this.api.patch<TaskDetail>(endpoints.scheduleTask(id), input);
+    return data;
+  }
+
+  async setParties(
+    id: number,
+    parties: Array<{ partyKind: "company" | "contact"; partyId: number; role?: string }>,
+  ): Promise<Array<{ partyKind: "company" | "contact"; partyId: number; role: string }>> {
+    const { data } = await this.api.put<Array<{ partyKind: "company" | "contact"; partyId: number; role: string }>>(
+      endpoints.parties(id),
+      { parties },
+    );
+    return data ?? [];
+  }
+
+  async listWatchers(id: number): Promise<number[]> {
+    const { data } = await this.api.get<number[]>(endpoints.watchers(id));
+    return data ?? [];
+  }
+
+  async addWatcher(id: number, userId: number): Promise<number[]> {
+    const { data } = await this.api.post<number[]>(endpoints.watcher(id, userId), {});
+    return data ?? [];
+  }
+
+  async removeWatcher(id: number, userId: number): Promise<number[]> {
+    const { data } = await this.api.delete<number[]>(endpoints.watcher(id, userId));
+    return data ?? [];
+  }
+
+  async archive(id: number): Promise<void> {
+    await this.api.post<void>(endpoints.archive(id), {});
+  }
+
+  async restore(id: number): Promise<TaskDetail> {
+    const { data } = await this.api.post<TaskDetail>(endpoints.restore(id), {});
+    return data;
+  }
+
+  async listDependencies(id: number): Promise<number[]> {
+    const { data } = await this.api.get<number[]>(endpoints.dependencies(id));
+    return data ?? [];
+  }
+
+  async setDependencies(id: number, dependsOnTaskIds: number[]): Promise<number[]> {
+    const { data } = await this.api.put<number[]>(endpoints.dependencies(id), { dependsOnTaskIds });
+    return data ?? [];
+  }
+
+  async startTimer(id: number): Promise<TaskDetail> {
+    const { data } = await this.api.post<TaskDetail>(endpoints.timerStart(id), {});
+    return data;
+  }
+
+  async stopTimer(id: number): Promise<TaskDetail> {
+    const { data } = await this.api.post<TaskDetail>(endpoints.timerStop(id), {});
     return data;
   }
 

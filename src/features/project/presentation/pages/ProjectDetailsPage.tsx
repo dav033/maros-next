@@ -833,7 +833,11 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
         defaultTitle={projectDetails.lead?.name || undefined}
       />
 
-      <EntityTasksSection entityKind="project" entityId={projectDetails.id} />
+      <EntityTasksSection
+        entityKind="project"
+        entityId={projectDetails.id}
+        entityLabel={projectDetails.lead?.name}
+      />
 
       {lead?.leadNumber ? (
         <QuickbooksProjectAttachments projectNumber={lead.leadNumber} />

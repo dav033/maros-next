@@ -7,6 +7,7 @@ import type {
   TaskDraft,
   TaskEntityLink,
   TaskMoveInput,
+  TaskRescheduleInput,
   TaskPatch,
   TaskReorderInput,
   TaskStatus,
@@ -15,10 +16,16 @@ import {
   createTaskAction,
   updateTaskAction,
   moveTaskAction,
+  rescheduleTaskAction,
   reorderSubtaskAction,
   setTaskAssigneeAction,
   setTaskLabelsAction,
   setTaskEntityAction,
+  setTaskPartiesAction,
+  addTaskWatcherAction,
+  removeTaskWatcherAction,
+  archiveTaskAction,
+  restoreTaskAction,
   addTaskAttachmentsAction,
   removeTaskAttachmentAction,
   reorderTaskAttachmentsAction,
@@ -39,8 +46,10 @@ function invalidateDetail(qc: QueryClient, id: number) {
 }
 
 function invalidateBoardAndLists(qc: QueryClient) {
-  void qc.invalidateQueries({ queryKey: tasksKeys.board() });
-  void qc.invalidateQueries({ queryKey: tasksKeys.lists() });
+  // `tasksKeys.all` also covers entity/party boards embedded in CRM records;
+  // otherwise a mutation made from an embedded board would look stale until a
+  // full page refresh.
+  void qc.invalidateQueries({ queryKey: tasksKeys.all });
 }
 
 /**
@@ -143,6 +152,43 @@ export function useTaskMutations() {
     invalidate: (qc, data) => invalidateByScope(qc, "all", data.id),
   });
 
+  const rescheduleMutation = useEntityMutation({
+    entityLabel: "Task",
+    action: "updated",
+    successMessage: "Schedule updated",
+    mutationFn: ({ id, input }: { id: number; input: TaskRescheduleInput }) => rescheduleTaskAction(id, input),
+    invalidate: (qc, data) => invalidateByScope(qc, "all", data.id),
+  });
+
+  const setPartiesMutation = useEntityMutation({
+    entityLabel: "Task",
+    action: "updated",
+    successMessage: "Related party updated",
+    mutationFn: ({
+      id,
+      parties,
+    }: {
+      id: number;
+      parties: Array<{ partyKind: "company" | "contact"; partyId: number; role?: string }>;
+    }) => setTaskPartiesAction(id, parties),
+    invalidate: (qc, _data, input) => {
+      invalidateByScope(qc, "all", input.id);
+    },
+  });
+
+  const addWatcherMutation = useEntityMutation({
+    entityLabel: "Task",
+    action: "updated",
+    mutationFn: ({ id, userId }: { id: number; userId: number }) => addTaskWatcherAction(id, userId),
+    invalidate: (qc, _data, input) => invalidateDetail(qc, input.id),
+  });
+  const removeWatcherMutation = useEntityMutation({
+    entityLabel: "Task",
+    action: "updated",
+    mutationFn: ({ id, userId }: { id: number; userId: number }) => removeTaskWatcherAction(id, userId),
+    invalidate: (qc, _data, input) => invalidateDetail(qc, input.id),
+  });
+
   // Additive, never a full-list replace — see TaskPatch for why. No success toast:
   // uploads/removals get their own feedback (EntityAttachmentsSection's own toasts).
   // Attachments render only inside the detail sheet — no board/list/mine card shows them.
@@ -175,6 +221,20 @@ export function useTaskMutations() {
     // for a query about to have nothing to show.
     mutationFn: (id: number) => deleteTaskAction(id),
     invalidate: (qc) => invalidateByScope(qc, "all"),
+  });
+
+  const archiveMutation = useEntityMutation({
+    entityLabel: "Task",
+    action: "archived",
+    mutationFn: (id: number) => archiveTaskAction(id),
+    invalidate: (qc) => invalidateByScope(qc, "all"),
+  });
+
+  const restoreMutation = useEntityMutation({
+    entityLabel: "Task",
+    action: "restored",
+    mutationFn: (id: number) => restoreTaskAction(id),
+    invalidate: (qc, data) => invalidateByScope(qc, "all", data.id),
   });
 
   // commentsCount shows on the board's TaskCard, but not on the list or "Mine" —
@@ -266,14 +326,20 @@ export function useTaskMutations() {
     createMutation,
     updateMutation,
     moveMutation,
+    rescheduleMutation,
     setAssigneeMutation,
     setLabelsMutation,
     setEntityMutation,
+    setPartiesMutation,
+    addWatcherMutation,
+    removeWatcherMutation,
     addAttachmentsMutation,
     removeAttachmentMutation,
     reorderAttachmentsMutation,
     reorderSubtaskMutation,
     deleteMutation,
+    archiveMutation,
+    restoreMutation,
     addCommentMutation,
     updateCommentMutation,
     deleteCommentMutation,

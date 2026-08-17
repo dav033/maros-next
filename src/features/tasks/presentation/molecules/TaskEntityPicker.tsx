@@ -59,8 +59,8 @@ export function TaskEntityPicker({
   const activeQuery =
     tab === "lead" || tab === "project" ? recordsQuery : tab === "contact" ? contactsQuery : companiesQuery;
 
-  const choose = (entityKind: PickerTab, entityId: number) => {
-    onSelect({ entityKind, entityId });
+  const choose = (entityKind: PickerTab, entityId: number, label: string) => {
+    onSelect({ entityKind, entityId, label });
     setOpen(false);
   };
 
@@ -95,7 +95,7 @@ export function TaskEntityPicker({
                   <CommandItem
                     key={lead.id}
                     value={`${lead.leadNumber ?? ""} ${lead.name}`}
-                    onSelect={() => choose("lead", lead.id)}
+                    onSelect={() => choose("lead", lead.id, lead.name)}
                   >
                     <span className="truncate">{lead.name}</span>
                     {lead.leadNumber && (
@@ -112,7 +112,7 @@ export function TaskEntityPicker({
                   <CommandItem
                     key={project.id}
                     value={`${project.leadNumber ?? ""} ${project.name}`}
-                    onSelect={() => choose("project", project.id)}
+                    onSelect={() => choose("project", project.id, project.name)}
                   >
                     <span className="truncate">{project.name}</span>
                     {project.leadNumber && (
@@ -131,7 +131,7 @@ export function TaskEntityPicker({
                     <CommandItem
                       key={contact.id}
                       value={`${contact.name} ${contact.email ?? ""} ${contact.phone ?? ""}`}
-                      onSelect={() => choose("contact", contact.id!)}
+                      onSelect={() => choose("contact", contact.id!, contact.name)}
                     >
                       <span className="truncate">{contact.name}</span>
                       {contact.email && (
@@ -148,7 +148,7 @@ export function TaskEntityPicker({
                   <CommandItem
                     key={company.id}
                     value={`${company.name} ${company.email ?? ""} ${company.phone ?? ""}`}
-                    onSelect={() => choose("company", company.id)}
+                    onSelect={() => choose("company", company.id, company.name)}
                   >
                     <span className="truncate">{company.name}</span>
                   </CommandItem>

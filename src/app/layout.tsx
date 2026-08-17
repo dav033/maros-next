@@ -1,19 +1,11 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import Script from "next/script";
-import { Work_Sans } from "next/font/google";
 import "../styles/globals.css";
 import { AppProviders } from "./AppProviders";
 import { AppShell } from "./AppShell";
 import { Toaster } from "@/components/ui/sonner";
 import { fetchCurrentUser } from "@/shared/auth/currentUser";
-
-const workSans = Work_Sans({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
-  variable: "--font-work-sans",
-  display: "swap",
-});
 
 declare global {
   interface Window {
@@ -39,7 +31,7 @@ export default async function RootLayout({
   const currentUser = isPublicReader ? null : await fetchCurrentUser();
 
   return (
-    <html lang="en" className={`dark ${workSans.variable}`}>
+    <html lang="en" className="dark">
       <body className="min-h-svh bg-background text-foreground font-sans">
         <AppProviders currentUser={currentUser}>
           <AppShell>{children}</AppShell>

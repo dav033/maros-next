@@ -8,3 +8,11 @@ export async function listTasksByEntity(
 ): Promise<Task[]> {
   return ctx.repos.task.listByEntity(entityKind, entityId);
 }
+
+export async function listTasksByParty(
+  ctx: TasksAppContext,
+  partyKind: "company" | "contact",
+  partyId: number,
+): Promise<Task[]> {
+  return ctx.repos.task.listByParty(partyKind, partyId);
+}

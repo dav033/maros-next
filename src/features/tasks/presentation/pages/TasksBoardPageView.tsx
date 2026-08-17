@@ -1,11 +1,14 @@
 "use client";
 
 import { KanbanSquare } from "lucide-react";
+import Link from "next/link";
 import { PageHeaderCard } from "@/components/shared";
 import { TaskBoard } from "../organisms/TaskBoard";
 import { CreateTaskDialog } from "../organisms/CreateTaskDialog";
 import { TaskDetailSheet } from "../organisms/TaskDetailSheet";
 import { TaskViewSwitcher } from "../molecules/TaskViewSwitcher";
+import { TaskScopeBar } from "../molecules/TaskScopeBar";
+import { TaskSavedViews } from "../molecules/TaskSavedViews";
 import { useTaskDetailRoute } from "../hooks/useTaskDetailRoute";
 
 export function TasksBoardPageView() {
@@ -18,10 +21,10 @@ export function TasksBoardPageView() {
         title="Tasks"
         description="What needs doing, who's doing it, and what it's waiting on."
         rightSlot={<CreateTaskDialog onCreated={openTask} />}
-        belowSlot={<TaskViewSwitcher current="board" />}
+        belowSlot={<div className="flex flex-wrap items-center gap-3"><TaskViewSwitcher current="board" /><TaskScopeBar /><TaskSavedViews /><Link href="/tasks/archive" className="text-xs text-muted-foreground underline decoration-dotted hover:text-foreground">Archived</Link></div>}
       />
 
-      <section className="dashboard-section-enter mt-2 flex-1 overflow-hidden">
+      <section className="mt-2 flex-1 overflow-hidden">
         <TaskBoard onOpenTask={openTask} />
       </section>
 

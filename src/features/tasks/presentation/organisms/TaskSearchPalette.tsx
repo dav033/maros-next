@@ -25,9 +25,8 @@ const MAX_HITS = 20;
  * extra unfiltered /tasks fetch on every page load.
  */
 function TaskResults({ query, onSelect }: { query: string; onSelect: (id: number) => void }) {
-  const { tasks, showSkeleton } = useInstantTasksList();
-  const q = query.trim().toLowerCase();
-  const hits = (q ? tasks.filter((t) => t.title.toLowerCase().includes(q)) : tasks).slice(0, MAX_HITS);
+  const { tasks, showSkeleton } = useInstantTasksList({ q: query.trim() || undefined, limit: MAX_HITS });
+  const hits = tasks.slice(0, MAX_HITS);
 
   return (
     <>
@@ -94,11 +93,11 @@ export function TaskSearchPalette() {
                 <KanbanSquare className="h-4 w-4 text-muted-foreground" />
                 Board
               </CommandItem>
-              <CommandItem value="go-list" onSelect={() => goTo("/tasks/list")}>
+              <CommandItem value="go-list" onSelect={() => goTo("/tasks?view=list")}>
                 <ListTodo className="h-4 w-4 text-muted-foreground" />
                 List
               </CommandItem>
-              <CommandItem value="go-mine" onSelect={() => goTo("/tasks/mine")}>
+              <CommandItem value="go-mine" onSelect={() => goTo("/tasks?view=mine")}>
                 <UserCheck className="h-4 w-4 text-muted-foreground" />
                 My tasks
               </CommandItem>

@@ -3,18 +3,22 @@
 import { toast } from "sonner";
 import { AppError, GENERIC_ERROR_MESSAGE } from "@/shared/errors";
 
-export type EntityAction = "created" | "updated" | "deleted";
+export type EntityAction = "created" | "updated" | "deleted" | "archived" | "restored";
 
 const PAST_TENSE_LABEL: Record<EntityAction, string> = {
   created: "created",
   updated: "updated",
   deleted: "deleted",
+  archived: "archived",
+  restored: "restored",
 };
 
 const VERB_LABEL: Record<EntityAction, string> = {
   created: "create",
   updated: "update",
   deleted: "delete",
+  archived: "archive",
+  restored: "restore",
 };
 
 export type EntityToastOptions = {
