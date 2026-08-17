@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { resolveCardDropSide, sameDragPreview } from "./taskBoardDragUtil";
+import { resolveCardDropSide } from "./taskBoardDragUtil";
 
 describe("resolveCardDropSide", () => {
   const column = [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }];
@@ -28,25 +28,5 @@ describe("resolveCardDropSide", () => {
 
   it("drops before when dropped on itself (no-op guard upstream still applies)", () => {
     expect(resolveCardDropSide(column, 2, 2)).toBe("before");
-  });
-});
-
-describe("sameDragPreview", () => {
-  it("treats equivalent drag positions as equal", () => {
-    expect(sameDragPreview(
-      { taskId: 7, toStatus: "in_progress", beforeId: 12 },
-      { taskId: 7, toStatus: "in_progress", beforeId: 12 },
-    )).toBe(true);
-  });
-
-  it("detects a changed target or position", () => {
-    expect(sameDragPreview(
-      { taskId: 7, toStatus: "in_progress", beforeId: 12 },
-      { taskId: 7, toStatus: "blocked", beforeId: 12 },
-    )).toBe(false);
-    expect(sameDragPreview(
-      { taskId: 7, toStatus: "in_progress", beforeId: 12 },
-      { taskId: 7, toStatus: "in_progress", afterId: 12 },
-    )).toBe(false);
   });
 });

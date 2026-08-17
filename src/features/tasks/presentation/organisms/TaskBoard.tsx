@@ -50,8 +50,7 @@ import {
   TASK_STATUS_COLORS,
   TASK_STATUS_LABELS,
 } from "../atoms/taskVisualTokens";
-import { resolveCardDropSide, sameDragPreview, type TaskBoardDragPreview } from "./taskBoardDragUtil";
-import { applyOptimisticMove } from "./taskBoardOptimisticMove";
+import { resolveCardDropSide } from "./taskBoardDragUtil";
 import { matchesAssigneeFilter, type AssigneeFilterKey } from "./taskBoardAssigneeFilter";
 import { groupTasksByAssignee } from "./taskBoardAssigneeGroups";
 import { TASK_SEARCH_INPUT_ID } from "./TaskKeyboardShortcuts";
@@ -409,12 +408,10 @@ export function TaskBoard({
     return () => window.clearTimeout(timer);
   }, [replaceState, searchDraft, state.q]);
 
-  // Which card is being dragged (for DragOverlay) and where it would land if dropped
-  // right now (for the live reorder preview) — both reset on drop or cancel. Neither
-  // touches the query cache; that only happens on a real drop (see
-  // taskBoardOptimisticMove, wired in useTaskMutations' moveMutation).
+  // Which card is being dragged (for DragOverlay). The board deliberately stays
+  // structurally stable while dnd-kit measures droppable columns; the final target
+  // is resolved from the drop event and the mutation applies the optimistic update.
   const [activeId, setActiveId] = useState<number | null>(null);
-  const [dragPreview, setDragPreview] = useState<TaskBoardDragPreview | null>(null);
   const [groupDragPreview, setGroupDragPreview] = useState<string | null>(null);
 
   const sensors = useSensors(
@@ -437,25 +434,16 @@ export function TaskBoard({
     return { taskStatusById: statusMap, taskById: taskMap };
   }, [board]);
 
-  // What actually renders: the real board, with the active drag's hypothetical
-  // placement previewed in — see dragPreview and applyOptimisticMove. Recomputed
-  // fresh from `board` each time, so a fast drag across several columns never
-  // compounds rounding/ordering drift from its own previous preview.
-  const displayBoard: TaskBoardColumns = useMemo(
-    () => (dragPreview ? applyOptimisticMove(board, dragPreview) : board),
-    [board, dragPreview]
-  );
-
   // Search is applied by the server; this pass keeps the board derived from the
-  // pristine query result so drag previews never compound over filtered data.
+  // pristine query result while a drag is in progress.
   const searched = useMemo(() => {
     const result: Partial<Record<TaskStatus, Task[]>> = {};
     for (const status of BOARD_STATUSES) {
-      const tasks = displayBoard[status] ?? [];
+      const tasks = board[status] ?? [];
       result[status] = tasks;
     }
     return result;
-  }, [displayBoard]);
+  }, [board]);
 
   const stats = useMemo(() => {
     let overdue = 0;
@@ -674,15 +662,12 @@ export function TaskBoard({
   };
 
   const handleDragOver = (event: DragOverEvent) => {
-    const { active, over } = event;
+    const { over } = event;
     if (!over) {
-      setDragPreview(null);
       return;
     }
 
-    const taskId = Number(active.id);
     if (state.group !== "status") {
-      setDragPreview(null);
       const target = taskById.get(Number(over.id));
       const targetKey = typeof over.id === "string" && over.id.startsWith(ASSIGNEE_PREFIX)
         ? over.id.slice(ASSIGNEE_PREFIX.length)
@@ -701,20 +686,14 @@ export function TaskBoard({
       return;
     }
     setGroupDragPreview(null);
-    const targetStatus = resolveTargetStatus(over.id);
-    if (!targetStatus) {
-      setDragPreview(null);
-      return;
-    }
-
-    const { beforeId, afterId } = resolveDropTarget(taskId, targetStatus, over.id);
-    const nextPreview: TaskBoardDragPreview = { taskId, toStatus: targetStatus, beforeId, afterId };
-    setDragPreview((current) => (sameDragPreview(current, nextPreview) ? current : nextPreview));
+    // Do not update rendered board state from dragover. dnd-kit continuously
+    // measures these droppables; changing the card tree here can cause an update
+    // loop when the pointer rests over a card. handleDragEnd resolves the same
+    // target and position from the final event.
   };
 
   const resetDragState = () => {
     setActiveId(null);
-    setDragPreview(null);
     setGroupDragPreview(null);
   };
 
