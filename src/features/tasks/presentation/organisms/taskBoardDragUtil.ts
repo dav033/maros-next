@@ -1,3 +1,24 @@
+import type { TaskStatus } from "@/tasks/domain";
+
+export type TaskBoardDragPreview = {
+  taskId: number;
+  toStatus: TaskStatus;
+  beforeId?: number;
+  afterId?: number;
+};
+
+export function sameDragPreview(
+  left: TaskBoardDragPreview | null,
+  right: TaskBoardDragPreview | null,
+): boolean {
+  if (left === right) return true;
+  if (!left || !right) return false;
+  return left.taskId === right.taskId
+    && left.toStatus === right.toStatus
+    && left.beforeId === right.beforeId
+    && left.afterId === right.afterId;
+}
+
 /**
  * dnd-kit's `over.id` is always the card being dropped ON — the caller has to decide
  * whether that means "take this card's spot" (before) or "land right after it"

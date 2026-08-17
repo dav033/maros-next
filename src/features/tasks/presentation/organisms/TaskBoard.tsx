@@ -50,7 +50,7 @@ import {
   TASK_STATUS_COLORS,
   TASK_STATUS_LABELS,
 } from "../atoms/taskVisualTokens";
-import { resolveCardDropSide } from "./taskBoardDragUtil";
+import { resolveCardDropSide, sameDragPreview, type TaskBoardDragPreview } from "./taskBoardDragUtil";
 import { applyOptimisticMove } from "./taskBoardOptimisticMove";
 import { matchesAssigneeFilter, type AssigneeFilterKey } from "./taskBoardAssigneeFilter";
 import { groupTasksByAssignee } from "./taskBoardAssigneeGroups";
@@ -414,12 +414,7 @@ export function TaskBoard({
   // touches the query cache; that only happens on a real drop (see
   // taskBoardOptimisticMove, wired in useTaskMutations' moveMutation).
   const [activeId, setActiveId] = useState<number | null>(null);
-  const [dragPreview, setDragPreview] = useState<{
-    taskId: number;
-    toStatus: TaskStatus;
-    beforeId?: number;
-    afterId?: number;
-  } | null>(null);
+  const [dragPreview, setDragPreview] = useState<TaskBoardDragPreview | null>(null);
   const [groupDragPreview, setGroupDragPreview] = useState<string | null>(null);
 
   const sensors = useSensors(
@@ -713,7 +708,8 @@ export function TaskBoard({
     }
 
     const { beforeId, afterId } = resolveDropTarget(taskId, targetStatus, over.id);
-    setDragPreview({ taskId, toStatus: targetStatus, beforeId, afterId });
+    const nextPreview: TaskBoardDragPreview = { taskId, toStatus: targetStatus, beforeId, afterId };
+    setDragPreview((current) => (sameDragPreview(current, nextPreview) ? current : nextPreview));
   };
 
   const resetDragState = () => {
