@@ -34,6 +34,8 @@ import { TaskRichTextEditor } from "../molecules/TaskRichTextEditor";
 import { isBlankDoc } from "../molecules/taskRichTextDoc";
 import { TASK_KIND_LABELS, TASK_PRIORITY_LABELS, taskLabelColor } from "../atoms/taskVisualTokens";
 import { taskEntityLabel } from "../atoms/taskEntityTokens";
+import { PendingAttachmentPicker, type PendingAttachment } from "@/features/attachments/presentation/PendingAttachmentPicker";
+import { ManagedFilesHttpRepository } from "@/features/attachments/infra/ManagedFilesHttpRepository";
 
 const EMPTY_DOC = { type: "doc", content: [{ type: "paragraph" }] };
 
@@ -90,11 +92,16 @@ export function CreateTaskDialog({
   const [labelIds, setLabelIds] = useState<Set<number>>(new Set());
   const [entityLink, setEntityLink] = useState<TaskEntityLink | null>(null);
   const [showMore, setShowMore] = useState(false);
+  const [pendingAttachments, setPendingAttachments] = useState<PendingAttachment[]>([]);
+  const [createdTaskId, setCreatedTaskId] = useState<number | null>(null);
+  const [uploadingAttachments, setUploadingAttachments] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [descriptionKey, setDescriptionKey] = useState(0);
   const descriptionRef = useRef<Record<string, unknown>>(EMPTY_DOC);
 
   const { labels: allLabels } = useInstantTaskLabels();
-  const { createMutation, setLabelsMutation } = useTaskMutations();
+  const { createMutation } = useTaskMutations();
+  const managedFiles = useRef(new ManagedFilesHttpRepository());
 
   const linkedEntityKind = defaultEntityKind ?? entityLink?.entityKind ?? null;
   const linkedEntityId = defaultEntityId ?? entityLink?.entityId ?? null;
@@ -109,6 +116,9 @@ export function CreateTaskDialog({
     setDueDate(null);
     setStartDate(null);
     setLabelIds(new Set());
+    setPendingAttachments([]);
+    setCreatedTaskId(null);
+    setUploadError(null);
     if (!entityIsLocked) setEntityLink(null);
     descriptionRef.current = EMPTY_DOC;
     setDescriptionKey((k) => k + 1);
@@ -124,28 +134,57 @@ export function CreateTaskDialog({
   };
 
   const submit = async (another: boolean) => {
-    if (!title.trim() || createMutation.isPending) return;
+    if (!title.trim() || createMutation.isPending || uploadingAttachments) return;
 
-    const result = await createMutation.mutateAsync({
-      title: title.trim(),
-      kind,
-      priority,
-      assigneeUserId: assigneeUserId ?? undefined,
-      dueDate: dueDate ?? undefined,
-      startDate: startDate ?? undefined,
-      entityKind: linkedEntityKind ?? undefined,
-      entityId: linkedEntityId ?? undefined,
-      description: isBlankDoc(descriptionRef.current) ? undefined : descriptionRef.current,
-      parties: defaultPartyKind && defaultPartyId != null
-        ? [{ partyKind: defaultPartyKind, partyId: defaultPartyId }]
-        : undefined,
-    });
+    let taskId = createdTaskId;
+    if (taskId == null) {
+      const result = await createMutation.mutateAsync({
+        title: title.trim(),
+        kind,
+        priority,
+        assigneeUserId: assigneeUserId ?? undefined,
+        dueDate: dueDate ?? undefined,
+        startDate: startDate ?? undefined,
+        entityKind: linkedEntityKind ?? undefined,
+        entityId: linkedEntityId ?? undefined,
+        description: isBlankDoc(descriptionRef.current) ? undefined : descriptionRef.current,
+        parties: defaultPartyKind && defaultPartyId != null
+          ? [{ partyKind: defaultPartyKind, partyId: defaultPartyId }]
+          : undefined,
+        labelIds: Array.from(labelIds),
+      });
+      taskId = result.id;
+      setCreatedTaskId(taskId);
+    }
+    if (taskId == null) return;
 
-    // Labels aren't part of creation (CreateTaskDto has no labelIds — see the domain
-    // TaskDraft type) — one extra call, same as attachments never being settable at
-    // creation either.
-    if (labelIds.size > 0) {
-      await setLabelsMutation.mutateAsync({ id: result.id, labelIds: Array.from(labelIds) });
+    if (pendingAttachments.length > 0) {
+      setUploadingAttachments(true);
+      setUploadError(null);
+      const failures: PendingAttachment[] = [];
+      for (const pending of pendingAttachments) {
+        try {
+          const intent = await managedFiles.current.createIntent({
+            ownerKind: "task",
+            ownerId: taskId,
+            fileName: pending.file.name,
+            mimeType: pending.file.type || "application/octet-stream",
+            sizeBytes: pending.file.size,
+            clientUploadId: pending.id,
+          });
+          await managedFiles.current.upload(intent, pending.file, (progress) => {
+            setPendingAttachments((current) => current.map((item) => item.id === pending.id ? { ...item, progress } : item));
+          });
+        } catch (error) {
+          failures.push({ ...pending, error: error instanceof Error ? error.message : "Upload failed" });
+        }
+      }
+      setUploadingAttachments(false);
+      if (failures.length > 0) {
+        setPendingAttachments(failures);
+        setUploadError("Some files could not be uploaded. Retry failed or open the task.");
+        return;
+      }
     }
     if (another) {
       resetPerTaskFields();
@@ -153,7 +192,7 @@ export function CreateTaskDialog({
     }
     setOpen(false);
     resetAll();
-    onCreated?.(result.id);
+    if (taskId != null) onCreated?.(taskId);
   };
 
   const toggleLabel = (labelId: number) => {
@@ -205,7 +244,7 @@ export function CreateTaskDialog({
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Pour foundation for unit 3"
               onKeyDown={(e) => {
-                if (e.key === "Enter") void submit(false);
+                if (e.key === "Enter") e.preventDefault();
               }}
             />
           </div>
@@ -282,18 +321,6 @@ export function CreateTaskDialog({
 
           {showMore ? (
             <div className="space-y-4 border-t border-border/60 pt-4">
-              <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground">Description</Label>
-                <TaskRichTextEditor
-                  key={descriptionKey}
-                  content={EMPTY_DOC}
-                  minHeightClassName="min-h-[70px]"
-                  onUpdate={(doc) => {
-                    descriptionRef.current = doc;
-                  }}
-                />
-              </div>
-
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label className="text-xs text-muted-foreground">Start date</Label>
@@ -384,6 +411,31 @@ export function CreateTaskDialog({
               ) : null}
             </div>
           ) : null}
+
+          <div className="space-y-1.5">
+            <Label className="text-xs text-muted-foreground">Description</Label>
+            <TaskRichTextEditor
+              key={descriptionKey}
+              content={EMPTY_DOC}
+              minHeightClassName="min-h-[90px]"
+              onUpdate={(doc) => {
+                descriptionRef.current = doc;
+              }}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-xs text-muted-foreground">Attachments</Label>
+            <PendingAttachmentPicker value={pendingAttachments} onChange={setPendingAttachments} disabled={uploadingAttachments} />
+            {uploadError ? <p className="text-xs text-destructive">{uploadError}</p> : null}
+            {createdTaskId && uploadError ? (
+              <div className="flex gap-2 text-xs">
+                <button type="button" className="underline" onClick={() => void submit(false)}>Retry failed</button>
+                <button type="button" className="underline" onClick={() => { setOpen(false); onCreated?.(createdTaskId); }}>Open task</button>
+                <button type="button" className="underline" onClick={() => { setOpen(false); resetAll(); onCreated?.(createdTaskId); }}>Done</button>
+              </div>
+            ) : null}
+          </div>
         </div>
 
         <DialogFooter className="gap-2 sm:justify-between">

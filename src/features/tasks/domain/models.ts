@@ -109,8 +109,8 @@ export interface Task {
   status: TaskStatus;
   priority: TaskPriority;
   position: number;
-  workspaceId: number | null;
-  folderId: number | null;
+  workspaceId?: number | null;
+  folderId?: number | null;
   workspacePosition?: number;
   workspace?: { id: number; title: string; archivedAt: string | null } | null;
   folder?: { id: number; title: string; parentFolderId: number | null } | null;
