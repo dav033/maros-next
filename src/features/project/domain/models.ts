@@ -4,6 +4,44 @@ import type { ProjectFinancial } from "./models/ProjectFinancial";
 // Re-export ProjectFinancial for convenience
 export type { ProjectFinancial } from "./models/ProjectFinancial";
 
+export type ProjectClientSummary = {
+  id: number;
+  type: "contact" | "company";
+  name: string;
+  isClient: boolean;
+  isCustomer: boolean;
+} | null;
+
+export type ProjectPaymentSummary = {
+  count: number;
+  totalAmount: number;
+  lastPaymentDate: string | null;
+  hasDetails: boolean;
+};
+
+export type ProjectPaymentItem = {
+  id: string;
+  date: string | null;
+  amount: number;
+  method: string | null;
+  reference: string | null;
+  linkedInvoices: Array<{ id: string; documentNumber: string | null; amount: number | null }>;
+  unappliedAmount: number;
+  memo: string | null;
+  attachmentCount: number;
+  warnings: string[];
+};
+
+export type ProjectPaymentsResponse = {
+  projectId: number;
+  projectNumber: string | null;
+  totalAmount: number;
+  count: number;
+  source: "quickbooks";
+  fetchedAt: string;
+  items: ProjectPaymentItem[];
+};
+
 export enum ProjectProgressStatus {
   NOT_EXECUTED = "NOT_EXECUTED",
   IN_PROGRESS = "IN_PROGRESS",
@@ -32,6 +70,8 @@ export interface Project {
   startDate?: string;
   endDate?: string;
   financial?: ProjectFinancial;
+  client?: ProjectClientSummary;
+  paymentSummary?: ProjectPaymentSummary | null;
 }
 
 export type ProjectId = number;

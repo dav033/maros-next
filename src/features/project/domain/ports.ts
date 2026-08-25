@@ -1,4 +1,4 @@
-import type { Project, ProjectDraft, ProjectId, ProjectPatch } from "./models";
+import type { Project, ProjectDraft, ProjectId, ProjectPatch, ProjectPaymentsResponse } from "./models";
 
 export interface ProjectRepositoryPort {
   getById(id: ProjectId): Promise<Project | null>;
@@ -7,6 +7,7 @@ export interface ProjectRepositoryPort {
   update(id: ProjectId, patch: ProjectPatch): Promise<Project>;
   delete(id: ProjectId): Promise<void>;
   revertToLead(id: ProjectId): Promise<{ leadId: number }>;
+  getPaymentDetails(id: ProjectId): Promise<ProjectPaymentsResponse>;
 }
 
 

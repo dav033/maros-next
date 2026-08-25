@@ -1,5 +1,5 @@
 import type { ApiProjectDTO } from "@/project/domain/services/projectReadMapper";
-import type { Project, ProjectDraft, ProjectPatch } from "@/project/domain/models";
+import type { Project, ProjectDraft, ProjectPatch, ProjectPaymentsResponse } from "@/project/domain/models";
 import type { ProjectRepositoryPort } from "@/project/domain/ports";
 import { optimizedApiClient } from "@/shared/infra/http";
 import { makeHttpResourceRepository } from "@/shared/infra/rest";
@@ -64,6 +64,12 @@ export class ProjectHttpRepository implements ProjectRepositoryPort {
       {},
     );
     if (!data) throw new Error("Empty response reverting project to lead");
+    return data;
+  };
+
+  getPaymentDetails = async (id: number): Promise<ProjectPaymentsResponse> => {
+    const { data } = await this.api.get<ProjectPaymentsResponse>(projectEndpoints.payments(id));
+    if (!data) throw new Error("Empty response loading project payments");
     return data;
   };
 }

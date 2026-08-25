@@ -12,6 +12,19 @@ export type ApiProjectDTO = {
   attachments?: string[] | null;
   leadId?: number | null;
   financial?: ProjectFinancial | null;
+  client?: {
+    id?: number | null;
+    type?: "contact" | "company" | null;
+    name?: string | null;
+    isClient?: boolean;
+    isCustomer?: boolean;
+  } | null;
+  paymentSummary?: {
+    count?: number;
+    totalAmount?: number;
+    lastPaymentDate?: string | null;
+    hasDetails?: boolean;
+  } | null;
   lead?: {
     id?: number | null;
     leadNumber?: string | null;

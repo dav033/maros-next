@@ -109,6 +109,11 @@ export interface Task {
   status: TaskStatus;
   priority: TaskPriority;
   position: number;
+  workspaceId: number | null;
+  folderId: number | null;
+  workspacePosition?: number;
+  workspace?: { id: number; title: string; archivedAt: string | null } | null;
+  folder?: { id: number; title: string; parentFolderId: number | null } | null;
   assignee: TaskPersonRef | null;
   reporter: TaskPersonRef | null;
   entityKind: TaskEntityKind | null;
@@ -139,11 +144,22 @@ export interface TaskDetail extends Task {
   description: Record<string, unknown>;
   createdBy: TaskPersonRef | null;
   attachments: string[];
+  managedFiles?: ManagedTaskFile[];
   subtasks: Task[];
   activity: TaskActivityEntry[];
   comments: TaskComment[];
   parties: Array<{ partyKind: "company" | "contact"; partyId: number; role: string }>;
   watcherIds?: number[];
+}
+
+export interface ManagedTaskFile {
+  id: number;
+  fileName: string;
+  mimeType: string;
+  sizeBytes: number;
+  position: number;
+  status: "pending" | "ready" | "failed";
+  previewUrl?: string | null;
 }
 
 /** One array per column, `cancelled` never appears. */
@@ -219,6 +235,10 @@ export type TaskDraft = Readonly<{
   recurrenceUntil?: string;
   estimatedHours?: number;
   parties?: Array<{ partyKind: "company" | "contact"; partyId: number; role?: string }>;
+  labelIds?: number[];
+  workspaceId?: number;
+  folderId?: number | null;
+  workspacePosition?: number;
 }>;
 
 /**
@@ -302,6 +322,9 @@ export type TaskFilters = Readonly<{
   sort?: "updatedAt" | "createdAt" | "dueDate" | "priority" | "title";
   direction?: "asc" | "desc";
   leadType?: "CONSTRUCTION" | "ROOFING" | "PLUMBING";
+  workspaceId?: number;
+  folderId?: number;
+  includeDescendants?: boolean;
 }>;
 
 export type TaskLabelDraft = Readonly<{ name: string; color?: string }>;
