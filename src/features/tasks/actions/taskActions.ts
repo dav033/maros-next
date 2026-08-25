@@ -2,7 +2,7 @@
 
 import { headers } from "next/headers";
 import { createServerApiClient } from "@/shared/infra/http";
-import { TasksHttpRepository, TaskLabelsHttpRepository, makeTasksAppContext } from "@/tasks";
+import { TasksHttpRepository, TaskLabelsHttpRepository, TaskWorkspacesHttpRepository, makeTasksAppContext } from "@/tasks";
 import type { ActionResult } from "@/shared/actions/types";
 import { success, handleActionError } from "@/shared/actions/utils";
 import type {
@@ -31,6 +31,7 @@ async function createServerTasksAppContext() {
     repos: {
       task: new TasksHttpRepository(api),
       label: new TaskLabelsHttpRepository(api),
+      workspace: new TaskWorkspacesHttpRepository(api),
     },
   });
 }

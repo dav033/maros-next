@@ -96,7 +96,7 @@ export class AnalyticsHttpRepository implements AnalyticsRepositoryPort {
     return mapRevenueTrend(data);
   }
 
-  async getTopClients(params?: { limit?: number; by?: "revenue" | "volume"; leadType?: LeadType }) {
+  async getTopClients(params?: { limit?: number; by?: "revenue" | "volume"; from?: string; to?: string; leadType?: LeadType }) {
     const { data } = await this.api.get<TopClientResponse[]>(analyticsEndpoints.topClients(), {
       params,
     });

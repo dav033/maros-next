@@ -71,6 +71,7 @@ export interface ProjectsTableProps {
   onEdit?: (project: Project) => void;
   onDelete?: (project: Project) => void;
   onOpenNotesModal?: (project: Project) => void;
+  onOpenPayments?: (project: Project) => void;
   groupBy?: ProjectGroupBy;
   pagination?: { enabled?: boolean };
   selection?: EntityTableSelection;
@@ -83,6 +84,7 @@ export function ProjectsTable({
   onEdit,
   onDelete,
   onOpenNotesModal,
+  onOpenPayments,
   groupBy = "none",
   pagination,
   selection,
@@ -90,7 +92,7 @@ export function ProjectsTable({
   const isMutating = tableLogic?.isMutating;
   const router = useRouter();
   const rows = tableLogic?.rows ?? projects ?? [];
-  const columns = useProjectsTableColumns({ onOpenNotesModal });
+  const columns = useProjectsTableColumns({ onOpenNotesModal, onOpenPayments });
 
   const getContextMenuItems = useMemo<
     ((row: Project) => EntityContextMenuItem[]) | undefined

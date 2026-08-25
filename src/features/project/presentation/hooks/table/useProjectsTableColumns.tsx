@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { NotesButton } from "@/components/shared";
 import { formatCurrency } from "@/shared/utils";
 import { PROGRESS_COLORS, PROGRESS_LABELS } from "../../organisms/projectVisualTokens";
+import { useHasPermission } from "@/shared/auth/useHasPermission";
 
 function ProjectStatusBadge({ status }: { status: ProjectProgressStatus }) {
   const label = PROGRESS_LABELS[status] ?? status;
@@ -26,6 +27,7 @@ function ProjectStatusBadge({ status }: { status: ProjectProgressStatus }) {
 
 type UseProjectsTableColumnsOptions = {
   onOpenNotesModal?: (project: Project) => void;
+  onOpenPayments?: (project: Project) => void;
 };
 
 function toAmount(value: unknown): number | null {
@@ -66,6 +68,8 @@ export function useProjectsTableColumns(
   options?: UseProjectsTableColumnsOptions
 ): SimpleTableColumn<Project>[] {
   const { onOpenNotesModal } = options || {};
+  const { onOpenPayments } = options || {};
+  const canReadFinance = useHasPermission("finance:read");
   
   return React.useMemo<SimpleTableColumn<Project>[]>(() => {
     return [
@@ -121,6 +125,27 @@ export function useProjectsTableColumns(
         sortable: true,
         sortValue: (project: Project) => project.projectProgressStatus || "",
       },
+      {
+        key: "client",
+        header: "Client",
+        className: "w-[180px]",
+        render: (project: Project) => project.client ? <span>{project.client.name}</span> : <span className="text-muted-foreground">—</span>,
+        sortable: true,
+        sortValue: (project: Project) => project.client?.name ?? "",
+      },
+      ...(canReadFinance ? [{
+        key: "payments",
+        header: "Payments",
+        className: "w-[170px]",
+        render: (project: Project) => {
+          const summary = project.paymentSummary;
+          if (!summary || summary.count === 0) return <span className="text-muted-foreground">No payments</span>;
+          const label = `${formatCurrency(summary.totalAmount)} · ${summary.count} ${summary.count === 1 ? "payment" : "payments"}`;
+          return <button type="button" className="text-left font-mono text-sm underline-offset-2 hover:underline" onClick={(event) => { event.stopPropagation(); onOpenPayments?.(project); }}>{label}</button>;
+        },
+        sortable: true,
+        sortValue: (project: Project) => project.paymentSummary?.totalAmount ?? 0,
+      } satisfies SimpleTableColumn<Project>] : []),
       {
         key: "estimate",
         header: "Estimate",
@@ -200,6 +225,6 @@ export function useProjectsTableColumns(
         sortValue: (project: Project) => computeBacklog(project) ?? 0,
       },
     ];
-  }, [onOpenNotesModal]);
+  }, [onOpenNotesModal, onOpenPayments, canReadFinance]);
 }
 

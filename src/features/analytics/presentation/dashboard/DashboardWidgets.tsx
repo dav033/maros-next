@@ -1,34 +1,16 @@
 import type { ReactNode } from "react";
-import { Activity, BarChart3, DollarSign, Users } from "lucide-react";
+import { Activity, Users } from "lucide-react";
 import { Can } from "@/shared/auth/Can";
 import type {
-  CostsBreakdown,
   ExpensesSummary,
   KpiOverview,
-  LeadsPerMonthPoint,
-  PipelineBucket,
-  ProjectHealth,
-  ProjectsStatusBucket,
-  RevenuePoint,
   TopClient,
 } from "../../domain";
 import { AsyncWidget } from "../widgets/AsyncWidget";
-import { CostsBreakdownPanel } from "../widgets/CostsBreakdownPanel";
 import { KpiOverviewRow } from "../widgets/KpiOverviewRow";
-import { LeadsPerMonthChart } from "../widgets/LeadsPerMonthChart";
-import { PipelineFunnelChart } from "../widgets/PipelineFunnelChart";
-import { ProjectHealthList } from "../widgets/ProjectHealthList";
-import { ProjectsStatusChart } from "../widgets/ProjectsStatusChart";
-import { RevenueTrendChart } from "../widgets/RevenueTrendChart";
 import { TopClientsTable } from "../widgets/TopClientsTable";
-import { TaskDashboardWidget } from "./TaskDashboardWidget";
 import {
-  BarChartSkeleton,
-  CostsBreakdownSkeleton,
   KpiOverviewSkeleton,
-  LineChartSkeleton,
-  PieChartSkeleton,
-  ProjectHealthSkeleton,
   TopClientsSkeleton,
 } from "../widgets/WidgetStates";
 
@@ -42,15 +24,9 @@ type QueryLike<T> = {
 
 type DashboardWidgetsProps = {
   overview: QueryLike<KpiOverview>;
-  pipeline: QueryLike<PipelineBucket[]>;
-  projectsStatus: QueryLike<ProjectsStatusBucket[]>;
-  leadsPerMonth: QueryLike<LeadsPerMonthPoint[]>;
-  costsBreakdown: QueryLike<CostsBreakdown>;
-  revenueTrend: QueryLike<RevenuePoint[]>;
   topClients: QueryLike<TopClient[]>;
   topClientsBy: "revenue" | "volume";
   onTopClientsByChange: (by: "revenue" | "volume") => void;
-  projectHealth: QueryLike<ProjectHealth[]>;
   expensesSummary: QueryLike<ExpensesSummary>;
   revenueRangeLabel?: string;
   revenueHref?: string;
@@ -86,15 +62,9 @@ function Section({ icon: Icon, title, description, children, delay = 0 }: Sectio
 
 export function DashboardWidgets({
   overview,
-  pipeline,
-  projectsStatus,
-  leadsPerMonth,
-  costsBreakdown,
-  revenueTrend,
   topClients,
   topClientsBy,
   onTopClientsByChange,
-  projectHealth,
   expensesSummary,
   revenueRangeLabel,
   revenueHref,
@@ -120,96 +90,13 @@ export function DashboardWidgets({
         </Section>
       </Can>
 
-      <Section icon={BarChart3} title="Revenue & pipeline" description="Trends and pipeline distribution" delay={120}>
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <Can permission="finance:read">
-            <AsyncWidget
-              query={revenueTrend}
-              errorText="Could not load revenue trend."
-              emptyText="No revenue data found for this range."
-              skeleton={<LineChartSkeleton />}
-            >
-              {(data) => <RevenueTrendChart data={data} />}
-            </AsyncWidget>
-          </Can>
-
-          <AsyncWidget
-            query={pipeline}
-            errorText="Could not load pipeline."
-            emptyText="No pipeline data available."
-            skeleton={<BarChartSkeleton />}
-          >
-            {(data) => <PipelineFunnelChart data={data} />}
-          </AsyncWidget>
-        </div>
-      </Section>
-
-      <Section icon={Activity} title="Tasks" description="This week's signals and team load" delay={180}>
-        <TaskDashboardWidget />
-      </Section>
-
-      <Section icon={BarChart3} title="Leads & projects" description="Monthly lead intake and project status mix" delay={220}>
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <AsyncWidget
-            query={leadsPerMonth}
-            errorText="Could not load leads per month."
-            emptyText="No leads found for this range."
-            isEmpty={(data) => data.length === 0 || data.every((item) => item.count <= 0)}
-            skeleton={<BarChartSkeleton />}
-          >
-            {(data) => <LeadsPerMonthChart data={data} />}
-          </AsyncWidget>
-
-          <AsyncWidget
-            query={projectsStatus}
-            errorText="Could not load project statuses."
-            emptyText="No project status data available."
-            isEmpty={(data) => data.length === 0 || data.every((item) => item.count <= 0)}
-            skeleton={<PieChartSkeleton />}
-          >
-            {(data) => <ProjectsStatusChart data={data} />}
-          </AsyncWidget>
-        </div>
-      </Section>
-
       <Can permission="finance:read">
-        <Section icon={DollarSign} title="Costs" description="All expenses and COGS by category" delay={270}>
-          <AsyncWidget
-            query={costsBreakdown}
-            errorText="Could not load costs breakdown."
-            emptyText="No cost data available for this range."
-            isEmpty={(data) => data.categories.length === 0 && data.totalCosts === 0}
-            skeleton={<CostsBreakdownSkeleton />}
-          >
-            {(data) => <CostsBreakdownPanel data={data} />}
+        <Section icon={Users} title="Top Clients" description="Top accounts in the active date range" delay={120}>
+          <AsyncWidget query={topClients} errorText="Could not load top clients." emptyText="No top clients found for this period." skeleton={<TopClientsSkeleton />}>
+            {(data) => <TopClientsTable data={data} by={topClientsBy} onByChange={onTopClientsByChange} />}
           </AsyncWidget>
         </Section>
       </Can>
-
-      <Section icon={Users} title="Clients & risk" description="Top accounts and projects that need attention" delay={320}>
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <Can permission="finance:read">
-            <AsyncWidget
-              query={topClients}
-              errorText="Could not load top clients."
-              emptyText="No top clients found for this period."
-              skeleton={<TopClientsSkeleton />}
-            >
-              {(data) => (
-                <TopClientsTable data={data} by={topClientsBy} onByChange={onTopClientsByChange} />
-              )}
-            </AsyncWidget>
-          </Can>
-
-          <AsyncWidget
-            query={projectHealth}
-            errorText="Could not load project health."
-            skeleton={<ProjectHealthSkeleton />}
-          >
-            {(data) => <ProjectHealthList data={data} />}
-          </AsyncWidget>
-        </div>
-      </Section>
     </div>
   );
 }

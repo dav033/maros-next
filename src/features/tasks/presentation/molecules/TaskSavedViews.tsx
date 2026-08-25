@@ -16,6 +16,7 @@ export function TaskSavedViews() {
   const createMutation = useMutation({ mutationFn: (input: { name: string; shared: boolean }) => ctx.repos.task.createSavedView(input.name, {
     scope: state.scope, job: state.job, view: state.view, group: state.group, sort: state.sort, direction: state.direction,
     q: state.q, status: state.status, assignee: state.assignee, label: state.label, kind: state.kind, priority: state.priority, due: state.due,
+    workspaceId: state.workspaceId, folderId: state.folderId,
   }, input.shared), onSuccess: () => queryClient.invalidateQueries({ queryKey: tasksKeys.savedViews() }) });
   const deleteMutation = useMutation({ mutationFn: (id: number) => ctx.repos.task.deleteSavedView(id), onSuccess: () => queryClient.invalidateQueries({ queryKey: tasksKeys.savedViews() }) });
 

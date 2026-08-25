@@ -6,14 +6,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { LeadType } from "@/leads/domain";
 import {
   invalidateAnalytics,
-  useCostsBreakdown,
   useExpensesSummary,
-  useLeadsPerMonth,
   useOverview,
-  usePipeline,
-  useProjectHealth,
-  useProjectsStatus,
-  useRevenueTrend,
   useTopClients,
 } from "../application";
 import { useAnalyticsApp } from "@/di";
@@ -88,26 +82,10 @@ export function DashboardPage() {
   }, [searchParams]);
 
   const overview = useOverview({ ...range, leadType });
-  const pipeline = usePipeline(leadType);
-  const projectsStatus = useProjectsStatus(leadType);
-  const leadsPerMonth = useLeadsPerMonth({ months: 12, from: range.from, to: range.to, leadType });
-  const revenueTrend = useRevenueTrend({ months: 12, from: range.from, to: range.to, leadType });
-  const topClients = useTopClients(5, topClientsBy, leadType);
-  const projectHealth = useProjectHealth(leadType);
+  const topClients = useTopClients(5, topClientsBy, leadType, range);
   const expensesSummary = useExpensesSummary({ from: range.from, to: range.to, leadType });
-  const costsBreakdown = useCostsBreakdown({ from: range.from, to: range.to, leadType });
 
-  const isUpdating = [
-    overview,
-    pipeline,
-    projectsStatus,
-    leadsPerMonth,
-    revenueTrend,
-    topClients,
-    projectHealth,
-    expensesSummary,
-    costsBreakdown,
-  ].some((query) => query.isFetching);
+  const isUpdating = [overview, topClients, expensesSummary].some((query) => query.isFetching);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -169,15 +147,9 @@ export function DashboardPage() {
 
       <DashboardWidgets
         overview={overview}
-        pipeline={pipeline}
-        projectsStatus={projectsStatus}
-        leadsPerMonth={leadsPerMonth}
-        costsBreakdown={costsBreakdown}
-        revenueTrend={revenueTrend}
         topClients={topClients}
         topClientsBy={topClientsBy}
         onTopClientsByChange={handleTopClientsByChange}
-        projectHealth={projectHealth}
         expensesSummary={expensesSummary}
         revenueRangeLabel={appliedQuickRangeLabel ?? `${range.from} → ${range.to}`}
         revenueHref={revenueHref}

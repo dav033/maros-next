@@ -31,6 +31,8 @@ export interface AnalyticsRepositoryPort {
   getTopClients(params?: {
     limit?: number;
     by?: "revenue" | "volume";
+    from?: string;
+    to?: string;
     leadType?: LeadType;
   }): Promise<TopClient[]>;
   getOutstandingBalances(params?: { limit?: number; leadType?: LeadType }): Promise<OutstandingBalanceItem[]>;

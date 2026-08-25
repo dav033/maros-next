@@ -104,6 +104,13 @@ const menuSection: SidebarSection = {
       activePrefix: "/tasks",
       permission: "tasks:read",
     },
+    {
+      title: "Task workspaces",
+      href: "/tasks/workspaces",
+      icon: FolderKanban,
+      activePrefix: "/tasks/workspaces",
+      permission: "tasks:read",
+    },
   ],
 };
 

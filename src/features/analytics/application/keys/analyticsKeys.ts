@@ -14,8 +14,8 @@ export const analyticsKeys = {
     [...analyticsKeys.all, "leads-per-month", months, from ?? "", to ?? "", leadType ?? ""] as const,
   revenueTrend: (months: number, from?: string, to?: string, leadType?: LeadType) =>
     [...analyticsKeys.all, "revenue-trend", months, from ?? "", to ?? "", leadType ?? ""] as const,
-  topClients: (limit: number, by: "revenue" | "volume", leadType?: LeadType) =>
-    [...analyticsKeys.all, "top-clients", limit, by, leadType ?? ""] as const,
+  topClients: (limit: number, by: "revenue" | "volume", from?: string, to?: string, leadType?: LeadType) =>
+    [...analyticsKeys.all, "top-clients", limit, by, from ?? "", to ?? "", leadType ?? ""] as const,
   outstandingBalances: (limit: number, leadType?: LeadType) =>
     [...analyticsKeys.all, "outstanding-balances", limit, leadType ?? ""] as const,
   backlog: (limit: number, leadType?: LeadType) =>

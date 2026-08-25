@@ -17,4 +17,11 @@ export interface TaskWorkspacesRepositoryPort {
   update(id: number, patch: TaskWorkspacePatch): Promise<TaskWorkspace>;
   archive(id: number): Promise<void>;
   restore(id: number): Promise<TaskWorkspace>;
+  addLinks(id: number, links: TaskWorkspaceDraft['links']): Promise<TaskWorkspace>;
+  removeLink(id: number, entityKind: TaskWorkspaceEntityKind, entityId: number): Promise<TaskWorkspace>;
+  listFolders(workspaceId: number): Promise<import('./models').TaskWorkspaceFolder[]>;
+  createFolder(workspaceId: number, input: { title: string; parentFolderId?: number | null; position?: number }): Promise<import('./models').TaskWorkspaceFolder>;
+  updateFolder(workspaceId: number, folderId: number, input: { title?: string; parentFolderId?: number | null; position?: number }): Promise<import('./models').TaskWorkspaceFolder>;
+  removeFolder(workspaceId: number, folderId: number, destinationFolderId?: number | null): Promise<void>;
+  moveTask(workspaceId: number, taskId: number, folderId?: number | null): Promise<unknown>;
 }

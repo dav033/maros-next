@@ -24,6 +24,8 @@ export interface TasksViewState {
   kind: TaskKind[];
   priority: TaskPriority[];
   due: TasksDueFilter | null;
+  workspaceId: number | null;
+  folderId: number | null;
 }
 
 const VIEWS: readonly TasksView[] = ["board", "list", "mine", "calendar"];
@@ -59,6 +61,8 @@ export function useTasksViewState() {
     const directionParam = searchParams.get("dir");
     const dueParam = searchParams.get("due");
     const jobParam = Number(searchParams.get("job"));
+    const workspaceParam = Number(searchParams.get("workspace"));
+    const folderParam = Number(searchParams.get("folder"));
 
     return {
       scope: searchParams.get("scope") || "all",
@@ -78,6 +82,8 @@ export function useTasksViewState() {
       kind: splitParam(searchParams.get("kind")) as TaskKind[],
       priority: splitParam(searchParams.get("priority")) as TaskPriority[],
       due: DUE_FILTERS.includes(dueParam as TasksDueFilter) ? (dueParam as TasksDueFilter) : null,
+      workspaceId: Number.isFinite(workspaceParam) && workspaceParam > 0 ? workspaceParam : null,
+      folderId: Number.isFinite(folderParam) && folderParam > 0 ? folderParam : null,
     };
   }, [searchParams]);
 
@@ -113,6 +119,8 @@ export function useTasksViewState() {
       if ("kind" in patch) setArray("kind", patch.kind);
       if ("priority" in patch) setArray("priority", patch.priority);
       if ("due" in patch) set("due", patch.due);
+      if ("workspaceId" in patch) set("workspace", patch.workspaceId);
+      if ("folderId" in patch) set("folder", patch.folderId);
 
       next.delete("cursor");
       const query = next.toString();
@@ -138,6 +146,8 @@ export function useTasksViewState() {
     dueOn: state.due === "today" ? todayInBusinessTimezone() : undefined,
     sort: state.sort,
     direction: state.direction,
+    workspaceId: state.workspaceId ?? undefined,
+    folderId: state.folderId ?? undefined,
   }), [state]);
 
   return { state, filters, replaceState };

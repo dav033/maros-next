@@ -49,6 +49,8 @@ import { useProjectsToolbarSearchController } from "../hooks/table/useProjectsTo
 import { useProjectsNotesModalController } from "../hooks/modals/useProjectsNotesModalController";
 import { useInstantLeadsByType } from "@/leads/presentation";
 import { LeadTypeSwitcher } from "@/components/shared/LeadTypeSwitcher";
+import { ProjectPaymentsDialog } from "../organisms/ProjectPaymentsDialog";
+import { useState } from "react";
 
 const PROGRESS_FILTER_OPTIONS = [
   { value: ProjectProgressStatus.NOT_EXECUTED, label: "Not Executed", color: PROGRESS_COLORS.NOT_EXECUTED },
@@ -79,6 +81,7 @@ export interface ProjectsPageViewProps {
 }
 
 export function ProjectsPageView({ logic }: ProjectsPageViewProps) {
+  const [paymentsProject, setPaymentsProject] = useState<Project | null>(null);
   const { leadType, data, crud, table, bulkActions, notesModal, openNotesModal } = logic;
 
   const { projects, showSkeleton } = data;
@@ -283,6 +286,7 @@ export function ProjectsPageView({ logic }: ProjectsPageViewProps) {
             tableLogic={table}
             isLoading={showSkeleton}
             onOpenNotesModal={openNotesModal}
+            onOpenPayments={setPaymentsProject}
             groupBy={groupBy}
             pagination={{ enabled: true }}
             selection={{
@@ -339,6 +343,7 @@ export function ProjectsPageView({ logic }: ProjectsPageViewProps) {
           />
 
           <NotesEditorModal controller={notesModalController} />
+          <ProjectPaymentsDialog project={paymentsProject} onClose={() => setPaymentsProject(null)} />
         </>
       }
     />
