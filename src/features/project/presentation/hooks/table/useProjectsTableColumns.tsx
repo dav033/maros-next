@@ -1,6 +1,7 @@
 "use client";
 
 import type { SimpleTableColumn } from "@/types/table";
+import Link from "next/link";
 
 import * as React from "react";
 import type { Project, ProjectProgressStatus } from "@/project/domain";
@@ -129,7 +130,25 @@ export function useProjectsTableColumns(
         key: "client",
         header: "Client",
         className: "w-[180px]",
-        render: (project: Project) => project.client ? <span>{project.client.name}</span> : <span className="text-muted-foreground">—</span>,
+        render: (project: Project) => {
+          const client = project.client;
+          if (!client) return <span className="text-muted-foreground">—</span>;
+
+          const href =
+            client.type === "company"
+              ? `/company/${client.id}`
+              : `/contact/${client.id}`;
+
+          return (
+            <Link
+              href={href}
+              className="text-foreground hover:underline"
+              onClick={(event) => event.stopPropagation()}
+            >
+              {client.name}
+            </Link>
+          );
+        },
         sortable: true,
         sortValue: (project: Project) => project.client?.name ?? "",
       },

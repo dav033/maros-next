@@ -150,11 +150,13 @@ export function useProjectsTableLogic({
       if (field === "all" || field === "") {
         const leadName = project.lead?.name?.toLowerCase() || "";
         const leadNumber = project.lead?.leadNumber?.toLowerCase() || "";
+        const clientName = project.client?.name?.toLowerCase() || "";
         const estimatedAmount = project.financial?.estimatedAmount?.toString() || "";
         const paidAmount = project.financial?.paidAmount?.toString() || "";
         return (
           leadName.includes(normalizedQuery) ||
           leadNumber.includes(normalizedQuery) ||
+          clientName.includes(normalizedQuery) ||
           estimatedAmount.includes(normalizedQuery) ||
           paidAmount.includes(normalizedQuery)
         );
@@ -165,6 +167,8 @@ export function useProjectsTableLogic({
           return project.lead?.name?.toLowerCase().includes(normalizedQuery) ?? false;
         case "lead.leadNumber":
           return project.lead?.leadNumber?.toLowerCase().includes(normalizedQuery) ?? false;
+        case "client.name":
+          return project.client?.name?.toLowerCase().includes(normalizedQuery) ?? false;
         default:
           return true;
       }

@@ -3,10 +3,10 @@ export const projectsSearchConfig = {
     { key: "all", label: "All fields" },
     { key: "lead.name", label: "Project Name" },
     { key: "lead.leadNumber", label: "Project Number" },
+    { key: "client.name", label: "Client" },
   ],
   defaultField: "all",
   normalize: (text: string) => text.toLowerCase().trim(),
 } as const;
 
 export const projectsSearchPlaceholder = "Search projects...";
-
