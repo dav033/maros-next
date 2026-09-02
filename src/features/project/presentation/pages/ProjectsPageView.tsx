@@ -27,6 +27,7 @@ import {
   Check,
   Trash2,
   AlertTriangle,
+  Loader2,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ProjectsTableSkeleton } from "../organisms/ProjectsTableSkeleton";
@@ -86,7 +87,7 @@ export function ProjectsPageView({ logic }: ProjectsPageViewProps) {
   const [paymentsProject, setPaymentsProject] = useState<Project | null>(null);
   const { leadType, data, crud, table, bulkActions, notesModal, openNotesModal } = logic;
 
-  const { projects, showSkeleton } = data;
+  const { projects, showSkeleton, financialsLoading } = data;
 
   const projectsMissingQboData = projects.filter((p) => p.qboError).length;
 
@@ -249,7 +250,18 @@ export function ProjectsPageView({ logic }: ProjectsPageViewProps) {
       loadingContent={<ProjectsTableSkeleton />}
       tableContent={
         <div className="space-y-3">
-          {projectsMissingQboData > 0 && (
+          {financialsLoading && (
+            <Alert>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <AlertDescription>
+                Cargando montos de QuickBooks (estimado, facturado, cobrado)...
+                Los proyectos ya están listos, los datos financieros aparecen
+                en cuanto llegan.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {!financialsLoading && projectsMissingQboData > 0 && (
             <Alert variant="destructive">
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription>

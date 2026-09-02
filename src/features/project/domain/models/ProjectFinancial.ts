@@ -23,6 +23,13 @@ export interface ProjectFinancial {
   payments?: ProjectFinancialPayment[];
 }
 
+/** One row of GET /projects/financials — merged into a Project client-side by id. */
+export interface ProjectFinancialsEntry {
+  id: number;
+  financial: ProjectFinancial | null;
+  qboError?: { code: string; message: string };
+}
+
 
 
 

@@ -2,7 +2,7 @@ import type { Lead } from "@/leads/domain";
 import type { ProjectFinancial } from "./models/ProjectFinancial";
 
 // Re-export ProjectFinancial for convenience
-export type { ProjectFinancial } from "./models/ProjectFinancial";
+export type { ProjectFinancial, ProjectFinancialsEntry } from "./models/ProjectFinancial";
 
 export type ProjectClientSummary = {
   id: number;

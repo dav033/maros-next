@@ -1,4 +1,5 @@
-import type { Project, ProjectDraft, ProjectPatch, ProjectClientSummary, ProjectPaymentSummary } from "@/project/domain";
+import type { Project, ProjectDraft, ProjectPatch, ProjectClientSummary, ProjectPaymentSummary, ProjectFinancialsEntry } from "@/project/domain";
+import type { ProjectFinancial } from "@/project/domain/models/ProjectFinancial";
 import type { ApiProjectDTO } from "@/project/domain/services/projectReadMapper";
 import { mapProjectFromDTO, mapProjectsFromDTO } from "@/project/domain";
 import { mapLeadFromDTO } from "@/leads/domain/services/leadReadMapper";
@@ -59,6 +60,30 @@ export function mapProjectsFromApi(dtos: ApiProjectDTO[]): Project[] {
     client: mapClient(dtos[index]?.client),
     paymentSummary: mapPaymentSummary(dtos[index]?.paymentSummary),
   }));
+}
+
+export function mapFinancialsFromApi(rows: unknown): ProjectFinancialsEntry[] {
+  if (!Array.isArray(rows)) return [];
+
+  const entries: ProjectFinancialsEntry[] = [];
+  for (const row of rows) {
+    if (!row || typeof row !== "object") continue;
+    const rec = row as Record<string, unknown>;
+    if (typeof rec.id !== "number") continue;
+
+    const qbo = rec.qbo as { error?: { code?: string; message?: string } } | null | undefined;
+    const qboError =
+      qbo?.error && typeof qbo.error.message === "string"
+        ? { code: qbo.error.code ?? "qbo_query_failed", message: qbo.error.message }
+        : undefined;
+
+    entries.push({
+      id: rec.id,
+      financial: (rec.financial as ProjectFinancial | null) ?? null,
+      qboError,
+    });
+  }
+  return entries;
 }
 
 export function mapProjectDraftToCreatePayload(

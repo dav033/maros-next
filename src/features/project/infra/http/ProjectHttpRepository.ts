@@ -1,5 +1,5 @@
 import type { ApiProjectDTO } from "@/project/domain/services/projectReadMapper";
-import type { Project, ProjectDraft, ProjectPatch, ProjectPaymentsResponse } from "@/project/domain/models";
+import type { Project, ProjectDraft, ProjectPatch, ProjectPaymentsResponse, ProjectFinancialsEntry } from "@/project/domain/models";
 import type { ProjectRepositoryPort } from "@/project/domain/ports";
 import { optimizedApiClient } from "@/shared/infra/http";
 import { makeHttpResourceRepository } from "@/shared/infra/rest";
@@ -10,6 +10,7 @@ import { endpoints as projectEndpoints } from "./endpoints";
 import {
   type CreateProjectPayload,
   type UpdateProjectPayload,
+  mapFinancialsFromApi,
   mapProjectDraftToCreatePayload,
   mapProjectFromApi,
   mapProjectPatchToUpdatePayload,
@@ -30,6 +31,11 @@ export class ProjectHttpRepository implements ProjectRepositoryPort {
   getById = (id: number) => this.resource.getById(id);
   list = () => this.resource.list();
   delete = (id: number) => this.resource.delete(id);
+
+  listFinancials = async (): Promise<ProjectFinancialsEntry[]> => {
+    const { data } = await this.api.get(projectEndpoints.financials());
+    return mapFinancialsFromApi(data);
+  };
 
   create = async (draft: ProjectDraft): Promise<Project> => {
     const payload: CreateProjectPayload = mapProjectDraftToCreatePayload(draft);

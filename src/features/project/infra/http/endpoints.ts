@@ -6,6 +6,7 @@ export const endpoints = {
   ...buildCrudEndpoints<number>(BASE, {
     listPath: "/all",
   }),
+  financials: () => `${BASE}/financials`,
   details: (id: number | string) => `${BASE}/${id}/details`,
   estimateFile: (id: number | string) => `${BASE}/${id}/estimate-file`,
   estimate: (id: number | string) => `${BASE}/${id}/estimate`,
