@@ -72,6 +72,8 @@ export interface Project {
   financial?: ProjectFinancial;
   client?: ProjectClientSummary;
   paymentSummary?: ProjectPaymentSummary | null;
+  /** Set when QuickBooks enrichment failed or timed out for this project. */
+  qboError?: { code: string; message: string };
 }
 
 export type ProjectId = number;

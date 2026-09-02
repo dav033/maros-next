@@ -26,7 +26,9 @@ import {
   Receipt,
   Check,
   Trash2,
+  AlertTriangle,
 } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ProjectsTableSkeleton } from "../organisms/ProjectsTableSkeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -85,6 +87,8 @@ export function ProjectsPageView({ logic }: ProjectsPageViewProps) {
   const { leadType, data, crud, table, bulkActions, notesModal, openNotesModal } = logic;
 
   const { projects, showSkeleton } = data;
+
+  const projectsMissingQboData = projects.filter((p) => p.qboError).length;
 
   const {
     isCreateModalOpen,
@@ -245,6 +249,19 @@ export function ProjectsPageView({ logic }: ProjectsPageViewProps) {
       loadingContent={<ProjectsTableSkeleton />}
       tableContent={
         <div className="space-y-3">
+          {projectsMissingQboData > 0 && (
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                QuickBooks no respondió a tiempo para {projectsMissingQboData}{" "}
+                {projectsMissingQboData === 1 ? "proyecto" : "proyectos"}. Los
+                montos financieros de {projectsMissingQboData === 1 ? "ese proyecto" : "esos proyectos"}{" "}
+                no se muestran por ahora; el resto de la información es correcta.
+                Se actualizará solo cuando QuickBooks vuelva a responder.
+              </AlertDescription>
+            </Alert>
+          )}
+
           <BulkActionsBar count={bulkActions.selectedCount} onClear={bulkActions.clearSelection}>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

@@ -12,6 +12,10 @@ export type ApiProjectDTO = {
   attachments?: string[] | null;
   leadId?: number | null;
   financial?: ProjectFinancial | null;
+  qbo?: {
+    data?: unknown;
+    error?: { code?: string; message?: string } | null;
+  } | null;
   client?: {
     id?: number | null;
     type?: "contact" | "company" | null;
@@ -145,6 +149,11 @@ export function mapProjectFromDTO(dto: ApiProjectDTO, leadMapper: (dto: any) => 
     }
   }
   
+  const qboError =
+    dto?.qbo?.error && typeof dto.qbo.error.message === "string"
+      ? { code: dto.qbo.error.code ?? "qbo_query_failed", message: dto.qbo.error.message }
+      : undefined;
+
   const leadId = dto?.leadId ?? dto?.lead?.id ?? 0;
   
   let lead: Lead;
@@ -164,6 +173,7 @@ export function mapProjectFromDTO(dto: ApiProjectDTO, leadMapper: (dto: any) => 
     lead,
     leadId,
     financial,
+    qboError,
   };
 }
 
