@@ -156,7 +156,14 @@ export function mapProjectFromDTO(dto: ApiProjectDTO, leadMapper: (dto: any) => 
     throw new Error("Project DTO is required");
   }
 
-  const id = dto?.id ?? 0;
+  const rawId = (dto as { id?: unknown })?.id;
+  const parsedId =
+    typeof rawId === "number"
+      ? rawId
+      : typeof rawId === "string" && rawId.trim() !== ""
+        ? Number(rawId)
+        : 0;
+  const id = Number.isInteger(parsedId) ? parsedId : 0;
 
   const projectProgressStatus = resolveProjectProgressStatus(dto?.projectProgressStatus);
   const invoiceStatus = resolveInvoiceStatus(dto?.invoiceStatus);

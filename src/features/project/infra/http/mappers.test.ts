@@ -15,6 +15,15 @@ const baseProject = {
 };
 
 describe("mapProjectFromApi", () => {
+  it("normalizes a project id returned as a string", () => {
+    const project = mapProjectFromApi({
+      ...baseProject,
+      id: "42" as unknown as number,
+    });
+
+    expect(project.id).toBe(42);
+  });
+
   it("preserves the canonical company client used by the projects table", () => {
     const project = mapProjectFromApi({
       ...baseProject,
