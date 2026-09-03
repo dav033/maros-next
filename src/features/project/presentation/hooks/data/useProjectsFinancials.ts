@@ -26,11 +26,11 @@ export function useProjectsFinancials(options?: { enabled?: boolean }): UseProje
     // Keep the projects table synchronized with QuickBooks while it is open.
     // The API also has a short read cache, so this avoids stale financials
     // without hammering QBO on every render.
-    refetchInterval: 60_000,
+    refetchInterval: 20_000,
     refetchIntervalInBackground: false,
     refetchOnMount: "always",
     refetchOnWindowFocus: "always",
-    staleTime: 30_000,
+    staleTime: 5_000,
     gcTime: 10 * 60 * 1000,
   });
 
