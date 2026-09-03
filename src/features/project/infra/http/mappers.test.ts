@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { mapProjectFromApi } from "./mappers";
+import { mapFinancialsFromApi, mapProjectFromApi } from "./mappers";
 
 const baseProject = {
   id: 42,
@@ -43,5 +43,28 @@ describe("mapProjectFromApi", () => {
     });
 
     expect(project.client).toBeNull();
+  });
+});
+
+describe("mapFinancialsFromApi", () => {
+  it("normalizes numeric project ids returned as strings", () => {
+    const [entry] = mapFinancialsFromApi([
+      {
+        id: "42",
+        financial: {
+          projectNumber: "PR-007",
+          estimatedAmount: 100,
+          estimateCount: 1,
+          invoicedAmount: 100,
+          invoiceCount: 1,
+          paidAmount: 50,
+          outstandingAmount: 50,
+          paidPercentage: 50,
+          estimateVsInvoicedDelta: 0,
+        },
+      },
+    ]);
+
+    expect(entry?.id).toBe(42);
   });
 });

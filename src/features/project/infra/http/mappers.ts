@@ -69,7 +69,15 @@ export function mapFinancialsFromApi(rows: unknown): ProjectFinancialsEntry[] {
   for (const row of rows) {
     if (!row || typeof row !== "object") continue;
     const rec = row as Record<string, unknown>;
-    if (typeof rec.id !== "number") continue;
+    // Some production responses serialize database ids as numeric strings.
+    // Normalize them before the table joins financials with the project list.
+    const id =
+      typeof rec.id === "number"
+        ? rec.id
+        : typeof rec.id === "string" && rec.id.trim() !== ""
+          ? Number(rec.id)
+          : NaN;
+    if (!Number.isInteger(id)) continue;
 
     const qbo = rec.qbo as { error?: { code?: string; message?: string } } | null | undefined;
     const qboError =
@@ -78,7 +86,7 @@ export function mapFinancialsFromApi(rows: unknown): ProjectFinancialsEntry[] {
         : undefined;
 
     entries.push({
-      id: rec.id,
+      id,
       financial: (rec.financial as ProjectFinancial | null) ?? null,
       qboError,
     });
