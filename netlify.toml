@@ -1,5 +1,8 @@
 [build]
-  command = "npm run build"
+  # Webpack keeps the generated runtime/chunk manifest coherent across
+  # Netlify deploys; Turbopack's fixed runtime filename was being cached with
+  # a chunk map from the previous deployment.
+  command = "npm run build -- --webpack"
   publish = ".next"
 
 # Environment variables for production

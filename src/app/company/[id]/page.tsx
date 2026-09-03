@@ -3,8 +3,8 @@ import { CompanyDetailsPage } from "@/features/company/presentation/pages/Compan
 import { CompanyDetailsPageSkeleton } from "@/features/company/presentation/components/CompanyDetailsPageSkeleton";
 import { loadCompanyDetailsData } from "@/features/company/presentation/data/loadCompanyDetailsData";
 
-async function CompanyDetailsPageWithData({ params }: { params: Promise<{ id: string }> | { id: string } }) {
-  const resolvedParams = params instanceof Promise ? await params : params;
+async function CompanyDetailsPageWithData({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = await params;
   const idString = resolvedParams.id;
   
   if (!idString) {
@@ -39,7 +39,7 @@ async function CompanyDetailsPageWithData({ params }: { params: Promise<{ id: st
   return <CompanyDetailsPage companyId={companyId} initialData={initialData} />;
 }
 
-export default async function CompanyDetailsRoutePage({ params }: { params: Promise<{ id: string }> | { id: string } }) {
+export default async function CompanyDetailsRoutePage({ params }: { params: Promise<{ id: string }> }) {
   return (
     <Suspense fallback={<CompanyDetailsPageSkeleton />}>
       <CompanyDetailsPageWithData params={params} />

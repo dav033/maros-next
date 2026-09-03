@@ -3,8 +3,8 @@ import { ProjectDetailsPage } from "@/project/presentation/pages/ProjectDetailsP
 import { ProjectDetailsPageSkeleton } from "@/features/project/presentation/components/ProjectDetailsPageSkeleton";
 import { loadProjectDetailsData } from "@/features/project/presentation/data/loadProjectDetailsData";
 
-async function ProjectDetailsPageWithData({ params }: { params: Promise<{ id: string }> | { id: string } }) {
-  const resolvedParams = params instanceof Promise ? await params : params;
+async function ProjectDetailsPageWithData({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = await params;
   const idString = resolvedParams.id;
   
   if (!idString) {
@@ -39,7 +39,7 @@ async function ProjectDetailsPageWithData({ params }: { params: Promise<{ id: st
   return <ProjectDetailsPage projectId={projectId} initialData={initialData} />;
 }
 
-export default async function ProjectDetailsRoutePage({ params }: { params: Promise<{ id: string }> | { id: string } }) {
+export default async function ProjectDetailsRoutePage({ params }: { params: Promise<{ id: string }> }) {
   return (
     <Suspense fallback={<ProjectDetailsPageSkeleton />}>
       <ProjectDetailsPageWithData params={params} />

@@ -3,9 +3,9 @@ import { ContactDetailsPage } from "@/contact/presentation/pages/ContactDetailsP
 import { ContactDetailsPageSkeleton } from "@/contact/presentation/components/ContactDetailsPageSkeleton";
 import { loadContactDetailsData } from "@/contact/presentation/data/loadContactDetailsData";
 
-async function ContactDetailsPageWithData({ params }: { params: Promise<{ id: string }> | { id: string } }) {
+async function ContactDetailsPageWithData({ params }: { params: Promise<{ id: string }> }) {
   // Manejar params como Promise o objeto directo
-  const resolvedParams = params instanceof Promise ? await params : params;
+  const resolvedParams = await params;
   const idString = resolvedParams.id;
   
   if (!idString) {
@@ -40,7 +40,7 @@ async function ContactDetailsPageWithData({ params }: { params: Promise<{ id: st
   return <ContactDetailsPage contactId={contactId} initialData={initialData} />;
 }
 
-export default async function ContactDetailsRoutePage({ params }: { params: Promise<{ id: string }> | { id: string } }) {
+export default async function ContactDetailsRoutePage({ params }: { params: Promise<{ id: string }> }) {
   return (
     <Suspense fallback={<ContactDetailsPageSkeleton />}>
       <ContactDetailsPageWithData params={params} />

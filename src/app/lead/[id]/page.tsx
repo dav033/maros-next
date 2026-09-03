@@ -3,8 +3,8 @@ import { LeadDetailsPage } from "@/leads/presentation/pages/LeadDetailsPage";
 import { LeadDetailsPageSkeleton } from "@/features/leads/presentation/components/LeadDetailsPageSkeleton";
 import { loadLeadDetailsData } from "@/features/leads/presentation/data/loadLeadDetailsData";
 
-async function LeadDetailsPageWithData({ params }: { params: Promise<{ id: string }> | { id: string } }) {
-  const resolvedParams = params instanceof Promise ? await params : params;
+async function LeadDetailsPageWithData({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = await params;
   const idString = resolvedParams.id;
   
   if (!idString) {
@@ -39,7 +39,7 @@ async function LeadDetailsPageWithData({ params }: { params: Promise<{ id: strin
   return <LeadDetailsPage leadId={leadId} initialData={initialData} />;
 }
 
-export default async function LeadDetailsRoutePage({ params }: { params: Promise<{ id: string }> | { id: string } }) {
+export default async function LeadDetailsRoutePage({ params }: { params: Promise<{ id: string }> }) {
   return (
     <Suspense fallback={<LeadDetailsPageSkeleton />}>
       <LeadDetailsPageWithData params={params} />
