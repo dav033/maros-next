@@ -23,7 +23,14 @@ export function useProjectsFinancials(options?: { enabled?: boolean }): UseProje
     queryKey: [...projectsKeys.all, "financials"],
     queryFn: () => listProjectsFinancials(ctx),
     enabled: options?.enabled,
-    staleTime: 60_000,
+    // Keep the projects table synchronized with QuickBooks while it is open.
+    // The API also has a short read cache, so this avoids stale financials
+    // without hammering QBO on every render.
+    refetchInterval: 60_000,
+    refetchIntervalInBackground: false,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: "always",
+    staleTime: 30_000,
     gcTime: 10 * 60 * 1000,
   });
 
