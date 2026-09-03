@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { formatCurrency } from "@/shared/utils";
 import type { Project, ProjectPaymentsResponse } from "@/project/domain";
 import { ProjectHttpRepository } from "../../infra/http/ProjectHttpRepository";
+import { PaymentScheduleTable } from "./PaymentScheduleTable";
 
 const repository = new ProjectHttpRepository();
 
@@ -21,6 +22,7 @@ export function ProjectPaymentsDialog({ project, onClose }: { project: Project |
         <DialogHeader><DialogTitle>Payments · {project?.lead.leadNumber ?? `Project #${project?.id}`}</DialogTitle></DialogHeader>
         {query.isLoading ? <p className="text-sm text-muted-foreground">Loading payment receipts…</p> : null}
         {query.error ? <p className="text-sm text-destructive">Could not load QuickBooks payments.</p> : null}
+        {project?.financial?.paymentSchedule ? <PaymentScheduleTable schedule={project.financial.paymentSchedule} /> : null}
         {query.data ? <PaymentContent data={query.data} /> : null}
       </DialogContent>
     </Dialog>

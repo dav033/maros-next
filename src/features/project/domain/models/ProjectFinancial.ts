@@ -10,6 +10,24 @@ export interface ProjectFinancialPayment {
   linkedInvoice?: string;
 }
 
+export interface ProjectPaymentScheduleItem {
+  label: string;
+  percentage: number;
+  amount: number | null;
+}
+
+export interface ProjectPaymentSchedule {
+  items: ProjectPaymentScheduleItem[];
+  totalPercentage: number | null;
+  totalAmount: number | null;
+  source: {
+    attachmentId: string;
+    fileName: string;
+    entityType: "Estimate" | "Invoice";
+    entityId: string;
+  };
+}
+
 export interface ProjectFinancial {
   projectNumber: string;
   estimatedAmount: number;
@@ -21,6 +39,7 @@ export interface ProjectFinancial {
   paidPercentage: number;
   estimateVsInvoicedDelta: number;
   payments?: ProjectFinancialPayment[];
+  paymentSchedule?: ProjectPaymentSchedule;
 }
 
 /** One row of GET /projects/financials — merged into a Project client-side by id. */

@@ -44,6 +44,24 @@ function computeBacklog(project: Project): number | null {
   return estimated - paid;
 }
 
+function getPaymentSummary(project: Project) {
+  if (project.paymentSummary) return project.paymentSummary;
+  const payments = project.financial?.payments;
+  if (!payments) return null;
+  return {
+    count: payments.length,
+    totalAmount: payments.reduce((sum, payment) => sum + (Number(payment.amount) || 0), 0),
+    lastPaymentDate: payments.map((payment) => payment.date).filter(Boolean).sort().at(-1) ?? null,
+    hasDetails: true,
+  };
+}
+
+function getPaymentScheduleLabel(project: Project): string | null {
+  const items = project.financial?.paymentSchedule?.items ?? [];
+  if (!items.length) return null;
+  return items.map((item) => `${item.percentage}%`).join(" · ");
+}
+
 type MoneyTone = "violet" | "emerald" | "amber" | "rose";
 
 // El proyecto es un solo tema oscuro (ver src/app/layout.tsx, .dark fijo en <html>),
@@ -157,13 +175,30 @@ export function useProjectsTableColumns(
         header: "Payments",
         className: "w-[170px]",
         render: (project: Project) => {
-          const summary = project.paymentSummary;
-          if (!summary || summary.count === 0) return <span className="text-muted-foreground">No payments</span>;
-          const label = `${formatCurrency(summary.totalAmount)} · ${summary.count} ${summary.count === 1 ? "payment" : "payments"}`;
-          return <button type="button" className="text-left font-mono text-sm underline-offset-2 hover:underline" onClick={(event) => { event.stopPropagation(); onOpenPayments?.(project); }}>{label}</button>;
+          const summary = getPaymentSummary(project);
+          const scheduleLabel = getPaymentScheduleLabel(project);
+          if ((!summary || summary.count === 0) && !scheduleLabel) {
+            return <span className="text-muted-foreground">No payments</span>;
+          }
+          const paymentsLabel = summary && summary.count > 0
+            ? `${formatCurrency(summary.totalAmount)} · ${summary.count} ${summary.count === 1 ? "payment" : "payments"}`
+            : null;
+          const scheduleFile = project.financial?.paymentSchedule?.source.fileName;
+          return (
+            <button
+              type="button"
+              className="text-left underline-offset-2 hover:underline"
+              title={scheduleFile ? `Payment Schedule · ${scheduleFile}` : undefined}
+              onClick={(event) => { event.stopPropagation(); onOpenPayments?.(project); }}
+            >
+              {scheduleLabel ? <span className="block font-mono text-sm">{scheduleLabel}</span> : null}
+              {scheduleLabel ? <span className="block text-[11px] text-muted-foreground">Payment schedule</span> : null}
+              {paymentsLabel ? <span className="block font-mono text-xs text-muted-foreground">{paymentsLabel}</span> : null}
+            </button>
+          );
         },
         sortable: true,
-        sortValue: (project: Project) => project.paymentSummary?.totalAmount ?? 0,
+        sortValue: (project: Project) => getPaymentSummary(project)?.totalAmount ?? 0,
       } satisfies SimpleTableColumn<Project>] : []),
       {
         key: "estimate",

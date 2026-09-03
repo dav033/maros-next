@@ -1,7 +1,11 @@
 import type { Project } from "../models";
 import type { Lead } from "@/leads/domain";
 import { ProjectProgressStatus, InvoiceStatus } from "../models";
-import type { ProjectFinancial, ProjectFinancialPayment } from "../models/ProjectFinancial";
+import type {
+  ProjectFinancial,
+  ProjectFinancialPayment,
+  ProjectPaymentSchedule,
+} from "../models/ProjectFinancial";
 
 export type ApiProjectDTO = {
   id?: number | null;
@@ -103,6 +107,50 @@ function normalizeFinancialPayments(input: unknown): ProjectFinancialPayment[] |
   return normalized.length > 0 ? normalized : undefined;
 }
 
+function normalizePaymentSchedule(input: unknown): ProjectPaymentSchedule | undefined {
+  if (!input || typeof input !== "object") return undefined;
+  const value = input as Record<string, unknown>;
+  if (!Array.isArray(value.items)) return undefined;
+
+  const items = value.items.flatMap((row) => {
+    if (!row || typeof row !== "object") return [];
+    const item = row as Record<string, unknown>;
+    const percentage = typeof item.percentage === "number" ? item.percentage : Number(item.percentage);
+    if (typeof item.label !== "string" || !Number.isFinite(percentage)) return [];
+    const amount = item.amount == null ? null : Number(item.amount);
+    return [{
+      label: item.label,
+      percentage,
+      amount: Number.isFinite(amount) ? amount : null,
+    }];
+  });
+  if (!items.length) return undefined;
+
+  const source = value.source;
+  if (!source || typeof source !== "object") return undefined;
+  const sourceValue = source as Record<string, unknown>;
+  if (
+    typeof sourceValue.attachmentId !== "string" ||
+    typeof sourceValue.fileName !== "string" ||
+    (sourceValue.entityType !== "Estimate" && sourceValue.entityType !== "Invoice") ||
+    typeof sourceValue.entityId !== "string"
+  ) return undefined;
+
+  const totalPercentage = value.totalPercentage == null ? null : Number(value.totalPercentage);
+  const totalAmount = value.totalAmount == null ? null : Number(value.totalAmount);
+  return {
+    items,
+    totalPercentage: Number.isFinite(totalPercentage) ? totalPercentage : null,
+    totalAmount: Number.isFinite(totalAmount) ? totalAmount : null,
+    source: {
+      attachmentId: sourceValue.attachmentId,
+      fileName: sourceValue.fileName,
+      entityType: sourceValue.entityType,
+      entityId: sourceValue.entityId,
+    },
+  };
+}
+
 export function mapProjectFromDTO(dto: ApiProjectDTO, leadMapper: (dto: any) => Lead): Project {
   if (!dto) {
     throw new Error("Project DTO is required");
@@ -145,6 +193,7 @@ export function mapProjectFromDTO(dto: ApiProjectDTO, leadMapper: (dto: any) => 
         paidPercentage: f.paidPercentage,
         estimateVsInvoicedDelta: f.estimateVsInvoicedDelta,
         payments: normalizeFinancialPayments((f as { payments?: unknown }).payments),
+        paymentSchedule: normalizePaymentSchedule((f as { paymentSchedule?: unknown }).paymentSchedule),
       };
     }
   }
