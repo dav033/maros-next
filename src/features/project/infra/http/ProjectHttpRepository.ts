@@ -34,7 +34,14 @@ export class ProjectHttpRepository implements ProjectRepositoryPort {
 
   listFinancials = async (): Promise<ProjectFinancialsEntry[]> => {
     const { data } = await this.api.get(projectEndpoints.financials());
-    return mapFinancialsFromApi(data);
+    const mapped = mapFinancialsFromApi(data);
+    const rawRows = Array.isArray(data)
+      ? data
+      : data && typeof data === "object" && Array.isArray((data as { data?: unknown }).data)
+        ? (data as { data: unknown[] }).data
+        : [];
+    console.error(`[financial-debug] raw=${rawRows.length} mapped=${mapped.length} ids=${mapped.slice(0, 5).map((entry) => entry.id).join(",")}`);
+    return mapped;
   };
 
   create = async (draft: ProjectDraft): Promise<Project> => {
