@@ -41,7 +41,7 @@ export class ProjectHttpRepository implements ProjectRepositoryPort {
         : data && typeof data === "object" && Array.isArray((data as { data?: unknown }).data)
           ? (data as { data: unknown[] }).data
           : [];
-      console.info("[projects financials]", JSON.stringify({
+      console.info(JSON.stringify({ tag: "projects financials",
         rawCount: rawRows.length,
         rawSample: rawRows.slice(0, 3).map((row) => {
           if (!row || typeof row !== "object") return typeof row;
