@@ -41,7 +41,7 @@ export class ProjectHttpRepository implements ProjectRepositoryPort {
         : data && typeof data === "object" && Array.isArray((data as { data?: unknown }).data)
           ? (data as { data: unknown[] }).data
           : [];
-      console.info("[projects financials]", {
+      console.info("[projects financials]", JSON.stringify({
         rawCount: rawRows.length,
         rawSample: rawRows.slice(0, 3).map((row) => {
           if (!row || typeof row !== "object") return typeof row;
@@ -50,7 +50,7 @@ export class ProjectHttpRepository implements ProjectRepositoryPort {
         }),
         mappedCount: mapped.length,
         mappedSample: mapped.slice(0, 3).map((entry) => ({ id: entry.id, hasFinancial: Boolean(entry.financial) })),
-      });
+      }));
     }
     return mapped;
   };
