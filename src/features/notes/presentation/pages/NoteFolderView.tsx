@@ -18,10 +18,12 @@ export function NoteFolderView({
   folderId,
   pages,
   onCreateChild,
+  canEdit = true,
 }: {
   folderId: number;
   pages: NotePageSummary[];
   onCreateChild: (parentId: number, kind?: NoteKind) => void;
+  canEdit?: boolean;
 }) {
   const children = pages
     .filter((page) => page.parentId === folderId)
@@ -29,20 +31,32 @@ export function NoteFolderView({
 
   return (
     <section>
-      <div className="mb-3 flex items-center gap-2">
-        <Button variant="outline" size="sm" onClick={() => onCreateChild(folderId, "page")}>
-          <Plus className="mr-1 h-3.5 w-3.5" />
-          New page
-        </Button>
-        <Button variant="ghost" size="sm" onClick={() => onCreateChild(folderId, "folder")}>
-          <FolderPlus className="mr-1 h-3.5 w-3.5" />
-          New folder
-        </Button>
-      </div>
+      {canEdit && (
+        <div className="mb-3 flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onCreateChild(folderId, "page")}
+          >
+            <Plus className="mr-1 h-3.5 w-3.5" />
+            New page
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onCreateChild(folderId, "folder")}
+          >
+            <FolderPlus className="mr-1 h-3.5 w-3.5" />
+            New folder
+          </Button>
+        </div>
+      )}
 
       {children.length === 0 ? (
         <p className="py-6 text-sm text-muted-foreground">
-          This folder is empty — add a page, or drag one in from the sidebar.
+          {canEdit
+            ? "This folder is empty — add a page, or drag one in from the sidebar."
+            : "This folder has no pages yet."}
         </p>
       ) : (
         <div className="flex flex-col">
@@ -65,9 +79,14 @@ export function NoteFolderView({
                   {child.title || "Untitled"}
                 </span>
                 <div className="flex items-center gap-2.5 text-xs text-muted-foreground">
-                  {child.lastEditedBy && <span>{noteAuthorName(child.lastEditedBy)}</span>}
+                  {child.lastEditedBy && (
+                    <span>{noteAuthorName(child.lastEditedBy)}</span>
+                  )}
                   {child.tags.map((tag) => (
-                    <span key={tag.id} className="inline-flex items-center gap-1.5">
+                    <span
+                      key={tag.id}
+                      className="inline-flex items-center gap-1.5"
+                    >
                       <span
                         className="h-1.5 w-1.5 shrink-0 rounded-full"
                         style={{ backgroundColor: noteTagColor(tag.color) }}

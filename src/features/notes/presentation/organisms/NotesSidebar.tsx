@@ -1,9 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Star, Trash, Users } from "lucide-react";
+import {
+  ChevronDown,
+  Files,
+  PanelLeft,
+  Star,
+  Trash,
+  Users,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { NoteTreePanel } from "./NoteTreePanel";
 import { ShareNoteDialog } from "./ShareNoteDialog";
 import { useInstantNoteTree } from "../hooks/data/useInstantNoteTree";
@@ -19,6 +27,8 @@ import { cn } from "@/lib/utils";
 export function NotesSidebar() {
   const router = useRouter();
   const pathname = usePathname();
+  const [mobileOpen, setMobileOpen] = useState(false);
+  useEffect(() => setMobileOpen(false), [pathname]);
   const tree = useInstantNoteTree();
   const { createMutation, moveMutation, favoriteMutation, trashMutation } =
     useNoteMutations();
@@ -80,50 +90,80 @@ export function NotesSidebar() {
   };
 
   const secondaryLinks = [
+    { href: "/notes", label: "All notes", icon: Files },
     { href: "/notes/shared", label: "Shared with me", icon: Users },
     { href: "/notes/favorites", label: "Favorites", icon: Star },
     { href: "/notes/trash", label: "Trash", icon: Trash },
   ];
 
   return (
-    <aside className="flex h-52 w-full shrink-0 flex-col border-b border-border/60 bg-card/20 md:h-auto md:w-64 md:border-b-0 md:border-r">
-      <div className="min-h-0 flex-1 overflow-hidden">
-        <NoteTreePanel
-          pages={tree.pages}
-          onCreateRoot={handleCreateRoot}
-          onCreateChild={handleCreateChild}
-          onOpenShare={(id, title) => setShareTarget({ id, title })}
-          onMove={handleMove}
-          onSetFavorite={(id, isFavorite) =>
-            favoriteMutation.mutate({ id, isFavorite })
-          }
-          onTrash={handleTrash}
-        />
-      </div>
-      <nav
-        aria-label="Note collections"
-        className="space-y-1 border-t border-border/60 p-2"
+    <aside
+      aria-label="Notes navigation"
+      className="flex w-full shrink-0 flex-col border-b border-border/60 bg-card/60 md:w-60 md:border-b-0 md:border-r lg:w-64"
+    >
+      <Button
+        variant="ghost"
+        className="h-11 w-full justify-start gap-2 rounded-none px-4 md:hidden"
+        aria-expanded={mobileOpen}
+        aria-controls="notes-navigation"
+        onClick={() => setMobileOpen(!mobileOpen)}
       >
-        {secondaryLinks.map(({ href, label, icon: Icon }) => {
-          const isActive = pathname === href;
-          return (
-            <Link
-              key={href}
-              href={href}
-              aria-current={isActive ? "page" : undefined}
-              className={cn(
-                "flex min-h-9 items-center gap-2 rounded-md px-2.5 py-2 text-sm transition-colors",
-                isActive
-                  ? "bg-primary/10 font-medium text-primary"
-                  : "text-muted-foreground hover:bg-accent hover:text-foreground",
-              )}
-            >
-              <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-              <span>{label}</span>
-            </Link>
-          );
-        })}
-      </nav>
+        <PanelLeft className="size-4" aria-hidden="true" />
+        Browse pages
+        <ChevronDown
+          className={cn("ml-auto size-4", mobileOpen && "rotate-180")}
+          aria-hidden="true"
+        />
+      </Button>
+      <div
+        id="notes-navigation"
+        className={cn(
+          "min-h-0 flex-1 flex-col",
+          mobileOpen
+            ? "flex h-80 max-h-[50dvh] md:h-auto md:max-h-none"
+            : "hidden md:flex",
+        )}
+      >
+        <div className="min-h-0 flex-1 overflow-hidden">
+          <NoteTreePanel
+            pages={tree.pages}
+            isLoading={tree.isLoading}
+            creating={createMutation.isPending}
+            onCreateRoot={handleCreateRoot}
+            onCreateChild={handleCreateChild}
+            onOpenShare={(id, title) => setShareTarget({ id, title })}
+            onMove={handleMove}
+            onSetFavorite={(id, isFavorite) =>
+              favoriteMutation.mutate({ id, isFavorite })
+            }
+            onTrash={handleTrash}
+          />
+        </div>
+        <nav
+          aria-label="Note collections"
+          className="space-y-1 border-t border-border/60 p-2"
+        >
+          {secondaryLinks.map(({ href, label, icon: Icon }) => {
+            const isActive = pathname === href;
+            return (
+              <Link
+                key={href}
+                href={href}
+                aria-current={isActive ? "page" : undefined}
+                className={cn(
+                  "flex min-h-9 items-center gap-2 rounded-md px-2.5 py-2 text-sm transition-colors",
+                  isActive
+                    ? "bg-primary/10 font-medium text-primary"
+                    : "text-muted-foreground hover:bg-accent hover:text-foreground",
+                )}
+              >
+                <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                <span>{label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+      </div>
       {shareTarget && (
         <ShareNoteDialog
           key={shareTarget.id}

@@ -40,7 +40,7 @@ export function useNotesWorkspaceLogic({
   } = useNoteMutations();
   const autosave = useNoteAutosave(activePageId ?? -1);
 
-  const [title, setTitle] = useState("");
+  const [title, setTitle] = useState(initialPage?.title ?? "");
   const [shareOpen, setShareOpen] = useState(false);
   const loadedPageIdRef = useRef<number | null>(null);
 
@@ -92,6 +92,7 @@ export function useNotesWorkspaceLogic({
   const handleTitleBlur = async () => {
     if (activePageId == null) return;
     const trimmed = title.trim() || "Untitled";
+    setTitle(trimmed);
     if (trimmed === activePage.page?.title) return;
     try {
       const page = await renameMutation.mutateAsync({
@@ -176,6 +177,9 @@ export function useNotesWorkspaceLogic({
     activePageId,
     activePage: activePage.page,
     activePageLoading: activePage.isLoading,
+    activePageError: activePage.error,
+    retryPage: activePage.refetch,
+    creating: createMutation.isPending,
     title,
     setTitle,
     onContentChange: handleContentChange,

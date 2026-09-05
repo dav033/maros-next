@@ -510,6 +510,28 @@ button[role="tab"][data-state="active"],
 /* Tailwind Typography's default table styling is a bare bottom-border-per-row
    look (fine for an article, not for a punch-list/data table). Give the note
    editor's tables real cell boundaries and a shaded header row instead. */
+.note-editor p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+  color: hsl(var(--muted-foreground));
+}
+
+.note-editor > :first-child {
+  margin-top: 0;
+}
+
+.note-editor .tableWrapper {
+  overflow-x: auto;
+}
+
+.note-editor h1,
+.note-editor h2,
+.note-editor h3 {
+  text-wrap: balance;
+}
+
 .ProseMirror table {
   border-collapse: collapse;
   table-layout: fixed;

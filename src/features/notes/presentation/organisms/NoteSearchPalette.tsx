@@ -3,7 +3,12 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FileText, Search } from "lucide-react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -14,12 +19,26 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { useNoteSearch } from "../hooks/data/useNoteSearch";
+import { useInstantNoteTree } from "../hooks/data/useInstantNoteTree";
 
-export function NoteSearchPalette({ showTrigger = false }: { showTrigger?: boolean }) {
+export function NoteSearchPalette({
+  showTrigger = false,
+}: {
+  showTrigger?: boolean;
+}) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const { hits, isLoading } = useNoteSearch(query);
+  const tree = useInstantNoteTree();
+  const results = query.trim()
+    ? hits
+    : [...tree.pages]
+        .sort(
+          (a, b) =>
+            new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+        )
+        .slice(0, 6);
 
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {
@@ -50,32 +69,70 @@ export function NoteSearchPalette({ showTrigger = false }: { showTrigger?: boole
           aria-label="Search notes"
         >
           <Search className="h-3.5 w-3.5" aria-hidden="true" />
-          <span className="hidden sm:inline">Search notes</span>
+          <span>Search notes</span>
           <kbd className="hidden rounded border border-border/70 bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">
-            {typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform)
+            {typeof navigator !== "undefined" &&
+            /Mac|iPhone|iPad/.test(navigator.platform)
               ? "⌘K"
               : "Ctrl K"}
           </kbd>
         </Button>
       )}
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog
+        open={open}
+        onOpenChange={(next) => {
+          setOpen(next);
+          if (!next) setQuery("");
+        }}
+      >
         <DialogContent className="overflow-hidden p-0">
+          <DialogTitle className="sr-only">Search notes</DialogTitle>
+          <DialogDescription className="sr-only">
+            Search page titles and content, or open a recently edited page.
+          </DialogDescription>
           {/* Server-side search already filters `hits`; shouldFilter avoids cmdk
               re-filtering client-side against a `value` that isn't the note title. */}
           <Command shouldFilter={false}>
-            <CommandInput placeholder="Search notes…" value={query} onValueChange={setQuery} />
+            <CommandInput
+              placeholder="Search notes…"
+              value={query}
+              onValueChange={setQuery}
+            />
             <CommandList>
+              {isLoading && (
+                <p
+                  role="status"
+                  className="px-4 py-6 text-center text-sm text-muted-foreground"
+                >
+                  Searching notes…
+                </p>
+              )}
+              {!query.trim() && results.length === 0 && (
+                <p className="px-4 py-6 text-center text-sm text-muted-foreground">
+                  Type to search your notes.
+                </p>
+              )}
               {!isLoading && query.trim() && hits.length === 0 && (
                 <CommandEmpty>No notes found.</CommandEmpty>
               )}
-              <CommandGroup>
-                {hits.map((hit) => (
+              <CommandGroup
+                heading={
+                  !query.trim() && results.length > 0
+                    ? "Recently edited"
+                    : undefined
+                }
+              >
+                {results.map((hit) => (
                   <CommandItem
                     key={hit.id}
                     value={String(hit.id)}
                     onSelect={() => handleSelect(hit.id)}
                   >
-                    {hit.icon ? <span>{hit.icon}</span> : <FileText className="h-4 w-4" />}
+                    {hit.icon ? (
+                      <span>{hit.icon}</span>
+                    ) : (
+                      <FileText className="h-4 w-4" />
+                    )}
                     <span className="truncate">{hit.title || "Untitled"}</span>
                   </CommandItem>
                 ))}

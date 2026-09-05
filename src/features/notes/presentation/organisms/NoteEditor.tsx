@@ -10,18 +10,10 @@ import { emptyNoteDoc } from "@/notes/domain";
 import { SlashCommand } from "@/features/notes/config/slashCommandExtension";
 import { NoteImage } from "@/features/notes/config/noteImageExtension";
 import { Callout } from "@/features/notes/config/calloutExtension";
-import { NOTE_SLASH_COMMANDS } from "@/features/notes/config/noteSlashCommands";
 import { useNoteImageUpload } from "../hooks/editor/useNoteImageUpload";
 import { NoteBlockHandle } from "./NoteBlockHandle";
 import { NoteTableMenu } from "./NoteTableMenu";
-import { Button } from "@/components/ui/button";
-
-// A few of the "/" menu's commands, surfaced as one-click buttons too, since not
-// every user thinks to type "/" to discover them.
-const QUICK_INSERT_IDS = ["table", "taskList", "callout", "reminder"];
-const QUICK_INSERT_COMMANDS = NOTE_SLASH_COMMANDS.filter((cmd) =>
-  QUICK_INSERT_IDS.includes(cmd.id)
-);
+import { NoteEditorToolbar } from "./NoteEditorToolbar";
 
 export interface NoteEditorProps {
   pageId: number;
@@ -67,28 +59,34 @@ export function NoteEditor({
     ],
     editorProps: {
       attributes: {
+        role: "textbox",
+        "aria-label": "Note content",
+        "aria-multiline": "true",
+        "aria-readonly": String(!editable),
         class:
-          "prose prose-invert prose-sm sm:prose-base max-w-none focus:outline-none min-h-[60vh]",
+          "note-editor prose prose-invert prose-sm sm:prose-base max-w-[75ch] focus:outline-none min-h-[45vh] break-words",
       },
       handlePaste: (view, event) => {
         const files = Array.from(event.clipboardData?.files ?? []).filter((f) =>
-          f.type.startsWith("image/")
+          f.type.startsWith("image/"),
         );
         if (files.length === 0) return false;
         event.preventDefault();
         for (const file of files) {
           void uploadImage(file).then((key) => {
             if (!key) return;
-            view.dispatch(view.state.tr.replaceSelectionWith(
-              view.state.schema.nodes.image.create({ src: key })
-            ));
+            view.dispatch(
+              view.state.tr.replaceSelectionWith(
+                view.state.schema.nodes.image.create({ src: key }),
+              ),
+            );
           });
         }
         return true;
       },
       handleDrop: (view, event) => {
         const files = Array.from(event.dataTransfer?.files ?? []).filter((f) =>
-          f.type.startsWith("image/")
+          f.type.startsWith("image/"),
         );
         if (files.length === 0) return false;
         event.preventDefault();
@@ -98,7 +96,10 @@ export function NoteEditor({
           void uploadImage(file).then((key) => {
             if (!key) return;
             view.dispatch(
-              view.state.tr.insert(pos, view.state.schema.nodes.image.create({ src: key }))
+              view.state.tr.insert(
+                pos,
+                view.state.schema.nodes.image.create({ src: key }),
+              ),
             );
           });
         }
@@ -114,27 +115,13 @@ export function NoteEditor({
     <>
       {editable && editor && <NoteBlockHandle editor={editor} />}
       {editable && editor && <NoteTableMenu editor={editor} />}
-      {editable && editor && (
-        <div className="mb-4 flex flex-wrap items-center gap-1 border-b border-border/60 pb-3">
-          {QUICK_INSERT_COMMANDS.map((cmd) => (
-            <Button
-              key={cmd.id}
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="gap-1.5 text-xs text-muted-foreground hover:text-foreground"
-              onClick={() => {
-                const pos = editor.state.selection.from;
-                cmd.run(editor, { from: pos, to: pos });
-              }}
-            >
-              <cmd.icon className="h-3.5 w-3.5" />
-              {cmd.title}
-            </Button>
-          ))}
-        </div>
-      )}
+      {editable && editor && <NoteEditorToolbar editor={editor} />}
       <EditorContent editor={editor} />
+      {editable && (
+        <p className="mt-8 border-t border-border/40 pt-3 text-xs text-muted-foreground">
+          Type / for blocks · Paste or drop images into your note
+        </p>
+      )}
     </>
   );
 }

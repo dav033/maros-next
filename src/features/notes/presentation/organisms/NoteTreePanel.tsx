@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  ChevronRight,
   FileText,
   Folder,
   FolderOpen,
@@ -52,6 +53,7 @@ import type { NoteKind, NotePageSummary, VisibleNoteRow } from "@/notes/domain";
 const INDENT_WIDTH = 16;
 import { usePersistedState, setStorageCodec } from "@/common/hooks/ui";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const EXPANDED_STORAGE_KEY = "maros.notes.expanded";
 
@@ -104,7 +106,7 @@ function SortableNoteTreeRow({
     <div ref={setNodeRef} style={style}>
       <div
         className={cn(
-          "group flex items-center gap-1 rounded-md px-1.5 py-1.5 text-sm transition-colors hover:bg-accent/70",
+          "group flex min-h-10 items-center gap-0.5 rounded-md px-1 py-1 text-sm transition-colors hover:bg-accent/70",
           isActive && "bg-primary/10 text-primary",
         )}
         style={{ paddingLeft: 4 + row.depth * 16 }}
@@ -113,7 +115,7 @@ function SortableNoteTreeRow({
           type="button"
           {...attributes}
           {...listeners}
-          className="flex h-6 w-6 shrink-0 cursor-grab touch-none items-center justify-center rounded text-muted-foreground hover:bg-accent sm:hidden sm:h-5 sm:w-5 sm:group-hover:flex"
+          className="flex h-7 w-4 shrink-0 cursor-grab touch-none items-center justify-center rounded text-muted-foreground opacity-0 hover:bg-accent focus-visible:opacity-100 group-hover:opacity-100 group-focus-within:opacity-100"
           aria-label="Drag to reorder"
           title="Drag to reorder"
         >
@@ -122,19 +124,25 @@ function SortableNoteTreeRow({
         <button
           type="button"
           onClick={() => onToggle(row.id)}
+          aria-expanded={row.hasChildren ? isOpen : undefined}
+          tabIndex={row.hasChildren ? 0 : -1}
           aria-label={
             row.hasChildren ? (isOpen ? "Collapse" : "Expand") : undefined
           }
           className={cn(
-            "flex h-6 w-6 shrink-0 items-center justify-center rounded text-muted-foreground hover:bg-accent sm:h-5 sm:w-5 sm:group-hover:hidden",
+            "flex h-7 w-5 shrink-0 items-center justify-center rounded text-muted-foreground hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
             !row.hasChildren && "invisible",
           )}
         >
-          {isOpen ? "▾" : "▸"}
+          <ChevronRight
+            className={cn("size-3.5", isOpen && "rotate-90")}
+            aria-hidden="true"
+          />
         </button>
         <Link
           href={`/notes/${row.id}`}
-          className="flex min-w-0 flex-1 items-center gap-1.5 truncate"
+          aria-current={isActive ? "page" : undefined}
+          className="flex min-h-8 min-w-0 flex-1 items-center gap-1.5 truncate rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <span className="shrink-0">
             <RowIcon row={row} isOpen={isOpen} />
@@ -156,41 +164,34 @@ function SortableNoteTreeRow({
             />
           )}
         </Link>
-        <button
-          type="button"
-          onClick={() => onSetFavorite(row.id, !row.isFavorite)}
-          // A starred page keeps its star visible; the rest only reveal it on hover,
-          // so the tree doesn't turn into a wall of icons.
-          className={cn(
-            "flex h-6 w-6 shrink-0 items-center justify-center rounded text-muted-foreground hover:bg-accent sm:hidden sm:h-5 sm:w-5 sm:group-hover:flex",
-            row.isFavorite && "sm:flex",
-          )}
-          title={row.isFavorite ? "Remove from favorites" : "Add to favorites"}
-          aria-label={
-            row.isFavorite ? "Remove from favorites" : "Add to favorites"
-          }
-        >
-          <Star
+        {row.isFavorite && (
+          <button
+            type="button"
+            onClick={() => onSetFavorite(row.id, !row.isFavorite)}
+          // Keep favorites visible; other pages can be starred from their menu.
             className={cn(
-              "h-3.5 w-3.5",
-              row.isFavorite && "fill-amber-400 text-amber-400",
+              "flex h-7 w-5 shrink-0 items-center justify-center rounded text-muted-foreground hover:bg-accent",
             )}
-          />
-        </button>
-        <button
-          type="button"
-          onClick={() => onCreateChild(row.id)}
-          className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-muted-foreground hover:bg-accent sm:hidden sm:h-5 sm:w-5 sm:group-hover:flex"
-          title="Add sub-page"
-          aria-label="Add sub-page"
-        >
-          <Plus className="h-3.5 w-3.5" />
-        </button>
+            title={
+              row.isFavorite ? "Remove from favorites" : "Add to favorites"
+            }
+            aria-label={
+              row.isFavorite ? "Remove from favorites" : "Add to favorites"
+            }
+          >
+            <Star
+              className={cn(
+                "h-3.5 w-3.5",
+                row.isFavorite && "fill-amber-400 text-amber-400",
+              )}
+            />
+          </button>
+        )}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-muted-foreground hover:bg-accent sm:hidden sm:h-5 sm:w-5 sm:group-hover:flex data-[state=open]:flex"
+              className="flex h-8 w-6 shrink-0 items-center justify-center rounded text-muted-foreground hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100 data-[state=open]:opacity-100"
               title="More actions"
               aria-label="More actions"
             >
@@ -239,8 +240,12 @@ export function NoteTreePanel({
   onMove,
   onSetFavorite,
   onTrash,
+  isLoading = false,
+  creating = false,
 }: {
   pages: NotePageSummary[];
+  isLoading?: boolean;
+  creating?: boolean;
   onCreateRoot: (kind?: NoteKind) => void;
   onCreateChild: (parentId: number, kind?: NoteKind) => void;
   onOpenShare: (id: number, title: string) => void;
@@ -316,9 +321,12 @@ export function NoteTreePanel({
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex h-12 items-center justify-between border-b border-border/40 px-3">
-        <span className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
-          Pages
+      <div className="flex h-14 shrink-0 items-center justify-between px-3">
+        <span className="text-sm font-medium text-muted-foreground">
+          Pages{" "}
+          <span className="ml-1 text-xs font-normal">
+            {isLoading ? "" : pages.length}
+          </span>
         </span>
         <div className="flex items-center gap-0.5">
           <Button
@@ -327,24 +335,33 @@ export function NoteTreePanel({
             className="h-8 w-8 text-muted-foreground hover:text-foreground"
             title="New folder"
             aria-label="New folder"
+            disabled={creating}
             onClick={() => onCreateRoot("folder")}
           >
             <FolderPlus className="h-3.5 w-3.5" aria-hidden="true" />
           </Button>
           <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+            variant="secondary"
+            size="sm"
+            className="h-8 gap-1.5"
             title="New page"
             aria-label="New page"
+            disabled={creating}
             onClick={() => onCreateRoot("page")}
           >
             <Plus className="h-3.5 w-3.5" aria-hidden="true" />
+            New
           </Button>
         </div>
       </div>
-      <div className="notes-scrollbar flex-1 overflow-y-auto px-1 pb-4">
-        {visibleRows.length === 0 ? (
+      <div className="notes-scrollbar min-h-0 flex-1 overflow-y-auto px-1 pb-4">
+        {isLoading ? (
+          <div className="space-y-2 p-2" aria-label="Loading pages">
+            {[1, 2, 3, 4].map((row) => (
+              <Skeleton key={row} className="h-8 w-full" />
+            ))}
+          </div>
+        ) : visibleRows.length === 0 ? (
           <div className="mx-2 mt-3 rounded-lg border border-dashed border-border/70 bg-background/30 px-3 py-4 text-center">
             <p className="text-sm font-medium text-foreground/80">
               No pages yet
