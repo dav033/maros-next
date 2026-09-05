@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -120,6 +120,7 @@ export function TaskDetailSheet({
   useEffect(() => {
     if (!task) return;
     const handler = (event: KeyboardEvent) => {
+      if (event.defaultPrevented) return;
       if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
         event.preventDefault();
         document.querySelector<HTMLButtonElement>("[data-task-comment-submit]")?.click();
@@ -129,7 +130,7 @@ export function TaskDetailSheet({
       const target = event.target as HTMLElement | null;
       if (target?.tagName === "INPUT" || target?.tagName === "TEXTAREA" || target?.isContentEditable) return;
       if (event.key === "?") { event.preventDefault(); setShortcutsOpen(true); }
-      if (event.key === "e") { event.preventDefault(); document.querySelector<HTMLInputElement>("[data-task-title]")?.focus(); }
+      if (event.key === "e") { event.preventDefault(); document.querySelector<HTMLTextAreaElement>("[data-task-title]")?.focus(); }
       if (event.key === "a") { event.preventDefault(); document.querySelector<HTMLButtonElement>("[data-task-assignee]")?.click(); }
       if (event.key === "d") { event.preventDefault(); document.querySelector<HTMLButtonElement>("[data-task=due]")?.click(); }
       if (event.key === "Escape") { event.preventDefault(); onClose(); }
@@ -244,7 +245,7 @@ export function TaskDetailSheet({
   return (
     <>
       <Sheet open={open} onOpenChange={(next) => !next && onClose()}>
-        <SheetContent pageMode={pageMode} side="right" className={cn("w-full overflow-y-auto p-6", pageMode ? "max-w-none" : "sm:max-w-3xl")}>
+        <SheetContent pageMode={pageMode} side="right" className={cn("@container/task-detail w-full min-w-0 p-4 sm:p-6", pageMode ? "mx-auto max-w-7xl" : "overflow-y-auto sm:max-w-3xl")}>
           {showSkeleton || !task ? (
             <div className="space-y-4 pt-8">
               <Skeleton className="h-8 w-3/4" />
@@ -253,7 +254,7 @@ export function TaskDetailSheet({
             </div>
           ) : (
             <>
-              <SheetHeader className="gap-1">
+              <SheetHeader className="gap-1 pr-8 text-left">
                 <SheetDescription className="font-mono text-xs">
                   T-{task.id}
                   {task.parentId ? (
@@ -266,19 +267,26 @@ export function TaskDetailSheet({
                     </button>
                   ) : null}
                 </SheetDescription>
-                <SheetTitle asChild>
-                  <Input
+                <SheetTitle className="sr-only">{title || "Task details"}</SheetTitle>
+                <div className="flex min-w-0 items-start gap-3">
+                  <Textarea
                     data-task-title
+                    aria-label="Task title"
+                    rows={1}
                     value={title}
-                    onChange={(e) => titleField.setValue(e.target.value)}
+                    onChange={(e) => titleField.setValue(e.target.value.replace(/[\r\n]+/g, " "))}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" && !event.metaKey && !event.ctrlKey && !event.nativeEvent.isComposing) {
+                        event.preventDefault();
+                        event.currentTarget.blur();
+                      }
+                    }}
                     onBlur={saveTitle}
-                    className="border-none px-0 text-lg font-semibold shadow-none focus-visible:ring-0"
+                    className="min-h-9 min-w-0 flex-1 resize-none border-none bg-transparent px-0 py-1 text-xl font-semibold leading-snug shadow-none [field-sizing:content] focus-visible:ring-1 md:text-xl"
                   />
-                </SheetTitle>
-                <div className="flex justify-end">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button type="button" variant="ghost" size="icon" className="-mt-8 h-8 w-8" aria-label="More task actions">
+                      <Button type="button" variant="ghost" size="icon" className="h-8 w-8 shrink-0" aria-label="More task actions">
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
@@ -295,7 +303,7 @@ export function TaskDetailSheet({
                 <div className="mt-4 rounded-lg border border-border/60 bg-card/60 px-3 py-2">
                   <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Job context</p>
                   <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
-                    <Link href={task.entity.href} className="font-medium hover:underline">{task.entity.label}</Link>
+                    <Link href={task.entity.href} className="min-w-0 break-words font-medium hover:underline">{task.entity.label}</Link>
                     {task.entity.leadNumber ? <span className="font-mono text-xs text-muted-foreground">{task.entity.leadNumber}</span> : null}
                     {task.entity.status ? <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">{humanizeEntityStatus(task.entity.status)}</span> : null}
                     {task.entity.address ? <span className="text-xs text-muted-foreground">{task.entity.address}</span> : null}
@@ -304,8 +312,8 @@ export function TaskDetailSheet({
                 </div>
               ) : null}
 
-              <div className={cn("mt-4", pageMode && "lg:grid lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-start lg:gap-6")}>
-              <Tabs defaultValue="details">
+              <div className={cn("mt-5 min-w-0", pageMode && "@min-[56rem]/task-detail:grid @min-[56rem]/task-detail:grid-cols-[minmax(0,1fr)_18rem] @min-[56rem]/task-detail:items-start @min-[56rem]/task-detail:gap-6")}>
+              <Tabs defaultValue="details" className="@container/task-form min-w-0">
                 <TabsList>
                   <TabsTrigger value="details">Details</TabsTrigger>
                   <TabsTrigger value="subtasks">
@@ -313,8 +321,8 @@ export function TaskDetailSheet({
                   </TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="details" className="space-y-5">
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <TabsContent value="details" className="min-w-0 space-y-5">
+                  <div className="grid grid-cols-1 gap-4 @min-[28rem]/task-form:grid-cols-2 [&>div]:min-w-0">
                     <div className="space-y-1.5">
                       <Label className="text-xs text-muted-foreground">Status</Label>
                       <Select value={task.status} onValueChange={changeStatus}>
@@ -579,7 +587,7 @@ export function TaskDetailSheet({
 
               </Tabs>
               {pageMode ? (
-                <aside className="mt-6 space-y-3 rounded-xl border border-border/60 bg-card/50 p-4 text-xs lg:mt-0">
+                <aside aria-label="Task facts" className="mt-6 min-w-0 space-y-3 rounded-xl border border-border/60 bg-card/50 p-4 text-xs @min-[56rem]/task-detail:mt-0">
                   <p className="font-semibold text-foreground">Task facts</p>
                   <dl className="space-y-2 text-muted-foreground">
                     <div className="flex justify-between gap-3"><dt>Status</dt><dd className="font-medium text-foreground">{TASK_STATUS_LABELS[task.status]}</dd></div>

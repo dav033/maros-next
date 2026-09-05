@@ -31,7 +31,7 @@ export function TaskWorkSection({ task, onSavePatch }: { task: TaskDetail; onSav
   });
 
   return (
-    <div className="grid gap-4 border-t border-border/60 pt-4 sm:grid-cols-2">
+    <div className="grid min-w-0 gap-4 border-t border-border/60 pt-4 @min-[28rem]/task-form:grid-cols-2 [&>div]:min-w-0">
       <div className="space-y-2">
         <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground"><GitBranch className="h-3.5 w-3.5" />Dependencies</div>
         <p className="text-xs text-muted-foreground">{dependencies.data?.length ? dependencies.data.map((id) => `T-${id}`).join(", ") : "No blocking tasks"}</p>

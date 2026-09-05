@@ -6,7 +6,7 @@ import { TaskDetailSheet } from "../organisms/TaskDetailSheet";
 export function TaskDetailPageView({ taskId }: { taskId: number }) {
   const router = useRouter();
   return (
-    <main className="min-h-screen bg-background">
+    <main className="min-h-0 w-full min-w-0 bg-background">
       <TaskDetailSheet
         taskId={taskId}
         onClose={() => router.push("/tasks")}

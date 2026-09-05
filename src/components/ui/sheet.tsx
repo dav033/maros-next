@@ -60,12 +60,15 @@ const SheetContent = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Content>,
   SheetContentProps
 >(({ side = "right", className, children, pageMode = false, ...props }, ref) => {
+  // Route content must not inherit a drawer's responsive width or modal behavior.
+  const Content = pageMode ? "div" : SheetPrimitive.Content
   const content = (
-    <SheetPrimitive.Content
+    <Content
       ref={ref}
       className={cn(
-        sheetVariants({ side }),
-        pageMode && "relative inset-auto z-auto h-auto min-h-screen w-full max-w-none border-0 bg-background p-6 shadow-none",
+        pageMode
+          ? "relative min-w-0 w-full bg-background p-6"
+          : sheetVariants({ side }),
         className,
       )}
       {...props}
@@ -75,7 +78,7 @@ const SheetContent = React.forwardRef<
         <span className="sr-only">Close</span>
       </SheetPrimitive.Close>
       {children}
-    </SheetPrimitive.Content>
+    </Content>
   )
 
   return pageMode ? content : (
