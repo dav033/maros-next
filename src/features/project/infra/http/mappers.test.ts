@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import { InvoiceStatus } from "@/project/domain";
+
 import { mapFinancialsFromApi, mapProjectFromApi } from "./mappers";
 
 const baseProject = {
@@ -75,5 +77,55 @@ describe("mapFinancialsFromApi", () => {
     ]);
 
     expect(entry?.id).toBe(42);
+  });
+
+  it("sube paymentSummary e invoiceStatus fuera de financial", () => {
+    const [entry] = mapFinancialsFromApi([
+      {
+        id: 111,
+        financial: {
+          projectNumber: "088-0626",
+          found: true,
+          estimatedAmount: 300,
+          estimateCount: 1,
+          invoicedAmount: 300,
+          invoiceCount: 1,
+          paidAmount: 300,
+          outstandingAmount: 0,
+          paidPercentage: 100,
+          estimateVsInvoicedDelta: 0,
+          paymentSummary: {
+            count: 1,
+            totalAmount: 300,
+            lastPaymentDate: "2026-06-06",
+            hasDetails: true,
+          },
+          invoiceStatus: "PAID",
+        },
+        qbo: { data: null },
+      },
+    ]);
+
+    expect(entry.id).toBe(111);
+    expect(entry.financial?.estimatedAmount).toBe(300);
+    expect(entry.paymentSummary).toEqual({
+      count: 1,
+      totalAmount: 300,
+      lastPaymentDate: "2026-06-06",
+      hasDetails: true,
+    });
+    expect(entry.invoiceStatus).toBe(InvoiceStatus.PAID);
+  });
+
+  it("deja la fila vacía cuando el proyecto no existe en QuickBooks", () => {
+    const [entry] = mapFinancialsFromApi([{ id: 143, financial: null, qbo: { data: null } }]);
+
+    expect(entry).toEqual({
+      id: 143,
+      financial: null,
+      paymentSummary: null,
+      invoiceStatus: undefined,
+      qboError: undefined,
+    });
   });
 });

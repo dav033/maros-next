@@ -40,16 +40,19 @@ export function useEntityTableLogic<T, TId = number>({
 }: UseEntityTableLogicOptions<T, TId>) {
   const [rows, setRows] = useState<T[]>([]);
 
-  const areItemsEqual = useCallback(
-    (a: T[], b: T[]) => {
-      if (a.length !== b.length) return false;
-      for (let i = 0; i < a.length; i++) {
-        if (getId(a[i]) !== getId(b[i])) return false;
-      }
-      return true;
-    },
-    [getId]
-  );
+  // Comparar solo los ids no alcanza: hay datos que llegan después del primer
+  // render y se mezclan en las filas ya existentes (los montos de QuickBooks en
+  // Projects, por ejemplo). Eso produce objetos nuevos con los mismos ids, y una
+  // comparación por id los descartaba en silencio. Se comparan las referencias
+  // de cada item: quien pase este array debe memoizarlo, o el efecto correría en
+  // cada render.
+  const areItemsEqual = useCallback((a: T[], b: T[]) => {
+    if (a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) {
+      if (a[i] !== b[i]) return false;
+    }
+    return true;
+  }, []);
 
   useEffect(() => {
     const newItems = items ?? [];

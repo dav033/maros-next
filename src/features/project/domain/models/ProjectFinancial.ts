@@ -1,3 +1,5 @@
+import type { InvoiceStatus, ProjectPaymentSummary } from "../models";
+
 /**
  * Financial information for a project from n8n webhook
  */
@@ -46,6 +48,10 @@ export interface ProjectFinancial {
 export interface ProjectFinancialsEntry {
   id: number;
   financial: ProjectFinancial | null;
+  /** Resumen de pagos de QuickBooks: alimenta la columna "Payments". */
+  paymentSummary?: ProjectPaymentSummary | null;
+  /** Derivado por el backend a partir de invoiced/outstanding: alimenta el filtro y el agrupado por invoice. */
+  invoiceStatus?: InvoiceStatus;
   qboError?: { code: string; message: string };
 }
 

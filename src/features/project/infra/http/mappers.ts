@@ -1,7 +1,7 @@
 import type { Project, ProjectDraft, ProjectPatch, ProjectClientSummary, ProjectPaymentSummary, ProjectFinancialsEntry } from "@/project/domain";
 import type { ProjectFinancial } from "@/project/domain/models/ProjectFinancial";
 import type { ApiProjectDTO } from "@/project/domain/services/projectReadMapper";
-import { mapProjectFromDTO, mapProjectsFromDTO } from "@/project/domain";
+import { InvoiceStatus, mapProjectFromDTO, mapProjectsFromDTO } from "@/project/domain";
 import { mapLeadFromDTO } from "@/leads/domain/services/leadReadMapper";
 
 export type CreateProjectPayload = {
@@ -45,6 +45,14 @@ function mapPaymentSummary(input: unknown): ProjectPaymentSummary | null {
   };
 }
 
+function resolveInvoiceStatus(input: unknown): InvoiceStatus | undefined {
+  if (typeof input !== "string") return undefined;
+  const value = input.trim().toUpperCase();
+  return Object.values(InvoiceStatus).includes(value as InvoiceStatus)
+    ? (value as InvoiceStatus)
+    : undefined;
+}
+
 export function mapProjectFromApi(dto: ApiProjectDTO): Project {
   const project = mapProjectFromDTO(dto, mapLeadFromDTO);
   return {
@@ -85,9 +93,16 @@ export function mapFinancialsFromApi(rows: unknown): ProjectFinancialsEntry[] {
         ? { code: qbo.error.code ?? "qbo_query_failed", message: qbo.error.message }
         : undefined;
 
+    // El backend anida paymentSummary e invoiceStatus dentro de `financial`;
+    // aquí se suben al nivel de la entry porque en el Project viven fuera de él.
+    const financial = (rec.financial as ProjectFinancial | null) ?? null;
+    const extras = (financial ?? {}) as Record<string, unknown>;
+
     entries.push({
       id,
-      financial: (rec.financial as ProjectFinancial | null) ?? null,
+      financial,
+      paymentSummary: mapPaymentSummary(extras.paymentSummary),
+      invoiceStatus: resolveInvoiceStatus(extras.invoiceStatus),
       qboError,
     });
   }

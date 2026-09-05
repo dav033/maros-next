@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { useInstantProjects } from "./useInstantProjects";
-import { useProjectsFinancials } from "./useProjectsFinancials";
+import { mergeProjectFinancials, useProjectsFinancials } from "./useProjectsFinancials";
 import type { Project } from "@/project/domain";
 import { LeadType } from "@/leads/domain";
 import { getLeadTypeFromNumber } from "@/features/leads/domain/utils/lead-type.utils";
@@ -33,11 +33,7 @@ export function useProjectsData({
     () =>
       (projects ?? [])
         .filter((project) => getLeadTypeFromNumber(project.lead?.leadNumber) === leadType)
-        .map((project) => {
-          const entry = financialsById.get(project.id);
-          if (!entry) return project;
-          return { ...project, financial: entry.financial ?? undefined, qboError: entry.qboError };
-        }),
+        .map((project) => mergeProjectFinancials(project, financialsById)),
     [projects, leadType, financialsById],
   );
 
