@@ -73,10 +73,23 @@ describe("mapFinancialsFromApi", () => {
           paidPercentage: 50,
           estimateVsInvoicedDelta: 0,
         },
+        qbo: { data: null },
       },
     ]);
 
     expect(entry?.id).toBe(42);
+  });
+
+  it("omite las filas que el backend no alcanzó a enriquecer (timeout)", () => {
+    // `qbo: null` = findAllFinancials cortó a los 25s sin tocar esa fila. Si se
+    // mapeara como fila vacía, el refetch periódico borraría los montos que la
+    // tabla ya tenía.
+    const entries = mapFinancialsFromApi([
+      { id: 1, financial: null, qbo: null },
+      { id: 2, financial: null, qbo: { data: null } },
+    ]);
+
+    expect(entries.map((entry) => entry.id)).toEqual([2]);
   });
 
   it("sube paymentSummary e invoiceStatus fuera de financial", () => {

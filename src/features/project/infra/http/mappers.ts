@@ -87,6 +87,12 @@ export function mapFinancialsFromApi(rows: unknown): ProjectFinancialsEntry[] {
           : NaN;
     if (!Number.isInteger(id)) continue;
 
+    // `qbo: null` significa que findAllFinancials cortó por timeout antes de
+    // tocar esta fila. No es lo mismo que "no existe en QuickBooks" (eso llega
+    // como `qbo: { data: null }`): se omite la fila para que la tabla conserve
+    // los montos que ya tenía en vez de vaciarlos hasta el próximo refetch.
+    if (rec.qbo === null || rec.qbo === undefined) continue;
+
     const qbo = rec.qbo as { error?: { code?: string; message?: string } } | null | undefined;
     const qboError =
       qbo?.error && typeof qbo.error.message === "string"
