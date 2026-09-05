@@ -6,6 +6,7 @@ export type {
   ProjectFinancial,
   ProjectFinancialsEntry,
   ProjectPaymentSchedule,
+  ProjectPaymentScheduleBasis,
   ProjectPaymentScheduleItem,
 } from "./models/ProjectFinancial";
 

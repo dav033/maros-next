@@ -5,6 +5,7 @@ import type {
   ProjectFinancial,
   ProjectFinancialPayment,
   ProjectPaymentSchedule,
+  ProjectPaymentScheduleBasis,
 } from "../models/ProjectFinancial";
 
 export type ApiProjectDTO = {
@@ -115,13 +116,19 @@ function normalizePaymentSchedule(input: unknown): ProjectPaymentSchedule | unde
   const items = value.items.flatMap((row) => {
     if (!row || typeof row !== "object") return [];
     const item = row as Record<string, unknown>;
-    const percentage = typeof item.percentage === "number" ? item.percentage : Number(item.percentage);
-    if (typeof item.label !== "string" || !Number.isFinite(percentage)) return [];
+    if (typeof item.label !== "string") return [];
+    // percentage viene null en los hitos de monto fijo: la fila sigue siendo
+    // válida mientras tenga label y alguno de los dos valores.
+    const percentage = item.percentage == null ? null : Number(item.percentage);
     const amount = item.amount == null ? null : Number(item.amount);
+    const safePercentage = percentage !== null && Number.isFinite(percentage) ? percentage : null;
+    const safeAmount = amount !== null && Number.isFinite(amount) ? amount : null;
+    if (safePercentage === null && safeAmount === null) return [];
     return [{
       label: item.label,
-      percentage,
-      amount: Number.isFinite(amount) ? amount : null,
+      percentage: safePercentage,
+      amount: safeAmount,
+      basis: resolveScheduleBasis(item.basis),
     }];
   });
   if (!items.length) return undefined;
@@ -131,10 +138,22 @@ function normalizePaymentSchedule(input: unknown): ProjectPaymentSchedule | unde
   const sourceValue = source as Record<string, unknown>;
   if (
     typeof sourceValue.attachmentId !== "string" ||
-    typeof sourceValue.fileName !== "string" ||
-    (sourceValue.entityType !== "Estimate" && sourceValue.entityType !== "Invoice") ||
-    typeof sourceValue.entityId !== "string"
+    typeof sourceValue.fileName !== "string"
   ) return undefined;
+
+  const entityType =
+    sourceValue.entityType === "Estimate" ||
+    sourceValue.entityType === "Invoice" ||
+    sourceValue.entityType === "Customer"
+      ? sourceValue.entityType
+      : null;
+  const matchedBy =
+    sourceValue.matchedBy === "estimate" ||
+    sourceValue.matchedBy === "invoice" ||
+    sourceValue.matchedBy === "customer" ||
+    sourceValue.matchedBy === "file-name"
+      ? sourceValue.matchedBy
+      : "estimate";
 
   const totalPercentage = value.totalPercentage == null ? null : Number(value.totalPercentage);
   const totalAmount = value.totalAmount == null ? null : Number(value.totalAmount);
@@ -142,13 +161,21 @@ function normalizePaymentSchedule(input: unknown): ProjectPaymentSchedule | unde
     items,
     totalPercentage: Number.isFinite(totalPercentage) ? totalPercentage : null,
     totalAmount: Number.isFinite(totalAmount) ? totalAmount : null,
+    basis:
+      resolveScheduleBasis(value.basis) ??
+      (items.some((item) => item.basis === "remaining-balance") ? "remaining-balance" : "total"),
     source: {
       attachmentId: sourceValue.attachmentId,
       fileName: sourceValue.fileName,
-      entityType: sourceValue.entityType,
-      entityId: sourceValue.entityId,
+      entityType,
+      entityId: typeof sourceValue.entityId === "string" ? sourceValue.entityId : null,
+      matchedBy,
     },
   };
+}
+
+function resolveScheduleBasis(input: unknown): ProjectPaymentScheduleBasis | undefined {
+  return input === "remaining-balance" || input === "total" ? input : undefined;
 }
 
 export function mapProjectFromDTO(dto: ApiProjectDTO, leadMapper: (dto: any) => Lead): Project {

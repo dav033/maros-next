@@ -12,21 +12,32 @@ export interface ProjectFinancialPayment {
   linkedInvoice?: string;
 }
 
+/**
+ * Sobre qué monto se calcula un porcentaje. Los proposals de Maros usan hitos
+ * tipo "35% of Remaining Balance", que no son una fracción del estimate.
+ */
+export type ProjectPaymentScheduleBasis = "total" | "remaining-balance";
+
 export interface ProjectPaymentScheduleItem {
   label: string;
-  percentage: number;
+  /** null en hitos de monto fijo ("Fixed Amount $5,000.00"). */
+  percentage: number | null;
   amount: number | null;
+  basis?: ProjectPaymentScheduleBasis;
 }
 
 export interface ProjectPaymentSchedule {
   items: ProjectPaymentScheduleItem[];
   totalPercentage: number | null;
   totalAmount: number | null;
+  basis: ProjectPaymentScheduleBasis;
   source: {
     attachmentId: string;
     fileName: string;
-    entityType: "Estimate" | "Invoice";
-    entityId: string;
+    entityType: "Estimate" | "Invoice" | "Customer" | null;
+    entityId: string | null;
+    /** 'file-name' es heurístico: hay proposals mal nombrados en QuickBooks. */
+    matchedBy: "estimate" | "invoice" | "customer" | "file-name";
   };
 }
 
