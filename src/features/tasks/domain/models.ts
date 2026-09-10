@@ -261,7 +261,7 @@ export type TaskPatch = Readonly<{
   /**
    * The task's `updatedAt` this edit was read from. When set, a save that lands after
    * someone else's concurrent edit fails with a "conflict" AppError instead of
-   * silently overwriting it — see TaskDetailSheet's saveTaskPatch. Omit for callers
+ * silently overwriting it — see TaskDetailDialog's saveTaskPatch. Omit for callers
    * where the last write is meant to win.
    */
   expectedUpdatedAt?: string;

@@ -2,6 +2,8 @@ import type { QueryClient, QueryKey } from "@tanstack/react-query";
 
 export type Snapshot = {
   restore: () => void;
+  /** Optional cleanup for operation-local bookkeeping after success or failure. */
+  finalize?: () => void;
 };
 
 type EntityWithId<TId> = { id?: TId };

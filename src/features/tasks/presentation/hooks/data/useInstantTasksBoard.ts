@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useTasksApp } from "@/di";
-import { tasksKeys, getBoard } from "@/tasks/application";
+import { normalizeTaskFilters, tasksKeys, getBoard } from "@/tasks/application";
 import type { TaskBoardResult, TaskFilters } from "@/tasks/domain";
 import { buildInstantQueryResult } from "@/shared/query";
 import { STALE_TIMES } from "@/shared/lib/queryClient";
@@ -11,8 +11,9 @@ const EMPTY_BOARD: TaskBoardResult = { columns: {}, doneTotalCount: 0 };
 
 export function useInstantTasksBoard(filters?: TaskFilters) {
   const ctx = useTasksApp();
+  const normalizedFilters = normalizeTaskFilters(filters);
   const query = useQuery<TaskBoardResult, Error>({
-    queryKey: [...tasksKeys.board(), filters ?? {}],
+    queryKey: tasksKeys.board(normalizedFilters),
     queryFn: () => getBoard(ctx, filters),
     staleTime: STALE_TIMES.lists,
   });

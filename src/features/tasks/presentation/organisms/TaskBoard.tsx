@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { isValid, parse } from "date-fns";
 import { Filter, Rows3, Search, X } from "lucide-react";
@@ -28,6 +28,16 @@ import { CSS } from "@dnd-kit/utilities";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MultiSelectFilter, PageToolbarCard } from "@/components/shared";
 import { cn } from "@/lib/utils";
@@ -37,6 +47,7 @@ import { useCurrentUser } from "@/shared/auth/CurrentUserProvider";
 import { useUserDirectory } from "@/features/users/presentation/hooks/data/useUserDirectory";
 import { BOARD_STATUSES, TASK_KINDS, TASK_PRIORITIES, TASK_STATUSES } from "@/tasks/domain";
 import type { Task, TaskBoardColumns, TaskEntityKind, TaskKind, TaskPriority, TaskStatus } from "@/tasks/domain";
+import type { DirectoryUser } from "@/features/users/domain";
 import { useInstantTasksBoard } from "../hooks/data/useInstantTasksBoard";
 import { useTaskMutations } from "../hooks/mutations/useTaskMutations";
 import { TaskCard } from "../molecules/TaskCard";
@@ -127,7 +138,7 @@ function QuickFilterPill({
   );
 }
 
-function SortableTaskCard({ task, onClick, onComplete, onAssigneeClick, onDueDateClick, onDuplicate, onDelete, onPriorityChange, onLabelsClick, onSelect, selected }: { task: Task; onClick: () => void; onComplete?: () => void; onAssigneeClick?: () => void; onDueDateClick?: () => void; onDuplicate?: () => void; onDelete?: () => void; onPriorityChange?: (priority: TaskPriority) => void; onLabelsClick?: () => void; onSelect?: (shiftKey: boolean) => void; selected?: boolean }) {
+function SortableTaskCard({ task, onClick, onComplete, onAssigneeClick, onAssigneeChange, onDueDateClick, onDueDateChange, onDuplicate, onDelete, onPriorityChange, onLabelsClick, onArchive, onSelect, selected }: { task: Task; onClick: () => void; onComplete?: () => void; onAssigneeClick?: () => void; onAssigneeChange?: (user: DirectoryUser | null) => void; onDueDateClick?: () => void; onDueDateChange?: (date: string | null) => void; onDuplicate?: () => void; onDelete?: () => void; onPriorityChange?: (priority: TaskPriority) => void; onLabelsClick?: () => void; onArchive?: () => void; onSelect?: (shiftKey: boolean) => void; selected?: boolean }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: task.id,
   });
@@ -143,8 +154,8 @@ function SortableTaskCard({ task, onClick, onComplete, onAssigneeClick, onDueDat
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      <TaskCard task={task} onClick={onClick} onComplete={onComplete} onAssigneeClick={onAssigneeClick} onDueDateClick={onDueDateClick} onDuplicate={onDuplicate} onDelete={onDelete} onPriorityChange={onPriorityChange} onLabelsClick={onLabelsClick} onSelect={onSelect} selected={selected} />
+    <div ref={setNodeRef} style={style}>
+      <TaskCard task={task} dragHandle={{ attributes, listeners }} onClick={onClick} onComplete={onComplete} onAssigneeClick={onAssigneeClick} onAssigneeChange={onAssigneeChange} onDueDateClick={onDueDateClick} onDueDateChange={onDueDateChange} onDuplicate={onDuplicate} onDelete={onDelete} onPriorityChange={onPriorityChange} onLabelsClick={onLabelsClick} onArchive={onArchive} onSelect={onSelect} selected={selected} />
     </div>
   );
 }
@@ -156,6 +167,8 @@ function BoardColumn({
   onCardClick,
   onQuickAdd,
   onComplete,
+  onAssigneeChange,
+  onDueDateChange,
   onDuplicate,
   onDelete,
   onPriorityChange,
@@ -169,6 +182,8 @@ function BoardColumn({
   onCardClick: (id: number) => void;
   onQuickAdd: (value: string) => Promise<void>;
   onComplete: (task: Task) => void;
+  onAssigneeChange: (task: Task, user: DirectoryUser | null) => void;
+  onDueDateChange: (task: Task, date: string | null) => void;
   onDuplicate: (task: Task) => void;
   onDelete: (task: Task) => void;
   onPriorityChange: (task: Task, priority: TaskPriority) => void;
@@ -203,8 +218,8 @@ function BoardColumn({
               task={task}
               onClick={() => onCardClick(task.id)}
               onComplete={() => onComplete(task)}
-              onAssigneeClick={() => onCardClick(task.id)}
-              onDueDateClick={() => onCardClick(task.id)}
+              onAssigneeChange={(user) => onAssigneeChange(task, user)}
+              onDueDateChange={(date) => onDueDateChange(task, date)}
               onDuplicate={() => onDuplicate(task)}
               onDelete={() => onDelete(task)}
               onPriorityChange={(priority) => onPriorityChange(task, priority)}
@@ -243,6 +258,8 @@ function AssigneeSwimlane({
   onDuplicate,
   onDelete,
   onPriorityChange,
+  onAssigneeChange,
+  onDueDateChange,
   isDropPreview,
   previewTask,
   onQuickAdd,
@@ -255,6 +272,8 @@ function AssigneeSwimlane({
   onDuplicate: (task: Task) => void;
   onDelete: (task: Task) => void;
   onPriorityChange: (task: Task, priority: TaskPriority) => void;
+  onAssigneeChange: (task: Task, user: DirectoryUser | null) => void;
+  onDueDateChange: (task: Task, date: string | null) => void;
   isDropPreview?: boolean;
   previewTask?: Task | null;
   onQuickAdd: (value: string) => Promise<void>;
@@ -298,8 +317,8 @@ function AssigneeSwimlane({
                       task={task}
                       onClick={() => onCardClick(task.id)}
                       onComplete={() => onComplete(task)}
-                      onAssigneeClick={() => onCardClick(task.id)}
-                      onDueDateClick={() => onCardClick(task.id)}
+                      onAssigneeChange={(user) => onAssigneeChange(task, user)}
+                      onDueDateChange={(date) => onDueDateChange(task, date)}
                       onDuplicate={() => onDuplicate(task)}
                       onDelete={() => onDelete(task)}
                       onPriorityChange={(priority) => onPriorityChange(task, priority)}
@@ -377,7 +396,7 @@ export function TaskBoard({
   }, [embeddedTasks, fetchedBoard]);
   const doneTotalCount = embeddedTasks ? (board.done?.length ?? 0) : fetchedDoneTotalCount;
   const showSkeleton = embeddedTasks ? false : fetchedShowSkeleton;
-  const { createMutation, moveMutation, setAssigneeMutation, setLabelsMutation, updateMutation, setEntityMutation, deleteMutation } = useTaskMutations();
+  const { createMutation, moveMutation, setAssigneeMutation, rescheduleMutation, setLabelsMutation, updateMutation, setEntityMutation, deleteMutation } = useTaskMutations();
   const { labels: taskLabels } = useInstantTaskLabels();
   const { user } = useCurrentUser();
   // Always on (not gated behind a picker opening) — the assignee filter and the
@@ -392,6 +411,16 @@ export function TaskBoard({
         : null;
   const { users: directoryUsers } = useUserDirectory(true);
 
+  const changeAssignee = (task: Task, person: DirectoryUser | null) => {
+    setAssigneeMutation.mutate({ id: task.id, userId: person?.id ?? null });
+  };
+  const changeDueDate = (task: Task, dueDate: string | null) => {
+    rescheduleMutation.mutate({
+      id: task.id,
+      input: { startDate: task.startDate, dueDate, assigneeUserId: task.assignee?.id ?? null },
+    });
+  };
+
   const [pendingBlock, setPendingBlock] = useState<{
     taskId: number;
     beforeId?: number;
@@ -400,6 +429,8 @@ export function TaskBoard({
   const [searchDraft, setSearchDraft] = useState(state.q);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [lastSelectedId, setLastSelectedId] = useState<number | null>(null);
+  const [pendingDeleteTask, setPendingDeleteTask] = useState<Task | null>(null);
+  const pendingMoveTaskIds = useRef(new Set<number>());
   useEffect(() => setSearchDraft(state.q), [state.q]);
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -565,7 +596,12 @@ export function TaskBoard({
     afterId?: number,
     blockedReason?: string
   ) => {
-    moveMutation.mutate({ id: taskId, input: { status, beforeId, afterId, blockedReason } });
+    if (pendingMoveTaskIds.current.has(taskId)) return;
+    pendingMoveTaskIds.current.add(taskId);
+    moveMutation.mutate(
+      { id: taskId, input: { status, beforeId, afterId, blockedReason } },
+      { onSettled: () => pendingMoveTaskIds.current.delete(taskId) },
+    );
   };
 
   const quickAddToColumn = async (status: TaskStatus, value: string) => {
@@ -637,7 +673,7 @@ export function TaskBoard({
   const duplicateTask = async (task: Task) => {
     await createMutation.mutateAsync({ title: `${task.title} (copy)`, kind: task.kind, priority: task.priority, assigneeUserId: task.assignee?.id, entityKind: task.entityKind ?? undefined, entityId: task.entityId ?? undefined, dueDate: task.dueDate ?? undefined });
   };
-  const deleteTask = (task: Task) => deleteMutation.mutate(task.id);
+  const deleteTask = (task: Task) => setPendingDeleteTask(task);
 
   // Always the pristine `board` here, never displayBoard/filteredBoard — a quick
   // filter, search, or the preview's own hypothetical reordering can hide or move the
@@ -948,6 +984,8 @@ export function TaskBoard({
                   onCardClick={openBoardTask}
                   onQuickAdd={(value) => quickAddToColumn(status, value)}
                   onComplete={completeTask}
+                  onAssigneeChange={changeAssignee}
+                  onDueDateChange={changeDueDate}
                   onDuplicate={duplicateTask}
                   onDelete={deleteTask}
                   onPriorityChange={(task, priority) => updateMutation.mutate({ id: task.id, patch: { priority } })}
@@ -961,7 +999,7 @@ export function TaskBoard({
               {assigneeGroups.length === 0 ? (
                 <TaskEmptyState title="No tasks match the current filters." className="py-10" />
               ) : assigneeGroups.map((group) => (
-                <AssigneeSwimlane key={group.key} group={group} onCardClick={openBoardTask} onComplete={completeTask} onDuplicate={duplicateTask} onDelete={deleteTask} onPriorityChange={(task, priority) => updateMutation.mutate({ id: task.id, patch: { priority } })} isDropPreview={groupDragPreview === group.key} previewTask={groupDragPreview === group.key ? activeTask : null} onQuickAdd={(value) => quickAddToGroup(group, value)} selectedIds={selectedIds} onSelect={selectTask} />
+                <AssigneeSwimlane key={group.key} group={group} onCardClick={openBoardTask} onComplete={completeTask} onAssigneeChange={changeAssignee} onDueDateChange={changeDueDate} onDuplicate={duplicateTask} onDelete={deleteTask} onPriorityChange={(task, priority) => updateMutation.mutate({ id: task.id, patch: { priority } })} isDropPreview={groupDragPreview === group.key} previewTask={groupDragPreview === group.key ? activeTask : null} onQuickAdd={(value) => quickAddToGroup(group, value)} selectedIds={selectedIds} onSelect={selectTask} />
               ))}
             </div>
           ) : (
@@ -970,7 +1008,7 @@ export function TaskBoard({
               {genericGroups.map((group) => (
                 <GenericGroupLane key={group.key} group={group} isDropPreview={groupDragPreview === group.key} previewTask={groupDragPreview === group.key ? activeTask : null} onQuickAdd={(value) => quickAddToGroup(group, value)}>
                      {group.tasks.map((task) => (
-                       <SortableTaskCard key={task.id} task={task} onClick={() => openBoardTask(task.id)} onComplete={() => completeTask(task)} onAssigneeClick={() => openBoardTask(task.id)} onDueDateClick={() => openBoardTask(task.id)} onDuplicate={() => void duplicateTask(task)} onDelete={() => deleteTask(task)} onPriorityChange={(priority) => updateMutation.mutate({ id: task.id, patch: { priority } })} onLabelsClick={() => openBoardTask(task.id)} onSelect={(shiftKey) => selectTask(task.id, shiftKey)} selected={selectedIds.has(task.id)} />
+                       <SortableTaskCard key={task.id} task={task} onClick={() => openBoardTask(task.id)} onComplete={() => completeTask(task)} onAssigneeChange={(person) => changeAssignee(task, person)} onDueDateChange={(date) => changeDueDate(task, date)} onDuplicate={() => void duplicateTask(task)} onDelete={() => deleteTask(task)} onPriorityChange={(priority) => updateMutation.mutate({ id: task.id, patch: { priority } })} onLabelsClick={() => openBoardTask(task.id)} onSelect={(shiftKey) => selectTask(task.id, shiftKey)} selected={selectedIds.has(task.id)} />
                      ))}
                 </GenericGroupLane>
               ))}
@@ -990,6 +1028,29 @@ export function TaskBoard({
           setPendingBlock(null);
         }}
       />
+      <AlertDialog open={pendingDeleteTask !== null} onOpenChange={(open) => !open && setPendingDeleteTask(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete task?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {pendingDeleteTask ? `“${pendingDeleteTask.title}” and its subtasks will be permanently removed.` : "This task will be permanently removed."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (!pendingDeleteTask) return;
+                deleteMutation.mutate(pendingDeleteTask.id);
+                setPendingDeleteTask(null);
+              }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <TaskBulkActionBar selectedIds={selectedIds} onClear={() => setSelectedIds(new Set())} />
     </div>
   );

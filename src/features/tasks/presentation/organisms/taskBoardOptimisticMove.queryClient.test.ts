@@ -32,43 +32,59 @@ function task(id: number, status: Task["status"]): Task {
 }
 
 describe("optimisticMoveTask", () => {
-  it("patches the cached board immediately, leaving doneTotalCount untouched", () => {
+  it("patches the visible filtered board immediately", async () => {
     const queryClient = new QueryClient();
     const board: TaskBoardResult = {
       columns: { todo: [task(1, "todo")], in_progress: [] },
       doneTotalCount: 12,
     };
-    queryClient.setQueryData(tasksKeys.board(), board);
+    queryClient.setQueryData(tasksKeys.board({}), board);
 
-    optimisticMoveTask(queryClient, { taskId: 1, toStatus: "in_progress" });
+    await optimisticMoveTask(queryClient, { taskId: 1, toStatus: "in_progress" });
 
-    const patched = queryClient.getQueryData<TaskBoardResult>(tasksKeys.board());
+    const patched = queryClient.getQueryData<TaskBoardResult>(tasksKeys.board({}));
     expect(patched?.columns.todo).toEqual([]);
-    expect(patched?.columns.in_progress?.map((t) => t.id)).toEqual([1]);
+    expect(patched?.columns.in_progress?.map((item) => item.id)).toEqual([1]);
     expect(patched?.doneTotalCount).toBe(12);
   });
 
-  it("restore() puts the pre-move board back — the rollback path on a failed move", () => {
+  it("restores only its own task", async () => {
+    const queryClient = new QueryClient();
+    const board: TaskBoardResult = {
+      columns: { todo: [task(1, "todo"), task(2, "todo")], in_progress: [] },
+      doneTotalCount: 0,
+    };
+    queryClient.setQueryData(tasksKeys.board({}), board);
+
+    const snapshotA = await optimisticMoveTask(queryClient, { taskId: 1, toStatus: "in_progress" });
+    const snapshotB = await optimisticMoveTask(queryClient, { taskId: 2, toStatus: "done" });
+    snapshotA.restore();
+
+    const current = queryClient.getQueryData<TaskBoardResult>(tasksKeys.board({}));
+    expect(current?.columns.todo?.map((item) => item.id)).toEqual([1]);
+    expect(current?.columns.done?.map((item) => item.id)).toEqual([2]);
+    snapshotB.restore();
+  });
+
+  it("patches every board cache variant under the board prefix", async () => {
     const queryClient = new QueryClient();
     const board: TaskBoardResult = {
       columns: { todo: [task(1, "todo")], in_progress: [] },
-      doneTotalCount: 12,
+      doneTotalCount: 0,
     };
-    queryClient.setQueryData(tasksKeys.board(), board);
+    queryClient.setQueryData(tasksKeys.board({}), board);
+    queryClient.setQueryData(tasksKeys.board({ status: ["todo"] }), board);
 
-    const snapshot = optimisticMoveTask(queryClient, { taskId: 1, toStatus: "in_progress" });
-    snapshot.restore();
+    await optimisticMoveTask(queryClient, { taskId: 1, toStatus: "in_progress" });
 
-    const restored = queryClient.getQueryData<TaskBoardResult>(tasksKeys.board());
-    expect(restored).toEqual(board);
+    expect(queryClient.getQueryData<TaskBoardResult>(tasksKeys.board({}))?.columns.in_progress?.map((item) => item.id)).toEqual([1]);
+    expect(queryClient.getQueryData<TaskBoardResult>(tasksKeys.board({ status: ["todo"] }))?.columns.todo).toEqual([]);
   });
 
-  it("is a no-op when the board isn't cached yet — nothing to patch or restore", () => {
+  it("does nothing when the board is not cached", async () => {
     const queryClient = new QueryClient();
-
-    const snapshot = optimisticMoveTask(queryClient, { taskId: 1, toStatus: "in_progress" });
-
-    expect(queryClient.getQueryData(tasksKeys.board())).toBeUndefined();
+    const snapshot = await optimisticMoveTask(queryClient, { taskId: 1, toStatus: "in_progress" });
+    expect(queryClient.getQueryData(tasksKeys.board({}))).toBeUndefined();
     expect(() => snapshot.restore()).not.toThrow();
   });
 });

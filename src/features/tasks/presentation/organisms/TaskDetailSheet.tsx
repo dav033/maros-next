@@ -6,12 +6,13 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Archive, AlertTriangle, Link2, MapPin, MoreHorizontal, X } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from "@/components/ui/sheet";
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
@@ -80,7 +81,27 @@ function descriptionPreview(value: Record<string, unknown> | undefined): string 
   return parts.join(" ").replace(/\s+/g, " ").trim() || "Empty";
 }
 
-export function TaskDetailSheet({
+function TaskDetailDialogSurface({ pageMode, children }: { pageMode: boolean; children: React.ReactNode }) {
+  const content = <div className="@container/task-detail min-w-0 p-4 sm:p-6">{children}</div>;
+  if (pageMode) {
+    return (
+      <div className="relative min-w-0 w-full bg-background">
+        <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
+          <X className="h-4 w-4" />
+          <span className="sr-only">Close</span>
+        </DialogClose>
+        {content}
+      </div>
+    );
+  }
+  return (
+    <DialogContent className="h-[100dvh] max-h-[100dvh] w-screen max-w-none overflow-y-auto overscroll-contain bg-background p-0 sm:h-auto sm:max-h-[90dvh] sm:w-[min(1100px,calc(100vw-2rem))] sm:rounded-xl">
+      {content}
+    </DialogContent>
+  );
+}
+
+export function TaskDetailDialog({
   taskId,
   onClose,
   onOpenTask,
@@ -88,7 +109,7 @@ export function TaskDetailSheet({
 }: {
   taskId: number | null;
   onClose: () => void;
-  /** Lets the Subtasks tab open a child task in this same sheet. */
+  /** Lets the Subtasks tab open a child task in this same dialog. */
   onOpenTask: (id: number) => void;
   pageMode?: boolean;
 }) {
@@ -133,7 +154,7 @@ export function TaskDetailSheet({
       if (event.key === "e") { event.preventDefault(); document.querySelector<HTMLTextAreaElement>("[data-task-title]")?.focus(); }
       if (event.key === "a") { event.preventDefault(); document.querySelector<HTMLButtonElement>("[data-task-assignee]")?.click(); }
       if (event.key === "d") { event.preventDefault(); document.querySelector<HTMLButtonElement>("[data-task=due]")?.click(); }
-      if (event.key === "Escape") { event.preventDefault(); onClose(); }
+      // Radix Dialog owns Escape so nested pickers/menus close before the task.
       if (event.key === "j" || event.key === "k") {
         event.preventDefault();
         const moveToSibling = async () => {
@@ -176,7 +197,7 @@ export function TaskDetailSheet({
   const open = taskId !== null;
 
   /**
-   * Every field edit made from this sheet (a human deliberately changing one thing)
+   * Every field edit made from this dialog (a human deliberately changing one thing)
    * carries `expectedUpdatedAt`, so a save that lands after someone else's concurrent
    * edit fails loud instead of silently overwriting it — see TaskPatch. The board
    * drag and "Mine"'s one-tap status button deliberately skip this (moveTaskAction):
@@ -244,8 +265,8 @@ export function TaskDetailSheet({
 
   return (
     <>
-      <Sheet open={open} onOpenChange={(next) => !next && onClose()}>
-        <SheetContent pageMode={pageMode} side="right" className={cn("@container/task-detail w-full min-w-0 p-4 sm:p-6", pageMode ? "mx-auto max-w-7xl" : "overflow-y-auto sm:max-w-3xl")}>
+      <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
+        <TaskDetailDialogSurface pageMode={pageMode}>
           {showSkeleton || !task ? (
             <div className="space-y-4 pt-8">
               <Skeleton className="h-8 w-3/4" />
@@ -254,8 +275,8 @@ export function TaskDetailSheet({
             </div>
           ) : (
             <>
-              <SheetHeader className="gap-1 pr-8 text-left">
-                <SheetDescription className="font-mono text-xs">
+              <DialogHeader className="gap-1 text-left">
+                <DialogDescription className="font-mono text-xs">
                   T-{task.id}
                   {task.parentId ? (
                     <button
@@ -266,8 +287,8 @@ export function TaskDetailSheet({
                       subtask of T-{task.parentId}
                     </button>
                   ) : null}
-                </SheetDescription>
-                <SheetTitle className="sr-only">{title || "Task details"}</SheetTitle>
+                </DialogDescription>
+                <DialogTitle className="sr-only">{title || "Task details"}</DialogTitle>
                 <div className="flex min-w-0 items-start gap-3">
                   <Textarea
                     data-task-title
@@ -297,7 +318,7 @@ export function TaskDetailSheet({
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
-              </SheetHeader>
+              </DialogHeader>
 
               {task.entity ? (
                 <div className="mt-4 rounded-lg border border-border/60 bg-card/60 px-3 py-2">
@@ -632,8 +653,8 @@ export function TaskDetailSheet({
               </div>
             </>
           )}
-        </SheetContent>
-      </Sheet>
+        </TaskDetailDialogSurface>
+      </Dialog>
 
       <BlockedReasonDialog
         open={pendingBlock}
@@ -720,3 +741,6 @@ export function TaskDetailSheet({
     </>
   );
 }
+
+/** Backward-compatible export for consumers outside the tasks feature. */
+export const TaskDetailSheet = TaskDetailDialog;

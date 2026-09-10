@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { getTask, tasksKeys } from "@/tasks/application";
 import { useTasksApp } from "@/di";
+import { AppError } from "@/shared/errors";
 import type { Task, TaskBoardResult, TaskDetail, TaskFilters, TaskListResult } from "@/tasks/domain";
 import { parseTaskChangedPayload } from "./taskChangedPayload";
 
@@ -49,6 +50,9 @@ export function useTaskEventsStream(): void {
     if (filters.labelId?.length && !task.labels.some((label) => filters.labelId?.includes(label.id))) return false;
     if (filters.dueBefore && (!task.dueDate || task.dueDate > filters.dueBefore)) return false;
     if (filters.dueOn && task.dueDate !== filters.dueOn) return false;
+    if (filters.includeSubtasks === false && task.parentId) return false;
+    if (filters.workspaceId != null && task.workspaceId !== filters.workspaceId) return false;
+    if (filters.folderId != null && task.folderId !== filters.folderId) return false;
     return true;
   };
 
@@ -77,31 +81,44 @@ export function useTaskEventsStream(): void {
   };
 
   const patchBoardCache = (task: TaskDetail | null, taskId: number) => {
-    queryClient.setQueriesData({ queryKey: tasksKeys.board() }, (old: unknown) => {
-      if (!old || typeof old !== "object") return old;
-      const current = old as TaskBoardResult;
-      const columns: TaskBoardResult["columns"] = {};
-      let wasPresent = false;
-      for (const [status, items] of Object.entries(current.columns)) {
-        const next = (items ?? []).filter((item) => {
-          const keep = item.id !== taskId;
-          if (!keep) wasPresent = true;
-          return keep;
-        });
-        columns[status as keyof TaskBoardResult["columns"]] = next;
-      }
-      if (task && task.status !== "cancelled" && (wasPresent || !task.parentId)) {
-        const statusItems = columns[task.status] ?? [];
-        columns[task.status] = [...statusItems, task].sort((a, b) => a.position - b.position);
-      }
-      return { ...current, columns };
-    });
+    for (const [queryKey, old] of queryClient.getQueriesData({ queryKey: tasksKeys.board() })) {
+      queryClient.setQueryData(queryKey, (currentValue: unknown) => {
+        const current = (currentValue ?? old) as TaskBoardResult | undefined;
+        if (!current || typeof current !== "object") return currentValue;
+        const filters = queryKey[2] as TaskFilters | undefined;
+        const columns: TaskBoardResult["columns"] = {};
+        let wasPresent = false;
+        for (const [status, items] of Object.entries(current.columns)) {
+          const next = (items ?? []).filter((item) => {
+            const keep = item.id !== taskId;
+            if (!keep) wasPresent = true;
+            return keep;
+          });
+          columns[status as keyof TaskBoardResult["columns"]] = next;
+        }
+        if (task && task.status !== "cancelled" && (wasPresent || !task.parentId) && (wasPresent || matchesListFilters(task, filters))) {
+          const statusItems = columns[task.status] ?? [];
+          columns[task.status] = [...statusItems, task].sort((a, b) => a.position - b.position);
+        }
+        return { ...current, columns };
+      });
+    }
   };
 
   useEffect(() => {
     if (typeof EventSource === "undefined") return;
 
     const source = new EventSource(STREAM_URL, { withCredentials: true });
+    let hadConnection = false;
+    source.onopen = () => {
+      if (hadConnection) {
+        void queryClient.invalidateQueries({ queryKey: tasksKeys.all });
+      }
+      hadConnection = true;
+    };
+    source.onerror = () => {
+      // EventSource retries. Visible data remains usable until a later open.
+    };
 
     source.addEventListener("task.changed", (event) => {
       const payload = parseTaskChangedPayload((event as MessageEvent<string>).data);
@@ -129,7 +146,14 @@ export function useTaskEventsStream(): void {
             return next;
           });
         })
-        .catch(() => {
+        .catch((error: unknown) => {
+          const appError = AppError.from(error);
+          if (appError.kind !== "not_found") {
+            // Timeout/transport/server errors leave visible data intact. A later
+            // reconnect or focused query can reconcile it without data loss.
+            void queryClient.invalidateQueries({ queryKey: tasksKeys.detail(payload.taskId) });
+            return;
+          }
           queryClient.removeQueries({ queryKey: tasksKeys.detail(payload.taskId) });
           patchListCaches(null, payload.taskId);
           patchBoardCache(null, payload.taskId);

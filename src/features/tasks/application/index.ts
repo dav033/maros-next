@@ -1,6 +1,6 @@
 export type { TasksAppContext } from "./context";
 export { makeTasksAppContext } from "./context";
-export { tasksKeys, taskLabelsKeys } from "./keys/tasksKeys";
+export { normalizeTaskFilters, tasksKeys, taskLabelsKeys } from "./keys/tasksKeys";
 
 export { listTasks } from "./usecases/queries/listTasks";
 export { getBoard } from "./usecases/queries/getBoard";

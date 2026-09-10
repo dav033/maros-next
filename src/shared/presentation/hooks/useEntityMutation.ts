@@ -18,7 +18,7 @@ export type EntityMutationConfig<TInput, TEntity> = {
   entityLabel: string;
   action: EntityAction;
   mutationFn: (input: TInput) => Promise<ActionResult<TEntity>>;
-  optimistic?: (queryClient: QueryClient, input: TInput) => Snapshot;
+  optimistic?: (queryClient: QueryClient, input: TInput) => Snapshot | Promise<Snapshot>;
   invalidate?: (queryClient: QueryClient, data: TEntity, input: TInput) => void;
   successMessage?: string;
   errorMessage?: string;
@@ -68,7 +68,7 @@ export function useEntityMutation<TInput, TEntity>({
       return result.data;
     },
     onMutate: async (input) => {
-      const snapshot = optimistic ? optimistic(queryClient, input) : undefined;
+      const snapshot = optimistic ? await optimistic(queryClient, input) : undefined;
       return { snapshot };
     },
     onError: (error, _input, context) => {
@@ -88,6 +88,10 @@ export function useEntityMutation<TInput, TEntity>({
       }
     },
     onSuccess: (data, input) => {
+      // Snapshot cleanup happens after the mutation has settled. This keeps
+      // operation-local guards alive while the request is actually in flight.
+      // The context is unavailable here, so optimistic operations that need
+      // cleanup also get it from onSettled below.
       if (invalidate) {
         invalidate(queryClient, data, input);
       }
@@ -101,6 +105,9 @@ export function useEntityMutation<TInput, TEntity>({
       } else {
         entityToast.success(entityLabel, action);
       }
+    },
+    onSettled: (_data, _error, _input, context) => {
+      context?.snapshot?.finalize?.();
     },
   });
 }

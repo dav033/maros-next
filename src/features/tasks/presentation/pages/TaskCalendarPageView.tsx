@@ -15,7 +15,7 @@ import { useTasksViewState } from "../hooks/useTasksViewState";
 import { TaskKindIcon } from "../atoms/TaskKindIcon";
 import { TaskPriorityBadge } from "../atoms/TaskPriorityBadge";
 import { AssigneeAvatar } from "../atoms/AssigneeAvatar";
-import { TaskDetailSheet } from "../organisms/TaskDetailSheet";
+import { TaskDetailDialog } from "../organisms/TaskDetailDialog";
 import { useTaskMutations } from "../hooks/mutations/useTaskMutations";
 import { assigneeLoad, groupTasksByAssignee, taskDurationDays, taskIsOnCalendarDay, CALENDAR_CAPACITY_HOURS } from "./taskCalendar";
 
@@ -79,7 +79,7 @@ export function TaskCalendarPageView() {
         })}
         {!isPending && rows.length === 0 ? <p className="p-6 text-sm text-muted-foreground">No scheduled tasks in this week.</p> : null}
       </section>
-      <TaskDetailSheet taskId={taskId} onClose={closeTask} onOpenTask={openTask} />
+      <TaskDetailDialog taskId={taskId} onClose={closeTask} onOpenTask={openTask} />
     </div>
   );
 }

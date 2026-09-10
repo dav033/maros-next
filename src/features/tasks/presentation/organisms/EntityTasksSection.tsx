@@ -9,7 +9,7 @@ import { useInstantTasksByEntity } from "../hooks/data/useInstantTasksByEntity";
 import { useInstantTasksByParty } from "../hooks/data/useInstantTasksByParty";
 import { useTaskDetailRoute } from "../hooks/useTaskDetailRoute";
 import { CreateTaskDialog } from "./CreateTaskDialog";
-import { TaskDetailSheet } from "./TaskDetailSheet";
+import { TaskDetailDialog } from "./TaskDetailDialog";
 import { TaskKindIcon } from "../atoms/TaskKindIcon";
 import { TaskStatusBadge } from "../atoms/TaskStatusBadge";
 import { AssigneeAvatar } from "../atoms/AssigneeAvatar";
@@ -92,7 +92,7 @@ export function EntityTasksSection({
         </div> : null}
       </CardContent>
 
-      <TaskDetailSheet taskId={taskId} onClose={closeTask} onOpenTask={openTask} />
+      <TaskDetailDialog taskId={taskId} onClose={closeTask} onOpenTask={openTask} />
     </Card>
   );
 }

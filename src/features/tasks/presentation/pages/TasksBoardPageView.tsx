@@ -5,7 +5,7 @@ import Link from "next/link";
 import { PageHeaderCard } from "@/components/shared";
 import { TaskBoard } from "../organisms/TaskBoard";
 import { CreateTaskDialog } from "../organisms/CreateTaskDialog";
-import { TaskDetailSheet } from "../organisms/TaskDetailSheet";
+import { TaskDetailDialog } from "../organisms/TaskDetailDialog";
 import { TaskViewSwitcher } from "../molecules/TaskViewSwitcher";
 import { TaskScopeBar } from "../molecules/TaskScopeBar";
 import { TaskSavedViews } from "../molecules/TaskSavedViews";
@@ -28,7 +28,7 @@ export function TasksBoardPageView() {
         <TaskBoard onOpenTask={openTask} />
       </section>
 
-      <TaskDetailSheet taskId={taskId} onClose={closeTask} onOpenTask={openTask} />
+      <TaskDetailDialog taskId={taskId} onClose={closeTask} onOpenTask={openTask} />
     </div>
   );
 }

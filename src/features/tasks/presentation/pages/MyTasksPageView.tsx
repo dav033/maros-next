@@ -17,7 +17,7 @@ import { useTaskDetailRoute } from "../hooks/useTaskDetailRoute";
 import { TaskEmptyState } from "../atoms/TaskEmptyState";
 import { CreateTaskDialog } from "../organisms/CreateTaskDialog";
 import { MyTaskRow } from "../organisms/MyTaskRow";
-import { TaskDetailSheet } from "../organisms/TaskDetailSheet";
+import { TaskDetailDialog } from "../organisms/TaskDetailDialog";
 import { TaskViewSwitcher } from "../molecules/TaskViewSwitcher";
 import { TaskScopeBar } from "../molecules/TaskScopeBar";
 import { TaskSavedViews } from "../molecules/TaskSavedViews";
@@ -330,7 +330,7 @@ export function MyTasksPageView() {
         </div>
       )}
 
-      <TaskDetailSheet taskId={taskId} onClose={closeTask} onOpenTask={openTask} />
+      <TaskDetailDialog taskId={taskId} onClose={closeTask} onOpenTask={openTask} />
     </div>
   );
 }

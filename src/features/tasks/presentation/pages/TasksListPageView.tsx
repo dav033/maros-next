@@ -12,7 +12,7 @@ import { useTasksViewState } from "../hooks/useTasksViewState";
 import { TaskListTable } from "../organisms/TaskListTable";
 import { TaskBulkActionBar } from "../organisms/TaskBulkActionBar";
 import { CreateTaskDialog } from "../organisms/CreateTaskDialog";
-import { TaskDetailSheet } from "../organisms/TaskDetailSheet";
+import { TaskDetailDialog } from "../organisms/TaskDetailDialog";
 import { TaskViewSwitcher } from "../molecules/TaskViewSwitcher";
 import { TaskScopeBar } from "../molecules/TaskScopeBar";
 import { TaskSavedViews } from "../molecules/TaskSavedViews";
@@ -153,7 +153,7 @@ export function TasksListPageView() {
         </div>
       </section>
 
-      <TaskDetailSheet taskId={taskId} onClose={closeTask} onOpenTask={openTask} />
+      <TaskDetailDialog taskId={taskId} onClose={closeTask} onOpenTask={openTask} />
 
       <TaskBulkActionBar
         selectedIds={selectedIds}
