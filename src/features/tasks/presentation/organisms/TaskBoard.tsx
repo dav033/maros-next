@@ -10,10 +10,12 @@ import {
   KeyboardSensor,
   PointerSensor,
   closestCorners,
+  pointerWithin,
   useDroppable,
   useSensor,
   useSensors,
   type Announcements,
+  type CollisionDetection,
   type DragEndEvent,
   type DragOverEvent,
   type DragStartEvent,
@@ -74,6 +76,22 @@ import { TaskBulkActionBar } from "./TaskBulkActionBar";
 const COLUMN_PREFIX = "column:";
 const ASSIGNEE_PREFIX = "assignee:";
 const GROUP_PREFIX = "group:";
+
+const taskBoardCollisionDetection: CollisionDetection = (args) => {
+  if (!args.pointerCoordinates) return closestCorners(args);
+
+  const activeId = String(args.active.id);
+  const pointerCollisions = pointerWithin(args).filter((collision) => String(collision.id) !== activeId);
+  const cardCollision = pointerCollisions.find((collision) => !String(collision.id).includes(":"));
+  if (cardCollision) return [cardCollision];
+
+  const containerCollision = pointerCollisions.find((collision) =>
+    String(collision.id).startsWith(COLUMN_PREFIX) ||
+    String(collision.id).startsWith(ASSIGNEE_PREFIX) ||
+    String(collision.id).startsWith(GROUP_PREFIX),
+  );
+  return containerCollision ? [containerCollision] : pointerCollisions;
+};
 
 type QuickFilter = "overdue" | "today" | "in_progress" | "blocked" | null;
 
@@ -966,7 +984,7 @@ export function TaskBoard({
 
       <DndContext
           sensors={sensors}
-          collisionDetection={closestCorners}
+          collisionDetection={taskBoardCollisionDetection}
           accessibility={{ announcements }}
           onDragStart={handleDragStart}
           onDragOver={handleDragOver}
