@@ -1,4 +1,5 @@
 import { AlertTriangle, CheckCircle2, Link2 } from "lucide-react";
+import type { PointerEvent as ReactPointerEvent } from "react";
 import type { DraggableAttributes, DraggableSyntheticListeners } from "@dnd-kit/core";
 import { cn } from "@/lib/utils";
 import { type Task, type TaskPriority } from "@/tasks/domain";
@@ -53,6 +54,12 @@ export function TaskCard({
   if (task.commentsCount > 0) metaParts.push(`${task.commentsCount} ${task.commentsCount === 1 ? "comment" : "comments"}`);
   const footerMetaText = metaParts.join(" · ");
   const actionHandlers = { onOpen: onClick, onComplete, onDuplicate, onDelete, onPriorityChange, onLabelsClick, onArchive };
+  const handleCardPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const target = event.target instanceof Element ? event.target : null;
+    if (target?.closest("[data-no-drag],button,a,input,textarea,select,[contenteditable='true']")) return;
+    const onPointerDown = dragHandle?.listeners?.onPointerDown;
+    if (onPointerDown) onPointerDown(event);
+  };
 
   return (
     <TaskContextMenu task={task} handlers={actionHandlers}>
@@ -84,6 +91,7 @@ export function TaskCard({
           selected && "ring-2 ring-primary ring-offset-1",
           className,
         )}
+        onPointerDown={dragHandle ? handleCardPointerDown : undefined}
       >
         <div className="flex items-start justify-between gap-2">
           <div className="flex min-w-0 items-center gap-1">
