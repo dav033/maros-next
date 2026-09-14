@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import axios from "axios";
+import { getOpenAiApiKey } from "@/shared/utils/openaiApiKey";
 
 interface BatchTranslationRequest {
   texts: string[];
@@ -82,7 +83,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ translatedTexts: texts }, { status: 200 });
     }
 
-    const apiKey = process.env.OPENAI_KEY;
+    const apiKey = getOpenAiApiKey();
 
     if (!apiKey) {
       return NextResponse.json(

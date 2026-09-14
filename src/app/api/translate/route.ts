@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import axios from "axios";
+import { getOpenAiApiKey } from "@/shared/utils/openaiApiKey";
 
 interface TranslationRequest {
   text: string;
@@ -87,7 +88,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ translatedText: text }, { status: 200 });
     }
 
-    const apiKey = process.env.OPENAI_KEY;
+    const apiKey = getOpenAiApiKey();
 
     if (!apiKey) {
       return NextResponse.json(

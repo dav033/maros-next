@@ -4,8 +4,9 @@ import axios from "axios";
 import { getCachedTranslation, setCachedTranslation } from "@/shared/cache/translationCache";
 import type { ActionResult } from "@/shared/actions/types";
 import { success, failure } from "@/shared/actions/utils";
+import { getOpenAiApiKey } from "@/shared/utils/openaiApiKey";
 
-const API_KEY = process.env.OPENAI_KEY;
+const API_KEY = getOpenAiApiKey();
 
 async function translateWithRetry(
   text: string,
