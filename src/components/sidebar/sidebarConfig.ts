@@ -15,6 +15,8 @@ import {
   Globe,
   KanbanSquare,
   BellRing,
+  Receipt,
+  Camera,
 } from "lucide-react";
 import type { Permission } from "@/shared/auth/permissions";
 
@@ -199,9 +201,29 @@ const settingsSection: SidebarSection = {
   ],
 };
 
+const financeSection: SidebarSection = {
+  section: "Finance",
+  items: [
+    {
+      title: "Invoice scans",
+      href: "/finance/invoices",
+      icon: Receipt,
+      activePrefix: "/finance/invoices",
+      activeExclude: ["/finance/invoices/scan"],
+      permission: "finance:write",
+    },
+    {
+      title: "Scan invoice",
+      href: "/finance/invoices/scan",
+      icon: Camera,
+      permission: "finance:write",
+    },
+  ],
+};
+
 export const SIDEBAR_CONFIG: SidebarConfig = {
   title: "Maros Construction",
-  top: [analyticsSection, menuSection, accountSection, reportsSection, settingsSection],
+  top: [analyticsSection, menuSection, accountSection, financeSection, reportsSection, settingsSection],
   bottom: [],
 };
 

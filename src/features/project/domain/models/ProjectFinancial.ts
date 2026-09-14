@@ -51,6 +51,8 @@ export interface ProjectFinancial {
   outstandingAmount: number;
   paidPercentage: number;
   estimateVsInvoicedDelta: number;
+  totalJobCost?: number;
+  grossProfit?: number;
   payments?: ProjectFinancialPayment[];
   paymentSchedule?: ProjectPaymentSchedule;
 }

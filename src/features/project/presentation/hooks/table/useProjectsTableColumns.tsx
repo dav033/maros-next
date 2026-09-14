@@ -39,9 +39,9 @@ function toAmount(value: unknown): number | null {
 
 function computeBacklog(project: Project): number | null {
   const estimated = toAmount(project.financial?.estimatedAmount);
-  const paid = toAmount(project.financial?.paidAmount);
-  if (estimated === null || paid === null) return null;
-  return estimated - paid;
+  const invoiced = toAmount(project.financial?.invoicedAmount);
+  if (estimated === null || invoiced === null) return null;
+  return estimated - invoiced;
 }
 
 function getPaymentSummary(project: Project) {
@@ -56,30 +56,74 @@ function getPaymentSummary(project: Project) {
   };
 }
 
-function getPaymentScheduleLabel(project: Project): string | null {
-  const items = project.financial?.paymentSchedule?.items ?? [];
-  if (!items.length) return null;
-  return items.map((item) => `${item.percentage}%`).join(" · ");
-}
-
-type MoneyTone = "violet" | "emerald" | "amber" | "rose";
-
-// El proyecto es un solo tema oscuro (ver src/app/layout.tsx, .dark fijo en <html>),
-// así que solo el color pensado para fondo oscuro llega a pintar; sin variante dark: muerta.
-const MONEY_TONE_CLASSES: Record<MoneyTone, string> = {
-  violet: "bg-violet-500/15 text-violet-300 ring-violet-500/30",
-  emerald: "bg-emerald-500/15 text-emerald-300 ring-emerald-500/30",
-  amber: "bg-amber-500/15 text-amber-300 ring-amber-500/30",
-  rose: "bg-rose-500/15 text-rose-300 ring-rose-500/30",
+type ComparisonMetric = {
+  label: string;
+  value: number | null;
+  tone: "emerald" | "rose" | "amber" | "violet";
 };
 
-function MoneyPill({ value, tone }: { value: string; tone: MoneyTone }) {
+const BAR_TONE_CLASSES = {
+  emerald: "bg-emerald-500/80",
+  rose: "bg-rose-500/80",
+  amber: "bg-amber-500/80",
+  violet: "bg-violet-500/80",
+} as const;
+
+function ComparisonBars({
+  metrics,
+  estimate,
+}: {
+  metrics: ComparisonMetric[];
+  estimate: number | null;
+}) {
   return (
-    <span
-      className={`inline-flex items-center rounded-md px-2 py-0.5 font-mono text-sm font-medium ring-1 ring-inset ${MONEY_TONE_CLASSES[tone]}`}
-    >
-      {value}
-    </span>
+    <div className="min-w-[190px] space-y-2">
+      {metrics.map(({ label, value, tone }) => {
+        if (value === null) {
+          return (
+            <div key={label} className="space-y-1">
+              <div className="flex items-center justify-between gap-2 text-xs">
+                <span className="text-muted-foreground">{label}</span>
+                <span className="font-mono text-muted-foreground">—</span>
+              </div>
+              <div className="h-1 overflow-hidden rounded-full bg-muted" />
+            </div>
+          );
+        }
+
+        const width = estimate && estimate > 0
+          ? Math.min(100, (Math.abs(value) / estimate) * 100)
+          : 0;
+        const rowTone = value < 0 ? "rose" : tone;
+        const formatted = formatCurrency(value);
+
+        return (
+          <div
+            key={label}
+            className="space-y-1"
+            title={`${label}: ${formatted}${estimate && estimate > 0 ? ` (${width.toFixed(0)}% of estimate)` : ""}`}
+          >
+            <div className="flex items-center justify-between gap-2 text-xs">
+              <span className="text-muted-foreground">{label}</span>
+              <span className="font-mono font-medium text-foreground">{formatted}</span>
+            </div>
+            <div
+              className="h-1 overflow-hidden rounded-full bg-muted"
+              role="progressbar"
+              aria-label={`${label} as a percentage of estimate`}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={width}
+            >
+              <div
+                className={`h-full rounded-full ${BAR_TONE_CLASSES[rowTone]}`}
+                style={{ width: `${width}%` }}
+              />
+            </div>
+          </div>
+        );
+      })}
+    </div>
   );
 }
 
@@ -115,7 +159,7 @@ export function useProjectsTableColumns(
       {
         key: "leadNumber",
         header: "Project Number",
-        className: "w-[150px]",
+        className: "w-[135px]",
         render: (project: Project) => (
           <span className="font-mono text-sm">{project.lead.leadNumber}</span>
         ),
@@ -176,24 +220,47 @@ export function useProjectsTableColumns(
         className: "w-[170px]",
         render: (project: Project) => {
           const summary = getPaymentSummary(project);
-          const scheduleLabel = getPaymentScheduleLabel(project);
-          if ((!summary || summary.count === 0) && !scheduleLabel) {
+          const schedule = project.financial?.paymentSchedule;
+          const paymentCount = summary?.count ?? 0;
+          const hasPayments = paymentCount > 0;
+          if (!hasPayments && !schedule) {
             return <span className="text-muted-foreground">No payments</span>;
           }
-          const paymentsLabel = summary && summary.count > 0
-            ? `${formatCurrency(summary.totalAmount)} · ${summary.count} ${summary.count === 1 ? "payment" : "payments"}`
-            : null;
+          const amount = hasPayments ? summary?.totalAmount : schedule?.totalAmount;
+          const amountContext = hasPayments
+            ? `${paymentCount} ${paymentCount === 1 ? "payment" : "payments"}`
+            : "planned";
           const scheduleFile = project.financial?.paymentSchedule?.source.fileName;
           return (
             <button
               type="button"
-              className="text-left underline-offset-2 hover:underline"
+              className="group flex min-w-0 flex-col items-start gap-1 text-left"
               title={scheduleFile ? `Payment Schedule · ${scheduleFile}` : undefined}
               onClick={(event) => { event.stopPropagation(); onOpenPayments?.(project); }}
             >
-              {scheduleLabel ? <span className="block font-mono text-sm">{scheduleLabel}</span> : null}
-              {scheduleLabel ? <span className="block text-[11px] text-muted-foreground">Payment schedule</span> : null}
-              {paymentsLabel ? <span className="block font-mono text-xs text-muted-foreground">{paymentsLabel}</span> : null}
+              {amount !== null && amount !== undefined ? (
+                <span className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                  <span className="whitespace-nowrap font-mono text-xs font-semibold tabular-nums text-foreground group-hover:underline">
+                    {formatCurrency(amount)}
+                  </span>
+                  <span className="whitespace-nowrap text-[10px] text-muted-foreground">
+                    {amountContext}
+                  </span>
+                </span>
+              ) : null}
+              {schedule ? (
+                <span className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[10px] text-muted-foreground">
+                  <span>Schedule</span>
+                  <span className="whitespace-nowrap rounded-sm bg-muted/70 px-1.5 py-0.5 font-mono tabular-nums text-foreground">
+                    {schedule.items.length} {schedule.items.length === 1 ? "stage" : "stages"}
+                  </span>
+                  {schedule.totalPercentage !== null ? (
+                    <span className="whitespace-nowrap font-mono tabular-nums">
+                      {schedule.totalPercentage}%
+                    </span>
+                  ) : null}
+                </span>
+              ) : null}
             </button>
           );
         },
@@ -201,82 +268,51 @@ export function useProjectsTableColumns(
         sortValue: (project: Project) => getPaymentSummary(project)?.totalAmount ?? 0,
       } satisfies SimpleTableColumn<Project>] : []),
       {
-        key: "estimate",
-        header: "Estimate",
-        className: "w-[150px]",
-        render: (project: Project) => {
-          const estimatedAmount = project.financial?.estimatedAmount;
-          if (estimatedAmount === null || estimatedAmount === undefined) {
-            return <span className="text-muted-foreground">-</span>;
-          }
-          const formatted = formatCurrency(estimatedAmount);
-          if (formatted === "-") {
-            return <span className="text-muted-foreground">-</span>;
-          }
-          return <MoneyPill value={formatted} tone="violet" />;
-        },
+        key: "estimateInvoicedCost",
+        header: "Estimate / Invoiced / Cost",
+        className: "w-[225px]",
+        render: (project: Project) => (
+          <ComparisonBars
+            estimate={toAmount(project.financial?.estimatedAmount)}
+            metrics={[
+              { label: "Estimate", value: toAmount(project.financial?.estimatedAmount), tone: "violet" },
+              { label: "Invoiced", value: toAmount(project.financial?.invoicedAmount), tone: "emerald" },
+              { label: "Cost", value: toAmount(project.financial?.totalJobCost), tone: "rose" },
+            ]}
+          />
+        ),
         sortable: true,
-        sortValue: (project: Project) => {
-          const estimatedAmount = project.financial?.estimatedAmount;
-          if (estimatedAmount === null || estimatedAmount === undefined) return 0;
-          return typeof estimatedAmount === "number" ? estimatedAmount : parseFloat(String(estimatedAmount)) || 0;
-        },
+        sortValue: (project: Project) => toAmount(project.financial?.invoicedAmount) ?? 0,
       },
       {
-        // "Invoiced" = dinero ya cobrado en QuickBooks (paidAmount).
-        key: "invoiced",
-        header: "Invoiced",
-        className: "w-[150px]",
+        key: "profitVsBacklog",
+        header: "Profit vs Backlog",
+        className: "w-[225px]",
         render: (project: Project) => {
-          const paidAmount = project.financial?.paidAmount;
-          if (paidAmount === null || paidAmount === undefined) {
-            return <span className="text-muted-foreground">-</span>;
-          }
-          const formatted = formatCurrency(paidAmount);
-          if (formatted === "-") {
-            return <span className="text-muted-foreground">-</span>;
-          }
-          const paidPct = Math.max(0, Math.min(100, project.financial?.paidPercentage ?? 0));
+          const invoiced = toAmount(project.financial?.invoicedAmount);
+          const cost = toAmount(project.financial?.totalJobCost);
+          const profit = toAmount(project.financial?.grossProfit) ?? (
+            invoiced !== null && cost !== null ? invoiced - cost : null
+          );
+          const backlog = computeBacklog(project);
           return (
-            <div className="space-y-1" title={`${paidPct.toFixed(0)}% of invoiced amount collected`}>
-              <MoneyPill value={formatted} tone="emerald" />
-              <div className="h-1 w-20 overflow-hidden rounded-full bg-muted">
-                <div
-                  className="h-full rounded-full bg-emerald-500/80"
-                  style={{ width: `${paidPct}%` }}
-                />
-              </div>
-            </div>
+            <ComparisonBars
+              estimate={toAmount(project.financial?.estimatedAmount)}
+              metrics={[
+                { label: "Profit", value: profit, tone: "violet" },
+                { label: "Backlog", value: backlog, tone: backlog === 0 ? "emerald" : "amber" },
+              ]}
+            />
           );
         },
         sortable: true,
         sortValue: (project: Project) => {
-          const paidAmount = project.financial?.paidAmount;
-          if (paidAmount === null || paidAmount === undefined) return 0;
-          return typeof paidAmount === "number" ? paidAmount : parseFloat(String(paidAmount)) || 0;
+          const invoiced = toAmount(project.financial?.invoicedAmount);
+          const cost = toAmount(project.financial?.totalJobCost);
+          return toAmount(project.financial?.grossProfit) ?? (
+            invoiced !== null && cost !== null ? invoiced - cost : 0
+          );
         },
-      },
-      {
-        // "Backlog" = lo que falta por pagar del proyecto: Estimate − Invoiced.
-        key: "backlog",
-        header: "Backlog",
-        className: "w-[150px]",
-        render: (project: Project) => {
-          const backlog = computeBacklog(project);
-          if (backlog === null) {
-            return <span className="text-muted-foreground">-</span>;
-          }
-          const formatted = formatCurrency(backlog);
-          if (formatted === "-") {
-            return <span className="text-muted-foreground">-</span>;
-          }
-          // Pendiente de cobrar → ámbar; saldado exacto → verde;
-          // negativo (cobrado por encima del estimate) → rojo, para revisarlo.
-          const tone: MoneyTone = backlog > 0 ? "amber" : backlog < 0 ? "rose" : "emerald";
-          return <MoneyPill value={formatted} tone={tone} />;
-        },
-        sortable: true,
-        sortValue: (project: Project) => computeBacklog(project) ?? 0,
       },
     ];
   }, [onOpenNotesModal, onOpenPayments, canReadFinance]);

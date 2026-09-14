@@ -24,7 +24,8 @@ export default async function RootLayout({
   // Published notes are read by people with no account here, so asking the API who
   // they are would be a guaranteed 401 on every one of those requests. Middleware
   // stamps the pathname precisely so this can be skipped.
-  const isPublicReader = (await headers()).get("x-pathname")?.startsWith("/p/") ?? false;
+  const isPublicReader =
+    (await headers()).get("x-pathname")?.startsWith("/p/") ?? false;
 
   // Only real on pages behind middleware's auth check — on /login there is
   // no session cookie yet, and fetchCurrentUser resolves to null.
@@ -50,4 +51,3 @@ export default async function RootLayout({
     </html>
   );
 }
-

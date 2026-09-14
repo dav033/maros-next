@@ -8,6 +8,7 @@
 export type Permission =
   | "dashboard:read"
   | "finance:read"
+  | "finance:write"
   | "leads:read"
   | "leads:write"
   | "leads:delete"

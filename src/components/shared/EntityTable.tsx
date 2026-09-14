@@ -18,6 +18,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Table,
   TableBody,
   TableCell,
@@ -74,6 +81,7 @@ export type EntityTableProps<T> = {
   isMutating?: (row: T) => boolean;
 
   getContextMenuItems?: (row: T) => EntityContextMenuItem[];
+  getRowClassName?: (row: T) => string | undefined;
   onRowClick?: (row: T) => void;
   /** Returns a route to prefetch on row hover (warms Next.js bundle for instant navigation). */
   getRowHref?: (row: T) => string | undefined;
@@ -98,6 +106,7 @@ export type EntityTableProps<T> = {
 
   loadingState?: ReactNode;
   emptyState?: ReactNode;
+  mobileRender?: (row: T) => ReactNode;
 
   className?: string;
   skeletonRows?: number;
@@ -148,6 +157,7 @@ function EntityTableInner<T>({
   isLoading = false,
   isMutating,
   getContextMenuItems,
+  getRowClassName,
   onRowClick,
   getRowHref,
   selection,
@@ -158,6 +168,7 @@ function EntityTableInner<T>({
   defaultSort,
   loadingState,
   emptyState,
+  mobileRender,
   className,
   skeletonRows = 6,
 }: EntityTableProps<T>) {
@@ -193,6 +204,7 @@ function EntityTableInner<T>({
   });
 
   const visibleRows = isGrouped ? sortedData : pagedData;
+  const mobileSortableColumns = columns.filter((column) => column.sortable);
 
   const allVisibleSelected =
     Boolean(selection) &&
@@ -380,6 +392,7 @@ function EntityTableInner<T>({
           mutating && "opacity-60 pointer-events-none",
           onRowClick &&
             "cursor-pointer hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring",
+          getRowClassName?.(row),
         )}
       >
         {selection ? (
@@ -425,11 +438,118 @@ function EntityTableInner<T>({
     );
   };
 
+  const renderMobileRow = (row: T) => {
+    const mutating = isMutating?.(row) ?? false;
+    const rowMenuItems = getContextMenuItems ? getContextMenuItems(row) : [];
+    return (
+      <article
+        key={rowKey(row)}
+        data-mutating={mutating || undefined}
+        className={cn(
+          "rounded-xl border border-border/70 bg-card p-4 shadow-sm",
+          mutating && "pointer-events-none opacity-60",
+          getRowClassName?.(row),
+        )}
+      >
+        <div className="flex items-start gap-3">
+          {selection ? (
+            <Checkbox
+              checked={selection.selectedIds.has(rowKey(row))}
+              onCheckedChange={() => handleToggleRow(row)}
+              aria-label="Select row"
+              className="mt-1"
+            />
+          ) : null}
+          <div className="min-w-0 flex-1">{mobileRender?.(row)}</div>
+          {getContextMenuItems ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Row actions"
+                  className="-mr-2 -mt-2 h-8 w-8 shrink-0"
+                >
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="min-w-[160px]">
+                {rowMenuItems.map((item, index) => renderMenuItem(item, index))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : null}
+        </div>
+      </article>
+    );
+  };
+
   return (
     <>
+      {mobileRender ? (
+        <div className="space-y-3 xl:hidden">
+          {mobileSortableColumns.length > 0 ? (
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs text-muted-foreground">Sort by</span>
+              <div className="flex min-w-0 items-center gap-2">
+                <Select
+                  value={sortKey ?? "__default"}
+                  onValueChange={(key) => {
+                    setSortKey(key === "__default" ? null : key);
+                    setSortDir("asc");
+                  }}
+                >
+                  <SelectTrigger className="h-9 w-[min(12rem,55vw)] bg-background text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__default">Default order</SelectItem>
+                    {mobileSortableColumns.map((column) => (
+                      <SelectItem key={String(column.key)} value={String(column.key)}>
+                        {column.header}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  className="size-9 shrink-0"
+                  aria-label={sortDir === "asc" ? "Sort descending" : "Sort ascending"}
+                  disabled={!sortKey}
+                  onClick={() => setSortDir((dir) => dir === "asc" ? "desc" : "asc")}
+                >
+                  {sortDir === "asc" ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+                </Button>
+              </div>
+            </div>
+          ) : null}
+          {isGrouped
+            ? groups.map((group) => (
+                <section key={group.key} aria-label={group.label}>
+                  <h3 className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    {group.color ? (
+                      <span
+                        aria-hidden="true"
+                        className="size-2 rounded-full"
+                        style={{ backgroundColor: group.color }}
+                      />
+                    ) : null}
+                    {group.label}
+                    <span className="font-normal">{group.items.length}</span>
+                  </h3>
+                  <div className="space-y-3">{group.items.map(renderMobileRow)}</div>
+                </section>
+              ))
+            : pagedData.map(renderMobileRow)}
+        </div>
+      ) : null}
+
       <section
         className={cn(
           "rounded-2xl bg-card shadow-sm overflow-x-auto",
+          mobileRender && "hidden xl:block",
           className,
         )}
       >

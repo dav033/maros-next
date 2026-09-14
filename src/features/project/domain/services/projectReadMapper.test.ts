@@ -25,6 +25,8 @@ function projectWithSchedule(schedule: unknown) {
         outstandingAmount: 184273.22,
         paidPercentage: 7.52,
         estimateVsInvoicedDelta: -195.57,
+        totalJobCost: 120000,
+        grossProfit: 79248.3,
         paymentSchedule: schedule,
       },
     } as never,
@@ -60,6 +62,8 @@ describe("normalizePaymentSchedule", () => {
     expect(project.financial?.paymentSchedule?.items[0].percentage).toBeNull();
     expect(project.financial?.paymentSchedule?.items[0].amount).toBe(5000);
     expect(project.financial?.paymentSchedule?.basis).toBe("remaining-balance");
+    expect(project.financial?.totalJobCost).toBe(120000);
+    expect(project.financial?.grossProfit).toBe(79248.3);
   });
 
   it("acepta un match por nombre de archivo, que no trae entidad de origen", () => {

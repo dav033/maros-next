@@ -4,11 +4,48 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export function ProjectsTableSkeleton() {
   return (
-    <div className="w-full overflow-auto">
+    <>
+      <div className="space-y-3 xl:hidden">
+        {Array.from({ length: 5 }).map((_, rowIdx) => (
+          <div key={rowIdx} className="space-y-3 rounded-xl border border-border/70 bg-card p-4 shadow-sm">
+            <div className="space-y-2">
+              <Skeleton className="h-3 w-24" />
+              <Skeleton className="h-5 w-3/4" />
+              <Skeleton className="h-3 w-1/2" />
+            </div>
+            <div className="grid gap-3 border-y border-border/50 py-3 md:grid-cols-2">
+              <div className="space-y-2">
+                <Skeleton className="h-3 w-24" />
+                <div className="space-y-2.5">
+                  {Array.from({ length: 2 }).map((__, metricIdx) => (
+                    <div key={metricIdx} className="space-y-1">
+                      <Skeleton className="h-3 w-full" />
+                      <Skeleton className="h-1 w-full" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-2 border-t border-border/50 pt-3 md:border-l md:border-t-0 md:pl-4 md:pt-0">
+                <Skeleton className="h-3 w-28" />
+                <div className="space-y-2.5">
+                  {Array.from({ length: 3 }).map((__, metricIdx) => (
+                    <div key={metricIdx} className="space-y-1">
+                      <Skeleton className="h-3 w-full" />
+                      <Skeleton className="h-1 w-full" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <Skeleton className="h-10 w-full" />
+          </div>
+        ))}
+      </div>
+      <div className="hidden w-full overflow-auto xl:block">
       <table className="w-full border-collapse">
         <thead>
           <tr className="border-b border-border">
-            <th className="w-[150px] px-4 py-3 text-left text-sm font-medium text-muted-foreground">
+            <th className="w-[135px] px-4 py-3 text-left text-sm font-medium text-muted-foreground">
               Project Number
             </th>
             <th className="w-[200px] px-4 py-3 text-left text-sm font-medium text-muted-foreground">
@@ -59,7 +96,8 @@ export function ProjectsTableSkeleton() {
           ))}
         </tbody>
       </table>
-    </div>
+      </div>
+    </>
   );
 }
 

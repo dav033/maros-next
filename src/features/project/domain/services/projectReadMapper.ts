@@ -226,6 +226,8 @@ export function mapProjectFromDTO(dto: ApiProjectDTO, leadMapper: (dto: any) => 
         outstandingAmount: f.outstandingAmount,
         paidPercentage: f.paidPercentage,
         estimateVsInvoicedDelta: f.estimateVsInvoicedDelta,
+        ...(typeof f.totalJobCost === "number" && { totalJobCost: f.totalJobCost }),
+        ...(typeof f.grossProfit === "number" && { grossProfit: f.grossProfit }),
         payments: normalizeFinancialPayments((f as { payments?: unknown }).payments),
         paymentSchedule: normalizePaymentSchedule((f as { paymentSchedule?: unknown }).paymentSchedule),
       };

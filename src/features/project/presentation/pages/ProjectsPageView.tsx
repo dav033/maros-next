@@ -171,78 +171,82 @@ export function ProjectsPageView({ logic }: ProjectsPageViewProps) {
           totalCount={toolbarSearchController.totalCount}
         >
           {/* Search field selector */}
-          <div className="w-32 shrink-0">
-            <Select value={toolbarSearchController.selectedField} onValueChange={toolbarSearchController.onFieldChange}>
-              <SelectTrigger className="bg-background/60 border-border/60 h-9 text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-popover border-border">
-                {toolbarSearchController.searchFields.map((field) => (
-                  <SelectItem key={field.value} value={field.value}>{field.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center">
+            <div className="col-span-2 flex min-w-0 gap-2 sm:contents">
+              <div className="w-28 shrink-0 sm:w-32">
+                <Select value={toolbarSearchController.selectedField} onValueChange={toolbarSearchController.onFieldChange}>
+                  <SelectTrigger className="bg-background/60 border-border/60 h-9 text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover border-border">
+                    {toolbarSearchController.searchFields.map((field) => (
+                      <SelectItem key={field.value} value={field.value}>{field.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-          {/* Search input */}
-          <div className="flex-1 min-w-[200px] relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="text"
-              value={toolbarSearchController.searchTerm}
-              onChange={(e) => toolbarSearchController.onSearchChange(e.target.value)}
-              placeholder={toolbarSearchController.placeholder}
-              className="pl-9 bg-background/60 border-border/60 h-9"
-            />
-            {toolbarSearchController.searchTerm.trim().length > 0 && (
-              <Button
-                type="button"
-                onClick={() => toolbarSearchController.onSearchChange("")}
-                aria-label="Clear search"
-                variant="ghost"
-                size="sm"
-                className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 px-0 text-muted-foreground hover:text-foreground"
-              >
-                <X className="h-3.5 w-3.5" />
-              </Button>
-            )}
-          </div>
+              {/* Search input */}
+              <div className="relative min-w-0 flex-1 sm:min-w-[200px]">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="text"
+                  value={toolbarSearchController.searchTerm}
+                  onChange={(e) => toolbarSearchController.onSearchChange(e.target.value)}
+                  placeholder={toolbarSearchController.placeholder}
+                  className="pl-9 bg-background/60 border-border/60 h-9"
+                />
+                {toolbarSearchController.searchTerm.trim().length > 0 && (
+                  <Button
+                    type="button"
+                    onClick={() => toolbarSearchController.onSearchChange("")}
+                    aria-label="Clear search"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 px-0 text-muted-foreground hover:text-foreground"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </Button>
+                )}
+              </div>
+            </div>
 
-          {/* Progress status filter (multi-select: ver más de un estado a la vez) */}
-          <div className="w-40 shrink-0">
-            <MultiSelectFilter
-              icon={Filter}
-              placeholder="All progress"
-              options={PROGRESS_FILTER_OPTIONS}
-              selected={progressFilter}
-              onChange={setProgressFilter}
-            />
-          </div>
+            {/* Progress status filter */}
+            <div className="w-full min-w-0 sm:w-40 sm:shrink-0">
+              <MultiSelectFilter
+                icon={Filter}
+                placeholder="All progress"
+                options={PROGRESS_FILTER_OPTIONS}
+                selected={progressFilter}
+                onChange={setProgressFilter}
+              />
+            </div>
 
-          {/* Invoice status filter (multi-select) */}
-          <div className="w-40 shrink-0">
-            <MultiSelectFilter
-              icon={Receipt}
-              placeholder="All invoices"
-              options={INVOICE_FILTER_OPTIONS}
-              selected={invoiceFilter}
-              onChange={setInvoiceFilter}
-            />
-          </div>
+            {/* Invoice status filter */}
+            <div className="w-full min-w-0 sm:w-40 sm:shrink-0">
+              <MultiSelectFilter
+                icon={Receipt}
+                placeholder="All invoices"
+                options={INVOICE_FILTER_OPTIONS}
+                selected={invoiceFilter}
+                onChange={setInvoiceFilter}
+              />
+            </div>
 
-          {/* Group by */}
-          <div className="w-36 shrink-0">
-            <Select value={groupBy} onValueChange={(v) => setGroupBy(v as ProjectGroupBy)}>
-              <SelectTrigger className="bg-background/60 border-border/60 h-9 text-xs">
-                <Layers className="h-3.5 w-3.5 mr-1.5 shrink-0 text-muted-foreground" />
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-popover border-border">
-                {PROJECT_GROUP_OPTIONS.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {/* Group by */}
+            <div className="col-span-2 w-full min-w-0 sm:w-36 sm:shrink-0">
+              <Select value={groupBy} onValueChange={(v) => setGroupBy(v as ProjectGroupBy)}>
+                <SelectTrigger className="bg-background/60 border-border/60 h-9 text-xs">
+                  <Layers className="h-3.5 w-3.5 mr-1.5 shrink-0 text-muted-foreground" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-popover border-border">
+                  {PROJECT_GROUP_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </PageToolbarCard>
       }
