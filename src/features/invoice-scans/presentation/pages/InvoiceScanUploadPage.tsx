@@ -17,12 +17,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { uploadAndScanInvoice } from "../../infra/invoiceScansApi";
 
-const ALLOWED_TYPES = new Set([
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "application/pdf",
-]);
+const IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 export function InvoiceScanUploadPage() {
   const router = useRouter();
@@ -44,7 +39,10 @@ export function InvoiceScanUploadPage() {
   async function handlePhoto(file?: File) {
     if (!file) return;
     setError(null);
-    if (!ALLOWED_TYPES.has(file.type)) {
+    const isPdf =
+      file.type === "application/pdf" ||
+      file.name.toLowerCase().endsWith(".pdf");
+    if (!isPdf && !IMAGE_TYPES.has(file.type)) {
       setError("Choose a JPG, PNG, WebP photo, or PDF file.");
       return;
     }
@@ -53,7 +51,7 @@ export function InvoiceScanUploadPage() {
       return;
     }
 
-    if (file.type === "application/pdf") {
+    if (isPdf) {
       setPreview(null);
       setPdfName(file.name);
     } else {
@@ -191,7 +189,7 @@ export function InvoiceScanUploadPage() {
         <input
           ref={cameraInput}
           type="file"
-          accept="image/jpeg,image/png,image/webp,application/pdf,.pdf"
+          accept="image/jpeg,image/png,image/webp"
           capture="environment"
           className="sr-only"
           aria-label="Take a photo of an invoice"
@@ -201,7 +199,7 @@ export function InvoiceScanUploadPage() {
         <input
           ref={libraryInput}
           type="file"
-          accept="image/jpeg,image/png,image/webp"
+          accept="image/jpeg,image/png,image/webp,application/pdf,.pdf"
           className="sr-only"
           aria-label="Choose an invoice photo or PDF"
           disabled={busy}

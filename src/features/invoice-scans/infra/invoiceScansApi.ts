@@ -23,16 +23,20 @@ export async function uploadAndScanInvoice(
   file: File,
   onStage?: (stage: string) => void,
 ): Promise<InvoiceScan> {
+  const contentType =
+    file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")
+      ? "application/pdf"
+      : file.type;
   const { data: upload } =
     await optimizedApiClient.post<CreateInvoiceScanResponse>("/invoice-scans", {
       fileName: file.name,
-      contentType: file.type,
+      contentType,
       sizeBytes: file.size,
     });
   onStage?.("Uploading invoice file…");
   const response = await fetch(upload.uploadUrl, {
     method: "PUT",
-    headers: { "Content-Type": file.type },
+    headers: { "Content-Type": contentType },
     body: file,
   });
   if (!response.ok)
