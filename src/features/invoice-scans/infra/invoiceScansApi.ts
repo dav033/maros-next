@@ -49,6 +49,17 @@ export async function uploadAndScanInvoice(
   return scan;
 }
 
+export async function updateInvoiceScanProjectNumber(
+  id: string,
+  projectNumber: string | null,
+): Promise<InvoiceScan> {
+  const { data } = await optimizedApiClient.patch<InvoiceScan>(
+    `/invoice-scans/${id}`,
+    { projectNumber },
+  );
+  return data;
+}
+
 export async function retryInvoiceScan(id: string): Promise<InvoiceScan> {
   const { data } = await optimizedApiClient.post<InvoiceScan>(
     `/invoice-scans/${id}/scan`,

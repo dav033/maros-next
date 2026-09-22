@@ -137,7 +137,8 @@ export class TasksHttpRepository implements TasksRepositoryPort {
   async setEntityLink(id: number, link: TaskEntityLink | null): Promise<TaskDetail> {
     const { data } = await this.api.put<TaskDetail>(
       endpoints.entity(id),
-      link ?? { entityKind: null, entityId: null },
+      // `label` is display-only; the backend rejects unknown fields (forbidNonWhitelisted).
+      link ? { entityKind: link.entityKind, entityId: link.entityId } : { entityKind: null, entityId: null },
     );
     return data;
   }

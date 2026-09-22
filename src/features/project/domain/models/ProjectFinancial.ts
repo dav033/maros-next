@@ -53,6 +53,8 @@ export interface ProjectFinancial {
   estimateVsInvoicedDelta: number;
   totalJobCost?: number;
   grossProfit?: number;
+  /** Cash basis: purchases and bill payments actually paid out. */
+  cashOutPaid?: number;
   payments?: ProjectFinancialPayment[];
   paymentSchedule?: ProjectPaymentSchedule;
 }

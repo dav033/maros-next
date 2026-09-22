@@ -27,6 +27,7 @@ function projectWithSchedule(schedule: unknown) {
         estimateVsInvoicedDelta: -195.57,
         totalJobCost: 120000,
         grossProfit: 79248.3,
+        cashOutPaid: 51000,
         paymentSchedule: schedule,
       },
     } as never,
@@ -64,6 +65,7 @@ describe("normalizePaymentSchedule", () => {
     expect(project.financial?.paymentSchedule?.basis).toBe("remaining-balance");
     expect(project.financial?.totalJobCost).toBe(120000);
     expect(project.financial?.grossProfit).toBe(79248.3);
+    expect(project.financial?.cashOutPaid).toBe(51000);
   });
 
   it("acepta un match por nombre de archivo, que no trae entidad de origen", () => {

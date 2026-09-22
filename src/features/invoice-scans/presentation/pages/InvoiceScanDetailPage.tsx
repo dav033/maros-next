@@ -14,7 +14,13 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { getInvoiceScan, retryInvoiceScan } from "../../infra/invoiceScansApi";
+import { Input } from "@/components/ui/input";
+import { AppError } from "@/shared/errors";
+import {
+  getInvoiceScan,
+  retryInvoiceScan,
+  updateInvoiceScanProjectNumber,
+} from "../../infra/invoiceScansApi";
 import type { InvoiceScan } from "../../domain/models";
 
 const CLASSIFICATION_LABELS: Record<string, string> = {
@@ -71,11 +77,16 @@ export function InvoiceScanDetailPage({ id }: { id: string }) {
   const [loading, setLoading] = useState(true);
   const [retrying, setRetrying] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [projectNumber, setProjectNumber] = useState("");
+  const [savingProject, setSavingProject] = useState(false);
+  const [projectError, setProjectError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setError(null);
     try {
-      setScan(await getInvoiceScan(id));
+      const loaded = await getInvoiceScan(id);
+      setScan(loaded);
+      setProjectNumber(loaded.projectNumber ?? "");
     } catch {
       setError("This invoice scan could not be loaded.");
     } finally {
@@ -99,6 +110,27 @@ export function InvoiceScanDetailPage({ id }: { id: string }) {
       await load();
     } finally {
       setRetrying(false);
+    }
+  }
+
+  async function saveProjectNumber() {
+    setSavingProject(true);
+    setProjectError(null);
+    try {
+      const updated = await updateInvoiceScanProjectNumber(
+        id,
+        projectNumber.trim() || null,
+      );
+      setScan((current) => (current ? { ...updated, imageUrl: current.imageUrl } : updated));
+      setProjectNumber(updated.projectNumber ?? "");
+    } catch (err) {
+      setProjectError(
+        err instanceof AppError && err.status === 400
+          ? "No project found with that number."
+          : "The project number could not be saved. Try again.",
+      );
+    } finally {
+      setSavingProject(false);
     }
   }
 
@@ -191,6 +223,50 @@ export function InvoiceScanDetailPage({ id }: { id: string }) {
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
+      <form
+        className="flex flex-wrap items-end gap-2"
+        onSubmit={(event) => {
+          event.preventDefault();
+          void saveProjectNumber();
+        }}
+      >
+        <div className="space-y-1">
+          <label
+            htmlFor="invoice-project-number"
+            className="text-xs font-medium text-muted-foreground"
+          >
+            Project number
+          </label>
+          <Input
+            id="invoice-project-number"
+            value={projectNumber}
+            onChange={(event) => setProjectNumber(event.target.value)}
+            placeholder="e.g. 074P-0926"
+            maxLength={50}
+            className="w-48"
+            aria-invalid={projectError ? true : undefined}
+          />
+        </div>
+        <Button
+          type="submit"
+          size="sm"
+          variant="outline"
+          disabled={
+            savingProject || projectNumber.trim() === (scan.projectNumber ?? "")
+          }
+        >
+          {savingProject && (
+            <LoaderCircle className="animate-spin" aria-hidden="true" />
+          )}
+          Save
+        </Button>
+        {projectError && (
+          <p className="w-full text-sm text-destructive" role="alert">
+            {projectError}
+          </p>
+        )}
+      </form>
+
       {scan.errorMessage && scan.status === "failed" && (
         <Alert variant="destructive">
           <AlertCircle aria-hidden="true" />

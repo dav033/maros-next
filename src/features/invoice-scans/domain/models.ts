@@ -50,6 +50,7 @@ export interface InvoiceScan {
   extractedData: ExtractedInvoiceData | null;
   qboSuggestions: QboInvoiceSuggestions;
   errorMessage: string | null;
+  projectNumber: string | null;
   createdAt: string;
   updatedAt: string;
   imageUrl?: string;

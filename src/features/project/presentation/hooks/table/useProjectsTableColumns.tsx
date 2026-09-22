@@ -56,6 +56,17 @@ function getPaymentSummary(project: Project) {
   };
 }
 
+// Cash basis: money actually received from the client and actually paid out.
+function getCollected(project: Project): number | null {
+  return toAmount(getPaymentSummary(project)?.totalAmount);
+}
+
+function getCashProfit(project: Project): number | null {
+  const collected = getCollected(project);
+  const costPaid = toAmount(project.financial?.cashOutPaid);
+  return collected !== null && costPaid !== null ? collected - costPaid : null;
+}
+
 type ComparisonMetric = {
   label: string;
   value: number | null;
@@ -269,31 +280,27 @@ export function useProjectsTableColumns(
       } satisfies SimpleTableColumn<Project>] : []),
       {
         key: "estimateInvoicedCost",
-        header: "Estimate / Invoiced / Cost",
+        header: "Estimate / Collected / Cost paid",
         className: "w-[225px]",
         render: (project: Project) => (
           <ComparisonBars
             estimate={toAmount(project.financial?.estimatedAmount)}
             metrics={[
               { label: "Estimate", value: toAmount(project.financial?.estimatedAmount), tone: "violet" },
-              { label: "Invoiced", value: toAmount(project.financial?.invoicedAmount), tone: "emerald" },
-              { label: "Cost", value: toAmount(project.financial?.totalJobCost), tone: "rose" },
+              { label: "Collected", value: getCollected(project), tone: "emerald" },
+              { label: "Cost paid", value: toAmount(project.financial?.cashOutPaid), tone: "rose" },
             ]}
           />
         ),
         sortable: true,
-        sortValue: (project: Project) => toAmount(project.financial?.invoicedAmount) ?? 0,
+        sortValue: (project: Project) => getCollected(project) ?? 0,
       },
       {
         key: "profitVsBacklog",
         header: "Profit vs Backlog",
         className: "w-[225px]",
         render: (project: Project) => {
-          const invoiced = toAmount(project.financial?.invoicedAmount);
-          const cost = toAmount(project.financial?.totalJobCost);
-          const profit = toAmount(project.financial?.grossProfit) ?? (
-            invoiced !== null && cost !== null ? invoiced - cost : null
-          );
+          const profit = getCashProfit(project);
           const backlog = computeBacklog(project);
           return (
             <ComparisonBars
@@ -306,13 +313,7 @@ export function useProjectsTableColumns(
           );
         },
         sortable: true,
-        sortValue: (project: Project) => {
-          const invoiced = toAmount(project.financial?.invoicedAmount);
-          const cost = toAmount(project.financial?.totalJobCost);
-          return toAmount(project.financial?.grossProfit) ?? (
-            invoiced !== null && cost !== null ? invoiced - cost : 0
-          );
-        },
+        sortValue: (project: Project) => getCashProfit(project) ?? 0,
       },
     ];
   }, [onOpenNotesModal, onOpenPayments, canReadFinance]);

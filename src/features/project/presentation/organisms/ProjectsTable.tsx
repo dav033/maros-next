@@ -100,15 +100,15 @@ function ProjectMobileCard({
 }) {
   const estimate = toProjectAmount(project.financial?.estimatedAmount);
   const invoiced = toProjectAmount(project.financial?.invoicedAmount);
-  const cost = toProjectAmount(project.financial?.totalJobCost);
-  const profit = toProjectAmount(project.financial?.grossProfit) ?? (
-    invoiced !== null && cost !== null ? invoiced - cost : null
-  );
+  const paymentAmount = project.paymentSummary?.totalAmount ?? project.financial?.paidAmount;
+  // Cash basis: collected from the client vs. actually paid out.
+  const collected = toProjectAmount(paymentAmount);
+  const costPaid = toProjectAmount(project.financial?.cashOutPaid);
+  const profit = collected !== null && costPaid !== null ? collected - costPaid : null;
   const backlog = estimate !== null && invoiced !== null ? estimate - invoiced : null;
-  const costExceedsInvoiced = cost !== null && invoiced !== null && cost > invoiced;
+  const costPaidExceedsCollected = costPaid !== null && collected !== null && costPaid > collected;
   const status = project.projectProgressStatus;
   const paymentSchedule = project.financial?.paymentSchedule;
-  const paymentAmount = project.paymentSummary?.totalAmount ?? project.financial?.paidAmount;
 
   return (
     <div className="space-y-3">
@@ -155,7 +155,7 @@ function ProjectMobileCard({
             </h3>
             <div className="space-y-2.5">
               <MobileMetric label="Estimate" value={estimate} estimate={estimate} tone="violet" />
-              <MobileMetric label="Cost" value={cost} estimate={estimate} tone="rose" />
+              <MobileMetric label="Cost paid" value={costPaid} estimate={estimate} tone="rose" />
             </div>
           </section>
           <section className="min-w-0 space-y-2 border-t border-border/50 pt-3 md:border-l md:border-t-0 md:pl-4 md:pt-0">
@@ -163,7 +163,7 @@ function ProjectMobileCard({
               Billing &amp; profit
             </h3>
             <div className="space-y-2.5">
-              <MobileMetric label="Invoiced" value={invoiced} estimate={estimate} tone="emerald" />
+              <MobileMetric label="Collected" value={collected} estimate={estimate} tone="emerald" />
               <MobileMetric label="Profit" value={profit} estimate={estimate} tone="violet" />
               <MobileMetric
                 label="Backlog"
@@ -176,8 +176,8 @@ function ProjectMobileCard({
         </div>
       ) : null}
 
-      {costExceedsInvoiced ? (
-        <p className="text-xs font-medium text-destructive">Cost exceeds invoiced</p>
+      {costPaidExceedsCollected ? (
+        <p className="text-xs font-medium text-destructive">Cost paid exceeds collected</p>
       ) : null}
 
       {canReadFinance || onOpenNotesModal ? (
@@ -327,9 +327,9 @@ export function ProjectsTable({
       isLoading={isLoading}
       isMutating={isMutating}
       getRowClassName={(project) => {
-        const invoiced = project.financial?.invoicedAmount;
-        const cost = project.financial?.totalJobCost;
-        return cost !== undefined && invoiced !== undefined && cost > invoiced
+        const collected = project.paymentSummary?.totalAmount ?? project.financial?.paidAmount;
+        const costPaid = project.financial?.cashOutPaid;
+        return costPaid !== undefined && collected !== undefined && costPaid > collected
           ? "border-destructive/40 bg-destructive/10 hover:bg-destructive/20 [&>td:first-child]:border-l-2 [&>td:first-child]:border-l-destructive"
           : undefined;
       }}
