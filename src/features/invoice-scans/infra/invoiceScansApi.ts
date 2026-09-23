@@ -1,9 +1,15 @@
 import { optimizedApiClient } from "@/shared/infra/http/OptimizedApiClient";
-import type { InvoiceScan } from "../domain/models";
+import type { InvoiceScan, InvoiceScanPatch } from "../domain/models";
 
 interface CreateInvoiceScanResponse {
   id: string;
   uploadUrl: string;
+}
+
+export interface ProjectPickerRecord {
+  id: number;
+  name: string;
+  leadNumber: string | null;
 }
 
 export async function listInvoiceScans(): Promise<InvoiceScan[]> {
@@ -49,13 +55,13 @@ export async function uploadAndScanInvoice(
   return scan;
 }
 
-export async function updateInvoiceScanProjectNumber(
+export async function updateInvoiceScan(
   id: string,
-  projectNumber: string | null,
+  patch: InvoiceScanPatch,
 ): Promise<InvoiceScan> {
   const { data } = await optimizedApiClient.patch<InvoiceScan>(
     `/invoice-scans/${id}`,
-    { projectNumber },
+    patch,
   );
   return data;
 }
@@ -65,4 +71,11 @@ export async function retryInvoiceScan(id: string): Promise<InvoiceScan> {
     `/invoice-scans/${id}/scan`,
   );
   return data;
+}
+
+/** Lightweight project list (no QuickBooks) for the project picker. */
+export async function listProjectsForPicker(): Promise<ProjectPickerRecord[]> {
+  const { data } =
+    await optimizedApiClient.get<ProjectPickerRecord[]>("/projects/picker");
+  return Array.isArray(data) ? data : [];
 }
