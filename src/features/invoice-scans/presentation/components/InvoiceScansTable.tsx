@@ -12,9 +12,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useUserDirectory } from "@/features/users/presentation/hooks/data/useUserDirectory";
 
 import {
-  CLASSIFICATION_LABELS,
   DIRECTION_LABELS,
   formatDate,
   formatMoney,
@@ -23,6 +23,7 @@ import {
 } from "../../domain/labels";
 import type { InvoiceScan } from "../../domain/models";
 import { EnteredCheckbox } from "./EnteredCheckbox";
+import { CategoryCell, CommentsCell, ProjectCell, UserCell } from "./InvoiceRowEditors";
 
 interface Props {
   scans: InvoiceScan[];
@@ -52,6 +53,7 @@ function StatusBadge({ scan }: { scan: InvoiceScan }) {
 /** Table on desktop, cards on mobile; the same rows either way. */
 export function InvoiceScansTable({ scans, variant }: Props) {
   const dateHeader = variant === "completed" ? "Entered" : "Scanned";
+  const { users } = useUserDirectory(true);
   const dateOf = (scan: InvoiceScan) =>
     formatDate(variant === "completed" ? scan.enteredAt : scan.createdAt);
 
@@ -67,7 +69,9 @@ export function InvoiceScansTable({ scans, variant }: Props) {
               <TableHead>Invoice</TableHead>
               <TableHead>Company</TableHead>
               <TableHead>Project</TableHead>
-              <TableHead className="hidden lg:table-cell">Category</TableHead>
+              <TableHead>Category</TableHead>
+              <TableHead>Comments</TableHead>
+              <TableHead>User</TableHead>
               <TableHead className="text-right">Total</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="whitespace-nowrap">{dateHeader}</TableHead>
@@ -95,11 +99,17 @@ export function InvoiceScansTable({ scans, variant }: Props) {
                   <TableCell className="max-w-48 truncate">
                     {invoice?.counterpartyName || <span className="text-muted-foreground">Not identified</span>}
                   </TableCell>
-                  <TableCell className="whitespace-nowrap tabular-nums">
-                    {scan.projectNumber || <span className="text-muted-foreground">—</span>}
+                  <TableCell className="whitespace-nowrap">
+                    <ProjectCell scan={scan} />
                   </TableCell>
-                  <TableCell className="hidden lg:table-cell">
-                    {invoice ? CLASSIFICATION_LABELS[invoice.classification] : "—"}
+                  <TableCell>
+                    <CategoryCell scan={scan} />
+                  </TableCell>
+                  <TableCell>
+                    <CommentsCell scan={scan} />
+                  </TableCell>
+                  <TableCell>
+                    <UserCell scan={scan} users={users} />
                   </TableCell>
                   <TableCell className="text-right tabular-nums">
                     {formatMoney(invoice?.total, invoice?.currency)}
@@ -142,6 +152,7 @@ export function InvoiceScansTable({ scans, variant }: Props) {
                   </span>
                   <StatusBadge scan={scan} />
                 </div>
+                {scan.comments && <p className="line-clamp-2 text-xs text-muted-foreground">{scan.comments}</p>}
               </Link>
             </li>
           );

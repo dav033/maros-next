@@ -89,6 +89,27 @@ export function useSetInvoiceScanEntered() {
   });
 }
 
+/**
+ * Edits one field straight from a table row. The row updates in place from the
+ * server's answer; a failed save is reported and the row snaps back.
+ */
+export function useUpdateInvoiceScanInline() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, patch }: { id: string; patch: InvoiceScanPatch }) =>
+      updateInvoiceScan(id, patch),
+    onSuccess: (updated) => {
+      queryClient.setQueryData<InvoiceScan>(invoiceScanKeys.detail(updated.id), (current) =>
+        current ? { ...updated, imageUrl: current.imageUrl } : current,
+      );
+      queryClient.setQueryData<InvoiceScan[]>(invoiceScanKeys.list(), (current) =>
+        current?.map((scan) => (scan.id === updated.id ? { ...scan, ...updated } : scan)),
+      );
+    },
+    onError: (error) => notifyError(error, "The invoice could not be updated."),
+  });
+}
+
 export function useRetryInvoiceScan(id: string) {
   const queryClient = useQueryClient();
   return useMutation({

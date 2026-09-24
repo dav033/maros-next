@@ -57,6 +57,8 @@ export interface InvoiceScan {
   qboSuggestions: QboInvoiceSuggestions;
   errorMessage: string | null;
   projectNumber: string | null;
+  /** Free-text note from the reviewer. */
+  comments: string | null;
   /** Non-fatal problems the scanner hit; the reviewer should check these fields. */
   warnings: string[];
   /** Set once the invoice was entered in QuickBooks. */
@@ -71,6 +73,9 @@ export interface InvoiceScan {
 /** Fields a reviewer can correct. Only the keys present are sent; `null` clears a value. */
 export interface InvoiceScanPatch {
   projectNumber?: string | null;
+  comments?: string | null;
+  /** User responsible for entering the invoice; `null` clears it. */
+  enteredBy?: number | null;
   direction?: InvoiceDirection;
   classification?: InvoiceClassification;
   counterpartyName?: string | null;

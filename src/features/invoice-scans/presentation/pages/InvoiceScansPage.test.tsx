@@ -21,6 +21,13 @@ vi.mock("@/shared/presentation/toast", () => ({
   notifySuccess: vi.fn(),
 }));
 
+vi.mock("@/features/users/presentation/hooks/data/useUserDirectory", () => ({
+  useUserDirectory: () => ({
+    users: [{ id: 7, name: "Ana Perez", email: "ana@example.com", picture: null }],
+    isLoading: false,
+  }),
+}));
+
 import { InvoiceScansPage } from "./InvoiceScansPage";
 
 afterEach(cleanup);
@@ -35,6 +42,7 @@ function scan(overrides: Partial<InvoiceScan>): InvoiceScan {
     qboSuggestions: {},
     errorMessage: null,
     projectNumber: null,
+    comments: null,
     warnings: [],
     enteredAt: null,
     enteredBy: null,
@@ -94,6 +102,43 @@ describe("InvoiceScansPage", () => {
     const user = userEvent.setup();
     await user.click(within(pendingSection).getAllByRole("checkbox", { name: "Entered in QuickBooks" })[0]);
     expect(api.updateInvoiceScan).toHaveBeenCalledWith("pending", { entered: true });
+  });
+
+  it("edits the comments of a row and saves them when the field loses focus", async () => {
+    const pending = scan({ id: "pending", comments: "Missing PO" });
+    api.listInvoiceScans.mockResolvedValue([pending]);
+    api.updateInvoiceScan.mockResolvedValue({ ...pending, comments: "PO received" });
+    renderPage();
+
+    const user = userEvent.setup();
+    const field = (await screen.findAllByLabelText("Comments on s.pdf"))[0];
+    expect(field).toHaveValue("Missing PO");
+    await user.clear(field);
+    await user.type(field, "PO received");
+    await user.tab();
+
+    expect(api.updateInvoiceScan).toHaveBeenCalledWith("pending", { comments: "PO received" });
+  });
+
+  it("does not save comments that were not changed", async () => {
+    api.updateInvoiceScan.mockClear();
+    api.listInvoiceScans.mockResolvedValue([scan({ id: "pending", comments: "Same" })]);
+    renderPage();
+
+    const user = userEvent.setup();
+    const field = (await screen.findAllByLabelText("Comments on s.pdf"))[0];
+    await user.click(field);
+    await user.tab();
+
+    expect(api.updateInvoiceScan).not.toHaveBeenCalled();
+  });
+
+  it("shows the assigned user and the project number as editable controls", async () => {
+    api.listInvoiceScans.mockResolvedValue([scan({ id: "pending", projectNumber: "050P-0826", enteredBy: 7 })]);
+    renderPage();
+
+    expect((await screen.findAllByRole("button", { name: "Project of s.pdf" }))[0]).toHaveTextContent("050P-0826");
+    expect(screen.getAllByRole("combobox", { name: "User of s.pdf" })[0]).toHaveTextContent("Ana Perez");
   });
 
   it("disables the checkbox for scans without details", async () => {

@@ -13,6 +13,7 @@ function scan(overrides: Partial<InvoiceScan>): InvoiceScan {
     qboSuggestions: {},
     errorMessage: null,
     projectNumber: null,
+    comments: null,
     warnings: [],
     enteredAt: null,
     enteredBy: null,
