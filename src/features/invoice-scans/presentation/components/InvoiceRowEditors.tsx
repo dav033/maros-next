@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, ChevronsUpDown } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   Command,
@@ -35,8 +35,6 @@ function useRowSave(scan: Pick<InvoiceScan, "id">) {
     save: (patch: InvoiceScanPatch) => mutation.mutate({ id: scan.id, patch }),
   };
 }
-
-const NO_USER = "none";
 
 export function userLabel(user: Pick<DirectoryUser, "name" | "email">): string {
   return user.name?.trim() || user.email;
@@ -173,38 +171,13 @@ export function CommentsCell({ scan }: { scan: InvoiceScan }) {
   );
 }
 
-export function UserCell({ scan, users }: { scan: InvoiceScan; users: DirectoryUser[] }) {
-  const { save, saving } = useRowSave(scan);
-  const current = scan.enteredBy;
-
-  const options = useMemo(() => {
-    // Keep the assigned user selectable even if the directory does not list them.
-    if (current !== null && !users.some((user) => user.id === current)) {
-      return [...users, { id: current, name: `User #${current}`, email: "", picture: null }];
-    }
-    return users;
-  }, [users, current]);
-
+/** Read-only: the server records whoever last saved a change to the row. */
+export function LastEditorCell({ scan, users }: { scan: InvoiceScan; users: DirectoryUser[] }) {
+  if (scan.updatedBy === null) return <span className="px-2 text-muted-foreground">—</span>;
+  const editor = users.find((user) => user.id === scan.updatedBy);
   return (
-    <Select
-      value={current === null ? NO_USER : String(current)}
-      disabled={saving}
-      onValueChange={(next) => save({ enteredBy: next === NO_USER ? null : Number(next) })}
-    >
-      <SelectTrigger
-        aria-label={`User of ${scan.fileName}`}
-        className="h-8 min-w-36 border-transparent bg-transparent px-2 shadow-none hover:border-input"
-      >
-        <SelectValue placeholder="No user" />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value={NO_USER}>No user</SelectItem>
-        {options.map((user) => (
-          <SelectItem key={user.id} value={String(user.id)}>
-            {userLabel(user)}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    <span className="block max-w-40 truncate px-2 text-sm">
+      {editor ? userLabel(editor) : `User #${scan.updatedBy}`}
+    </span>
   );
 }

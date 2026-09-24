@@ -23,7 +23,7 @@ import {
 } from "../../domain/labels";
 import type { InvoiceScan } from "../../domain/models";
 import { EnteredCheckbox } from "./EnteredCheckbox";
-import { CategoryCell, CommentsCell, ProjectCell, UserCell } from "./InvoiceRowEditors";
+import { CategoryCell, CommentsCell, LastEditorCell, ProjectCell } from "./InvoiceRowEditors";
 
 interface Props {
   scans: InvoiceScan[];
@@ -71,7 +71,7 @@ export function InvoiceScansTable({ scans, variant }: Props) {
               <TableHead>Project</TableHead>
               <TableHead>Category</TableHead>
               <TableHead>Comments</TableHead>
-              <TableHead>User</TableHead>
+              <TableHead>Last edited by</TableHead>
               <TableHead className="text-right">Total</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="whitespace-nowrap">{dateHeader}</TableHead>
@@ -109,7 +109,7 @@ export function InvoiceScansTable({ scans, variant }: Props) {
                     <CommentsCell scan={scan} />
                   </TableCell>
                   <TableCell>
-                    <UserCell scan={scan} users={users} />
+                    <LastEditorCell scan={scan} users={users} />
                   </TableCell>
                   <TableCell className="text-right tabular-nums">
                     {formatMoney(invoice?.total, invoice?.currency)}

@@ -64,6 +64,8 @@ export interface InvoiceScan {
   /** Set once the invoice was entered in QuickBooks. */
   enteredAt: string | null;
   enteredBy: number | null;
+  /** User who last edited the scan; set by the server. */
+  updatedBy: number | null;
   createdAt: string;
   updatedAt: string;
   /** Presigned URL to the original file; only on the detail endpoint, expires in ~15 min. */
@@ -74,8 +76,6 @@ export interface InvoiceScan {
 export interface InvoiceScanPatch {
   projectNumber?: string | null;
   comments?: string | null;
-  /** User responsible for entering the invoice; `null` clears it. */
-  enteredBy?: number | null;
   direction?: InvoiceDirection;
   classification?: InvoiceClassification;
   counterpartyName?: string | null;

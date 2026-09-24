@@ -46,6 +46,7 @@ function scan(overrides: Partial<InvoiceScan>): InvoiceScan {
     warnings: [],
     enteredAt: null,
     enteredBy: null,
+    updatedBy: null,
     createdAt: "2026-09-01T00:00:00Z",
     updatedAt: "2026-09-01T00:00:00Z",
     ...overrides,
@@ -133,12 +134,12 @@ describe("InvoiceScansPage", () => {
     expect(api.updateInvoiceScan).not.toHaveBeenCalled();
   });
 
-  it("shows the assigned user and the project number as editable controls", async () => {
-    api.listInvoiceScans.mockResolvedValue([scan({ id: "pending", projectNumber: "050P-0826", enteredBy: 7 })]);
+  it("shows the project as an editable control and the last editor by name", async () => {
+    api.listInvoiceScans.mockResolvedValue([scan({ id: "pending", projectNumber: "050P-0826", updatedBy: 7 })]);
     renderPage();
 
     expect((await screen.findAllByRole("button", { name: "Project of s.pdf" }))[0]).toHaveTextContent("050P-0826");
-    expect(screen.getAllByRole("combobox", { name: "User of s.pdf" })[0]).toHaveTextContent("Ana Perez");
+    expect(screen.getAllByText("Ana Perez").length).toBeGreaterThan(0);
   });
 
   it("disables the checkbox for scans without details", async () => {

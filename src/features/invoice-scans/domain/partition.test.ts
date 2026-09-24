@@ -17,6 +17,7 @@ function scan(overrides: Partial<InvoiceScan>): InvoiceScan {
     warnings: [],
     enteredAt: null,
     enteredBy: null,
+    updatedBy: null,
     createdAt: "2026-09-01T00:00:00Z",
     updatedAt: "2026-09-01T00:00:00Z",
     ...overrides,
