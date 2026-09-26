@@ -17,6 +17,8 @@ import {
   BellRing,
   Receipt,
   Camera,
+  CalendarDays,
+  Video,
 } from "lucide-react";
 import type { Permission } from "@/shared/auth/permissions";
 
@@ -201,6 +203,14 @@ const settingsSection: SidebarSection = {
   ],
 };
 
+const meetingsSection: SidebarSection = {
+  section: "Meetings",
+  items: [
+    { title: "Calendar", href: "/calendar", icon: CalendarDays },
+    { title: "Start Meet", href: "/meet", icon: Video },
+  ],
+};
+
 const financeSection: SidebarSection = {
   section: "Finance",
   items: [
@@ -223,7 +233,7 @@ const financeSection: SidebarSection = {
 
 export const SIDEBAR_CONFIG: SidebarConfig = {
   title: "Maros Construction",
-  top: [analyticsSection, menuSection, accountSection, financeSection, reportsSection, settingsSection],
+  top: [analyticsSection, meetingsSection, menuSection, accountSection, financeSection, reportsSection, settingsSection],
   bottom: [],
 };
 

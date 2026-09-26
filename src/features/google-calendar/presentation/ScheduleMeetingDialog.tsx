@@ -9,19 +9,17 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { API_BASE_URL, optimizedApiClient } from "@/shared/infra/http/OptimizedApiClient";
+import { optimizedApiClient } from "@/shared/infra/http/OptimizedApiClient";
+import { connectGoogleCalendar as startGoogleCalendarConnection } from "../connectGoogleCalendar";
+import {
+  googleCalendarConnectionKey,
+  googleCalendarMeetingsKey,
+  type CreateGoogleCalendarMeeting,
+  type GoogleCalendarConnection,
+  type GoogleCalendarMeeting,
+} from "../types";
 
 type EntityKind = "lead" | "task";
-type CalendarConnection = { configured: boolean; connected: boolean; email?: string };
-type CalendarMeeting = {
-  id: number;
-  title: string;
-  meetUrl: string | null;
-  calendarUrl: string | null;
-  startsAt: string;
-  endsAt: string;
-  attendees: string[];
-};
 
 function localDateTimeValue(date: Date): string {
   const local = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
@@ -62,30 +60,26 @@ export function ScheduleMeetingDialog({
   const [durationMinutes, setDurationMinutes] = useState("60");
   const [attendees, setAttendees] = useState("");
   const connectionQuery = useQuery({
-    queryKey: ["google-calendar", "connection"],
-    queryFn: async () => (await optimizedApiClient.get<CalendarConnection>("/google-calendar/connection")).data,
+    queryKey: googleCalendarConnectionKey,
+    queryFn: async () => (await optimizedApiClient.get<GoogleCalendarConnection>("/google-calendar/connection")).data,
     enabled: open,
   });
   const meetingsQuery = useQuery({
-    queryKey: ["google-calendar", "meetings", entityKind, entityId],
-    queryFn: async () => (await optimizedApiClient.get<CalendarMeeting[]>("/google-calendar/meetings", {
+    queryKey: [...googleCalendarMeetingsKey, entityKind, entityId],
+    queryFn: async () => (await optimizedApiClient.get<GoogleCalendarMeeting[]>("/google-calendar/meetings", {
       params: { entityKind, entityId },
     })).data,
     enabled: open && connectionQuery.data?.connected === true,
   });
   const createMeeting = useMutation({
-    mutationFn: async (input: {
-      entityKind: EntityKind;
-      entityId: number;
-      title: string;
-      startsAt: string;
-      endsAt: string;
-      timeZone: string;
-      attendees: string[];
-    }) => (await optimizedApiClient.post<CalendarMeeting>("/google-calendar/meetings", input)).data,
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["google-calendar", "meetings", entityKind, entityId] });
-      toast.success("Google Calendar event created.");
+    mutationFn: async (input: CreateGoogleCalendarMeeting) => (await optimizedApiClient.post<GoogleCalendarMeeting>("/google-calendar/meetings", input)).data,
+    onSuccess: async (meeting) => {
+      await queryClient.invalidateQueries({ queryKey: googleCalendarMeetingsKey });
+      toast.success(
+        meeting.attendees.length
+          ? `Google Calendar sent invitations to ${meeting.attendees.length} invitee${meeting.attendees.length === 1 ? "" : "s"}.`
+          : "Google Calendar event created.",
+      );
     },
     onError: (error: unknown) => toast.error(error instanceof Error ? error.message : "Could not schedule the meeting."),
   });
@@ -99,10 +93,7 @@ export function ScheduleMeetingDialog({
   }, [open, entityLabel, attendeeEmail]);
 
   const connectGoogleCalendar = () => {
-    const base = API_BASE_URL.replace(/\/$/, "");
-    const returnTo = `${window.location.pathname}${window.location.search}`;
-    const query = new URLSearchParams({ returnTo });
-    window.location.assign(`${base}/google-calendar/connect?${query.toString()}`);
+    startGoogleCalendarConnection(`${window.location.pathname}${window.location.search}`);
   };
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
@@ -126,7 +117,7 @@ export function ScheduleMeetingDialog({
       <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-xl">
         <DialogHeader>
           <DialogTitle>Schedule a Google Meet</DialogTitle>
-          <DialogDescription>Create a Calendar event for {entityLabel} and invite attendees.</DialogDescription>
+          <DialogDescription>Create a Calendar event for {entityLabel}. Google Calendar emails the Meet invitation to each invitee.</DialogDescription>
         </DialogHeader>
 
         {connectionQuery.isPending ? (
@@ -162,7 +153,7 @@ export function ScheduleMeetingDialog({
               <div className="space-y-1.5">
                 <Label htmlFor="meet-attendees">Invitees</Label>
                 <Textarea id="meet-attendees" value={attendees} onChange={(event) => setAttendees(event.target.value)} placeholder="name@example.com, another@example.com" rows={2} />
-                <p className="text-xs text-muted-foreground">Separate email addresses with commas or new lines.</p>
+                <p className="text-xs text-muted-foreground">Separate email addresses with commas or new lines. Google Calendar emails each invitee the event and Meet link.</p>
               </div>
               <DialogFooter>
                 <Button type="submit" disabled={createMeeting.isPending || !startsAt || !title.trim()}>
