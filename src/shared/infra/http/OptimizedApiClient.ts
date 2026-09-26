@@ -5,13 +5,13 @@ import type { HttpClientLike, RequestOptions } from "./types";
 
 // Fallback seguro para producción: nunca apuntar a localhost en un build desplegado.
 // En local, `.env` puede definir NEXT_PUBLIC_API_BASE_URL con la API local.
-const BASE_URL =
+export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://api.marosconstruction.com/api";
 
 export class OptimizedApiClient implements HttpClientLike {
   private readonly axiosInstance: AxiosInstance;
 
-  constructor(baseURL: string = BASE_URL) {
+  constructor(baseURL: string = API_BASE_URL) {
     this.axiosInstance = axios.create({
       baseURL,
       withCredentials: true,
@@ -73,4 +73,4 @@ export class OptimizedApiClient implements HttpClientLike {
   }
 }
 
-export const optimizedApiClient = new OptimizedApiClient(BASE_URL);
+export const optimizedApiClient = new OptimizedApiClient(API_BASE_URL);

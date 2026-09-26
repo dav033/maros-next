@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
-import { Archive, AlertTriangle, Link2, MapPin, MoreHorizontal, X } from "lucide-react";
+import { Archive, AlertTriangle, CalendarPlus, Link2, MapPin, MoreHorizontal, X } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import {
   Dialog,
@@ -69,6 +69,8 @@ import {
 import { classifyAttachmentsChange } from "./taskAttachmentsDiff";
 import { isTaskConflictError } from "./taskConflict";
 import { TASK_ENTITY_KIND_LABELS, taskEntityFallbackLabel } from "../atoms/taskEntityTokens";
+import { ScheduleMeetingDialog } from "@/features/google-calendar/presentation/ScheduleMeetingDialog";
+import { useHasPermission } from "@/shared/auth/useHasPermission";
 
 function descriptionPreview(value: Record<string, unknown> | undefined): string {
   const parts: string[] = [];
@@ -131,12 +133,14 @@ export function TaskDetailDialog({
     removeWatcherMutation,
   } = useTaskMutations();
   const { user } = useCurrentUser();
+  const canScheduleMeetings = useHasPermission("tasks:write");
 
   const [pendingBlock, setPendingBlock] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [conflictPatch, setConflictPatch] = useState<TaskPatch | null>(null);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
+  const [scheduleMeetingOpen, setScheduleMeetingOpen] = useState(false);
 
   useEffect(() => {
     if (!task) return;
@@ -305,6 +309,19 @@ export function TaskDetailDialog({
                     onBlur={saveTitle}
                     className="min-h-9 min-w-0 flex-1 resize-none border-none bg-transparent px-0 py-1 text-xl font-semibold leading-snug shadow-none [field-sizing:content] focus-visible:ring-1 md:text-xl"
                   />
+                  {canScheduleMeetings ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      className="h-8 w-8 shrink-0"
+                      aria-label="Schedule Google Meet"
+                      title="Schedule Google Meet"
+                      onClick={() => setScheduleMeetingOpen(true)}
+                    >
+                      <CalendarPlus className="size-4" />
+                    </Button>
+                  ) : null}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button type="button" variant="ghost" size="icon" className="h-8 w-8 shrink-0" aria-label="More task actions">
@@ -655,6 +672,16 @@ export function TaskDetailDialog({
           )}
         </TaskDetailDialogSurface>
       </Dialog>
+
+      {task ? (
+        <ScheduleMeetingDialog
+          open={scheduleMeetingOpen}
+          onOpenChange={setScheduleMeetingOpen}
+          entityKind="task"
+          entityId={task.id}
+          entityLabel={task.title}
+        />
+      ) : null}
 
       <BlockedReasonDialog
         open={pendingBlock}

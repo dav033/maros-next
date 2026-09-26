@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, useState, useEffect } from "react";
-import { FolderPlus } from "lucide-react";
+import { CalendarPlus, FolderPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLeadsNotesLogic } from "../hooks/notes/useLeadsNotesLogic";
@@ -28,6 +28,8 @@ import { initialCompanyFormValue, toDraft as toCompanyDraft } from "@/features/c
 import type { CompanyFormValue } from "@/features/company/presentation/molecules/CompanyForm";
 import { createProject, projectsKeys } from "@/project/application";
 import { useInlineEdit } from "@/common/hooks";
+import { useHasPermission } from "@/shared/auth/useHasPermission";
+import { ScheduleMeetingDialog } from "@/features/google-calendar/presentation/ScheduleMeetingDialog";
 
 import { LeadInfoSection } from "./sections/LeadInfoSection";
 import { LeadContactSection } from "./sections/LeadContactSection";
@@ -49,6 +51,8 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
   const router = useRouter();
   const { leadDetails: initialLeadDetails, error } = initialData;
   const [leadDetails, setLeadDetails] = useState(initialLeadDetails);
+  const [scheduleMeetingOpen, setScheduleMeetingOpen] = useState(false);
+  const canScheduleMeetings = useHasPermission("leads:write");
 
   useEffect(() => {
     setLeadDetails(initialLeadDetails);
@@ -327,6 +331,11 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
         subtitle={leadDetails.projectType?.name}
         actions={
           <>
+            {canScheduleMeetings ? (
+              <Button variant="outline" size="sm" onClick={() => setScheduleMeetingOpen(true)}>
+                <CalendarPlus className="mr-2 size-4" />Schedule Meet
+              </Button>
+            ) : null}
             <Button
               variant="outline"
               size="sm"
@@ -385,6 +394,15 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
       />
 
       <EntityTasksSection entityKind="lead" entityId={leadDetails.id} entityLabel={leadDetails.name} />
+
+      <ScheduleMeetingDialog
+        open={scheduleMeetingOpen}
+        onOpenChange={setScheduleMeetingOpen}
+        entityKind="lead"
+        entityId={leadDetails.id}
+        entityLabel={leadDetails.name || `Lead #${leadDetails.id}`}
+        attendeeEmail={leadDetails.contact?.email}
+      />
 
       <CompanyModal
         controller={companyModalController}
