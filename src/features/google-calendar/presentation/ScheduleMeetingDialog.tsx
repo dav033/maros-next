@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { optimizedApiClient } from "@/shared/infra/http/OptimizedApiClient";
 import { connectGoogleCalendar as startGoogleCalendarConnection } from "../connectGoogleCalendar";
 import { MeetingParticipantsPicker } from "./MeetingParticipantsPicker";
@@ -114,7 +115,7 @@ export function ScheduleMeetingDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-xl">
+      <DialogContent className="max-h-[90dvh] overflow-y-auto rounded-2xl sm:max-w-xl">
         <DialogHeader>
           <DialogTitle>Schedule a Google Meet</DialogTitle>
           <DialogDescription>Create a Calendar event for {entityLabel}. Google Calendar emails the Meet invitation to each invitee.</DialogDescription>
@@ -123,7 +124,7 @@ export function ScheduleMeetingDialog({
         {connectionQuery.isPending ? (
           <div className="flex items-center gap-2 py-5 text-sm text-muted-foreground"><LoaderCircle className="size-4 animate-spin" />Checking Google Calendar connection…</div>
         ) : connectionQuery.isError ? (
-          <div className="space-y-3 rounded-lg border p-4">
+          <div className="space-y-3 rounded-xl border bg-muted/20 p-4">
             <p className="text-sm text-muted-foreground">Could not check the Google Calendar connection. Make sure the integration database setup is complete.</p>
             <Button type="button" variant="outline" onClick={() => void connectionQuery.refetch()}>Try again</Button>
           </div>
@@ -135,19 +136,22 @@ export function ScheduleMeetingDialog({
                 <Label htmlFor="meet-title">Meeting title</Label>
                 <Input id="meet-title" value={title} onChange={(event) => setTitle(event.target.value)} maxLength={255} required />
               </div>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_150px]">
+              <div className="grid grid-cols-1 gap-4 rounded-xl bg-muted/25 p-4 sm:grid-cols-[1fr_170px]">
                 <div className="space-y-1.5">
                   <Label htmlFor="meet-start">Date and time</Label>
                   <Input id="meet-start" type="datetime-local" value={startsAt} onChange={(event) => setStartsAt(event.target.value)} required />
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="meet-duration">Duration</Label>
-                  <select id="meet-duration" className="h-10 w-full rounded-md border border-input bg-input px-3 text-sm" value={durationMinutes} onChange={(event) => setDurationMinutes(event.target.value)}>
-                    <option value="30">30 minutes</option>
-                    <option value="60">1 hour</option>
-                    <option value="90">1.5 hours</option>
-                    <option value="120">2 hours</option>
-                  </select>
+                  <Select value={durationMinutes} onValueChange={setDurationMinutes}>
+                    <SelectTrigger id="meet-duration" aria-label="Duration"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="30">30 minutes</SelectItem>
+                      <SelectItem value="60">1 hour</SelectItem>
+                      <SelectItem value="90">1.5 hours</SelectItem>
+                      <SelectItem value="120">2 hours</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               <div className="space-y-1.5">
@@ -167,7 +171,7 @@ export function ScheduleMeetingDialog({
               {meetingsQuery.isPending ? <p className="text-sm text-muted-foreground">Loading meetings…</p> : null}
               {meetingsQuery.data?.length === 0 ? <p className="text-sm text-muted-foreground">No meetings scheduled yet.</p> : null}
               {meetingsQuery.data?.map((meeting) => (
-                <div key={meeting.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3">
+                <div key={meeting.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-card p-3">
                   <div className="min-w-0">
                     <p className="truncate text-sm font-medium">{meeting.title}</p>
                     <p className="text-xs text-muted-foreground">{displayDate(meeting.startsAt)} · {meeting.attendees.length} invitee{meeting.attendees.length === 1 ? "" : "s"}</p>

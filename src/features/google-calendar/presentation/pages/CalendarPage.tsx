@@ -76,16 +76,16 @@ export function CalendarPage() {
       {connection.isPending ? (
         <div className="flex items-center gap-2 text-sm text-muted-foreground" role="status"><LoaderCircle className="size-4 animate-spin" />Checking Google Calendar…</div>
       ) : connection.isError ? (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-destructive/40 px-4 py-3 text-sm">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm">
           <span className="text-destructive">Could not check the Google Calendar connection.</span>
           <Button type="button" variant="outline" size="sm" onClick={() => void connection.refetch()}>Try again</Button>
         </div>
       ) : connection.data?.configured === false ? (
-        <p className="rounded-xl border border-dashed px-4 py-3 text-sm text-muted-foreground">Google Calendar must be configured by a system administrator before you can create or manage events.</p>
+        <p className="rounded-2xl border border-dashed bg-muted/30 px-4 py-3 text-sm text-muted-foreground">Google Calendar must be configured by a system administrator before you can create or manage events.</p>
       ) : connection.data?.connected ? (
-        <p className="rounded-xl border bg-card px-4 py-3 text-sm text-muted-foreground">Connected as <span className="font-medium text-foreground">{connection.data.email}</span></p>
+        <p className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-2xl border border-primary/15 bg-primary/10 px-4 py-3 text-sm text-primary">Google Calendar connected <span aria-hidden="true" className="text-primary/60">·</span><span className="font-medium text-foreground">{connection.data.email}</span></p>
       ) : (
-        <section className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-dashed px-4 py-3">
+        <section className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-dashed bg-muted/20 px-4 py-4">
           <div>
             <h2 className="text-sm font-medium">Connect Google Calendar to create meetings</h2>
             <p className="mt-0.5 text-xs text-muted-foreground">Invitations from Maros colleagues will still appear here.</p>
@@ -95,8 +95,8 @@ export function CalendarPage() {
         </section>
       )}
 
-      <section className="overflow-hidden rounded-xl border bg-card">
-        <div className="flex flex-col gap-3 border-b px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+      <section className="overflow-hidden rounded-2xl border bg-card shadow-sm">
+        <div className="flex flex-col gap-4 border-b bg-muted/20 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <div>
             <h2 className="font-semibold">Your meetings</h2>
             <p className="mt-1 text-sm text-muted-foreground">Events you organize and invitations shared with your Maros account.</p>
@@ -106,9 +106,9 @@ export function CalendarPage() {
               <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search meetings or people" className="pl-9" aria-label="Search meetings or people" />
             </div>
-            <div className="flex rounded-md border p-1" aria-label="Meeting period">
-              <Button type="button" size="sm" variant={view === "upcoming" ? "secondary" : "ghost"} aria-pressed={view === "upcoming"} onClick={() => setView("upcoming")}>Upcoming</Button>
-              <Button type="button" size="sm" variant={view === "past" ? "secondary" : "ghost"} aria-pressed={view === "past"} onClick={() => setView("past")}>Past</Button>
+            <div className="flex w-fit rounded-xl bg-muted p-1" aria-label="Meeting period">
+              <Button type="button" size="sm" variant="ghost" className={view === "upcoming" ? "rounded-lg bg-background text-foreground shadow-sm hover:bg-background" : "rounded-lg text-muted-foreground"} aria-pressed={view === "upcoming"} onClick={() => setView("upcoming")}>Upcoming</Button>
+              <Button type="button" size="sm" variant="ghost" className={view === "past" ? "rounded-lg bg-background text-foreground shadow-sm hover:bg-background" : "rounded-lg text-muted-foreground"} aria-pressed={view === "past"} onClick={() => setView("past")}>Past</Button>
             </div>
           </div>
         </div>
@@ -132,16 +132,16 @@ export function CalendarPage() {
         ) : (
           <div className="divide-y">
             {visibleMeetings.map((meeting) => (
-              <article key={meeting.id} className="flex flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+              <article key={meeting.id} className="flex flex-col gap-4 px-4 py-4 transition-colors hover:bg-muted/20 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                 <div className="flex min-w-0 items-start gap-3">
-                  <div className="hidden size-11 shrink-0 flex-col items-center justify-center rounded-lg bg-primary/10 text-primary sm:flex">
+                  <div className="flex size-12 shrink-0 flex-col items-center justify-center rounded-xl bg-primary/10 text-primary">
                     <span className="text-[10px] font-semibold uppercase">{new Intl.DateTimeFormat(undefined, { month: "short" }).format(new Date(meeting.startsAt))}</span>
                     <span className="text-base font-semibold leading-none">{new Intl.DateTimeFormat(undefined, { day: "numeric" }).format(new Date(meeting.startsAt))}</span>
                   </div>
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <h3 className="max-w-full truncate text-sm font-medium">{meeting.title}</h3>
-                      <span className="rounded-full border px-2 py-0.5 text-[10px] text-muted-foreground">{meeting.isOrganizer ? "Organized by you" : "Invited"}</span>
+                      <span className="rounded-full bg-muted px-2.5 py-1 text-[10px] font-medium text-muted-foreground">{meeting.isOrganizer ? "Organized by you" : "Invited"}</span>
                     </div>
                     <p className="mt-1 flex flex-wrap items-center gap-x-1.5 text-xs text-muted-foreground">
                       <Clock3 className="size-3.5" />{formatDate(meeting.startsAt, true)} · {formatDate(meeting.endsAt, false)} end

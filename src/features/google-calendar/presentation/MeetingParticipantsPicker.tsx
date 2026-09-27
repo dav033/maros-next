@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, ChevronDown, X } from "lucide-react";
+import { Check, ChevronDown, Plus, UsersRound, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Input } from "@/components/ui/input";
@@ -47,8 +47,8 @@ export function MeetingParticipantsPicker({
     <div className="space-y-2">
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <Button type="button" variant="outline" className="w-full justify-between" disabled={disabled || value.length >= 25}>
-            <span>{value.length ? `${value.length} participant${value.length === 1 ? "" : "s"} selected` : "Choose app users"}</span>
+          <Button type="button" variant="outline" className="h-11 w-full justify-between rounded-xl" disabled={disabled || value.length >= 25}>
+            <span className="flex min-w-0 items-center gap-2"><UsersRound className="size-4 shrink-0 text-primary" /><span className="truncate">{value.length ? `${value.length} participant${value.length === 1 ? "" : "s"} selected` : "Choose app users"}</span></span>
             <ChevronDown className="size-4 text-muted-foreground" />
           </Button>
         </PopoverTrigger>
@@ -86,7 +86,7 @@ export function MeetingParticipantsPicker({
           {value.map((email) => {
             const person = participants.get(email.toLowerCase());
             return (
-              <span key={email} className="inline-flex max-w-full items-center gap-1 rounded-full border bg-muted/50 py-1 pl-2.5 pr-1 text-xs">
+              <span key={email} className="inline-flex max-w-full items-center gap-1 rounded-full border border-primary/15 bg-primary/10 py-1 pl-2.5 pr-1 text-xs">
                 <span className="truncate">{person?.name ?? email}</span>
                 <button
                   type="button"
@@ -117,8 +117,8 @@ export function MeetingParticipantsPicker({
           placeholder="Add an external email"
           disabled={disabled || value.length >= 25}
         />
-        <Button type="button" variant="secondary" onClick={addExternalEmail} disabled={disabled || value.length >= 25 || !externalEmail.trim()}>
-          Add
+        <Button type="button" variant="secondary" className="shrink-0" onClick={addExternalEmail} disabled={disabled || value.length >= 25 || !externalEmail.trim()}>
+          <Plus className="mr-1 size-4" />Add
         </Button>
       </div>
       {emailError ? <p className="text-xs text-destructive" role="alert">Enter a valid email address to add this guest.</p> : null}

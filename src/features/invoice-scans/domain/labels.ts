@@ -4,6 +4,7 @@ import type {
   InvoicePaymentStatus,
   InvoiceScan,
   InvoiceScanStatus,
+  InvoiceTransactionDirection,
 } from "./models";
 
 export const CLASSIFICATION_LABELS: Record<InvoiceClassification, string> = {
@@ -26,6 +27,11 @@ export const PAYMENT_STATUS_LABELS: Record<InvoicePaymentStatus, string> = {
   unknown: "Unknown",
 };
 
+export const TRANSACTION_DIRECTION_LABELS: Record<InvoiceTransactionDirection, string> = {
+  payment_made: "Payment made · money out",
+  payment_received: "Payment received · money in",
+};
+
 export const STATUS_LABELS: Record<InvoiceScanStatus, string> = {
   uploaded: "Awaiting scan",
   processing: "Scanning",
@@ -33,7 +39,10 @@ export const STATUS_LABELS: Record<InvoiceScanStatus, string> = {
   failed: "Scan failed",
 };
 
-export function invoiceTitle(scan: Pick<InvoiceScan, "extractedData" | "fileName">): string {
+export function invoiceTitle(scan: Pick<InvoiceScan, "recordType" | "extractedData" | "fileName">): string {
+  if (scan.recordType === "transaction") {
+    return scan.extractedData?.description || "Manual transaction";
+  }
   const number = scan.extractedData?.invoiceNumber;
   return number ? `Invoice ${number}` : scan.fileName;
 }
@@ -53,6 +62,9 @@ export function formatMoney(amount: number | null | undefined, currency: string 
 
 export function formatDate(value: string | null | undefined): string {
   if (!value) return "—";
-  const date = new Date(value);
+  const dateOnly = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  const date = dateOnly
+    ? new Date(Number(dateOnly[1]), Number(dateOnly[2]) - 1, Number(dateOnly[3]))
+    : new Date(value);
   return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString();
 }

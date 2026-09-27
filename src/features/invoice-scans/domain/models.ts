@@ -14,6 +14,8 @@ export type InvoiceClassification =
   | "unknown";
 
 export type InvoicePaymentStatus = "paid" | "unpaid" | "unknown";
+export type InvoiceScanRecordType = "invoice" | "transaction";
+export type InvoiceTransactionDirection = "payment_made" | "payment_received";
 
 export interface InvoiceLineItem {
   description: string;
@@ -34,6 +36,8 @@ export interface ExtractedInvoiceData {
   taxTotal: number | null;
   total: number | null;
   paymentStatus: InvoicePaymentStatus;
+  description?: string | null;
+  transactionDirection?: InvoiceTransactionDirection;
   confidence: number;
   lineItems: InvoiceLineItem[];
 }
@@ -50,6 +54,7 @@ export interface QboInvoiceSuggestions {
 
 export interface InvoiceScan {
   id: string;
+  recordType?: InvoiceScanRecordType;
   fileName: string;
   contentType: string;
   status: InvoiceScanStatus;

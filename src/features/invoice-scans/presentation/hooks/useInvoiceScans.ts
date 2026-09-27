@@ -7,6 +7,7 @@ import { notifyError, notifySuccess } from "@/shared/presentation/toast";
 
 import type { InvoiceScan, InvoiceScanPatch } from "../../domain/models";
 import {
+  createManualInvoiceTransaction,
   getInvoiceScan,
   listInvoiceScans,
   listProjectsForPicker,
@@ -50,6 +51,19 @@ export function useProjectPickerOptions(enabled = true) {
           value: record.leadNumber as string,
           label: `${record.leadNumber} · ${record.name}`,
         })),
+  });
+}
+
+export function useCreateManualInvoiceTransaction() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: createManualInvoiceTransaction,
+    onSuccess: (created) => {
+      queryClient.setQueryData<InvoiceScan>(invoiceScanKeys.detail(created.id), created);
+      void queryClient.invalidateQueries({ queryKey: invoiceScanKeys.list() });
+      notifySuccess("Transaction added to the QuickBooks entry queue");
+    },
+    onError: (error) => notifyError(error, "The transaction could not be added."),
   });
 }
 

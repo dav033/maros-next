@@ -67,7 +67,7 @@ export function MeetingEditDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-xl">
+      <DialogContent className="max-h-[90dvh] overflow-y-auto rounded-2xl sm:max-w-xl">
         <DialogHeader>
           <DialogTitle>Edit meeting</DialogTitle>
           <DialogDescription>Update the event details or participants. Google Calendar will email everyone about the changes.</DialogDescription>
@@ -77,7 +77,7 @@ export function MeetingEditDialog({
             <Label htmlFor="edit-meeting-title">Meeting title</Label>
             <Input id="edit-meeting-title" value={title} onChange={(event) => setTitle(event.target.value)} maxLength={255} required />
           </div>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_150px]">
+          <div className="grid grid-cols-1 gap-4 rounded-xl bg-muted/25 p-4 sm:grid-cols-[1fr_170px]">
             <div className="space-y-1.5">
               <Label htmlFor="edit-meeting-start">Date and time</Label>
               <Input id="edit-meeting-start" type="datetime-local" value={startsAt} onChange={(event) => setStartsAt(event.target.value)} required />

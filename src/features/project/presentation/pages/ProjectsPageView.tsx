@@ -54,6 +54,9 @@ import { useInstantLeadsByType } from "@/leads/presentation";
 import { LeadTypeSwitcher } from "@/components/shared/LeadTypeSwitcher";
 import { ProjectPaymentsDialog } from "../organisms/ProjectPaymentsDialog";
 import { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Can } from "@/shared/auth/Can";
 
 const PROGRESS_FILTER_OPTIONS = [
   { value: ProjectProgressStatus.NOT_EXECUTED, label: "Not Executed", color: PROGRESS_COLORS.NOT_EXECUTED },
@@ -85,6 +88,7 @@ export interface ProjectsPageViewProps {
 
 export function ProjectsPageView({ logic }: ProjectsPageViewProps) {
   const [paymentsProject, setPaymentsProject] = useState<Project | null>(null);
+  const pathname = usePathname();
   const { leadType, data, crud, table, bulkActions, notesModal, openNotesModal } = logic;
 
   const { projects, showSkeleton, financialsLoading } = data;
@@ -160,7 +164,23 @@ export function ProjectsPageView({ logic }: ProjectsPageViewProps) {
               New project
             </Button>
           }
-          belowSlot={<LeadTypeSwitcher currentType={leadType} basePath="/projects" />}
+          belowSlot={
+            <div className="space-y-3">
+              <nav className="inline-flex flex-wrap gap-1 rounded-xl bg-muted p-1" aria-label="Project sections">
+                <Button asChild size="sm" variant="ghost" className={`rounded-lg ${pathname !== "/projects/import-from-quickbooks" ? "bg-background text-foreground shadow-sm hover:bg-background" : "text-muted-foreground"}`}>
+                  <Link href="/projects/construction"><FolderKanban className="mr-2 h-4 w-4" />Projects</Link>
+                </Button>
+                <Can permission="projects:read">
+                  <Can permission="finance:read">
+                    <Button asChild size="sm" variant="ghost" className={`rounded-lg ${pathname === "/projects/import-from-quickbooks" ? "bg-background text-foreground shadow-sm hover:bg-background" : "text-muted-foreground"}`}>
+                      <Link href="/projects/import-from-quickbooks"><Receipt className="mr-2 h-4 w-4" />Import from QuickBooks</Link>
+                    </Button>
+                  </Can>
+                </Can>
+              </nav>
+              <LeadTypeSwitcher currentType={leadType} basePath="/projects" />
+            </div>
+          }
         />
       }
       toolbar={

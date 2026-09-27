@@ -2,7 +2,9 @@
 
 import {
   AlertCircle,
+  ArrowDownLeft,
   ArrowLeft,
+  ArrowUpRight,
   LoaderCircle,
   RotateCcw,
 } from "lucide-react";
@@ -17,8 +19,10 @@ import { notifyError, notifySuccess } from "@/shared/presentation/toast";
 import {
   CLASSIFICATION_LABELS,
   formatDate,
+  formatMoney,
   invoiceTitle,
   STATUS_LABELS,
+  TRANSACTION_DIRECTION_LABELS,
 } from "../../domain/labels";
 import type { InvoiceScan, InvoiceScanPatch } from "../../domain/models";
 import { EnteredCheckbox } from "../components/EnteredCheckbox";
@@ -46,13 +50,13 @@ function BackLink() {
 function QboSuggestions({ scan }: { scan: InvoiceScan }) {
   const suggestions = scan.qboSuggestions;
   return (
-    <section className="rounded-xl border bg-card p-4 sm:p-6" aria-labelledby="qbo-title">
+    <section className="rounded-2xl border bg-card p-4 shadow-sm sm:p-6" aria-labelledby="qbo-title">
       <h2 id="qbo-title" className="font-semibold">QuickBooks matches</h2>
       <p className="mt-1 text-sm text-muted-foreground">
         Suggestions only; nothing is created in QuickBooks from here.
       </p>
       {suggestions.connected === false ? (
-        <p className="mt-4 rounded-md bg-muted px-3 py-2 text-sm text-muted-foreground">
+          <p className="mt-4 rounded-xl bg-muted px-3 py-2 text-sm text-muted-foreground">
           QuickBooks could not be reached during the scan. Match the customer or vendor by hand.
         </p>
       ) : (
@@ -68,7 +72,7 @@ function QboSuggestions({ scan }: { scan: InvoiceScan }) {
                 {suggestions.counterparties.map((candidate) => (
                   <li
                     key={candidate.id}
-                    className="flex items-center justify-between gap-3 rounded-md bg-muted/70 px-3 py-2"
+                    className="flex items-center justify-between gap-3 rounded-xl bg-muted/70 px-3 py-2"
                   >
                     <span className="min-w-0 truncate">{candidate.name}</span>
                     <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
@@ -162,6 +166,8 @@ export function InvoiceScanDetailPage({ id }: { id: string }) {
   }
 
   const invoice = scan.extractedData;
+  const isManualTransaction = scan.recordType === "transaction";
+  const transactionDirection = invoice?.transactionDirection;
   const processing = scan.status === "processing" || retry.isPending;
   const canRetry = !processing && (scan.status === "uploaded" || scan.status === "failed");
 
@@ -175,10 +181,21 @@ export function InvoiceScanDetailPage({ id }: { id: string }) {
             {invoiceTitle(scan)}
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {invoice?.counterpartyName || "Company not identified"}
-            {invoice ? ` · ${CLASSIFICATION_LABELS[invoice.classification]}` : ""}
-            {" · scanned "}
-            {formatDate(scan.createdAt)}
+            {isManualTransaction ? (
+              <>
+                {invoice?.counterpartyName || "Counterparty not identified"}
+                {transactionDirection ? ` · ${TRANSACTION_DIRECTION_LABELS[transactionDirection]}` : " · Manual transaction"}
+                {" · dated "}
+                {formatDate(invoice?.issueDate)}
+              </>
+            ) : (
+              <>
+                {invoice?.counterpartyName || "Company not identified"}
+                {invoice ? ` · ${CLASSIFICATION_LABELS[invoice.classification]}` : ""}
+                {" · scanned "}
+                {formatDate(scan.createdAt)}
+              </>
+            )}
           </p>
         </div>
         <div className="flex shrink-0 flex-wrap items-center gap-3">
@@ -197,7 +214,7 @@ export function InvoiceScanDetailPage({ id }: { id: string }) {
         </div>
       </header>
 
-      {retry.isError && (
+      {!isManualTransaction && retry.isError && (
         <Alert variant="destructive">
           <AlertCircle aria-hidden="true" />
           <AlertDescription>
@@ -205,17 +222,17 @@ export function InvoiceScanDetailPage({ id }: { id: string }) {
           </AlertDescription>
         </Alert>
       )}
-      {scan.errorMessage && scan.status === "failed" && (
+      {!isManualTransaction && scan.errorMessage && scan.status === "failed" && (
         <Alert variant="destructive">
           <AlertCircle aria-hidden="true" />
           <AlertDescription>{scan.errorMessage}</AlertDescription>
         </Alert>
       )}
-      <InvoiceScanWarnings warnings={scan.warnings} />
+      {!isManualTransaction && <InvoiceScanWarnings warnings={scan.warnings} />}
 
       <section
         aria-label="Review"
-        className="grid gap-4 rounded-xl border bg-card p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end"
+        className="grid gap-4 rounded-2xl border bg-card p-4 shadow-sm sm:p-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end"
       >
         <div className="space-y-1.5">
           <p className="text-xs font-medium text-muted-foreground">Project</p>
@@ -237,9 +254,52 @@ export function InvoiceScanDetailPage({ id }: { id: string }) {
         <div className="flex min-h-48 items-center justify-center gap-2 rounded-xl border bg-card text-sm text-muted-foreground">
           <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden="true" /> Scanning invoice…
         </div>
+      ) : isManualTransaction ? (
+        <section className="rounded-2xl border bg-card p-4 shadow-sm sm:p-6" aria-labelledby="transaction-details-title">
+          <div className="flex items-start gap-3">
+            {transactionDirection === "payment_received" ? (
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-300"><ArrowDownLeft className="size-5" aria-hidden="true" /></span>
+            ) : (
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-rose-500/10 text-rose-300"><ArrowUpRight className="size-5" aria-hidden="true" /></span>
+            )}
+            <div>
+              <h2 id="transaction-details-title" className="font-semibold">Manual transaction</h2>
+              <p className="mt-1 text-sm text-muted-foreground">{invoice?.description || "Payment"}</p>
+            </div>
+          </div>
+          <dl className="mt-6 grid gap-x-8 gap-y-4 border-t pt-5 sm:grid-cols-2">
+            <div>
+              <dt className="text-xs font-medium text-muted-foreground">Direction</dt>
+              <dd className="mt-1 text-sm font-medium">
+                {transactionDirection ? TRANSACTION_DIRECTION_LABELS[transactionDirection] : "Unclassified"}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-xs font-medium text-muted-foreground">Amount</dt>
+              <dd className="mt-1 text-lg font-semibold tabular-nums text-primary">
+                {formatMoney(invoice?.total, invoice?.currency)}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-xs font-medium text-muted-foreground">Date</dt>
+              <dd className="mt-1 text-sm">{formatDate(invoice?.issueDate)}</dd>
+            </div>
+            <div>
+              <dt className="text-xs font-medium text-muted-foreground">
+                {transactionDirection === "payment_received" ? "Received from" : "Paid to"}
+              </dt>
+              <dd className="mt-1 text-sm">{invoice?.counterpartyName || "Not specified"}</dd>
+            </div>
+          </dl>
+          {scan.enteredAt && (
+            <p className="mt-5 border-t pt-4 text-xs text-muted-foreground">
+              This transaction is marked as entered in QuickBooks. Untick above to return it to the queue.
+            </p>
+          )}
+        </section>
       ) : (
         <div className="grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(20rem,0.85fr)]">
-          <section className="min-w-0 rounded-xl border bg-card p-4 sm:p-6">
+          <section className="min-w-0 rounded-2xl border bg-card p-4 shadow-sm sm:p-6">
             <InvoiceDetailsForm
               data={invoice}
               onSave={save}

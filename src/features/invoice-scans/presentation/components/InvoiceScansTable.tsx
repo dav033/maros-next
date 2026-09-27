@@ -20,6 +20,7 @@ import {
   formatMoney,
   invoiceTitle,
   STATUS_LABELS,
+  TRANSACTION_DIRECTION_LABELS,
 } from "../../domain/labels";
 import type { InvoiceScan } from "../../domain/models";
 import { EnteredCheckbox } from "./EnteredCheckbox";
@@ -50,24 +51,34 @@ function StatusBadge({ scan }: { scan: InvoiceScan }) {
   );
 }
 
+function recordDirection(scan: InvoiceScan): string {
+  if (scan.recordType === "transaction") {
+    const direction = scan.extractedData?.transactionDirection;
+    return direction ? TRANSACTION_DIRECTION_LABELS[direction] : "Manual transaction";
+  }
+  return scan.extractedData ? DIRECTION_LABELS[scan.extractedData.direction] : "Invoice file";
+}
+
 /** Table on desktop, cards on mobile; the same rows either way. */
 export function InvoiceScansTable({ scans, variant }: Props) {
-  const dateHeader = variant === "completed" ? "Entered" : "Scanned";
+  const dateHeader = variant === "completed" ? "Entered" : "Date";
   const { users } = useUserDirectory(true);
-  const dateOf = (scan: InvoiceScan) =>
-    formatDate(variant === "completed" ? scan.enteredAt : scan.createdAt);
+  const dateOf = (scan: InvoiceScan) => {
+    if (variant === "completed") return formatDate(scan.enteredAt);
+    return formatDate(scan.recordType === "transaction" ? scan.extractedData?.issueDate : scan.createdAt);
+  };
 
   return (
     <>
       <div className="hidden overflow-x-auto md:block">
         <Table>
-          <TableHeader>
+          <TableHeader className="bg-muted/40">
             <TableRow>
               <TableHead className="w-12">
                 <span className="sr-only">Entered in QuickBooks</span>
               </TableHead>
-              <TableHead>Invoice</TableHead>
-              <TableHead>Company</TableHead>
+              <TableHead>Invoice / transaction</TableHead>
+              <TableHead>Counterparty</TableHead>
               <TableHead>Project</TableHead>
               <TableHead>Category</TableHead>
               <TableHead>Comments</TableHead>
@@ -81,7 +92,7 @@ export function InvoiceScansTable({ scans, variant }: Props) {
             {scans.map((scan) => {
               const invoice = scan.extractedData;
               return (
-                <TableRow key={scan.id} className={scan.enteredAt ? "text-muted-foreground" : undefined}>
+                <TableRow key={scan.id} className={scan.enteredAt ? "text-muted-foreground" : "transition-colors hover:bg-muted/25"}>
                   <TableCell>
                     <EnteredCheckbox scan={scan} />
                   </TableCell>
@@ -93,7 +104,7 @@ export function InvoiceScansTable({ scans, variant }: Props) {
                       {invoiceTitle(scan)}
                     </Link>
                     <span className="block truncate text-xs text-muted-foreground">
-                      {invoice ? DIRECTION_LABELS[invoice.direction] : "Invoice file"}
+                      {recordDirection(scan)}
                     </span>
                   </TableCell>
                   <TableCell className="max-w-48 truncate">
@@ -129,7 +140,7 @@ export function InvoiceScansTable({ scans, variant }: Props) {
         {scans.map((scan) => {
           const invoice = scan.extractedData;
           return (
-            <li key={scan.id} className="flex gap-3 p-4">
+            <li key={scan.id} className="flex gap-3 p-4 transition-colors hover:bg-muted/20">
               <EnteredCheckbox scan={scan} className="pt-1" />
               <Link
                 href={`/finance/invoices/${scan.id}`}
@@ -139,7 +150,7 @@ export function InvoiceScansTable({ scans, variant }: Props) {
                   <div className="min-w-0">
                     <p className="truncate font-medium">{invoiceTitle(scan)}</p>
                     <p className="mt-0.5 truncate text-sm text-muted-foreground">
-                      {invoice?.counterpartyName || "Company not identified"}
+                      {invoice?.counterpartyName || "Counterparty not identified"}
                     </p>
                   </div>
                   <p className="shrink-0 font-semibold tabular-nums">
@@ -148,7 +159,7 @@ export function InvoiceScansTable({ scans, variant }: Props) {
                 </div>
                 <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
                   <span className="truncate">
-                    {scan.projectNumber ? `Project ${scan.projectNumber}` : "No project"} · {dateOf(scan)}
+                    {recordDirection(scan)} · {scan.projectNumber ? `Project ${scan.projectNumber}` : "No project"} · {dateOf(scan)}
                   </span>
                   <StatusBadge scan={scan} />
                 </div>

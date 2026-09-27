@@ -39,14 +39,22 @@ export function InvoiceScansPage() {
       <PageHeaderCard
         icon={FileText}
         title="Invoice scans"
-        description="Scanned invoices waiting to be entered in QuickBooks. Tick one once it is in."
+        description="Scanned invoices and manual transactions waiting to be entered in QuickBooks."
         rightSlot={
-          <Button asChild>
-            <Link href="/finance/invoices/scan">
-              <Plus aria-hidden="true" />
-              Scan invoice
-            </Link>
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button asChild variant="outline" className="rounded-xl">
+              <Link href="/finance/invoices/transaction">
+                <Plus aria-hidden="true" />
+                Add transaction
+              </Link>
+            </Button>
+            <Button asChild className="rounded-xl">
+              <Link href="/finance/invoices/scan">
+                <Plus aria-hidden="true" />
+                Scan invoice
+              </Link>
+            </Button>
+          </div>
         }
       />
 
@@ -62,12 +70,12 @@ export function InvoiceScansPage() {
         </Alert>
       )}
 
-      <section aria-labelledby="pending-title" className="rounded-xl border bg-card">
-        <header className="flex flex-wrap items-center justify-between gap-2 border-b px-4 py-3 sm:px-6">
+      <section aria-labelledby="pending-title" className="overflow-hidden rounded-2xl border bg-card shadow-sm">
+        <header className="flex flex-wrap items-center justify-between gap-2 border-b bg-muted/20 px-4 py-4 sm:px-6">
           <h2 id="pending-title" className="font-semibold">
             To enter
             {!query.isLoading && (
-              <span className="ml-2 rounded-full bg-primary/15 px-2 py-0.5 text-xs font-medium text-primary tabular-nums">
+              <span className="ml-2 rounded-full bg-primary/15 px-2.5 py-1 text-xs font-medium text-primary tabular-nums">
                 {pending.length}
               </span>
             )}
@@ -80,16 +88,16 @@ export function InvoiceScansPage() {
           <LoadingRows />
         ) : pending.length === 0 ? (
           <div className="flex min-h-48 flex-col items-center justify-center px-6 py-10 text-center">
-            <div className="mb-4 grid h-11 w-11 place-items-center rounded-xl border border-border bg-background text-primary">
+            <div className="mb-4 grid h-12 w-12 place-items-center rounded-full bg-primary/10 text-primary">
               <Camera className="h-5 w-5" aria-hidden="true" />
             </div>
             <h3 className="text-lg font-semibold tracking-tight">
-              {query.data?.length ? "Everything is entered" : "No invoices scanned yet"}
+              {query.data?.length ? "Everything is entered" : "No invoices or transactions yet"}
             </h3>
             <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">
               {query.data?.length
                 ? "New scans will show up here until they are marked as entered in QuickBooks."
-                : "Take a photo or choose a PDF. The scan runs on its own and the details show up here, ready to check."}
+                : "Scan an invoice or add a payment manually. Items appear here to review before entering them in QuickBooks."}
             </p>
           </div>
         ) : (
@@ -98,9 +106,9 @@ export function InvoiceScansPage() {
       </section>
 
       {completed.length > 0 && (
-        <section aria-labelledby="completed-title" className="rounded-xl border bg-card/60">
-          <header className="flex items-center gap-2 border-b px-4 py-3 sm:px-6">
-            <CheckCircle2 className="h-4 w-4 text-emerald-600" aria-hidden="true" />
+        <section aria-labelledby="completed-title" className="overflow-hidden rounded-2xl border bg-card/60 shadow-sm">
+          <header className="flex flex-wrap items-center gap-2 border-b bg-muted/20 px-4 py-4 sm:px-6">
+            <CheckCircle2 className="h-4 w-4 text-emerald-300" aria-hidden="true" />
             <h2 id="completed-title" className="font-semibold">
               Entered in QuickBooks
               <span className="ml-2 rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">

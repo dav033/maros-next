@@ -1,5 +1,5 @@
 import { optimizedApiClient } from "@/shared/infra/http/OptimizedApiClient";
-import type { InvoiceScan, InvoiceScanPatch } from "../domain/models";
+import type { InvoiceScan, InvoiceScanPatch, InvoiceTransactionDirection } from "../domain/models";
 
 interface CreateInvoiceScanResponse {
   id: string;
@@ -10,6 +10,16 @@ export interface ProjectPickerRecord {
   id: number;
   name: string;
   leadNumber: string | null;
+}
+
+export interface CreateManualInvoiceTransactionInput {
+  description: string;
+  direction: InvoiceTransactionDirection;
+  transactionDate: string;
+  amount: number;
+  currency: string;
+  counterpartyName?: string;
+  projectNumber?: string | null;
 }
 
 export async function listInvoiceScans(): Promise<InvoiceScan[]> {
@@ -53,6 +63,16 @@ export async function uploadAndScanInvoice(
     `/invoice-scans/${upload.id}/scan`,
   );
   return scan;
+}
+
+export async function createManualInvoiceTransaction(
+  input: CreateManualInvoiceTransactionInput,
+): Promise<InvoiceScan> {
+  const { data } = await optimizedApiClient.post<InvoiceScan>(
+    "/invoice-scans/manual",
+    input,
+  );
+  return data;
 }
 
 export async function updateInvoiceScan(
