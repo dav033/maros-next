@@ -8,9 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { optimizedApiClient } from "@/shared/infra/http/OptimizedApiClient";
 import { connectGoogleCalendar as startGoogleCalendarConnection } from "../connectGoogleCalendar";
+import { MeetingParticipantsPicker } from "./MeetingParticipantsPicker";
+import { GoogleCalendarPrivacyNotice } from "./GoogleCalendarPrivacyNotice";
 import {
   googleCalendarConnectionKey,
   googleCalendarMeetingsKey,
@@ -58,7 +59,7 @@ export function ScheduleMeetingDialog({
   const [title, setTitle] = useState("");
   const [startsAt, setStartsAt] = useState(defaultStartValue);
   const [durationMinutes, setDurationMinutes] = useState("60");
-  const [attendees, setAttendees] = useState("");
+  const [attendees, setAttendees] = useState<string[]>([]);
   const connectionQuery = useQuery({
     queryKey: googleCalendarConnectionKey,
     queryFn: async () => (await optimizedApiClient.get<GoogleCalendarConnection>("/google-calendar/connection")).data,
@@ -89,7 +90,7 @@ export function ScheduleMeetingDialog({
     setTitle(`Meeting: ${entityLabel}`);
     setStartsAt(defaultStartValue());
     setDurationMinutes("60");
-    setAttendees(attendeeEmail ?? "");
+    setAttendees(attendeeEmail ? [attendeeEmail.toLowerCase()] : []);
   }, [open, entityLabel, attendeeEmail]);
 
   const connectGoogleCalendar = () => {
@@ -100,7 +101,6 @@ export function ScheduleMeetingDialog({
     event.preventDefault();
     const start = new Date(startsAt);
     const end = new Date(start.getTime() + Number(durationMinutes) * 60_000);
-    const attendeeList = [...new Set(attendees.split(/[\n,;]/).map((email) => email.trim().toLowerCase()).filter(Boolean))];
     createMeeting.mutate({
       entityKind,
       entityId,
@@ -108,7 +108,7 @@ export function ScheduleMeetingDialog({
       startsAt: start.toISOString(),
       endsAt: end.toISOString(),
       timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone || "America/Bogota",
-      attendees: attendeeList,
+      attendees,
     });
   };
 
@@ -151,9 +151,8 @@ export function ScheduleMeetingDialog({
                 </div>
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="meet-attendees">Invitees</Label>
-                <Textarea id="meet-attendees" value={attendees} onChange={(event) => setAttendees(event.target.value)} placeholder="name@example.com, another@example.com" rows={2} />
-                <p className="text-xs text-muted-foreground">Separate email addresses with commas or new lines. Google Calendar emails each invitee the event and Meet link.</p>
+                <Label>Participants <span className="font-normal text-muted-foreground">(optional)</span></Label>
+                <MeetingParticipantsPicker value={attendees} onChange={setAttendees} disabled={createMeeting.isPending} />
               </div>
               <DialogFooter>
                 <Button type="submit" disabled={createMeeting.isPending || !startsAt || !title.trim()}>
@@ -195,6 +194,7 @@ export function ScheduleMeetingDialog({
               </div>
             </div>
             <Button type="button" onClick={connectGoogleCalendar}>Connect Google Calendar</Button>
+            <GoogleCalendarPrivacyNotice />
           </div>
         )}
       </DialogContent>

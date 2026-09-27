@@ -48,6 +48,11 @@ export default async function LoginPage({ searchParams }: PageProps) {
             </svg>
             Iniciar sesión con Google
           </a>
+          <p className="text-center text-xs text-muted-foreground">
+            <a href="/about" className="underline underline-offset-4">About Maros CRM</a>
+            <span className="px-2">·</span>
+            <a href="/privacy-policy" className="underline underline-offset-4">Privacy policy</a>
+          </p>
         </CardContent>
       </Card>
     </div>

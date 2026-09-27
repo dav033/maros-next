@@ -1,18 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
-import { CalendarDays, ExternalLink, LoaderCircle, Video } from "lucide-react";
+import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { CalendarDays, Clock3, ExternalLink, LoaderCircle, Pencil, Search, Trash2, Video } from "lucide-react";
+import { toast } from "sonner";
 import { PageHeaderCard } from "@/components/shared";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useUserDirectory } from "@/features/users/presentation/hooks/data/useUserDirectory";
 import { optimizedApiClient } from "@/shared/infra/http/OptimizedApiClient";
 import { connectGoogleCalendar } from "../../connectGoogleCalendar";
-import {
-  googleCalendarConnectionKey,
-  googleCalendarMeetingsKey,
-  type GoogleCalendarConnection,
-  type GoogleCalendarMeeting,
-} from "../../types";
+import { googleCalendarConnectionKey, googleCalendarMeetingsKey, type GoogleCalendarConnection, type GoogleCalendarMeeting } from "../../types";
+import { MeetingEditDialog } from "../MeetingEditDialog";
+import { GoogleCalendarPrivacyNotice } from "../GoogleCalendarPrivacyNotice";
+
+type CalendarView = "upcoming" | "past";
 
 function formatDate(value: string, includeDate: boolean): string {
   return new Intl.DateTimeFormat(undefined, {
@@ -22,6 +26,12 @@ function formatDate(value: string, includeDate: boolean): string {
 }
 
 export function CalendarPage() {
+  const queryClient = useQueryClient();
+  const [view, setView] = useState<CalendarView>("upcoming");
+  const [search, setSearch] = useState("");
+  const [meetingToEdit, setMeetingToEdit] = useState<GoogleCalendarMeeting | null>(null);
+  const [meetingToCancel, setMeetingToCancel] = useState<GoogleCalendarMeeting | null>(null);
+  const { users } = useUserDirectory(true);
   const connection = useQuery({
     queryKey: googleCalendarConnectionKey,
     queryFn: async () => (await optimizedApiClient.get<GoogleCalendarConnection>("/google-calendar/connection")).data,
@@ -29,93 +39,152 @@ export function CalendarPage() {
   const meetings = useQuery({
     queryKey: googleCalendarMeetingsKey,
     queryFn: async () => (await optimizedApiClient.get<GoogleCalendarMeeting[]>("/google-calendar/meetings")).data,
-    enabled: connection.data?.connected === true,
   });
+  const cancelMeeting = useMutation({
+    mutationFn: async (id: number) => optimizedApiClient.delete(`/google-calendar/meetings/${id}`),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: googleCalendarMeetingsKey });
+      toast.success("Meeting cancelled. Google Calendar notified the participants.");
+      setMeetingToCancel(null);
+    },
+    onError: (error: unknown) => toast.error(error instanceof Error ? error.message : "Could not cancel the meeting."),
+  });
+
   const now = Date.now();
-  const upcoming = (meetings.data ?? []).filter((meeting) => new Date(meeting.startsAt).getTime() >= now);
-  const past = (meetings.data ?? []).filter((meeting) => new Date(meeting.startsAt).getTime() < now).reverse();
+  const allMeetings = meetings.data ?? [];
+  const visibleMeetings = allMeetings
+    .filter((meeting) => view === "upcoming"
+      ? new Date(meeting.startsAt).getTime() >= now
+      : new Date(meeting.startsAt).getTime() < now)
+    .filter((meeting) => {
+      const term = search.trim().toLowerCase();
+      return !term || meeting.title.toLowerCase().includes(term) || meeting.attendees.some((email) => email.includes(term));
+    })
+    .sort((a, b) => view === "upcoming"
+      ? new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime()
+      : new Date(b.startsAt).getTime() - new Date(a.startsAt).getTime());
 
   return (
     <div className="flex w-full flex-1 flex-col gap-4">
       <PageHeaderCard
         icon={CalendarDays}
         title="Calendar"
-        description="Meetings scheduled from Maros with your Google Calendar."
-        rightSlot={
-          <Button asChild>
-            <Link href="/meet"><Video className="mr-2 size-4" />Start Meet</Link>
-          </Button>
-        }
+        description="Schedule events, manage meetings, and join invitations from your Maros teammates."
+        rightSlot={<Button asChild><Link href="/meet"><CalendarDays className="mr-2 size-4" />Add event</Link></Button>}
       />
 
       {connection.isPending ? (
-        <div className="flex items-center gap-2 py-8 text-sm text-muted-foreground" role="status">
-          <LoaderCircle className="size-4 animate-spin" />Checking Google Calendar connection…
-        </div>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground" role="status"><LoaderCircle className="size-4 animate-spin" />Checking Google Calendar…</div>
       ) : connection.isError ? (
-        <div className="rounded-xl border border-destructive/40 p-5 text-sm">
-          <p className="text-destructive">Could not load your Google Calendar connection.</p>
-          <Button type="button" variant="outline" className="mt-3" onClick={() => void connection.refetch()}>Try again</Button>
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-destructive/40 px-4 py-3 text-sm">
+          <span className="text-destructive">Could not check the Google Calendar connection.</span>
+          <Button type="button" variant="outline" size="sm" onClick={() => void connection.refetch()}>Try again</Button>
         </div>
       ) : connection.data?.configured === false ? (
-        <p className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">Google Calendar must be configured by a system administrator.</p>
+        <p className="rounded-xl border border-dashed px-4 py-3 text-sm text-muted-foreground">Google Calendar must be configured by a system administrator before you can create or manage events.</p>
       ) : connection.data?.connected ? (
-        <>
-          <p className="text-sm text-muted-foreground">Connected as <span className="font-medium text-foreground">{connection.data.email}</span></p>
-          {meetings.isPending ? (
-            <div className="space-y-3" role="status" aria-label="Loading meetings">
-              {Array.from({ length: 3 }, (_, index) => <div key={index} className="h-16 animate-pulse rounded-xl bg-muted" />)}
-            </div>
-          ) : meetings.isError ? (
-            <div className="rounded-xl border border-destructive/40 p-5 text-sm">
-              <p className="text-destructive">Could not load your meetings.</p>
-              <Button type="button" variant="outline" className="mt-3" onClick={() => void meetings.refetch()}>Try again</Button>
-            </div>
-          ) : (
-            <>
-              <MeetingSection title="Upcoming" items={upcoming} />
-              <MeetingSection title="Past meetings" items={past} />
-            </>
-          )}
-        </>
+        <p className="rounded-xl border bg-card px-4 py-3 text-sm text-muted-foreground">Connected as <span className="font-medium text-foreground">{connection.data.email}</span></p>
       ) : (
-        <section className="rounded-xl border border-dashed p-6">
-          <h2 className="font-semibold">Connect Google Calendar</h2>
-          <p className="mt-1 text-sm text-muted-foreground">Connect your account to see scheduled meetings and create Meet links from Maros.</p>
-          <Button type="button" className="mt-4" onClick={() => connectGoogleCalendar("/calendar")}>Connect Google Calendar</Button>
+        <section className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-dashed px-4 py-3">
+          <div>
+            <h2 className="text-sm font-medium">Connect Google Calendar to create meetings</h2>
+            <p className="mt-0.5 text-xs text-muted-foreground">Invitations from Maros colleagues will still appear here.</p>
+            <div className="mt-2"><GoogleCalendarPrivacyNotice /></div>
+          </div>
+          <Button type="button" variant="outline" size="sm" onClick={() => connectGoogleCalendar("/calendar")}>Connect Calendar</Button>
         </section>
       )}
-    </div>
-  );
-}
 
-function MeetingSection({ title, items }: { title: string; items: GoogleCalendarMeeting[] }) {
-  return (
-    <section aria-label={title} className="rounded-xl border bg-card">
-      <header className="border-b px-4 py-3 sm:px-6">
-        <h2 className="font-semibold">{title}<span className="ml-2 text-xs font-normal text-muted-foreground">{items.length}</span></h2>
-      </header>
-      {items.length === 0 ? (
-        <p className="px-4 py-6 text-sm text-muted-foreground sm:px-6">{title === "Upcoming" ? "No upcoming meetings. Start a Meet to create one." : "No past meetings."}</p>
-      ) : (
-        <div className="divide-y">
-          {items.map((meeting) => (
-            <article key={meeting.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6">
-              <div className="min-w-0">
-                <h3 className="truncate text-sm font-medium">{meeting.title}</h3>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {formatDate(meeting.startsAt, true)} · {meeting.attendees.length} invitee{meeting.attendees.length === 1 ? "" : "s"}
-                  {meeting.entityKind && meeting.entityId ? ` · Linked to ${meeting.entityKind} #${meeting.entityId}` : ""}
-                </p>
-              </div>
-              <div className="flex gap-2">
-                {meeting.meetUrl ? <Button asChild size="sm"><a href={meeting.meetUrl} target="_blank" rel="noopener noreferrer"><Video className="mr-1.5 size-3.5" />Join</a></Button> : null}
-                {meeting.calendarUrl ? <Button asChild size="sm" variant="outline" aria-label="Open event in Google Calendar"><a href={meeting.calendarUrl} target="_blank" rel="noopener noreferrer"><ExternalLink className="size-3.5" /></a></Button> : null}
-              </div>
-            </article>
-          ))}
+      <section className="overflow-hidden rounded-xl border bg-card">
+        <div className="flex flex-col gap-3 border-b px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+          <div>
+            <h2 className="font-semibold">Your meetings</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Events you organize and invitations shared with your Maros account.</p>
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <div className="relative min-w-0 sm:w-64">
+              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search meetings or people" className="pl-9" aria-label="Search meetings or people" />
+            </div>
+            <div className="flex rounded-md border p-1" aria-label="Meeting period">
+              <Button type="button" size="sm" variant={view === "upcoming" ? "secondary" : "ghost"} aria-pressed={view === "upcoming"} onClick={() => setView("upcoming")}>Upcoming</Button>
+              <Button type="button" size="sm" variant={view === "past" ? "secondary" : "ghost"} aria-pressed={view === "past"} onClick={() => setView("past")}>Past</Button>
+            </div>
+          </div>
         </div>
-      )}
-    </section>
+
+        {meetings.isPending ? (
+          <div className="space-y-3 p-4 sm:p-6" role="status" aria-label="Loading meetings">
+            {Array.from({ length: 3 }, (_, index) => <div key={index} className="h-24 animate-pulse rounded-xl bg-muted" />)}
+          </div>
+        ) : meetings.isError ? (
+          <div className="p-6 text-sm">
+            <p className="text-destructive">Could not load your meetings.</p>
+            <Button type="button" variant="outline" className="mt-3" onClick={() => void meetings.refetch()}>Try again</Button>
+          </div>
+        ) : visibleMeetings.length === 0 ? (
+          <div className="px-6 py-12 text-center">
+            <CalendarDays className="mx-auto size-8 text-muted-foreground/60" />
+            <h3 className="mt-3 text-sm font-medium">{search ? "No matching meetings" : view === "upcoming" ? "Nothing scheduled yet" : "No past meetings"}</h3>
+            <p className="mt-1 text-sm text-muted-foreground">{search ? "Try a different title or participant email." : view === "upcoming" ? "Add an event for any day and invite teammates or guests." : "Completed meetings will appear here."}</p>
+            {!search && view === "upcoming" && connection.data?.connected ? <Button asChild className="mt-4"><Link href="/meet"><CalendarDays className="mr-2 size-4" />Schedule a meeting</Link></Button> : null}
+          </div>
+        ) : (
+          <div className="divide-y">
+            {visibleMeetings.map((meeting) => (
+              <article key={meeting.id} className="flex flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                <div className="flex min-w-0 items-start gap-3">
+                  <div className="hidden size-11 shrink-0 flex-col items-center justify-center rounded-lg bg-primary/10 text-primary sm:flex">
+                    <span className="text-[10px] font-semibold uppercase">{new Intl.DateTimeFormat(undefined, { month: "short" }).format(new Date(meeting.startsAt))}</span>
+                    <span className="text-base font-semibold leading-none">{new Intl.DateTimeFormat(undefined, { day: "numeric" }).format(new Date(meeting.startsAt))}</span>
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="max-w-full truncate text-sm font-medium">{meeting.title}</h3>
+                      <span className="rounded-full border px-2 py-0.5 text-[10px] text-muted-foreground">{meeting.isOrganizer ? "Organized by you" : "Invited"}</span>
+                    </div>
+                    <p className="mt-1 flex flex-wrap items-center gap-x-1.5 text-xs text-muted-foreground">
+                      <Clock3 className="size-3.5" />{formatDate(meeting.startsAt, true)} · {formatDate(meeting.endsAt, false)} end
+                      {meeting.entityKind && meeting.entityId ? <span>· Linked to {meeting.entityKind} #{meeting.entityId}</span> : null}
+                    </p>
+                    <p className="mt-1 truncate text-xs text-muted-foreground">
+                      {meeting.attendees.length ? meeting.attendees.map((email) => users.find((person) => person.email.toLowerCase() === email.toLowerCase())?.name ?? email).join(", ") : "No participants invited"}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2 sm:shrink-0">
+                  {meeting.meetUrl ? <Button asChild size="sm"><a href={meeting.meetUrl} target="_blank" rel="noopener noreferrer"><Video className="mr-1.5 size-3.5" />Join</a></Button> : null}
+                  {meeting.calendarUrl ? <Button asChild size="sm" variant="outline" aria-label="Open event in Google Calendar"><a href={meeting.calendarUrl} target="_blank" rel="noopener noreferrer"><ExternalLink className="size-3.5" /></a></Button> : null}
+                  {meeting.isOrganizer && view === "upcoming" ? (
+                    <>
+                      <Button type="button" size="sm" variant="outline" onClick={() => setMeetingToEdit(meeting)}><Pencil className="mr-1.5 size-3.5" />Edit</Button>
+                      <Button type="button" size="sm" variant="ghost" className="text-destructive hover:text-destructive" onClick={() => setMeetingToCancel(meeting)} aria-label={`Cancel ${meeting.title}`}><Trash2 className="size-3.5" /></Button>
+                    </>
+                  ) : null}
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <MeetingEditDialog meeting={meetingToEdit} open={meetingToEdit !== null} onOpenChange={(open) => { if (!open) setMeetingToEdit(null); }} />
+      <AlertDialog open={meetingToCancel !== null} onOpenChange={(open) => { if (!open) setMeetingToCancel(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel this meeting?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {meetingToCancel ? `“${meetingToCancel.title}” will be removed from Google Calendar. Google Calendar will email the cancellation to its participants.` : "This event will be removed and participants will be notified."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={cancelMeeting.isPending}>Keep meeting</AlertDialogCancel>
+            <AlertDialogAction disabled={cancelMeeting.isPending} onClick={(event) => { event.preventDefault(); if (meetingToCancel) cancelMeeting.mutate(meetingToCancel.id); }} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              {cancelMeeting.isPending ? <LoaderCircle className="mr-2 size-4 animate-spin" /> : null}Cancel meeting
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
   );
 }

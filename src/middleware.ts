@@ -29,6 +29,13 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next({ request: { headers } });
   }
 
+  // Public OAuth verification pages must be readable before sign-in.
+  if (pathname === "/about" || pathname === "/privacy-policy") {
+    const headers = new Headers(request.headers);
+    headers.set("x-pathname", pathname);
+    return NextResponse.next({ request: { headers } });
+  }
+
   if (isDevAuthBypassEnabled()) {
     const existingToken = request.cookies.get(SESSION_COOKIE)?.value;
     if (existingToken && (await verifyDevSessionToken(existingToken))) {

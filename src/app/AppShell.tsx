@@ -18,7 +18,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   // /login has no session yet; /p/<token> is a published note read by someone who has
   // no account at all. Neither should be wrapped in the CRM's navigation.
-  if (pathname === "/login" || pathname.startsWith("/p/")) {
+  if (
+    pathname === "/login" ||
+    pathname === "/about" ||
+    pathname === "/privacy-policy" ||
+    pathname.startsWith("/p/")
+  ) {
     return <>{children}</>;
   }
 

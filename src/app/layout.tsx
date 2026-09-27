@@ -14,22 +14,23 @@ declare global {
 }
 
 export const metadata: Metadata = {
-  title: "Maros Next App",
-  description: "Next.js application with Clean Architecture",
+  title: "Maros Construction CRM",
+  description: "Construction project, customer, task, and meeting management for Maros Construction.",
 };
 
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  // Published notes are read by people with no account here, so asking the API who
-  // they are would be a guaranteed 401 on every one of those requests. Middleware
-  // stamps the pathname precisely so this can be skipped.
-  const isPublicReader =
-    (await headers()).get("x-pathname")?.startsWith("/p/") ?? false;
+  // Public pages do not need a CRM session lookup.
+  const publicPath = (await headers()).get("x-pathname") ?? "";
+  const isPublicPage =
+    publicPath.startsWith("/p/") ||
+    publicPath === "/about" ||
+    publicPath === "/privacy-policy";
 
   // Only real on pages behind middleware's auth check — on /login there is
   // no session cookie yet, and fetchCurrentUser resolves to null.
-  const currentUser = isPublicReader ? null : await fetchCurrentUser();
+  const currentUser = isPublicPage ? null : await fetchCurrentUser();
 
   return (
     <html lang="en" className="dark">

@@ -14,6 +14,7 @@ export type GoogleCalendarMeeting = {
   startsAt: string;
   endsAt: string;
   attendees: string[];
+  isOrganizer: boolean;
 };
 
 export type CreateGoogleCalendarMeeting = {
@@ -25,6 +26,8 @@ export type CreateGoogleCalendarMeeting = {
   timeZone: string;
   attendees: string[];
 };
+
+export type UpdateGoogleCalendarMeeting = Omit<CreateGoogleCalendarMeeting, "entityKind" | "entityId">;
 
 export const googleCalendarConnectionKey = ["google-calendar", "connection"] as const;
 export const googleCalendarMeetingsKey = ["google-calendar", "meetings"] as const;
