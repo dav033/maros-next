@@ -19,6 +19,7 @@ import {
   Camera,
   CalendarDays,
   Video,
+  ArrowDownToLine,
 } from "lucide-react";
 import type { Permission } from "@/shared/auth/permissions";
 
@@ -79,7 +80,13 @@ const menuSection: SidebarSection = {
       href: "/projects/construction",
       icon: FolderKanban,
       activePrefix: "/projects",
-      activeExclude: ["/projects/completed", "/projects/lost"],
+      activeExclude: ["/projects/completed", "/projects/lost", "/projects/import-from-quickbooks"],
+      permission: "projects:read",
+    },
+    {
+      title: "Import from QuickBooks",
+      href: "/projects/import-from-quickbooks",
+      icon: ArrowDownToLine,
       permission: "projects:read",
     },
     {

@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { addDays, addMonths, format, isSameDay, isSameMonth, startOfMonth, startOfWeek } from "date-fns";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CalendarDays, Clock3, ExternalLink, LoaderCircle, Pencil, Search, Trash2, Video } from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight, Clock3, ExternalLink, List, LoaderCircle, Pencil, Search, Trash2, Video } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeaderCard } from "@/components/shared";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -16,7 +17,12 @@ import { googleCalendarConnectionKey, googleCalendarMeetingsKey, type GoogleCale
 import { MeetingEditDialog } from "../MeetingEditDialog";
 import { GoogleCalendarPrivacyNotice } from "../GoogleCalendarPrivacyNotice";
 
-type CalendarView = "upcoming" | "past";
+type CalendarMode = "month" | "agenda";
+type AgendaPeriod = "upcoming" | "past";
+
+const WEEKDAYS = Array.from({ length: 7 }, (_, index) =>
+  format(addDays(startOfWeek(new Date(2024, 0, 7)), index), "EEE"),
+);
 
 function formatDate(value: string, includeDate: boolean): string {
   return new Intl.DateTimeFormat(undefined, {
@@ -27,7 +33,10 @@ function formatDate(value: string, includeDate: boolean): string {
 
 export function CalendarPage() {
   const queryClient = useQueryClient();
-  const [view, setView] = useState<CalendarView>("upcoming");
+  const [mode, setMode] = useState<CalendarMode>("month");
+  const [period, setPeriod] = useState<AgendaPeriod>("upcoming");
+  const [month, setMonth] = useState(() => startOfMonth(new Date()));
+  const [selectedDate, setSelectedDate] = useState(() => new Date());
   const [search, setSearch] = useState("");
   const [meetingToEdit, setMeetingToEdit] = useState<GoogleCalendarMeeting | null>(null);
   const [meetingToCancel, setMeetingToCancel] = useState<GoogleCalendarMeeting | null>(null);
@@ -52,17 +61,68 @@ export function CalendarPage() {
 
   const now = Date.now();
   const allMeetings = meetings.data ?? [];
-  const visibleMeetings = allMeetings
-    .filter((meeting) => view === "upcoming"
+  const matchingMeetings = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    return allMeetings.filter((meeting) =>
+      !term || meeting.title.toLowerCase().includes(term) || meeting.attendees.some((email) => email.toLowerCase().includes(term)),
+    );
+  }, [allMeetings, search]);
+  const meetingsByDay = useMemo(() => {
+    const grouped = new Map<string, GoogleCalendarMeeting[]>();
+    for (const meeting of matchingMeetings) {
+      const key = format(new Date(meeting.startsAt), "yyyy-MM-dd");
+      grouped.set(key, [...(grouped.get(key) ?? []), meeting]);
+    }
+    return grouped;
+  }, [matchingMeetings]);
+  const monthDays = useMemo(() => {
+    const firstDay = startOfWeek(startOfMonth(month));
+    return Array.from({ length: 42 }, (_, index) => addDays(firstDay, index));
+  }, [month]);
+  const visibleMeetings = matchingMeetings
+    .filter((meeting) => period === "upcoming"
       ? new Date(meeting.startsAt).getTime() >= now
       : new Date(meeting.startsAt).getTime() < now)
-    .filter((meeting) => {
-      const term = search.trim().toLowerCase();
-      return !term || meeting.title.toLowerCase().includes(term) || meeting.attendees.some((email) => email.includes(term));
-    })
-    .sort((a, b) => view === "upcoming"
+    .sort((a, b) => period === "upcoming"
       ? new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime()
       : new Date(b.startsAt).getTime() - new Date(a.startsAt).getTime());
+  const selectedDayMeetings = [...(meetingsByDay.get(format(selectedDate, "yyyy-MM-dd")) ?? [])]
+    .sort((a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime());
+  const monthMeetingCount = matchingMeetings.filter((meeting) => isSameMonth(new Date(meeting.startsAt), month)).length;
+
+  const renderMeeting = (meeting: GoogleCalendarMeeting) => (
+    <article key={meeting.id} className="flex flex-col gap-4 px-4 py-4 transition-colors hover:bg-muted/20 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+      <div className="flex min-w-0 items-start gap-3">
+        <div className="flex size-12 shrink-0 flex-col items-center justify-center rounded-xl bg-primary/10 text-primary">
+          <span className="text-[10px] font-semibold uppercase">{format(new Date(meeting.startsAt), "MMM")}</span>
+          <span className="text-base font-semibold leading-none">{format(new Date(meeting.startsAt), "d")}</span>
+        </div>
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="max-w-full truncate text-sm font-medium">{meeting.title}</h3>
+            <span className="rounded-full bg-muted px-2.5 py-1 text-[10px] font-medium text-muted-foreground">{meeting.isOrganizer ? "Organized by you" : "Invited"}</span>
+          </div>
+          <p className="mt-1 flex flex-wrap items-center gap-x-1.5 text-xs text-muted-foreground">
+            <Clock3 className="size-3.5" />{formatDate(meeting.startsAt, true)} · {formatDate(meeting.endsAt, false)} end
+            {meeting.entityKind && meeting.entityId ? <span>· Linked to {meeting.entityKind} #{meeting.entityId}</span> : null}
+          </p>
+          <p className="mt-1 truncate text-xs text-muted-foreground">
+            {meeting.attendees.length ? meeting.attendees.map((email) => users.find((person) => person.email.toLowerCase() === email.toLowerCase())?.name ?? email).join(", ") : "No participants invited"}
+          </p>
+        </div>
+      </div>
+      <div className="flex flex-wrap gap-2 sm:shrink-0">
+        {meeting.meetUrl ? <Button asChild size="sm"><a href={meeting.meetUrl} target="_blank" rel="noopener noreferrer"><Video className="mr-1.5 size-3.5" />Join</a></Button> : null}
+        {meeting.calendarUrl ? <Button asChild size="sm" variant="outline" aria-label="Open event in Google Calendar"><a href={meeting.calendarUrl} target="_blank" rel="noopener noreferrer"><ExternalLink className="size-3.5" /></a></Button> : null}
+        {meeting.isOrganizer && new Date(meeting.startsAt).getTime() >= now ? (
+          <>
+            <Button type="button" size="sm" variant="outline" onClick={() => setMeetingToEdit(meeting)}><Pencil className="mr-1.5 size-3.5" />Edit</Button>
+            <Button type="button" size="sm" variant="ghost" className="text-destructive hover:text-destructive" onClick={() => setMeetingToCancel(meeting)} aria-label={`Cancel ${meeting.title}`}><Trash2 className="size-3.5" /></Button>
+          </>
+        ) : null}
+      </div>
+    </article>
+  );
 
   return (
     <div className="flex w-full flex-1 flex-col gap-4">
@@ -96,24 +156,99 @@ export function CalendarPage() {
       )}
 
       <section className="overflow-hidden rounded-2xl border bg-card shadow-sm">
-        <div className="flex flex-col gap-4 border-b bg-muted/20 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+        <div className="flex flex-col gap-4 border-b bg-muted/20 px-4 py-4 sm:px-6">
           <div>
-            <h2 className="font-semibold">Your meetings</h2>
-            <p className="mt-1 text-sm text-muted-foreground">Events you organize and invitations shared with your Maros account.</p>
+            <h2 className="font-semibold">Your calendar</h2>
+            <p className="mt-1 text-sm text-muted-foreground">See meetings by day or browse your agenda.</p>
           </div>
-          <div className="flex flex-col gap-2 sm:flex-row">
-            <div className="relative min-w-0 sm:w-64">
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+            <div className="relative min-w-0 sm:w-64 sm:flex-1 lg:flex-none">
               <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search meetings or people" className="pl-9" aria-label="Search meetings or people" />
             </div>
-            <div className="flex w-fit rounded-xl bg-muted p-1" aria-label="Meeting period">
-              <Button type="button" size="sm" variant="ghost" className={view === "upcoming" ? "rounded-lg bg-background text-foreground shadow-sm hover:bg-background" : "rounded-lg text-muted-foreground"} aria-pressed={view === "upcoming"} onClick={() => setView("upcoming")}>Upcoming</Button>
-              <Button type="button" size="sm" variant="ghost" className={view === "past" ? "rounded-lg bg-background text-foreground shadow-sm hover:bg-background" : "rounded-lg text-muted-foreground"} aria-pressed={view === "past"} onClick={() => setView("past")}>Past</Button>
+            <div className="flex w-fit rounded-xl bg-muted p-1" aria-label="Calendar view">
+              <Button type="button" size="sm" variant="ghost" className={mode === "month" ? "rounded-lg bg-background text-foreground shadow-sm hover:bg-background" : "rounded-lg text-muted-foreground"} aria-pressed={mode === "month"} onClick={() => setMode("month")}><CalendarDays className="mr-1.5 size-3.5" />Month</Button>
+              <Button type="button" size="sm" variant="ghost" className={mode === "agenda" ? "rounded-lg bg-background text-foreground shadow-sm hover:bg-background" : "rounded-lg text-muted-foreground"} aria-pressed={mode === "agenda"} onClick={() => setMode("agenda")}><List className="mr-1.5 size-3.5" />Agenda</Button>
             </div>
+            {mode === "agenda" ? (
+              <div className="flex w-fit rounded-xl bg-muted p-1" aria-label="Meeting period">
+                <Button type="button" size="sm" variant="ghost" className={period === "upcoming" ? "rounded-lg bg-background text-foreground shadow-sm hover:bg-background" : "rounded-lg text-muted-foreground"} aria-pressed={period === "upcoming"} onClick={() => setPeriod("upcoming")}>Upcoming</Button>
+                <Button type="button" size="sm" variant="ghost" className={period === "past" ? "rounded-lg bg-background text-foreground shadow-sm hover:bg-background" : "rounded-lg text-muted-foreground"} aria-pressed={period === "past"} onClick={() => setPeriod("past")}>Past</Button>
+              </div>
+            ) : null}
           </div>
         </div>
 
-        {meetings.isPending ? (
+        {mode === "month" ? (
+          <>
+            <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6">
+              <div>
+                <h3 className="text-lg font-semibold">{format(month, "MMMM yyyy")}</h3>
+                <p className="text-sm text-muted-foreground">{monthMeetingCount} {monthMeetingCount === 1 ? "meeting" : "meetings"}{search ? " match your search" : " this month"}</p>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Button type="button" variant="outline" size="icon" className="rounded-xl" aria-label="Previous month" onClick={() => { const nextMonth = addMonths(month, -1); setMonth(nextMonth); setSelectedDate(nextMonth); }}><ChevronLeft className="size-4" /></Button>
+                <Button type="button" variant="outline" size="sm" className="rounded-xl" onClick={() => { const today = new Date(); setMonth(startOfMonth(today)); setSelectedDate(today); }}>Today</Button>
+                <Button type="button" variant="outline" size="icon" className="rounded-xl" aria-label="Next month" onClick={() => { const nextMonth = addMonths(month, 1); setMonth(nextMonth); setSelectedDate(nextMonth); }}><ChevronRight className="size-4" /></Button>
+              </div>
+            </div>
+            {meetings.isError ? (
+              <div className="mx-4 mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm sm:mx-6">
+                <span className="text-destructive">Could not load your meetings.</span>
+                <Button type="button" variant="outline" size="sm" onClick={() => void meetings.refetch()}>Try again</Button>
+              </div>
+            ) : meetings.isPending ? (
+              <p className="px-4 pb-3 text-sm text-muted-foreground" role="status">Loading meetings…</p>
+            ) : null}
+            <div className="grid grid-cols-7 border-l border-t" aria-label={`${format(month, "MMMM yyyy")} calendar`}>
+              {WEEKDAYS.map((weekday) => <div key={weekday} className="border-b border-r bg-muted/30 px-1 py-2 text-center text-[10px] font-semibold text-muted-foreground sm:px-2 sm:text-xs">{weekday}</div>)}
+              {monthDays.map((day) => {
+                const dayMeetings = meetingsByDay.get(format(day, "yyyy-MM-dd")) ?? [];
+                const selected = isSameDay(day, selectedDate);
+                const currentMonth = isSameMonth(day, month);
+                const today = isSameDay(day, new Date());
+                return (
+                  <button
+                    key={format(day, "yyyy-MM-dd")}
+                    type="button"
+                    aria-label={`${format(day, "EEEE, MMMM d, yyyy")}: ${dayMeetings.length} ${dayMeetings.length === 1 ? "meeting" : "meetings"}`}
+                    aria-pressed={selected}
+                    aria-current={today ? "date" : undefined}
+                    onClick={() => { setSelectedDate(day); if (!currentMonth) setMonth(startOfMonth(day)); }}
+                    className={`min-w-0 min-h-[4.75rem] border-b border-r p-1.5 text-left transition-colors hover:bg-muted/40 focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:min-h-28 sm:p-2 ${currentMonth ? "bg-card" : "bg-muted/15 text-muted-foreground/70"} ${selected ? "bg-primary/10 ring-1 ring-inset ring-primary/35" : ""}`}
+                  >
+                    <span className="mb-1 flex items-center justify-between gap-1">
+                      <span className={`flex size-6 items-center justify-center rounded-full text-xs font-medium ${selected ? "bg-primary text-primary-foreground" : today ? "bg-primary/15 text-primary" : currentMonth ? "text-foreground" : "text-muted-foreground"}`}>{format(day, "d")}</span>
+                      {dayMeetings.length ? <span className="flex items-center gap-1 text-[10px] text-primary sm:hidden"><span className="size-1.5 rounded-full bg-primary" />{dayMeetings.length}</span> : null}
+                    </span>
+                    <span className="hidden space-y-1 md:block">
+                      {dayMeetings.slice(0, 2).map((meeting) => (
+                        <span key={meeting.id} className="flex min-w-0 items-center gap-1 rounded-md bg-primary/10 px-1.5 py-1 text-[10px] leading-tight text-primary">
+                          <span className="shrink-0 tabular-nums">{format(new Date(meeting.startsAt), "h:mm a")}</span>
+                          <span className="truncate">{meeting.title}</span>
+                        </span>
+                      ))}
+                      {dayMeetings.length > 2 ? <span className="block truncate px-1 text-[10px] text-muted-foreground">+{dayMeetings.length - 2} more</span> : null}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            <div className="border-t px-0 py-4 sm:py-5">
+              <div className="flex flex-wrap items-center justify-between gap-2 px-4 sm:px-6">
+                <h3 className="font-semibold">{format(selectedDate, "EEEE, MMMM d")}</h3>
+                <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">{selectedDayMeetings.length} {selectedDayMeetings.length === 1 ? "meeting" : "meetings"}</span>
+              </div>
+              {selectedDayMeetings.length ? <div className="mt-2 divide-y">{selectedDayMeetings.map(renderMeeting)}</div> : (
+                <div className="px-6 py-8 text-center">
+                  <p className="text-sm font-medium">No meetings this day</p>
+                  <p className="mt-1 text-sm text-muted-foreground">Choose another date or add an event.</p>
+                  {connection.data?.connected ? <Button asChild variant="secondary" className="mt-3"><Link href="/meet"><CalendarDays className="mr-2 size-4" />Add event</Link></Button> : null}
+                </div>
+              )}
+            </div>
+          </>
+        ) : meetings.isPending ? (
           <div className="space-y-3 p-4 sm:p-6" role="status" aria-label="Loading meetings">
             {Array.from({ length: 3 }, (_, index) => <div key={index} className="h-24 animate-pulse rounded-xl bg-muted" />)}
           </div>
@@ -125,46 +260,12 @@ export function CalendarPage() {
         ) : visibleMeetings.length === 0 ? (
           <div className="px-6 py-12 text-center">
             <CalendarDays className="mx-auto size-8 text-muted-foreground/60" />
-            <h3 className="mt-3 text-sm font-medium">{search ? "No matching meetings" : view === "upcoming" ? "Nothing scheduled yet" : "No past meetings"}</h3>
-            <p className="mt-1 text-sm text-muted-foreground">{search ? "Try a different title or participant email." : view === "upcoming" ? "Add an event for any day and invite teammates or guests." : "Completed meetings will appear here."}</p>
-            {!search && view === "upcoming" && connection.data?.connected ? <Button asChild className="mt-4"><Link href="/meet"><CalendarDays className="mr-2 size-4" />Schedule a meeting</Link></Button> : null}
+            <h3 className="mt-3 text-sm font-medium">{search ? "No matching meetings" : period === "upcoming" ? "Nothing scheduled yet" : "No past meetings"}</h3>
+            <p className="mt-1 text-sm text-muted-foreground">{search ? "Try a different title or participant email." : period === "upcoming" ? "Add an event for any day and invite teammates or guests." : "Completed meetings will appear here."}</p>
+            {!search && period === "upcoming" && connection.data?.connected ? <Button asChild className="mt-4"><Link href="/meet"><CalendarDays className="mr-2 size-4" />Schedule a meeting</Link></Button> : null}
           </div>
         ) : (
-          <div className="divide-y">
-            {visibleMeetings.map((meeting) => (
-              <article key={meeting.id} className="flex flex-col gap-4 px-4 py-4 transition-colors hover:bg-muted/20 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-                <div className="flex min-w-0 items-start gap-3">
-                  <div className="flex size-12 shrink-0 flex-col items-center justify-center rounded-xl bg-primary/10 text-primary">
-                    <span className="text-[10px] font-semibold uppercase">{new Intl.DateTimeFormat(undefined, { month: "short" }).format(new Date(meeting.startsAt))}</span>
-                    <span className="text-base font-semibold leading-none">{new Intl.DateTimeFormat(undefined, { day: "numeric" }).format(new Date(meeting.startsAt))}</span>
-                  </div>
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="max-w-full truncate text-sm font-medium">{meeting.title}</h3>
-                      <span className="rounded-full bg-muted px-2.5 py-1 text-[10px] font-medium text-muted-foreground">{meeting.isOrganizer ? "Organized by you" : "Invited"}</span>
-                    </div>
-                    <p className="mt-1 flex flex-wrap items-center gap-x-1.5 text-xs text-muted-foreground">
-                      <Clock3 className="size-3.5" />{formatDate(meeting.startsAt, true)} · {formatDate(meeting.endsAt, false)} end
-                      {meeting.entityKind && meeting.entityId ? <span>· Linked to {meeting.entityKind} #{meeting.entityId}</span> : null}
-                    </p>
-                    <p className="mt-1 truncate text-xs text-muted-foreground">
-                      {meeting.attendees.length ? meeting.attendees.map((email) => users.find((person) => person.email.toLowerCase() === email.toLowerCase())?.name ?? email).join(", ") : "No participants invited"}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-2 sm:shrink-0">
-                  {meeting.meetUrl ? <Button asChild size="sm"><a href={meeting.meetUrl} target="_blank" rel="noopener noreferrer"><Video className="mr-1.5 size-3.5" />Join</a></Button> : null}
-                  {meeting.calendarUrl ? <Button asChild size="sm" variant="outline" aria-label="Open event in Google Calendar"><a href={meeting.calendarUrl} target="_blank" rel="noopener noreferrer"><ExternalLink className="size-3.5" /></a></Button> : null}
-                  {meeting.isOrganizer && view === "upcoming" ? (
-                    <>
-                      <Button type="button" size="sm" variant="outline" onClick={() => setMeetingToEdit(meeting)}><Pencil className="mr-1.5 size-3.5" />Edit</Button>
-                      <Button type="button" size="sm" variant="ghost" className="text-destructive hover:text-destructive" onClick={() => setMeetingToCancel(meeting)} aria-label={`Cancel ${meeting.title}`}><Trash2 className="size-3.5" /></Button>
-                    </>
-                  ) : null}
-                </div>
-              </article>
-            ))}
-          </div>
+          <div className="divide-y">{visibleMeetings.map(renderMeeting)}</div>
         )}
       </section>
 
