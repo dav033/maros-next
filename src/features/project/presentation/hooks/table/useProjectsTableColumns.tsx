@@ -8,6 +8,8 @@ import type { Project, ProjectProgressStatus } from "@/project/domain";
 import { Badge } from "@/components/ui/badge";
 import { NotesButton } from "@/components/shared";
 import { formatCurrency } from "@/shared/utils";
+import { MoneyLine } from "../../molecules/MoneyLine";
+import { LIST_AXIS_MAX_PERCENT } from "../../molecules/moneyLineGeometry";
 import { PROGRESS_COLORS, PROGRESS_LABELS } from "../../organisms/projectVisualTokens";
 import { useHasPermission } from "@/shared/auth/useHasPermission";
 
@@ -37,13 +39,6 @@ function toAmount(value: unknown): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
-function computeBacklog(project: Project): number | null {
-  const estimated = toAmount(project.financial?.estimatedAmount);
-  const invoiced = toAmount(project.financial?.invoicedAmount);
-  if (estimated === null || invoiced === null) return null;
-  return estimated - invoiced;
-}
-
 function getPaymentSummary(project: Project) {
   if (project.paymentSummary) return project.paymentSummary;
   const payments = project.financial?.payments;
@@ -65,77 +60,6 @@ function getCashProfit(project: Project): number | null {
   const collected = getCollected(project);
   const costPaid = toAmount(project.financial?.cashOutPaid);
   return collected !== null && costPaid !== null ? collected - costPaid : null;
-}
-
-type ComparisonMetric = {
-  label: string;
-  value: number | null;
-  tone: "emerald" | "rose" | "amber" | "violet";
-};
-
-const BAR_TONE_CLASSES = {
-  emerald: "bg-emerald-500/80",
-  rose: "bg-rose-500/80",
-  amber: "bg-amber-500/80",
-  violet: "bg-violet-500/80",
-} as const;
-
-function ComparisonBars({
-  metrics,
-  estimate,
-}: {
-  metrics: ComparisonMetric[];
-  estimate: number | null;
-}) {
-  return (
-    <div className="min-w-[190px] space-y-2">
-      {metrics.map(({ label, value, tone }) => {
-        if (value === null) {
-          return (
-            <div key={label} className="space-y-1">
-              <div className="flex items-center justify-between gap-2 text-xs">
-                <span className="text-muted-foreground">{label}</span>
-                <span className="font-mono text-muted-foreground">—</span>
-              </div>
-              <div className="h-1 overflow-hidden rounded-full bg-muted" />
-            </div>
-          );
-        }
-
-        const width = estimate && estimate > 0
-          ? Math.min(100, (Math.abs(value) / estimate) * 100)
-          : 0;
-        const rowTone = value < 0 ? "rose" : tone;
-        const formatted = formatCurrency(value);
-
-        return (
-          <div
-            key={label}
-            className="space-y-1"
-            title={`${label}: ${formatted}${estimate && estimate > 0 ? ` (${width.toFixed(0)}% of estimate)` : ""}`}
-          >
-            <div className="flex items-center justify-between gap-2 text-xs">
-              <span className="text-muted-foreground">{label}</span>
-              <span className="font-mono font-medium text-foreground">{formatted}</span>
-            </div>
-            <div
-              className="h-1 overflow-hidden rounded-full bg-muted"
-              role="progressbar"
-              aria-label={`${label} as a percentage of estimate`}
-              aria-valuemin={0}
-              aria-valuemax={100}
-              aria-valuenow={width}
-            >
-              <div
-                className={`h-full rounded-full ${BAR_TONE_CLASSES[rowTone]}`}
-                style={{ width: `${width}%` }}
-              />
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
 }
 
 export function useProjectsTableColumns(
@@ -262,7 +186,7 @@ export function useProjectsTableColumns(
               {schedule ? (
                 <span className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[10px] text-muted-foreground">
                   <span>Schedule</span>
-                  <span className="whitespace-nowrap rounded-sm bg-muted/70 px-1.5 py-0.5 font-mono tabular-nums text-foreground">
+                  <span className="whitespace-nowrap rounded-sm bg-elev-4 px-1.5 py-0.5 font-mono tabular-nums text-foreground">
                     {schedule.items.length} {schedule.items.length === 1 ? "stage" : "stages"}
                   </span>
                   {schedule.totalPercentage !== null ? (
@@ -279,37 +203,48 @@ export function useProjectsTableColumns(
         sortValue: (project: Project) => getPaymentSummary(project)?.totalAmount ?? 0,
       } satisfies SimpleTableColumn<Project>] : []),
       {
-        key: "estimateInvoicedCost",
-        header: "Estimate / Collected / Cost paid",
-        className: "w-[225px]",
+        // One axis instead of five bars: the track is the contract, and collected
+        // and spent are drawn against it. Backlog is omitted here — the row only
+        // has room for two lanes; the project card shows the third. The axis is
+        // pinned so the contract marker lands on the same x in every row.
+        key: "contractVsCash",
+        header: "Collected / Spent vs contract",
+        className: "w-[240px]",
         render: (project: Project) => (
-          <ComparisonBars
+          <MoneyLine
             estimate={toAmount(project.financial?.estimatedAmount)}
-            metrics={[
-              { label: "Estimate", value: toAmount(project.financial?.estimatedAmount), tone: "violet" },
-              { label: "Collected", value: getCollected(project), tone: "emerald" },
-              { label: "Cost paid", value: toAmount(project.financial?.cashOutPaid), tone: "rose" },
-            ]}
+            collected={getCollected(project)}
+            spent={toAmount(project.financial?.cashOutPaid)}
+            axisMaxPercent={LIST_AXIS_MAX_PERCENT}
+            label={project.lead.name}
           />
         ),
         sortable: true,
-        sortValue: (project: Project) => getCollected(project) ?? 0,
+        // The cell reads as a share of the contract, so it sorts as one. Rows with no
+        // usable contract have no share to sort by and fall back to raw dollars.
+        sortValue: (project: Project) => {
+          const collected = getCollected(project);
+          if (collected === null) return 0;
+          const estimate = toAmount(project.financial?.estimatedAmount);
+          return estimate !== null && estimate > 0 ? collected / estimate : collected;
+        },
       },
       {
-        key: "profitVsBacklog",
-        header: "Profit vs Backlog",
-        className: "w-[225px]",
+        // Cash profit is a figure, not a bar: the money line already owns the bars,
+        // but the number itself still has to be visible and sortable.
+        key: "cashProfit",
+        header: "Profit",
+        className: "w-[110px]",
         render: (project: Project) => {
           const profit = getCashProfit(project);
-          const backlog = computeBacklog(project);
+          if (profit === null) return <span className="text-muted-foreground">—</span>;
           return (
-            <ComparisonBars
-              estimate={toAmount(project.financial?.estimatedAmount)}
-              metrics={[
-                { label: "Profit", value: profit, tone: "violet" },
-                { label: "Backlog", value: backlog, tone: backlog === 0 ? "emerald" : "amber" },
-              ]}
-            />
+            <span
+              className="font-mono text-xs font-semibold tabular-nums"
+              style={{ color: profit < 0 ? "var(--money-over)" : undefined }}
+            >
+              {formatCurrency(profit)}
+            </span>
           );
         },
         sortable: true,

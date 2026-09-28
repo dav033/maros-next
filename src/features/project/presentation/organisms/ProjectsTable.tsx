@@ -25,6 +25,8 @@ import {
   LEAD_TYPE_ORDER,
 } from "@/features/leads/presentation/atoms/leadVisualTokens";
 
+import { MoneyLine } from "../molecules/MoneyLine";
+import { LIST_AXIS_MAX_PERCENT } from "../molecules/moneyLineGeometry";
 import { useProjectsTableColumns } from "../hooks/table/useProjectsTableColumns";
 import type {
   ProjectGroupBy,
@@ -38,53 +40,35 @@ import {
   PROGRESS_ORDER,
 } from "./projectVisualTokens";
 
-type MobileMetricTone = "emerald" | "rose" | "amber" | "violet";
-
-const MOBILE_BAR_COLORS: Record<MobileMetricTone, string> = {
-  emerald: "bg-emerald-500/80",
-  rose: "bg-rose-500/80",
-  amber: "bg-amber-500/80",
-  violet: "bg-violet-500/80",
-};
-
 function toProjectAmount(value: unknown): number | null {
   if (value === null || value === undefined) return null;
   const amount = typeof value === "number" ? value : Number.parseFloat(String(value));
   return Number.isFinite(amount) ? amount : null;
 }
 
-function MobileMetric({
-  label,
-  value,
-  estimate,
-  tone,
-}: {
-  label: string;
-  value: number | null;
-  estimate: number | null;
-  tone: MobileMetricTone;
-}) {
-  const width = value !== null && estimate !== null && estimate > 0
-    ? Math.min(100, (Math.abs(value) / estimate) * 100)
-    : 0;
-  const color = value !== null && value < 0 ? "rose" : tone;
+/**
+ * 44px rows: the money line is 32px tall, so the cells keep 4px of vertical padding
+ * and the row carries the height. EntityTable's own py-3 is what made these ~64px.
+ */
+const DENSE_ROW_CLASS = "[&_tbody_tr]:h-11 [&_tbody_td]:py-1";
 
-  return (
-    <div className="min-w-0 space-y-1">
-      <div className="flex items-baseline justify-between gap-1">
-        <span className="truncate text-[10px] text-muted-foreground">{label}</span>
-        <span
-          title={value === null ? undefined : formatCurrency(value)}
-          className="truncate text-right font-mono text-xs font-medium tabular-nums"
-        >
-          {value === null ? "—" : formatCurrency(value)}
-        </span>
-      </div>
-      <div aria-hidden="true" className="h-1 overflow-hidden rounded-full bg-muted">
-        <div className={`h-full rounded-full ${MOBILE_BAR_COLORS[color]}`} style={{ width: `${width}%` }} />
-      </div>
-    </div>
+/**
+ * The two cash problems the money line makes visible, shared by the row rail and the
+ * mobile card so they can never disagree.
+ */
+function getProjectCashAlerts(project: Project): {
+  exceedsCollected: boolean;
+  exceedsContract: boolean;
+} {
+  const collected = toProjectAmount(
+    project.paymentSummary?.totalAmount ?? project.financial?.paidAmount,
   );
+  const spent = toProjectAmount(project.financial?.cashOutPaid);
+  const estimate = toProjectAmount(project.financial?.estimatedAmount);
+  return {
+    exceedsCollected: spent !== null && collected !== null && spent > collected,
+    exceedsContract: spent !== null && estimate !== null && estimate > 0 && spent > estimate,
+  };
 }
 
 function ProjectMobileCard({
@@ -106,7 +90,7 @@ function ProjectMobileCard({
   const costPaid = toProjectAmount(project.financial?.cashOutPaid);
   const profit = collected !== null && costPaid !== null ? collected - costPaid : null;
   const backlog = estimate !== null && invoiced !== null ? estimate - invoiced : null;
-  const costPaidExceedsCollected = costPaid !== null && collected !== null && costPaid > collected;
+  const { exceedsCollected, exceedsContract } = getProjectCashAlerts(project);
   const status = project.projectProgressStatus;
   const paymentSchedule = project.financial?.paymentSchedule;
 
@@ -148,36 +132,39 @@ function ProjectMobileCard({
       </div>
 
       {canReadFinance ? (
-        <div className="grid gap-3 border-y border-border/50 py-3 md:grid-cols-2">
-          <section className="min-w-0 space-y-2">
+        <div className="min-w-0 space-y-2 border-y border-border py-3">
+          <div className="flex items-baseline justify-between gap-2">
             <h3 className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-              Estimate vs. cost
+              Contract
             </h3>
-            <div className="space-y-2.5">
-              <MobileMetric label="Estimate" value={estimate} estimate={estimate} tone="violet" />
-              <MobileMetric label="Cost paid" value={costPaid} estimate={estimate} tone="rose" />
-            </div>
-          </section>
-          <section className="min-w-0 space-y-2 border-t border-border/50 pt-3 md:border-l md:border-t-0 md:pl-4 md:pt-0">
+            <span className="font-mono text-xs font-medium tabular-nums">
+              {estimate === null ? "—" : formatCurrency(estimate)}
+            </span>
+          </div>
+          <MoneyLine
+            estimate={estimate}
+            collected={collected}
+            spent={costPaid}
+            backlog={backlog}
+            axisMaxPercent={LIST_AXIS_MAX_PERCENT}
+            label={project.lead.name}
+          />
+          <div className="flex items-baseline justify-between gap-2">
             <h3 className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-              Billing &amp; profit
+              Profit
             </h3>
-            <div className="space-y-2.5">
-              <MobileMetric label="Collected" value={collected} estimate={estimate} tone="emerald" />
-              <MobileMetric label="Profit" value={profit} estimate={estimate} tone="violet" />
-              <MobileMetric
-                label="Backlog"
-                value={backlog}
-                estimate={estimate}
-                tone={backlog === 0 ? "emerald" : "amber"}
-              />
-            </div>
-          </section>
+            <span className="font-mono text-xs font-medium tabular-nums">
+              {profit === null ? "—" : formatCurrency(profit)}
+            </span>
+          </div>
         </div>
       ) : null}
 
-      {costPaidExceedsCollected ? (
+      {exceedsCollected ? (
         <p className="text-xs font-medium text-destructive">Cost paid exceeds collected</p>
+      ) : null}
+      {exceedsContract ? (
+        <p className="text-xs font-medium text-destructive">Cost paid exceeds the contract</p>
       ) : null}
 
       {canReadFinance || onOpenNotesModal ? (
@@ -186,7 +173,7 @@ function ProjectMobileCard({
             <button
               type="button"
               onClick={() => onOpenPayments(project)}
-              className="flex min-h-10 min-w-0 flex-1 items-center justify-between gap-2 rounded-md border border-border/60 px-3 text-left text-xs hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="flex min-h-10 min-w-0 flex-1 items-center justify-between gap-2 rounded-lg border border-border px-3 text-left text-xs hover:bg-elev-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <span className="flex min-w-0 items-center gap-2">
                 <CreditCard className="size-4 shrink-0 text-muted-foreground" />
@@ -315,7 +302,7 @@ export function ProjectsTable({
 
   // Column widths from useProjectsTableColumns, plus optional checkbox/action cells.
   const tableMinWidth =
-    (columns.some((column) => column.key === "payments") ? 1400 : 1230) +
+    (columns.some((column) => column.key === "payments") ? 1300 : 1130) +
     (selection ? 40 : 0) +
     (getContextMenuItems ? 40 : 0);
 
@@ -327,9 +314,8 @@ export function ProjectsTable({
       isLoading={isLoading}
       isMutating={isMutating}
       getRowClassName={(project) => {
-        const collected = project.paymentSummary?.totalAmount ?? project.financial?.paidAmount;
-        const costPaid = project.financial?.cashOutPaid;
-        return costPaid !== undefined && collected !== undefined && costPaid > collected
+        const { exceedsCollected, exceedsContract } = getProjectCashAlerts(project);
+        return exceedsCollected || exceedsContract
           ? "border-destructive/40 bg-destructive/10 hover:bg-destructive/20 [&>td:first-child]:border-l-2 [&>td:first-child]:border-l-destructive"
           : undefined;
       }}
@@ -350,8 +336,9 @@ export function ProjectsTable({
       paginated={pagination?.enabled}
       defaultSort={{ key: "leadNumber", dir: "desc" }}
       loadingState={<DefaultTableLoading label="Loading projects…" />}
+      className={DENSE_ROW_CLASS}
       emptyState={
-        <div className="flex flex-col items-center justify-center rounded-lg border border-border bg-card/40 p-8 text-center">
+        <div className="flex flex-col items-center justify-center rounded-lg border border-border bg-elev-2 p-8 text-center">
           <FolderX className="size-12 text-muted-foreground/50 mb-4" />
           <h3 className="text-lg font-medium text-foreground">No projects found</h3>
           <p className="text-sm text-muted-foreground mt-1">

@@ -10,9 +10,37 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["var(--font-work-sans)", "system-ui", "sans-serif"],
+        display: ["var(--font-display)", "system-ui", "sans-serif"],
+        sans: ["var(--font-sans)", "system-ui", "sans-serif"],
+        mono: ["var(--font-mono)", "ui-monospace", "monospace"],
       },
       colors: {
+        // Contract Rev. E: the elevation, line, foreground and money scales
+        // declared in globals.css, exposed as utilities (bg-elev-2, text-fg-dim,
+        // bg-money-in...). These tokens already hold a color; the shadcn names
+        // below hold channels and map onto the same values.
+        "elev-0": "var(--elev-0)",
+        "elev-1": "var(--elev-1)",
+        "elev-2": "var(--elev-2)",
+        "elev-3": "var(--elev-3)",
+        "elev-4": "var(--elev-4)",
+        "elev-5": "var(--elev-5)",
+        line: {
+          DEFAULT: "var(--line)",
+          strong: "var(--line-strong)",
+        },
+        fg: {
+          DEFAULT: "var(--fg)",
+          dim: "var(--fg-dim)",
+          faint: "var(--fg-faint)",
+        },
+        money: {
+          in: "var(--money-in)",
+          out: "var(--money-out)",
+          hold: "var(--money-hold)",
+          over: "var(--money-over)",
+          track: "var(--money-track)",
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -21,6 +49,8 @@ const config: Config = {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
+          container: "var(--primary-container)",
+          "on-container": "var(--on-primary-container)",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",

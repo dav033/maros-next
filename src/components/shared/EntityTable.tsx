@@ -555,7 +555,7 @@ function EntityTableInner<T>({
       >
         <Table style={minWidth ? { minWidth } : undefined}>
           <TableHeader className="bg-muted/50">
-            <TableRow className="text-left text-xs uppercase tracking-wide text-muted-foreground h-12 border-b border-border">
+            <TableRow className="text-left font-display text-xs uppercase tracking-wide text-muted-foreground h-12 border-b border-border">
               {selection ? (
                 <TableHead className="w-10 px-4 py-3">
                   <Checkbox

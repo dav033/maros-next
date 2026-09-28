@@ -3,52 +3,112 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Custom theme variables (legacy) */
-:root {
-  --color-dark: #161616;
-  --color-gray: #273f4f;
-  --color-gray-alt: #1f313d;
-  --color-gray-darker: #101010;
-  --color-gray-subtle: #2a2a2a;
-  --color-primary: #041fc4;
-  --color-primary-alt: #c44a04;
-  --color-light: #efeeea;
-  --sidebar: 0 0% 12%;
-  --sidebar-foreground: 240 4.8% 95.9%;
-  --sidebar-primary: 224.3 76.3% 48%;
-  --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 220 3% 16%;
-  --sidebar-accent-foreground: 171 78% 79%;
-  --sidebar-border: 240 3.7% 15.9%;
-  --sidebar-ring: 171 78% 79%;
-}
+/* ---------------------------------------------------------------------------
+   Design tokens (contract Rev. E) — the single source of truth for color and
+   shape. Dark is the base palette, so it lives in :root and never inside a
+   theme block: the app renders dark with or without a theme class on <html>.
 
-/* Shadcn UI CSS Variables - Dark theme by default */
+   Each contract token is a color, usable straight from CSS or a style prop
+   (backgroundColor: "var(--money-in)"). Where a shadcn token maps onto one,
+   the value also needs a channel form, because shadcn's tokens are read as
+   hsl(var(--token)) by tailwind.config.ts and by ~20 components: that is the
+   `-hsl` twin, and it is the authoritative declaration of the value. Every
+   twin reproduces the hex in its comment exactly.
+--------------------------------------------------------------------------- */
 :root {
-  --radius: 0.5rem;
-}
+  /* Elevation — opaque tonal surfaces, from the app background upwards. Stack
+     these instead of layering opacities (bg-card/40) so nothing shows through. */
+  --elev-0-hsl: 165 12.5% 6.3%;
+  --elev-0: hsl(var(--elev-0-hsl)); /* #0E1211 app background */
+  --elev-1-hsl: 156 11% 9%;
+  --elev-1: hsl(var(--elev-1-hsl)); /* #141917 base panel */
+  --elev-2-hsl: 160 11% 11%;
+  --elev-2: hsl(var(--elev-2-hsl)); /* #191F1D card, row */
+  --elev-3-hsl: 162.9 10.8% 12.7%;
+  --elev-3: hsl(var(--elev-3-hsl)); /* #1D2422 sidebar, hover */
+  --elev-4-hsl: 158 11% 15%;
+  --elev-4: hsl(var(--elev-4-hsl)); /* #222A27 menu, chip */
+  --elev-5-hsl: 153.3 10.3% 17.1%;
+  --elev-5: hsl(var(--elev-5-hsl)); /* #27302C dialog */
 
-.dark,
-:root {
-  --background: 0 0% 9%;
-  --foreground: 60 9% 93%;
-  --card: 0 0% 12%;
-  --card-foreground: 60 9% 93%;
-  --popover: 0 0% 9%;
-  --popover-foreground: 60 9% 93%;
-  --primary: 171 78% 79%;
-  --primary-foreground: 0 0% 9%;
-  --secondary: 0 0% 12%;
-  --secondary-foreground: 60 9% 93%;
-  --muted: 200 15% 18%;
-  --muted-foreground: 60 5% 64%;
-  --accent: 200 20% 20%;
-  --accent-foreground: 60 9% 93%;
+  --line-hsl: 158.2 8.9% 24.1%;
+  --line: hsl(var(--line-hsl)); /* #38433F */
+  --line-strong: #707976; /* borders of interactive controls */
+
+  --fg-hsl: 150 8% 90.2%;
+  --fg: hsl(var(--fg-hsl)); /* #E4E8E6 */
+  --fg-dim-hsl: 157.5 4.7% 66.7%;
+  --fg-dim: hsl(var(--fg-dim-hsl)); /* #A6AEAB */
+  --fg-faint: #8f9793;
+
+  /* Interface — chrome only: navigation, focus, primary button. Never inside a
+     piece of data. */
+  --primary-mint-hsl: 166 70% 63%;
+  --primary-mint: hsl(var(--primary-mint-hsl)); /* #5FE3C4 */
+  --on-primary-hsl: 167.5 100% 10.4%;
+  --on-primary: hsl(var(--on-primary-hsl)); /* #00352A */
+  --primary-container: #12433a;
+  --on-primary-container: #8cffe2;
+
+  /* Data — only inside the money line and the status badges. */
+  --money-in: #4ed0a0; /* collected */
+  --money-out: #e0a84f; /* spent */
+  --money-hold: #8e96d8; /* backlog, not executed */
+  --money-over: #ff8a7a; /* out of contract, loss */
+  --money-track: #242d2a; /* empty track of the bar */
+
+  /* Shape. Named --shape-* and not --radius-*: Tailwind v4 owns the
+     --radius-* namespace (the config's borderRadius scale compiles into it),
+     so reusing those names left two declarations of each with different
+     values in the compiled sheet. */
+  --shape-xs: 4px;
+  --shape-sm: 8px;
+  --shape-md: 12px;
+  --shape-lg: 16px;
+
+  /* shadcn's own tokens keep their names and map onto the scale above, so every
+     component already reading them picks up the contract. They hold the channel
+     form because every consumer wraps them in hsl(). --radius stays the base
+     Tailwind derives rounded-sm/md/lg from. */
+  --radius: var(--shape-sm);
+  --background: var(--elev-0-hsl);
+  --foreground: var(--fg-hsl);
+  --card: var(--elev-2-hsl);
+  --card-foreground: var(--fg-hsl);
+  --popover: var(--elev-2-hsl);
+  --popover-foreground: var(--fg-hsl);
+  --primary: var(--primary-mint-hsl);
+  --primary-foreground: var(--on-primary-hsl);
+  --secondary: var(--elev-2-hsl);
+  --secondary-foreground: var(--fg-hsl);
+  /* One rung above the surface they are meant to read as. Both are consumed
+     almost everywhere as a translucent wash over an elev-2 row or card
+     (EntityTable: bg-muted/50 header, hover:bg-accent/30 row), so mapping them
+     onto elev-3/elev-4 composited down to a 1.03:1 step. At elev-4/elev-5 the
+     same washes land on elev-3, the contract's hover surface. */
+  --muted: var(--elev-4-hsl);
+  --muted-foreground: var(--fg-dim-hsl);
+  --accent: var(--elev-5-hsl);
+  --accent-foreground: var(--fg-hsl);
+  --border: var(--line-hsl);
+  /* This app reads --input as the control surface (bg-input) as well as its
+     border (border-input), so it maps to a surface; --line-strong is applied
+     per control. */
+  --input: var(--elev-1-hsl);
+  --ring: var(--primary-mint-hsl);
+  --sidebar: var(--elev-3-hsl);
+  --sidebar-foreground: var(--fg-hsl);
+  --sidebar-primary: var(--primary-mint-hsl);
+  --sidebar-primary-foreground: var(--on-primary-hsl);
+  --sidebar-accent: var(--elev-4-hsl);
+  --sidebar-accent-foreground: var(--primary-mint-hsl);
+  --sidebar-border: var(--line-hsl);
+  --sidebar-ring: var(--primary-mint-hsl);
+
+  /* Outside the contract, left as they were: destructive, the categorical chart
+     slots and the badge hues. */
   --destructive: 0 62% 46%;
   --destructive-foreground: 60 9% 93%;
-  --border: 200 10% 20%;
-  --input: 0 0% 9%;
-  --ring: 171 78% 79%;
   --chart-1: 220 70% 50%;
   --chart-2: 160 60% 45%;
   --chart-3: 30 80% 55%;
@@ -75,7 +135,7 @@
 }
 
 html {
-  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
   color-scheme: dark;
@@ -97,16 +157,16 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-gray-darker);
+  background: var(--elev-0);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-gray);
+  background: var(--line);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-gray-alt);
+  background: var(--line-strong);
 }
 
 /* Notes use nested scroll regions. Keep their scrollbar quiet and aligned with
@@ -143,190 +203,6 @@ body {
   background: hsl(var(--primary) / 0.7);
   border-color: transparent;
   background-clip: padding-box;
-}
-
-/* Bridge: mantener clases legacy, pero que ya usen tokens shadcn */
-.bg-theme-dark { background-color: hsl(var(--background)); }
-.bg-theme-gray { background-color: hsl(var(--muted)); }
-.bg-theme-gray-alt { background-color: hsl(var(--accent)); }
-.bg-theme-gray-darker { background-color: hsl(var(--popover)); }
-.bg-theme-darker { background-color: hsl(var(--popover)); }
-.bg-theme-gray-subtle { background-color: hsl(var(--muted)); }
-.bg-theme-primary { background-color: hsl(var(--primary)); }
-.bg-theme-primary-alt { background-color: hsl(var(--primary)); }
-
-/* Text bridge */
-.text-theme-primary { color: hsl(var(--primary)); }
-.text-theme-light { color: hsl(var(--foreground)); }
-.text-theme-muted { color: hsl(var(--muted-foreground)); }
-.text-theme-accent { color: hsl(var(--primary)); }
-
-/* Border bridge */
-.border-theme-gray { border-color: hsl(var(--border)); }
-.border-theme-border { border-color: hsl(var(--border)); }
-.border-theme-gray-alt { border-color: hsl(var(--border)); }
-.border-theme-primary { border-color: hsl(var(--ring)); }
-.border-theme-gray-subtle { border-color: hsl(var(--border)); }
-
-.hover\:bg-theme-gray-subtle:hover {
-  background-color: var(--color-gray-subtle);
-}
-
-.hover\:bg-theme-darker:hover {
-  background-color: var(--color-gray-darker);
-}
-
-.bg-theme-dark\/60 {
-  background-color: rgb(0 0 0 / 0.6);
-}
-
-.bg-theme-dark\/80 {
-  background-color: rgb(0 0 0 / 0.8);
-}
-
-.hover\:bg-theme-dark\/60:hover {
-  background-color: rgb(0 0 0 / 0.6);
-}
-
-.bg-gray-800\/50 {
-  background-color: rgb(31 41 55 / 0.5);
-}
-
-.bg-gray-700\/60 {
-  background-color: rgb(55 65 81 / 0.6);
-}
-
-.hover\:bg-gray-700\/80:hover {
-  background-color: rgb(55 65 81 / 0.8);
-}
-
-.bg-gray-900 {
-  background-color: rgb(17 24 39);
-}
-
-.border-gray-700 {
-  border-color: rgb(55 65 81);
-}
-
-.border-gray-800 {
-  border-color: rgb(31 41 55);
-}
-
-.bg-gray-700\/50 {
-  background-color: rgb(55 65 81 / 0.5);
-}
-
-.bg-gray-600\/60 {
-  background-color: rgb(75 85 99 / 0.6);
-}
-
-.hover\:bg-gray-600\/60:hover {
-  background-color: rgb(75 85 99 / 0.6);
-}
-
-.border-gray-600\/50 {
-  border-color: rgb(75 85 99 / 0.5);
-}
-
-.border-white\/15 {
-  border-color: rgb(255 255 255 / 0.15);
-}
-
-.border-white\/6 {
-  border-color: rgb(255 255 255 / 0.06);
-}
-
-.hover\:bg-white\/\[0\.06\]:hover {
-  background-color: rgb(255 255 255 / 0.06);
-}
-
-.focus\:bg-white\/\[0\.06\]:focus {
-  background-color: rgb(255 255 255 / 0.06);
-}
-
-.text-theme-light\/90 {
-  color: rgb(239 238 234 / 0.9);
-}
-
-.text-theme-light\/40 {
-  color: rgb(239 238 234 / 0.4);
-}
-
-.bg-\[\#1c2128\] {
-  background-color: #1c2128;
-}
-
-.hover\:bg-red-500\/10:hover {
-  background-color: rgb(239 68 68 / 0.1);
-}
-
-.min-w-\[180px\] {
-  min-width: 180px;
-}
-
-.text-\[13px\] {
-  font-size: 13px;
-}
-
-.text-\[10px\] {
-  font-size: 10px;
-}
-
-.backdrop-blur-sm {
-  backdrop-filter: blur(4px);
-}
-
-.group:hover .group-hover\:text-white {
-  color: rgb(255 255 255);
-}
-
-.text-white {
-  color: rgb(255 255 255);
-}
-
-.text-red-400 {
-  color: rgb(248 113 113);
-}
-
-.hover\:border-gray-500\/70:hover {
-  border-color: rgb(107 114 128 / 0.7);
-}
-
-.divide-theme-gray-subtle > :not([hidden]) ~ :not([hidden]) {
-  border-color: var(--color-gray-subtle);
-  border-top-width: 1px;
-}
-
-.table-divider {
-  border-color: var(--color-gray-subtle) !important;
-  border-top-width: 1px !important;
-}
-
-.table-row-divider {
-  border-top: 1px solid var(--color-gray-subtle);
-}
-
-table.custom-table {
-  border-collapse: separate;
-  border-spacing: 0;
-}
-
-table.custom-table thead tr {
-  border-bottom: 1px solid var(--color-gray-subtle);
-}
-
-table.custom-table tbody tr:not(:last-child) {
-  border-bottom: 1px solid var(--color-gray-subtle);
-}
-
-table.custom-table th,
-table.custom-table td {
-  border-top: none;
-  border-bottom: none;
-}
-
-table.custom-table * {
-  border-color: var(--color-gray-subtle) !important;
 }
 
 /* Evitar que <select> legacy contradiga <Select/> de shadcn */
@@ -419,12 +295,6 @@ select option:focus {
   animation: contextMenuFadeIn 0.12s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Force sidebar background color */
-[data-sidebar="sidebar"],
-.bg-sidebar {
-  background-color: hsl(0 0% 12%) !important;
-}
-
 /* Force sidebar active state colors */
 [data-sidebar="menu-button"][data-active="true"],
 [data-sidebar="menu-sub-button"][data-active="true"] {
@@ -439,66 +309,7 @@ button[role="tab"][data-state="active"],
   color: hsl(var(--sidebar-accent-foreground)) !important;
 }
 
-/* Force modal content background color to #1f1f1f (only content, not overlay) */
-/* Target elements with fixed, z-50 and specific positioning that are modal content */
-.fixed.left-\[50\%\].top-\[50\%\].z-50,
-.fixed.inset-x-0.z-50,
-.fixed.inset-y-0.z-50,
-[data-radix-dialog-content],
-[data-radix-alert-dialog-content],
-[data-radix-popover-content] {
-  background-color: #1f1f1f !important;
-  background: #1f1f1f !important;
-}
-
-.dark {
-  --sidebar: 0 0% 12%;
-  --sidebar-foreground: 240 4.8% 95.9%;
-  --sidebar-primary: 224.3 76.3% 48%;
-  --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 220 3% 16%;
-  --sidebar-accent-foreground: 171 78% 79%;
-  --sidebar-border: 240 3.7% 15.9%;
-  --sidebar-ring: 171 78% 79%;
-}@theme inline {
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
-}@layer base {
-  :root {
-    --sidebar: 0 0% 12%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 3% 16%;
-    --sidebar-accent-foreground: 171 78% 79%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 171 78% 79%;
-  }  .dark {
-    --sidebar: 0 0% 12%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 3% 16%;
-    --sidebar-accent-foreground: 171 78% 79%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 171 78% 79%;
-  }
-}@theme inline {
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
-}@layer base {
+@layer base {
   * {
     @apply border-border outline-ring/50;
   }

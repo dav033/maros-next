@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import Script from "next/script";
+import { Archivo, IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import "../styles/globals.css";
 import { AppProviders } from "./AppProviders";
 import { AppShell } from "./AppShell";
@@ -12,6 +13,27 @@ declare global {
     initMaps?: () => void;
   }
 }
+
+// tailwind.config.ts reads these three variables as font-display, font-sans
+// and font-mono. Figures belong in the mono face.
+const fontDisplay = Archivo({
+  subsets: ["latin"],
+  variable: "--font-display",
+  display: "swap",
+});
+
+const fontSans = IBM_Plex_Sans({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+});
+
+const fontMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-mono",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Maros Construction CRM",
@@ -33,7 +55,15 @@ export default async function RootLayout({
   const currentUser = isPublicPage ? null : await fetchCurrentUser();
 
   return (
-    <html lang="en" className="dark">
+    // "dark" is rendered on the server so the first paint is already themed:
+    // next-themes only applies its class from a client script, and anything
+    // behind the `dark:` variant would flash unthemed until it runs. It strips
+    // theme names only when it applies its own, so the two coexist.
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`dark ${fontDisplay.variable} ${fontSans.variable} ${fontMono.variable}`}
+    >
       <body className="min-h-svh bg-background text-foreground font-sans">
         <AppProviders currentUser={currentUser}>
           <AppShell>{children}</AppShell>

@@ -11,6 +11,8 @@ import Link from "next/link";
 import { useProjectsNotesLogic } from "../hooks/notes/useProjectsNotesLogic";
 import { useProjectsNotesModalController } from "../hooks/modals/useProjectsNotesModalController";
 import { NotesEditorModal, DetailField } from "@/components/shared";
+import { MoneyLine } from "../molecules/MoneyLine";
+import { formatPercentOfContract } from "../molecules/moneyLineGeometry";
 import { ProjectForm } from "../molecules/ProjectForm";
 import { useProjectsApp } from "@/di";
 import { updateProject, deleteProject, revertProjectToLead } from "@/project/application";
@@ -42,6 +44,7 @@ interface ProjectDetails {
   attachments?: string[];
   financial?: {
     estimatedAmount?: number;
+    invoicedAmount?: number;
     paidAmount?: number;
     outstandingAmount?: number;
     payments?: Array<{
@@ -132,6 +135,80 @@ function ProjectEditFormWithLeads({
   );
 }
 
+function toAmount(value: number | undefined): number | null {
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+/** Contracted work still to invoice. */
+function computeBacklog(financial: ProjectDetails["financial"]): number | null {
+  const estimate = toAmount(financial?.estimatedAmount);
+  const invoiced = toAmount(financial?.invoicedAmount);
+  return estimate !== null && invoiced !== null ? estimate - invoiced : null;
+}
+
+/**
+ * One project, so there is nothing to compare it against: the axis stays elastic and
+ * an overrun shows its real length, unlike the projects list, which pins the axis so
+ * the contract marker lands on the same x in every row.
+ *
+ * There is no spend lane here. GET /projects/:id/details enriches with the QuickBooks
+ * full profile, which returns estimated / invoiced / paid / outstanding but never job
+ * costing, so cash out is simply not available on this screen.
+ */
+function ProjectMoneySummary({
+  name,
+  estimate,
+  invoiced,
+  collected,
+  outstanding,
+  backlog,
+}: {
+  name?: string;
+  estimate: number | null;
+  invoiced: number | null;
+  collected: number | null;
+  outstanding: number | null;
+  backlog: number | null;
+}) {
+  const hasContract = estimate !== null && estimate > 0;
+  const rows: Array<{ label: string; value: number | null }> = [
+    { label: "Contract", value: estimate },
+    { label: "Invoiced", value: invoiced },
+    { label: "Collected", value: collected },
+    { label: "Outstanding", value: outstanding },
+  ];
+
+  return (
+    <div className="rounded-xl bg-elev-1 p-4">
+      <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        Contract vs cash
+      </h3>
+      <MoneyLine
+        className="mt-3"
+        estimate={estimate}
+        collected={collected}
+        backlog={backlog}
+        label={name}
+      />
+      <dl className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
+        {rows.map(({ label, value }) => (
+          <div key={label}>
+            <dt className="text-[10px] uppercase tracking-wide text-muted-foreground">{label}</dt>
+            <dd className="font-mono text-sm font-semibold tabular-nums">
+              {value === null ? "—" : formatCurrency(value)}
+            </dd>
+            <dd className="text-[10px] text-muted-foreground">
+              {value === null || !hasContract
+                ? "—"
+                : `${formatPercentOfContract((value / estimate) * 100)} of contract`}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  );
+}
+
 function PaymentsTable({ payments }: { payments: Payment[] }) {
   if (!payments.length) {
     return (
@@ -149,7 +226,7 @@ function PaymentsTable({ payments }: { payments: Payment[] }) {
     <div className="overflow-hidden rounded-md border">
       <div className="max-h-64 overflow-auto">
         <table className="w-full text-sm">
-          <thead className="bg-muted/30">
+          <thead className="bg-elev-3">
             <tr>
               <th className="px-3 py-2 text-left font-medium">Date</th>
               <th className="px-3 py-2 text-left font-medium">Method</th>
@@ -763,6 +840,16 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
                       ) : null}
                     </DetailField>
                   </div>
+
+                  <Separator />
+                  <ProjectMoneySummary
+                    name={lead?.name}
+                    estimate={toAmount(projectDetails.financial?.estimatedAmount)}
+                    invoiced={toAmount(projectDetails.financial?.invoicedAmount)}
+                    collected={toAmount(projectDetails.financial?.paidAmount)}
+                    outstanding={toAmount(projectDetails.financial?.outstandingAmount)}
+                    backlog={computeBacklog(projectDetails.financial)}
+                  />
 
                   <Separator />
                   <div>

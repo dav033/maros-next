@@ -61,7 +61,6 @@ export type UserInvite = Readonly<{
 export interface UserInvitation {
   id: number;
   expiresAt: string;
-  tokenHint: string;
 }
 
 export interface InvitedUser {
