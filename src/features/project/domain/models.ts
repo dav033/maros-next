@@ -26,6 +26,22 @@ export {
   QBO_REPORT_NAMES,
 } from "./models/QboReport";
 
+export type {
+  QuickbooksImportBatchReport,
+  QuickbooksImportDecision,
+  QuickbooksImportDecisionResult,
+  QuickbooksImportJob,
+  QuickbooksImportJobCollision,
+  QuickbooksImportJobRole,
+  QuickbooksImportJobStatus,
+  QuickbooksImportMatch,
+  QuickbooksImportOutcome,
+} from "./models/QuickbooksImportJob";
+export {
+  QUICKBOOKS_IMPORT_BATCH_LIMIT,
+  QUICKBOOKS_IMPORT_PROJECT_NUMBER_MAX_LENGTH,
+} from "./models/QuickbooksImportJob";
+
 export type ProjectClientSummary = {
   id: number;
   type: "contact" | "company";

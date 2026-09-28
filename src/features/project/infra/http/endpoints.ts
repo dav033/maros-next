@@ -14,5 +14,7 @@ export const endpoints = {
   revertToLead: (id: number | string) => `${BASE}/${id}/revert-to-lead`,
   payments: (id: number | string) => `${BASE}/${id}/payments`,
   qboReport: (id: number | string) => `${BASE}/${id}/qbo-report`,
+  quickbooksImportJobs: () => `${BASE}/quickbooks-import/jobs`,
+  quickbooksImportBatch: () => `${BASE}/quickbooks-import/import-batch`,
 } as const;
 

@@ -68,3 +68,29 @@ export interface QboAttachmentDownloadUrl {
   downloadUrlExpires: string | null;
   warnings: QboAttachmentWarning[];
 }
+
+export interface QboProjectLinkRemoval {
+  projectId: number;
+  leadId: number | null;
+  previousQboCustomerId: string | null;
+  /** false cuando el proyecto ya no tenía vínculo: la llamada no cambió nada. */
+  unlinked: boolean;
+}
+
+export interface QuickbooksConnection {
+  /** Hay credenciales guardadas. No garantiza que Intuit las siga aceptando. */
+  connected: boolean;
+  /** Identificador de la empresa en QuickBooks. null cuando nunca se conectó. */
+  realmId: string | null;
+  /** false cuando el servidor no tiene configurado OAuth: conectar no es posible. */
+  oauthConfigured: boolean;
+  accessTokenExpiresAt: string | null;
+  accessTokenExpiresInSeconds: number | null;
+  accessTokenExpired: boolean;
+  /** Los tokens rotan en cada refresco: este es el último refresco correcto. */
+  lastRefreshedAt: string | null;
+  connectedAt: string | null;
+  /** Ruta de reautorización, relativa a la URL base de la API. */
+  authorizationUrl: string;
+  checkedAt: string;
+}

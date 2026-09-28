@@ -1,5 +1,6 @@
 export { useQuickbooksProjectAttachments } from "./useQuickbooksProjectAttachments";
 export { useQuickbooksAttachmentDownloadUrl } from "./useQuickbooksAttachmentDownloadUrl";
+export { useQuickbooksConnectionStatus } from "./useQuickbooksConnectionStatus";
 export {
   createPrefetchAnalyticsRepository,
   prefetchBacklog,

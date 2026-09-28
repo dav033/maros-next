@@ -5,6 +5,8 @@ import type {
   QboAttachmentWarning,
   QboProjectAttachmentRef,
   QboProjectAttachments,
+  QboProjectLinkRemoval,
+  QuickbooksConnection,
 } from "../../domain/models";
 import type {
   QboAttachmentByEntityResponse,
@@ -13,6 +15,8 @@ import type {
   QboAttachmentWarningResponse,
   QboProjectAttachmentRefResponse,
   QboProjectAttachmentsResponse,
+  QboProjectLinkRemovalResponse,
+  QuickbooksConnectionResponse,
 } from "./responses";
 
 function mapWarning(w: QboAttachmentWarningResponse): QboAttachmentWarning {
@@ -81,5 +85,33 @@ export function mapAttachmentDownloadUrl(
     downloadUrlFetchedAt: data.downloadUrlFetchedAt,
     downloadUrlExpires: data.downloadUrlExpires,
     warnings: data.warnings.map(mapWarning),
+  };
+}
+
+export function mapProjectLinkRemoval(
+  data: QboProjectLinkRemovalResponse,
+): QboProjectLinkRemoval {
+  return {
+    projectId: data.projectId,
+    leadId: data.leadId ?? null,
+    previousQboCustomerId: data.previousQboCustomerId ?? null,
+    unlinked: data.unlinked,
+  };
+}
+
+export function mapQuickbooksConnection(
+  data: QuickbooksConnectionResponse,
+): QuickbooksConnection {
+  return {
+    connected: data.connected,
+    realmId: data.realmId ?? null,
+    oauthConfigured: data.oauthConfigured,
+    accessTokenExpiresAt: data.accessTokenExpiresAt ?? null,
+    accessTokenExpiresInSeconds: data.accessTokenExpiresInSeconds ?? null,
+    accessTokenExpired: data.accessTokenExpired,
+    lastRefreshedAt: data.lastRefreshedAt ?? null,
+    connectedAt: data.connectedAt ?? null,
+    authorizationUrl: data.authorizationUrl,
+    checkedAt: data.checkedAt,
   };
 }

@@ -61,3 +61,22 @@ export interface QboAttachmentDownloadUrlResponse {
   warnings: QboAttachmentWarningResponse[];
 }
 
+export interface QboProjectLinkRemovalResponse {
+  projectId: number;
+  leadId: number | null;
+  previousQboCustomerId: string | null;
+  unlinked: boolean;
+}
+
+export interface QuickbooksConnectionResponse {
+  connected: boolean;
+  realmId: string | null;
+  oauthConfigured: boolean;
+  accessTokenExpiresAt: string | null;
+  accessTokenExpiresInSeconds: number | null;
+  accessTokenExpired: boolean;
+  lastRefreshedAt: string | null;
+  connectedAt: string | null;
+  authorizationUrl: string;
+  checkedAt: string;
+}

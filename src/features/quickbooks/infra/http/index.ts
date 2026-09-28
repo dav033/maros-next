@@ -3,6 +3,8 @@ export { QuickbooksHttpRepository } from "./QuickbooksHttpRepository";
 export {
   mapAttachmentDownloadUrl,
   mapProjectAttachments,
+  mapProjectLinkRemoval,
+  mapQuickbooksConnection,
 } from "./mappers";
 export type {
   QboAttachmentByEntityResponse,
@@ -11,4 +13,6 @@ export type {
   QboAttachmentWarningResponse,
   QboProjectAttachmentRefResponse,
   QboProjectAttachmentsResponse,
+  QboProjectLinkRemovalResponse,
+  QuickbooksConnectionResponse,
 } from "./responses";

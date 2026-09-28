@@ -2,6 +2,8 @@ import type {
   QboAttachment,
   QboAttachmentDownloadUrl,
   QboProjectAttachments,
+  QboProjectLinkRemoval,
+  QuickbooksConnection,
 } from "./models";
 
 export interface QuickbooksRepositoryPort {
@@ -17,6 +19,11 @@ export interface QuickbooksRepositoryPort {
     attachmentId: string;
     realmId?: string;
   }): Promise<QboAttachmentDownloadUrl>;
+
+  getConnectionStatus(): Promise<QuickbooksConnection>;
+
+  /** Rompe el vínculo del proyecto con QuickBooks. No borra el proyecto ni el lead. */
+  unlinkProject(projectId: number): Promise<QboProjectLinkRemoval>;
 }
 
 export type QboAttachmentFetcher = (

@@ -6,5 +6,7 @@ export type {
   QboAttachmentWarning,
   QboProjectAttachmentRef,
   QboProjectAttachments,
+  QboProjectLinkRemoval,
+  QuickbooksConnection,
 } from "./models";
 export type { QuickbooksRepositoryPort } from "./ports";

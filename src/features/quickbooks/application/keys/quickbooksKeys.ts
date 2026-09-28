@@ -12,4 +12,5 @@ export const quickbooksKeys = {
     ] as const,
   attachmentDownloadUrl: (attachmentId: string) =>
     [...quickbooksKeys.all, "attachment-download-url", attachmentId] as const,
+  connectionStatus: () => [...quickbooksKeys.all, "connection-status"] as const,
 } as const;

@@ -1,7 +1,10 @@
 export { QuickbooksProjectAttachments } from "./components/QuickbooksProjectAttachments";
+export { QuickbooksConnectionStatusCard } from "./components/QuickbooksConnectionStatusCard";
+export { QuickbooksUnlinkProjectButton } from "./components/QuickbooksUnlinkProjectButton";
 export { QuickbooksReportPrefetchBoundary } from "./QuickbooksReportPrefetchBoundary";
 export { useGroupedQboAttachments } from "./hooks/useGroupedQboAttachments";
 export { useFilteredQboAttachments } from "./hooks/useFilteredQboAttachments";
+export { useUnlinkProjectQboLink } from "./hooks/useUnlinkProjectQboLink";
 export { getAllEntityTypeOrder, getEntityTypeMeta } from "./utils/entityTypeMeta";
 export type { QboAttachmentIcon, QboAttachmentSection, QboAttachmentsGrouped } from "./hooks/useGroupedQboAttachments";
 export type { QboAttachmentsFilter, QboFilteredAttachments } from "./hooks/useFilteredQboAttachments";

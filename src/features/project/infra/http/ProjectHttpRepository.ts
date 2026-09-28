@@ -1,5 +1,5 @@
 import type { ApiProjectDTO } from "@/project/domain/services/projectReadMapper";
-import type { Project, ProjectDraft, ProjectPatch, ProjectPaymentsResponse, ProjectFinancialsEntry, ProjectQboReport, QboReportParams } from "@/project/domain/models";
+import type { Project, ProjectDraft, ProjectPatch, ProjectPaymentsResponse, ProjectFinancialsEntry, ProjectQboReport, QboReportParams, QuickbooksImportBatchReport, QuickbooksImportDecision, QuickbooksImportJob } from "@/project/domain/models";
 import type { ProjectRepositoryPort } from "@/project/domain/ports";
 import { optimizedApiClient } from "@/shared/infra/http";
 import { makeHttpResourceRepository } from "@/shared/infra/rest";
@@ -93,6 +93,24 @@ export class ProjectHttpRepository implements ProjectRepositoryPort {
       params: query,
     });
     if (!data) throw new Error("Empty response loading project QuickBooks report");
+    return data;
+  };
+
+  listQuickbooksImportJobs = async (): Promise<QuickbooksImportJob[]> => {
+    const { data } = await this.api.get<QuickbooksImportJob[]>(
+      projectEndpoints.quickbooksImportJobs(),
+    );
+    return data ?? [];
+  };
+
+  importQuickbooksJobsBatch = async (
+    decisions: readonly QuickbooksImportDecision[],
+  ): Promise<QuickbooksImportBatchReport> => {
+    const { data } = await this.api.post<QuickbooksImportBatchReport>(
+      projectEndpoints.quickbooksImportBatch(),
+      { decisions },
+    );
+    if (!data) throw new Error("Empty response importing QuickBooks jobs");
     return data;
   };
 }

@@ -20,6 +20,7 @@ import {
   CalendarDays,
   Video,
   ArrowDownToLine,
+  Plug,
 } from "lucide-react";
 import type { Permission } from "@/shared/auth/permissions";
 
@@ -206,6 +207,12 @@ const settingsSection: SidebarSection = {
       title: "Notifications",
       href: "/settings/notifications",
       icon: BellRing,
+    },
+    {
+      title: "QuickBooks",
+      href: "/settings/quickbooks",
+      icon: Plug,
+      permission: "finance:read",
     },
   ],
 };

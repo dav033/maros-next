@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useCallback } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, FolderTree, User, Phone, Mail, MapPin, Building, Receipt, StickyNote, DollarSign, Edit, Plus, Save, X, FileText, FileBarChart, Trash2, Undo2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,7 +16,7 @@ import { MoneyLine } from "../molecules/MoneyLine";
 import { formatPercentOfContract } from "../molecules/moneyLineGeometry";
 import { ProjectForm } from "../molecules/ProjectForm";
 import { useProjectsApp } from "@/di";
-import { updateProject, deleteProject, revertProjectToLead } from "@/project/application";
+import { updateProject, deleteProject, revertProjectToLead, projectsKeys } from "@/project/application";
 import type { ProjectPatch } from "@/project/domain";
 import { updateLeadNameAction } from "@/features/leads/actions/leadActions";
 import { reportActionFailure } from "@/shared/actions/clientResult";
@@ -32,6 +33,8 @@ import { toContactPatch } from "@/contact/domain";
 import type { Contact as DomainContact } from "@/contact/domain";
 import { EntityAttachmentsSection } from "@/features/attachments/presentation/EntityAttachmentsSection";
 import { QuickbooksProjectAttachments } from "@/features/quickbooks/presentation/components/QuickbooksProjectAttachments";
+import { QuickbooksUnlinkProjectButton } from "@/features/quickbooks/presentation/components/QuickbooksUnlinkProjectButton";
+import { Can } from "@/shared/auth/Can";
 import { EntityNotesSection } from "@/features/notes/presentation/organisms/EntityNotesSection";
 import { EntityTasksSection } from "@/features/tasks/presentation/organisms/EntityTasksSection";
 
@@ -329,6 +332,7 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
   const router = useRouter();
   const { projectDetails, error } = initialData;
   const app = useProjectsApp();
+  const queryClient = useQueryClient();
   const { companies } = useInstantCompanies();
   const { updateContactMutation } = useContactMutations();
 
@@ -373,6 +377,16 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
       setIsDeleting(false);
     }
   }, [projectDetails, app, router]);
+
+  // La ficha se pinta con datos del servidor, así que además de invalidar las
+  // claves del proyecto hay que volver a pedir el render para ver el cambio.
+  // Toda la rama `projects`: las cifras de QuickBooks de la tabla de proyectos
+  // cuelgan de `[...projectsKeys.all, "financials"]`, que ni el detalle ni las
+  // listas arrastran, así que sin esto la tabla seguiría mostrando las viejas.
+  const handleQboUnlinked = useCallback(() => {
+    void queryClient.invalidateQueries({ queryKey: projectsKeys.all });
+    router.refresh();
+  }, [queryClient, router]);
 
   const [isEditingName, setIsEditingName] = useState(false);
   const [editingName, setEditingName] = useState("");
@@ -656,7 +670,7 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
             )}
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center justify-end gap-2">
           {projectDetails.projectProgressStatus && (
             <Badge variant="outline">{projectDetails.projectProgressStatus}</Badge>
           )}
@@ -664,12 +678,22 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
             <Badge variant="outline">{projectDetails.invoiceStatus}</Badge>
           )}
           {projectDetails.qboCustomerId ? (
-            <Button asChild variant="outline" size="sm">
-              <Link href={`/project/${projectId}/report`}>
-                <FileBarChart className="size-4 mr-2" />
-                Llévame al reporte
-              </Link>
-            </Button>
+            <>
+              <Button asChild variant="outline" size="sm">
+                <Link href={`/project/${projectId}/report`}>
+                  <FileBarChart className="size-4 mr-2" />
+                  Llévame al reporte
+                </Link>
+              </Button>
+              <Can permission="projects:write">
+                <QuickbooksUnlinkProjectButton
+                  projectId={projectId}
+                  qboCustomerId={projectDetails.qboCustomerId}
+                  onUnlinked={handleQboUnlinked}
+                  disabled={isReverting || isDeleting}
+                />
+              </Can>
+            </>
           ) : (
             <div className="flex flex-col items-end gap-1">
               <Button variant="outline" size="sm" disabled>
