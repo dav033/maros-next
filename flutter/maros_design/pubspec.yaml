@@ -1,0 +1,71 @@
+# maros_design — the MARO design system (contract Rev. E) and the money-line
+# widget, ported from the maros-next web app.
+#
+# Zero third-party dependencies on purpose: everything here must be readable and
+# reviewable without a lockfile, and the machine this was written on has no
+# Flutter SDK to resolve anything with.
+name: maros_design
+description: MARO design tokens, Material 3 theme and the MoneyLine widget, ported from the maros-next web app.
+version: 0.1.0
+
+# A package meant to be consumed by path/git from inside the MARO monorepo, not
+# published to pub.dev.
+publish_to: "none"
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+  flutter: ">=3.10.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+
+  # ---------------------------------------------------------------------------
+  # FONTS — DECLARED HERE BUT DELIBERATELY COMMENTED OUT.
+  # ---------------------------------------------------------------------------
+  # The web loads three families (src/app/layout.tsx): Archivo for display,
+  # IBM Plex Sans for body copy and IBM Plex Mono for figures. MarosTypography
+  # asks for those exact family names.
+  #
+  # No .ttf files are committed in this package, and a `fonts:` entry that points
+  # at a missing asset is a HARD build error ("unable to locate asset entry in
+  # pubspec.yaml"), which would break `flutter test` for everyone. So the block
+  # is written out ready to use and left commented.
+  #
+  # TO TURN THE FAMILIES ON, do ONE of these:
+  #   a) drop the .ttf files under fonts/ with exactly these names and uncomment
+  #      the block below, or
+  #   b) add package:google_fonts to the CONSUMING APP and build the text theme
+  #      with GoogleFonts.archivo() / .ibmPlexSans() / .ibmPlexMono().
+  #
+  # UNTIL THEN Flutter silently falls back to the system font: the text still
+  # renders, so nothing looks broken, and the figures quietly lose the
+  # mono/tabular alignment the money column depends on. That silent fallback is
+  # exactly the bug the web just fixed — see README.md, "Fonts".
+  #
+  # fonts:
+  #   - family: Archivo
+  #     fonts:
+  #       - asset: fonts/Archivo-Regular.ttf
+  #         weight: 400
+  #       - asset: fonts/Archivo-SemiBold.ttf
+  #         weight: 600
+  #   - family: IBM Plex Sans
+  #     fonts:
+  #       - asset: fonts/IBMPlexSans-Regular.ttf
+  #         weight: 400
+  #       - asset: fonts/IBMPlexSans-Medium.ttf
+  #         weight: 500
+  #   - family: IBM Plex Mono
+  #     fonts:
+  #       - asset: fonts/IBMPlexMono-Regular.ttf
+  #         weight: 400
+  #       - asset: fonts/IBMPlexMono-Medium.ttf
+  #         weight: 500
