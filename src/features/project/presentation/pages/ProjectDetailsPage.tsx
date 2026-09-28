@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useCallback } from "react";
-import { ArrowLeft, FolderTree, User, Phone, Mail, MapPin, Building, Receipt, StickyNote, DollarSign, Edit, Plus, Save, X, FileText, Trash2, Undo2 } from "lucide-react";
+import { ArrowLeft, FolderTree, User, Phone, Mail, MapPin, Building, Receipt, StickyNote, DollarSign, Edit, Plus, Save, X, FileText, FileBarChart, Trash2, Undo2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -37,6 +37,8 @@ interface ProjectDetails {
   id: number;
   projectProgressStatus?: string;
   invoiceStatus?: string;
+  /** Cliente de QuickBooks vinculado. null cuando el proyecto no se importó desde QuickBooks. */
+  qboCustomerId?: string | null;
   attachments?: string[];
   financial?: {
     estimatedAmount?: number;
@@ -583,6 +585,24 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
           )}
           {projectDetails.invoiceStatus && (
             <Badge variant="outline">{projectDetails.invoiceStatus}</Badge>
+          )}
+          {projectDetails.qboCustomerId ? (
+            <Button asChild variant="outline" size="sm">
+              <Link href={`/project/${projectId}/report`}>
+                <FileBarChart className="size-4 mr-2" />
+                Llévame al reporte
+              </Link>
+            </Button>
+          ) : (
+            <div className="flex flex-col items-end gap-1">
+              <Button variant="outline" size="sm" disabled>
+                <FileBarChart className="size-4 mr-2" />
+                Llévame al reporte
+              </Button>
+              <span className="max-w-[220px] text-right text-xs text-muted-foreground">
+                Este proyecto no está enlazado a un cliente de QuickBooks
+              </span>
+            </div>
           )}
           <Button
             variant="outline"

@@ -1,5 +1,6 @@
 import { createRemoteJWKSet, jwtVerify } from 'jose';
 import { NextRequest, NextResponse } from 'next/server';
+import { ServerApiClient } from '@/shared/infra/http';
 import {
   createSessionToken,
   OAUTH_STATE_COOKIE,
@@ -12,10 +13,8 @@ const GOOGLE_TOKEN_ENDPOINT = 'https://oauth2.googleapis.com/token';
 const GOOGLE_JWKS_URI = 'https://www.googleapis.com/oauth2/v3/certs';
 const GOOGLE_ISSUERS = ['https://accounts.google.com', 'accounts.google.com'];
 const WORKSPACE_DOMAIN = 'marosconstruction.com';
-const EXTERNAL_EMAIL_ALLOWLIST = new Set([
-  'david.theran03@gmail.com',
-  'cicreativove@gmail.com',
-]);
+const INVITATION_CHECK_PATH = '/auth/invitations/check';
+const INVITATION_CHECK_TIMEOUT_MS = 5000;
 
 const googleJwks = createRemoteJWKSet(new URL(GOOGLE_JWKS_URI));
 
@@ -24,8 +23,40 @@ interface GoogleTokenResponse {
   access_token: string;
 }
 
+interface InvitationCheck {
+  allowed: boolean;
+  userId?: number;
+  status?: 'invited' | 'active' | 'disabled';
+}
+
 function loginError(baseUrl: string, error: string): NextResponse {
   return NextResponse.redirect(new URL(`/login?error=${error}`, baseUrl));
+}
+
+/**
+ * Asks the backend whether a non-Workspace address may be given a session. This replaces
+ * the EXTERNAL_EMAIL_ALLOWLIST constant that used to live in this file, so the two Gmail
+ * addresses it held MUST already exist as invited users (POST /users/invite) before this
+ * ships — otherwise they lose access the moment it deploys.
+ *
+ * Returns null when the question could not be asked at all (no secret configured, backend
+ * down, timeout). The caller denies on null: an outage must never widen access.
+ */
+async function checkInvitation(email: string): Promise<InvitationCheck | null> {
+  const token = process.env.AUTH_INVITATION_CHECK_TOKEN;
+  if (!token) return null;
+
+  try {
+    const client = new ServerApiClient(undefined, { Authorization: `Bearer ${token}` });
+    const { data } = await client.post<InvitationCheck>(
+      INVITATION_CHECK_PATH,
+      { email },
+      { signal: AbortSignal.timeout(INVITATION_CHECK_TIMEOUT_MS) }
+    );
+    return data;
+  } catch {
+    return null;
+  }
 }
 
 export async function GET(request: NextRequest) {
@@ -90,11 +121,22 @@ export async function GET(request: NextRequest) {
 
   const normalizedEmail = email?.trim().toLowerCase();
   const isWorkspaceAccount = hd === WORKSPACE_DOMAIN;
-  const isExplicitlyAllowedExternal =
-    normalizedEmail !== undefined && EXTERNAL_EMAIL_ALLOWLIST.has(normalizedEmail);
 
-  if (!normalizedEmail || !emailVerified || (!isWorkspaceAccount && !isExplicitlyAllowedExternal)) {
+  if (!normalizedEmail || !emailVerified) {
     return loginError(baseUrl, 'domain');
+  }
+
+  // The Workspace domain is checked first and on its own: internal staff self-provision on
+  // first login, so until then they have no user row and the backend would deny them.
+  if (!isWorkspaceAccount) {
+    const check = await checkInvitation(normalizedEmail);
+    if (!check) {
+      return loginError(baseUrl, 'unavailable');
+    }
+    if (!check.allowed) {
+      // A known address that is blocked gets a reason; an unknown one only gets 'domain'.
+      return loginError(baseUrl, check.status ? 'invitation' : 'domain');
+    }
   }
 
   const sessionToken = await createSessionToken({

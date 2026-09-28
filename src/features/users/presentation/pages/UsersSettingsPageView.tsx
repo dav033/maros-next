@@ -8,8 +8,9 @@ export function UsersSettingsPageView() {
       <h1 className="text-2xl font-semibold">Users</h1>
       <p className="mb-6 text-sm text-muted-foreground">
         Anyone with a @marosconstruction.com Google account gets access automatically on
-        first login. Change their role or deactivate them here — it takes effect on their
-        next request, no re-login needed.
+        first login. Everybody else needs an invitation — use Invitar. Change their role
+        or deactivate them here — it takes effect on their next request, no re-login
+        needed.
       </p>
       <UsersTable />
     </div>

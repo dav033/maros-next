@@ -2,6 +2,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 
 const ERROR_MESSAGES: Record<string, string> = {
   domain: 'Solo cuentas @marosconstruction.com y el acceso externo autorizado pueden acceder.',
+  invitation:
+    'Tu invitación ya expiró o fue cancelada. Pide al administrador que te envíe una nueva.',
+  unavailable:
+    'No pudimos verificar tu invitación en este momento. Intenta de nuevo en unos minutos.',
   oauth: 'No se pudo completar el inicio de sesión. Intenta de nuevo.',
 };
 

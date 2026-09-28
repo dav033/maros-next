@@ -1,5 +1,5 @@
 import type { ApiProjectDTO } from "@/project/domain/services/projectReadMapper";
-import type { Project, ProjectDraft, ProjectPatch, ProjectPaymentsResponse, ProjectFinancialsEntry } from "@/project/domain/models";
+import type { Project, ProjectDraft, ProjectPatch, ProjectPaymentsResponse, ProjectFinancialsEntry, ProjectQboReport, QboReportParams } from "@/project/domain/models";
 import type { ProjectRepositoryPort } from "@/project/domain/ports";
 import { optimizedApiClient } from "@/shared/infra/http";
 import { makeHttpResourceRepository } from "@/shared/infra/rest";
@@ -76,6 +76,23 @@ export class ProjectHttpRepository implements ProjectRepositoryPort {
   getPaymentDetails = async (id: number): Promise<ProjectPaymentsResponse> => {
     const { data } = await this.api.get<ProjectPaymentsResponse>(projectEndpoints.payments(id));
     if (!data) throw new Error("Empty response loading project payments");
+    return data;
+  };
+
+  getQboReport = async (id: number, params: QboReportParams): Promise<ProjectQboReport> => {
+    // El ValidationPipe del backend corre con forbidNonWhitelisted, así que sólo
+    // pueden viajar los parámetros del DTO y sin claves vacías.
+    const query: Record<string, string> = {
+      report: params.report,
+      accountingMethod: params.accountingMethod,
+    };
+    if (params.startDate) query.startDate = params.startDate;
+    if (params.endDate) query.endDate = params.endDate;
+
+    const { data } = await this.api.get<ProjectQboReport>(projectEndpoints.qboReport(id), {
+      params: query,
+    });
+    if (!data) throw new Error("Empty response loading project QuickBooks report");
     return data;
   };
 }

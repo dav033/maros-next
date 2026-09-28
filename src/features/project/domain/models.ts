@@ -10,6 +10,22 @@ export type {
   ProjectPaymentScheduleItem,
 } from "./models/ProjectFinancial";
 
+export type {
+  ProjectQboReport,
+  QboAccountingMethod,
+  QboRawReport,
+  QboReportColData,
+  QboReportColumn,
+  QboReportName,
+  QboReportParams,
+  QboReportRow,
+} from "./models/QboReport";
+export {
+  isPointInTimeReport,
+  QBO_ACCOUNTING_METHODS,
+  QBO_REPORT_NAMES,
+} from "./models/QboReport";
+
 export type ProjectClientSummary = {
   id: number;
   type: "contact" | "company";

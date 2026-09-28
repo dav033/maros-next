@@ -40,6 +40,8 @@ const CODE_MESSAGES: Record<string, string> = {
     "No se pudo completar la acción. Intenta de nuevo más tarde.",
   TASK_CONFLICT:
     "Alguien más editó esta tarea mientras tanto. Se recargó con los últimos cambios.",
+  USER_ALREADY_EXISTS: "Ese correo ya tiene una cuenta en el sistema.",
+  USER_NOT_INVITED: "Esa persona no tiene una invitación pendiente.",
 };
 
 export function messageForStatus(status: number | undefined): string | undefined {

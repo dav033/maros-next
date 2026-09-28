@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { useRouter } from "next/navigation";
 import {
   useEntityTableLogic,
   usePersistedState,
@@ -9,7 +10,7 @@ import {
   type ContextMenuItem,
 } from "@/common/hooks";
 import React from "react";
-import { Check } from "lucide-react";
+import { Check, FileBarChart } from "lucide-react";
 
 import type { Project } from "@/project/domain";
 import { ProjectProgressStatus, InvoiceStatus } from "@/project/domain";
@@ -72,6 +73,7 @@ export function useProjectsTableLogic({
   isUpdatingStatus,
   persistNamespace = "projects",
 }: UseProjectsTableLogicProps): UseProjectsTableLogicReturn {
+  const router = useRouter();
   const [progressFilter, setProgressFilter] = usePersistedState<Set<ProjectProgressStatus>>(
     `${persistNamespace}:progressFilter`,
     new Set(),
@@ -126,6 +128,13 @@ export function useProjectsTableLogic({
           disabled: mutatingRow,
         });
       }
+
+      items.push({
+        label: "Llévame al reporte",
+        icon: React.createElement(FileBarChart, { className: "size-4" }),
+        onClick: () => router.push(`/project/${project.id}/report`),
+      });
+
       return items;
     },
   });

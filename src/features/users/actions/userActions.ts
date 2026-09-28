@@ -5,7 +5,16 @@ import { createServerApiClient } from "@/shared/infra/http";
 import { UsersHttpRepository, RolesHttpRepository, makeUsersAppContext } from "@/features/users";
 import type { ActionResult } from "@/shared/actions/types";
 import { success, handleActionError } from "@/shared/actions/utils";
-import type { AppRole, AppUser, RoleDraft, RolePatch, UserPatch } from "@/features/users/domain";
+import type {
+  AppRole,
+  AppUser,
+  InvitedUser,
+  RoleDraft,
+  RolePatch,
+  UserInvitation,
+  UserInvite,
+  UserPatch,
+} from "@/features/users/domain";
 
 async function createServerUsersAppContext() {
   const apiClient = createServerApiClient(await headers());
@@ -25,6 +34,40 @@ export async function updateUserAction(
     const ctx = await createServerUsersAppContext();
     const user = await ctx.repos.user.update(id, patch);
     return success(user);
+  } catch (error) {
+    return handleActionError(error);
+  }
+}
+
+export async function inviteUserAction(
+  draft: UserInvite
+): Promise<ActionResult<InvitedUser>> {
+  try {
+    const ctx = await createServerUsersAppContext();
+    const invited = await ctx.repos.user.invite(draft);
+    return success(invited);
+  } catch (error) {
+    return handleActionError(error);
+  }
+}
+
+export async function resendInvitationAction(
+  id: number
+): Promise<ActionResult<UserInvitation>> {
+  try {
+    const ctx = await createServerUsersAppContext();
+    const invitation = await ctx.repos.user.resendInvite(id);
+    return success(invitation);
+  } catch (error) {
+    return handleActionError(error);
+  }
+}
+
+export async function revokeInvitationAction(id: number): Promise<ActionResult<null>> {
+  try {
+    const ctx = await createServerUsersAppContext();
+    await ctx.repos.user.revokeInvite(id);
+    return success(null);
   } catch (error) {
     return handleActionError(error);
   }

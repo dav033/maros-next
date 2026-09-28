@@ -13,5 +13,6 @@ export const endpoints = {
   sendEstimateEmail: (id: number | string) => `${BASE}/${id}/send-estimate-email`,
   revertToLead: (id: number | string) => `${BASE}/${id}/revert-to-lead`,
   payments: (id: number | string) => `${BASE}/${id}/payments`,
+  qboReport: (id: number | string) => `${BASE}/${id}/qbo-report`,
 } as const;
 

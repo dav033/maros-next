@@ -1,11 +1,23 @@
 import type { Permission } from "@/shared/auth/permissions";
 
+/** 'internal' is staff; 'client' is an outside guest scoped to a company/contact. */
+export type UserType = "internal" | "client";
+
+/** Lifecycle only. `isActive` stays the flag that actually grants access. */
+export type UserStatus = "invited" | "active" | "disabled";
+
 export interface AppUser {
   id: number;
   email: string;
   name: string | null;
   picture: string | null;
   isActive: boolean;
+  userType: UserType;
+  status: UserStatus;
+  scopedCompanyId: number | null;
+  scopedContactId: number | null;
+  /** Non-null only while `status === "invited"`. */
+  invitationExpiresAt: string | null;
   lastLoginAt: string | null;
   createdAt: string;
   role: { id: number; name: string; isSystem: boolean } | null;
@@ -34,6 +46,28 @@ export type UserPatch = Readonly<{
   roleId?: number;
   isActive?: boolean;
 }>;
+
+export type UserInvite = Readonly<{
+  email: string;
+  name?: string;
+  roleId: number;
+  userType: UserType;
+  scopedCompanyId?: number;
+  scopedContactId?: number;
+  expiresInDays?: number;
+}>;
+
+/** What the API tells us about an invitation. Never the token itself. */
+export interface UserInvitation {
+  id: number;
+  expiresAt: string;
+  tokenHint: string;
+}
+
+export interface InvitedUser {
+  user: AppUser;
+  invitation: UserInvitation;
+}
 
 export type RoleDraft = Readonly<{
   name: string;

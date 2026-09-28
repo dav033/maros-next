@@ -1,4 +1,4 @@
-import type { Project, ProjectDraft, ProjectId, ProjectPatch, ProjectPaymentsResponse, ProjectFinancialsEntry } from "./models";
+import type { Project, ProjectDraft, ProjectId, ProjectPatch, ProjectPaymentsResponse, ProjectFinancialsEntry, ProjectQboReport, QboReportParams } from "./models";
 
 export interface ProjectRepositoryPort {
   getById(id: ProjectId): Promise<Project | null>;
@@ -10,6 +10,8 @@ export interface ProjectRepositoryPort {
   delete(id: ProjectId): Promise<void>;
   revertToLead(id: ProjectId): Promise<{ leadId: number }>;
   getPaymentDetails(id: ProjectId): Promise<ProjectPaymentsResponse>;
+  /** Reporte de QuickBooks acotado al cliente del proyecto, devuelto verbatim. */
+  getQboReport(id: ProjectId, params: QboReportParams): Promise<ProjectQboReport>;
 }
 
 

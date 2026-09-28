@@ -3,6 +3,9 @@ import { api } from "@/shared/infra";
 export const endpoints = {
   users: () => api.resource("users"),
   user: (id: number) => `${api.resource("users")}/${id}`,
+  invite: () => `${api.resource("users")}/invite`,
+  resendInvite: (id: number) => `${api.resource("users")}/${id}/invite/resend`,
+  userInvite: (id: number) => `${api.resource("users")}/${id}/invite`,
   /** No permission required — see UsersController.findUserDirectory. */
   directory: () => api.resource("users/directory"),
   roles: () => api.resource("roles"),
