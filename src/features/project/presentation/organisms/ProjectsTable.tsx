@@ -302,7 +302,7 @@ export function ProjectsTable({
 
   // Column widths from useProjectsTableColumns, plus optional checkbox/action cells.
   const tableMinWidth =
-    (columns.some((column) => column.key === "payments") ? 1300 : 1130) +
+    (columns.some((column) => column.key === "payments") ? 1410 : 1240) +
     (selection ? 40 : 0) +
     (getContextMenuItems ? 40 : 0);
 

@@ -57,6 +57,13 @@ export interface ProjectFinancial {
   cashOutPaid?: number;
   payments?: ProjectFinancialPayment[];
   paymentSchedule?: ProjectPaymentSchedule;
+  /**
+   * El cronograma sale de descargar y parsear un PDF, que es lento, asi que el
+   * listado no lo espera: se calienta en segundo plano. Mientras tanto esto va a
+   * true. Sin el, "todavia no se sabe" se dibujaria igual que "no tiene
+   * cronograma", que es justo la confusion que el backend se molesta en evitar.
+   */
+  paymentSchedulePending?: boolean;
 }
 
 /** One row of GET /projects/financials — merged into a Project client-side by id. */

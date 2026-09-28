@@ -35,7 +35,7 @@ const inviteSchema = z.object({
   email: z.string().trim().min(1, "Escribe un correo").email("Ese correo no es válido"),
   name: z.string().trim().max(255),
   roleId: z.string().min(1, "Elige un rol"),
-  userType: z.enum(["internal", "client"]),
+  userType: z.enum(["internal", "external"]),
   scopedCompanyId: z.string(),
   scopedContactId: z.string(),
 });
@@ -97,12 +97,12 @@ export function InviteUserDialog({ open, onOpenChange }: Props) {
   const scopedCompanyId = watch("scopedCompanyId");
   const companyId = scopedCompanyId ? Number(scopedCompanyId) : null;
 
-  // Only clients carry a scope, so nobody else pays for these two lists.
+  // Only external users carry a scope, so nobody else pays for these two lists.
   const { companies = [] } = useInstantCompanies(undefined, {
-    enabled: open && userType === "client",
+    enabled: open && userType === "external",
   });
   const { contacts = [] } = useInstantContactsByCompany(
-    userType === "client" ? companyId : null
+    userType === "external" ? companyId : null
   );
 
   const companyOptions = useMemo(
@@ -121,17 +121,17 @@ export function InviteUserDialog({ open, onOpenChange }: Props) {
   const isPending = inviteMutation.isPending;
 
   const submit = handleSubmit(async (values) => {
-    const isClient = values.userType === "client";
+    const isExternal = values.userType === "external";
     try {
       await inviteMutation.mutateAsync({
         email: values.email,
         ...(values.name ? { name: values.name } : {}),
         roleId: Number(values.roleId),
         userType: values.userType,
-        ...(isClient && values.scopedCompanyId
+        ...(isExternal && values.scopedCompanyId
           ? { scopedCompanyId: Number(values.scopedCompanyId) }
           : {}),
-        ...(isClient && values.scopedContactId
+        ...(isExternal && values.scopedContactId
           ? { scopedContactId: Number(values.scopedContactId) }
           : {}),
       });
@@ -212,7 +212,7 @@ export function InviteUserDialog({ open, onOpenChange }: Props) {
           <Field
             label="Tipo de usuario"
             htmlFor="invite-user-type"
-            hint="Interno es personal de Maros. Cliente es alguien de fuera."
+            hint="Interno es personal de Maros. Externo es alguien de fuera."
           >
             <Controller
               control={control}
@@ -223,7 +223,7 @@ export function InviteUserDialog({ open, onOpenChange }: Props) {
                   disabled={isPending}
                   onValueChange={(value) => {
                     field.onChange(value);
-                    if (value !== "client") {
+                    if (value !== "external") {
                       setValue("scopedCompanyId", "");
                       setValue("scopedContactId", "");
                     }
@@ -234,14 +234,14 @@ export function InviteUserDialog({ open, onOpenChange }: Props) {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="internal">Interno</SelectItem>
-                    <SelectItem value="client">Cliente</SelectItem>
+                    <SelectItem value="external">Externo</SelectItem>
                   </SelectContent>
                 </Select>
               )}
             />
           </Field>
 
-          {userType === "client" && (
+          {userType === "external" && (
             <>
               <Field
                 label="Empresa"

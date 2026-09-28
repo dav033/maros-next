@@ -107,8 +107,8 @@ export function UsersTable() {
                 <TableCell>
                   <div className="flex items-center gap-2 font-medium">
                     {user.name ?? user.email}
-                    {user.userType === "client" && (
-                      <Badge variant="outline">Client</Badge>
+                    {user.userType === "external" && (
+                      <Badge variant="outline">External</Badge>
                     )}
                   </div>
                   <div className="text-xs text-muted-foreground">{user.email}</div>

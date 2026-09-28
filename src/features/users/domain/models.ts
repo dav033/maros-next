@@ -1,7 +1,7 @@
 import type { Permission } from "@/shared/auth/permissions";
 
-/** 'internal' is staff; 'client' is an outside guest scoped to a company/contact. */
-export type UserType = "internal" | "client";
+/** 'internal' is staff; 'external' is an outside guest scoped to a company/contact. */
+export type UserType = "internal" | "external";
 
 /** Lifecycle only. `isActive` stays the flag that actually grants access. */
 export type UserStatus = "invited" | "active" | "disabled";

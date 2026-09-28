@@ -91,11 +91,11 @@ export function CalendarPage() {
   const monthMeetingCount = matchingMeetings.filter((meeting) => isSameMonth(new Date(meeting.startsAt), month)).length;
 
   const renderMeeting = (meeting: GoogleCalendarMeeting) => (
-    <article key={meeting.id} className="flex flex-col gap-4 px-4 py-4 transition-colors hover:bg-elev-3 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+    <article key={meeting.id} className="flex flex-col gap-3 px-4 py-3 transition-colors hover:bg-elev-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex min-w-0 items-start gap-3">
-        <div className="flex size-12 shrink-0 flex-col items-center justify-center rounded-xl bg-primary-container text-primary-on-container">
+        <div className="flex size-10 shrink-0 flex-col items-center justify-center rounded-md bg-primary-container text-primary-on-container">
           <span className="font-display text-xs font-semibold uppercase">{format(new Date(meeting.startsAt), "MMM")}</span>
-          <span className="text-base font-semibold leading-none">{format(new Date(meeting.startsAt), "d")}</span>
+          <span className="font-mono text-sm font-semibold leading-none tabular-nums">{format(new Date(meeting.startsAt), "d")}</span>
         </div>
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
@@ -155,25 +155,25 @@ export function CalendarPage() {
         </section>
       )}
 
-      <section className="overflow-hidden rounded-2xl border bg-card shadow-sm">
-        <div className="flex flex-col gap-4 border-b border-line bg-elev-3 px-4 py-4 sm:px-6">
+      <section className="overflow-hidden rounded-lg border border-line bg-card">
+        <div className="flex flex-col gap-3 border-b border-line px-4 py-3">
           <div>
-            <h2 className="font-semibold">Your calendar</h2>
-            <p className="mt-1 text-sm text-muted-foreground">See meetings by day or browse your agenda.</p>
+            <h2 className="font-display text-sm font-semibold">Your calendar</h2>
+            <p className="mt-1 text-xs text-muted-foreground">See meetings by day or browse your agenda.</p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
             <div className="relative min-w-0 sm:w-64 sm:flex-1 lg:flex-none">
               <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search meetings or people" className="pl-9" aria-label="Search meetings or people" />
             </div>
-            <div className="flex w-fit rounded-xl bg-elev-4 p-1" aria-label="Calendar view">
-              <Button type="button" size="sm" variant="ghost" className={mode === "month" ? "rounded-lg bg-elev-5 text-foreground shadow-sm hover:bg-elev-5" : "rounded-lg text-muted-foreground"} aria-pressed={mode === "month"} onClick={() => setMode("month")}><CalendarDays className="mr-1.5 size-3.5" />Month</Button>
-              <Button type="button" size="sm" variant="ghost" className={mode === "agenda" ? "rounded-lg bg-elev-5 text-foreground shadow-sm hover:bg-elev-5" : "rounded-lg text-muted-foreground"} aria-pressed={mode === "agenda"} onClick={() => setMode("agenda")}><List className="mr-1.5 size-3.5" />Agenda</Button>
+            <div className="flex w-fit rounded-lg bg-elev-4 p-1" aria-label="Calendar view">
+              <Button type="button" size="sm" variant="ghost" className={mode === "month" ? "h-7 rounded-md bg-elev-5 text-foreground hover:bg-elev-5" : "h-7 rounded-md text-muted-foreground"} aria-pressed={mode === "month"} onClick={() => setMode("month")}><CalendarDays className="mr-1.5 size-3.5" />Month</Button>
+              <Button type="button" size="sm" variant="ghost" className={mode === "agenda" ? "h-7 rounded-md bg-elev-5 text-foreground hover:bg-elev-5" : "h-7 rounded-md text-muted-foreground"} aria-pressed={mode === "agenda"} onClick={() => setMode("agenda")}><List className="mr-1.5 size-3.5" />Agenda</Button>
             </div>
             {mode === "agenda" ? (
-              <div className="flex w-fit rounded-xl bg-elev-4 p-1" aria-label="Meeting period">
-                <Button type="button" size="sm" variant="ghost" className={period === "upcoming" ? "rounded-lg bg-elev-5 text-foreground shadow-sm hover:bg-elev-5" : "rounded-lg text-muted-foreground"} aria-pressed={period === "upcoming"} onClick={() => setPeriod("upcoming")}>Upcoming</Button>
-                <Button type="button" size="sm" variant="ghost" className={period === "past" ? "rounded-lg bg-elev-5 text-foreground shadow-sm hover:bg-elev-5" : "rounded-lg text-muted-foreground"} aria-pressed={period === "past"} onClick={() => setPeriod("past")}>Past</Button>
+              <div className="flex w-fit rounded-lg bg-elev-4 p-1" aria-label="Meeting period">
+                <Button type="button" size="sm" variant="ghost" className={period === "upcoming" ? "h-7 rounded-md bg-elev-5 text-foreground hover:bg-elev-5" : "h-7 rounded-md text-muted-foreground"} aria-pressed={period === "upcoming"} onClick={() => setPeriod("upcoming")}>Upcoming</Button>
+                <Button type="button" size="sm" variant="ghost" className={period === "past" ? "h-7 rounded-md bg-elev-5 text-foreground hover:bg-elev-5" : "h-7 rounded-md text-muted-foreground"} aria-pressed={period === "past"} onClick={() => setPeriod("past")}>Past</Button>
               </div>
             ) : null}
           </div>
@@ -181,15 +181,15 @@ export function CalendarPage() {
 
         {mode === "month" ? (
           <>
-            <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6">
+            <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
               <div>
-                <h3 className="text-lg font-semibold">{format(month, "MMMM yyyy")}</h3>
-                <p className="text-sm text-muted-foreground">{monthMeetingCount} {monthMeetingCount === 1 ? "meeting" : "meetings"}{search ? " match your search" : " this month"}</p>
+                <h3 className="font-display text-sm font-semibold">{format(month, "MMMM yyyy")}</h3>
+                <p className="text-xs text-muted-foreground">{monthMeetingCount} {monthMeetingCount === 1 ? "meeting" : "meetings"}{search ? " match your search" : " this month"}</p>
               </div>
-              <div className="flex items-center gap-1.5">
-                <Button type="button" variant="outline" size="icon" className="rounded-xl" aria-label="Previous month" onClick={() => { const nextMonth = addMonths(month, -1); setMonth(nextMonth); setSelectedDate(nextMonth); }}><ChevronLeft className="size-4" /></Button>
-                <Button type="button" variant="outline" size="sm" className="rounded-xl" onClick={() => { const today = new Date(); setMonth(startOfMonth(today)); setSelectedDate(today); }}>Today</Button>
-                <Button type="button" variant="outline" size="icon" className="rounded-xl" aria-label="Next month" onClick={() => { const nextMonth = addMonths(month, 1); setMonth(nextMonth); setSelectedDate(nextMonth); }}><ChevronRight className="size-4" /></Button>
+              <div className="flex items-center gap-1">
+                <Button type="button" variant="ghost" size="icon" className="size-8 rounded-md" aria-label="Previous month" onClick={() => { const nextMonth = addMonths(month, -1); setMonth(nextMonth); setSelectedDate(nextMonth); }}><ChevronLeft className="size-4" /></Button>
+                <Button type="button" variant="ghost" size="sm" className="h-8 rounded-md" onClick={() => { const today = new Date(); setMonth(startOfMonth(today)); setSelectedDate(today); }}>Today</Button>
+                <Button type="button" variant="ghost" size="icon" className="size-8 rounded-md" aria-label="Next month" onClick={() => { const nextMonth = addMonths(month, 1); setMonth(nextMonth); setSelectedDate(nextMonth); }}><ChevronRight className="size-4" /></Button>
               </div>
             </div>
             {meetings.isError ? (
@@ -200,8 +200,8 @@ export function CalendarPage() {
             ) : meetings.isPending ? (
               <p className="px-4 pb-3 text-sm text-muted-foreground" role="status">Loading meetings…</p>
             ) : null}
-            <div className="grid grid-cols-7 border-l border-t" aria-label={`${format(month, "MMMM yyyy")} calendar`}>
-              {WEEKDAYS.map((weekday) => <div key={weekday} className="border-b border-r border-line bg-elev-3 px-1 py-2 text-center font-display text-xs font-semibold text-muted-foreground sm:px-2">{weekday}</div>)}
+            <div className="grid grid-cols-7 gap-1 px-4 pb-4" aria-label={`${format(month, "MMMM yyyy")} calendar`}>
+              {WEEKDAYS.map((weekday) => <div key={weekday} className="pb-1 text-center font-display text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{weekday}</div>)}
               {monthDays.map((day) => {
                 const dayMeetings = meetingsByDay.get(format(day, "yyyy-MM-dd")) ?? [];
                 const selected = isSameDay(day, selectedDate);
@@ -215,29 +215,30 @@ export function CalendarPage() {
                     aria-pressed={selected}
                     aria-current={today ? "date" : undefined}
                     onClick={() => { setSelectedDate(day); if (!currentMonth) setMonth(startOfMonth(day)); }}
-                    className={`min-w-0 min-h-[4.75rem] border-b border-r border-line p-2 text-left transition-colors hover:bg-elev-3 focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:min-h-28 ${currentMonth ? "bg-elev-2" : "bg-elev-1 text-fg-faint"} ${selected ? "bg-primary-container ring-1 ring-inset ring-primary" : ""}`}
+                    className={`min-h-14 min-w-0 rounded-md p-1 text-left transition-colors hover:bg-elev-3 focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:min-h-20 ${currentMonth ? "text-foreground" : "text-fg-faint"} ${selected ? "bg-primary-container" : ""}`}
                   >
                     <span className="mb-1 flex items-center justify-between gap-1">
-                      <span className={`flex size-6 items-center justify-center rounded-full text-xs font-medium ${selected ? "bg-primary text-primary-foreground" : today ? "bg-primary-container text-primary-on-container" : currentMonth ? "text-foreground" : "text-muted-foreground"}`}>{format(day, "d")}</span>
-                      {dayMeetings.length ? <span className="flex items-center gap-1 text-xs text-primary sm:hidden"><span className="size-1.5 rounded-full bg-primary" />{dayMeetings.length}</span> : null}
+                      <span className={`flex size-5 items-center justify-center rounded-full font-mono text-[11px] tabular-nums ${selected ? "bg-primary font-semibold text-primary-foreground" : today ? "bg-primary-container font-semibold text-primary-on-container" : currentMonth ? "text-foreground" : "text-fg-faint"}`}>{format(day, "d")}</span>
+                      {dayMeetings.length ? <span className="flex items-center gap-1 font-mono text-[11px] tabular-nums text-primary sm:hidden"><span className="size-1.5 rounded-full bg-primary" />{dayMeetings.length}</span> : null}
                     </span>
                     <span className="hidden space-y-1 md:block">
                       {dayMeetings.slice(0, 2).map((meeting) => (
-                        <span key={meeting.id} className="flex min-w-0 items-center gap-1 rounded-md bg-primary-container px-1.5 py-1 text-xs leading-tight text-primary-on-container">
-                          <span className="shrink-0 tabular-nums">{format(new Date(meeting.startsAt), "h:mm a")}</span>
+                        <span key={meeting.id} className="flex min-w-0 items-center gap-1 text-[11px] leading-tight">
+                          <span className="size-1 shrink-0 rounded-full bg-primary" />
+                          <span className="shrink-0 font-mono tabular-nums text-fg-dim">{format(new Date(meeting.startsAt), "h:mm a")}</span>
                           <span className="truncate">{meeting.title}</span>
                         </span>
                       ))}
-                      {dayMeetings.length > 2 ? <span className="block truncate px-1 text-xs text-muted-foreground">+{dayMeetings.length - 2} more</span> : null}
+                      {dayMeetings.length > 2 ? <span className="block truncate text-[11px] text-muted-foreground">+{dayMeetings.length - 2} more</span> : null}
                     </span>
                   </button>
                 );
               })}
             </div>
-            <div className="border-t border-line px-0 py-4 sm:py-6">
-              <div className="flex flex-wrap items-center justify-between gap-2 px-4 sm:px-6">
-                <h3 className="font-semibold">{format(selectedDate, "EEEE, MMMM d")}</h3>
-                <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">{selectedDayMeetings.length} {selectedDayMeetings.length === 1 ? "meeting" : "meetings"}</span>
+            <div className="border-t border-line py-3">
+              <div className="flex flex-wrap items-center justify-between gap-2 px-4">
+                <h3 className="font-display text-sm font-semibold">{format(selectedDate, "EEEE, MMMM d")}</h3>
+                <span className="font-mono text-xs tabular-nums text-muted-foreground">{selectedDayMeetings.length} {selectedDayMeetings.length === 1 ? "meeting" : "meetings"}</span>
               </div>
               {selectedDayMeetings.length ? <div className="mt-2 divide-y">{selectedDayMeetings.map(renderMeeting)}</div> : (
                 <div className="px-6 py-8 text-center">

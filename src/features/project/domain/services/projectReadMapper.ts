@@ -231,6 +231,13 @@ export function mapProjectFromDTO(dto: ApiProjectDTO, leadMapper: (dto: any) => 
         ...(typeof f.cashOutPaid === "number" && { cashOutPaid: f.cashOutPaid }),
         payments: normalizeFinancialPayments((f as { payments?: unknown }).payments),
         paymentSchedule: normalizePaymentSchedule((f as { paymentSchedule?: unknown }).paymentSchedule),
+        // El listado ya no espera a que se parseen los PDF de los cronogramas; el
+        // backend marca los que siguen en camino para que "todavia no se sabe" no
+        // se dibuje igual que "no tiene cronograma".
+        paymentSchedulePending:
+          (f as { paymentSchedulePending?: unknown }).paymentSchedulePending === true
+            ? true
+            : undefined,
       };
     }
   }

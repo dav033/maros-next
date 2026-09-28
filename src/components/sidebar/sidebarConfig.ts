@@ -57,10 +57,15 @@ export type SidebarConfig = {
   title?: string;
 };
 
-// Leads y Projects son un solo link: el cambio de tipo (construction/roofing/
-// plumbing) se hace dentro de cada página con su switcher.
-const menuSection: SidebarSection = {
-  section: "Business",
+// Grupos por naturaleza del trabajo, no por "cosas del negocio": el embudo
+// comercial (Sales), la ejecución de obra (Projects), el trabajo propio del
+// usuario (Workspace) y las herramientas de integración (Integrations) son
+// cuatro dominios distintos que antes convivían en un único cajón "Business".
+
+// Leads es un solo link: el cambio de tipo (construction/roofing/plumbing) se
+// hace dentro de la página con su switcher.
+const salesSection: SidebarSection = {
+  section: "Sales",
   items: [
     {
       title: "Leads",
@@ -76,18 +81,20 @@ const menuSection: SidebarSection = {
       icon: XCircle,
       permission: "leads:read",
     },
+  ],
+};
+
+// Projects es un solo link: el cambio de tipo vive en su propio switcher, y
+// "Import from QuickBooks" es una pestaña de esta misma página (no un hermano).
+const projectsSection: SidebarSection = {
+  section: "Projects",
+  items: [
     {
       title: "Projects",
       href: "/projects/construction",
       icon: FolderKanban,
       activePrefix: "/projects",
       activeExclude: ["/projects/completed", "/projects/lost", "/projects/import-from-quickbooks"],
-      permission: "projects:read",
-    },
-    {
-      title: "Import from QuickBooks",
-      href: "/projects/import-from-quickbooks",
-      icon: ArrowDownToLine,
       permission: "projects:read",
     },
     {
@@ -102,13 +109,14 @@ const menuSection: SidebarSection = {
       icon: XCircle,
       permission: "projects:read",
     },
-    {
-      title: "Notes",
-      href: "/notes",
-      icon: NotebookPen,
-      activePrefix: "/notes",
-      permission: "notes:read",
-    },
+  ],
+};
+
+// Lo que el usuario hace, no lo que el negocio vende ni lo que ejecuta:
+// tareas, sus tableros, notas y su agenda.
+const workspaceSection: SidebarSection = {
+  section: "Workspace",
+  items: [
     {
       title: "Tasks",
       href: "/tasks",
@@ -123,11 +131,20 @@ const menuSection: SidebarSection = {
       activePrefix: "/tasks/workspaces",
       permission: "tasks:read",
     },
+    {
+      title: "Notes",
+      href: "/notes",
+      icon: NotebookPen,
+      activePrefix: "/notes",
+      permission: "notes:read",
+    },
+    { title: "Calendar", href: "/calendar", icon: CalendarDays },
+    { title: "Start Meet", href: "/meet", icon: Video },
   ],
 };
 
-const accountSection: SidebarSection = {
-  section: "Account",
+const directorySection: SidebarSection = {
+  section: "Directory",
   items: [
     {
       title: "Contacts",
@@ -182,6 +199,25 @@ const analyticsSection: SidebarSection = {
   ],
 };
 
+// Puentes con sistemas externos: conectar QuickBooks y traer datos desde él.
+const integrationsSection: SidebarSection = {
+  section: "Integrations",
+  items: [
+    {
+      title: "QuickBooks",
+      href: "/settings/quickbooks",
+      icon: Plug,
+      permission: "finance:read",
+    },
+    {
+      title: "Import from QuickBooks",
+      href: "/projects/import-from-quickbooks",
+      icon: ArrowDownToLine,
+      permission: "projects:read",
+    },
+  ],
+};
+
 const settingsSection: SidebarSection = {
   section: "Settings",
   items: [
@@ -208,20 +244,6 @@ const settingsSection: SidebarSection = {
       href: "/settings/notifications",
       icon: BellRing,
     },
-    {
-      title: "QuickBooks",
-      href: "/settings/quickbooks",
-      icon: Plug,
-      permission: "finance:read",
-    },
-  ],
-};
-
-const meetingsSection: SidebarSection = {
-  section: "Meetings",
-  items: [
-    { title: "Calendar", href: "/calendar", icon: CalendarDays },
-    { title: "Start Meet", href: "/meet", icon: Video },
   ],
 };
 
@@ -247,7 +269,17 @@ const financeSection: SidebarSection = {
 
 export const SIDEBAR_CONFIG: SidebarConfig = {
   title: "Maros Construction",
-  top: [analyticsSection, meetingsSection, menuSection, accountSection, financeSection, reportsSection, settingsSection],
+  top: [
+    analyticsSection,
+    salesSection,
+    projectsSection,
+    workspaceSection,
+    directorySection,
+    financeSection,
+    reportsSection,
+    integrationsSection,
+    settingsSection,
+  ],
   bottom: [],
 };
 

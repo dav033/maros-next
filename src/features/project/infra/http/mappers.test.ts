@@ -130,6 +130,33 @@ describe("mapFinancialsFromApi", () => {
     expect(entry.invoiceStatus).toBe(InvoiceStatus.PAID);
   });
 
+  it("marca el error cuando findAllFinancials venció el plazo para ese proyecto", () => {
+    // Forma que emite maros-nest al agotar los 25s: la misma que ya usaba para
+    // un fallo por proyecto. Tiene que llegar como qboError y NO confundirse con
+    // un proyecto vacío, o un proyecto que falló se vería igual que uno sin datos.
+    const [entry] = mapFinancialsFromApi([
+      {
+        id: 144,
+        financial: null,
+        qbo: {
+          data: null,
+          error: {
+            code: "qbo_query_failed",
+            message: "QuickBooks tardo demasiado y este proyecto quedo sin datos financieros.",
+          },
+        },
+      },
+    ]);
+
+    expect(entry.id).toBe(144);
+    expect(entry.financial).toBeNull();
+    expect(entry.qboError?.code).toBe("qbo_query_failed");
+  });
+
+  it("omite la fila cuando el enriquecimiento no llegó a tocarla", () => {
+    expect(mapFinancialsFromApi([{ id: 145, financial: null, qbo: null }])).toEqual([]);
+  });
+
   it("deja la fila vacía cuando el proyecto no existe en QuickBooks", () => {
     const [entry] = mapFinancialsFromApi([{ id: 143, financial: null, qbo: { data: null } }]);
 

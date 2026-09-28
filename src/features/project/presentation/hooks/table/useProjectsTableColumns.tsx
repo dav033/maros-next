@@ -56,6 +56,19 @@ function getCollected(project: Project): number | null {
   return toAmount(getPaymentSummary(project)?.totalAmount);
 }
 
+/**
+ * Contratado que todavia no se ha facturado. Vivia en la tabla antes del rediseno
+ * y se perdio al borrar la columna de barras que lo consumia: el dato dejo de
+ * usarse porque desaparecio su unico consumidor, no porque dejara de importar.
+ * Misma definicion que la tarjeta movil (ProjectsTable.tsx).
+ */
+function computeBacklog(project: Project): number | null {
+  const estimate = toAmount(project.financial?.estimatedAmount);
+  const invoiced = toAmount(project.financial?.invoicedAmount);
+  if (estimate === null || invoiced === null) return null;
+  return estimate - invoiced;
+}
+
 function getCashProfit(project: Project): number | null {
   const collected = getCollected(project);
   const costPaid = toAmount(project.financial?.cashOutPaid);
@@ -159,6 +172,11 @@ export function useProjectsTableColumns(
           const paymentCount = summary?.count ?? 0;
           const hasPayments = paymentCount > 0;
           if (!hasPayments && !schedule) {
+            // "Todavia no se sabe" no es "no tiene": mientras se parsea el PDF en
+            // segundo plano hay que decirlo, no dibujar un vacio que parece un dato.
+            if (project.financial?.paymentSchedulePending) {
+              return <span className="text-fg-faint">Checking schedule…</span>;
+            }
             return <span className="text-muted-foreground">No payments</span>;
           }
           const amount = hasPayments ? summary?.totalAmount : schedule?.totalAmount;
@@ -204,9 +222,10 @@ export function useProjectsTableColumns(
       } satisfies SimpleTableColumn<Project>] : []),
       {
         // One axis instead of five bars: the track is the contract, and collected
-        // and spent are drawn against it. Backlog is omitted here — the row only
-        // has room for two lanes; the project card shows the third. The axis is
-        // pinned so the contract marker lands on the same x in every row.
+        // and spent are drawn against it. Backlog has no lane here — the row only
+        // fits two, and the card and the ficha show the third — but it does get a
+        // figure column: the number still matters even when the bar does not fit.
+        // The axis is pinned so the contract marker lands on the same x in every row.
         key: "contractVsCash",
         header: "Collected / Spent vs contract",
         className: "w-[240px]",
@@ -249,6 +268,28 @@ export function useProjectsTableColumns(
         },
         sortable: true,
         sortValue: (project: Project) => getCashProfit(project) ?? 0,
+      },
+      {
+        // Contracted work not yet invoiced. A figure, not a bar, for the same
+        // reason as Profit: the money line owns the bars, but the number has to
+        // stay visible and sortable.
+        key: "backlog",
+        header: "Backlog",
+        className: "w-[110px]",
+        render: (project: Project) => {
+          const backlog = computeBacklog(project);
+          if (backlog === null) return <span className="text-muted-foreground">—</span>;
+          return (
+            <span
+              className="font-mono text-xs font-semibold tabular-nums"
+              style={{ color: backlog === 0 ? "var(--money-in)" : "var(--money-hold)" }}
+            >
+              {formatCurrency(backlog)}
+            </span>
+          );
+        },
+        sortable: true,
+        sortValue: (project: Project) => computeBacklog(project) ?? 0,
       },
     ];
   }, [onOpenNotesModal, onOpenPayments, canReadFinance]);
