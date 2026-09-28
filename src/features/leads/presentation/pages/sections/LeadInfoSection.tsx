@@ -56,6 +56,14 @@ export function LeadInfoSection({
     setFields,
   } = inlineEdit;
 
+  const formatMoney = (amount: number) =>
+    `$${amount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const estimateText = lead.estimate != null ? formatMoney(Number(lead.estimate)) : undefined;
+  const qboEstimateText =
+    lead.financial?.estimatedAmount != null
+      ? formatMoney(Number(lead.financial.estimatedAmount))
+      : undefined;
+
   return (
     <Card>
       <InlineEditCardHeader
@@ -71,7 +79,7 @@ export function LeadInfoSection({
         <div className="grid grid-cols-2 gap-4">
           <div>
             <p className="text-sm text-muted-foreground">Lead Number</p>
-            <p className="text-foreground font-mono">{lead.leadNumber || "N/A"}</p>
+            <p className="font-mono tabular-nums text-foreground">{lead.leadNumber || "N/A"}</p>
           </div>
           
           {isEditing ? (
@@ -81,7 +89,7 @@ export function LeadInfoSection({
                 value={editingValue.projectTypeId != null ? String(editingValue.projectTypeId) : EMPTY_SELECT_VALUE}
                 onValueChange={(val) => setField("projectTypeId", val === EMPTY_SELECT_VALUE ? undefined : Number(val))}
               >
-                <SelectTrigger>
+                <SelectTrigger className="border-line-strong">
                   <SelectValue placeholder="Select Project Type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -109,6 +117,7 @@ export function LeadInfoSection({
                 type="date"
                 value={editingValue.startDate || ""}
                 onChange={(e) => setField("startDate", e.target.value)}
+                className="border-line-strong"
               />
             </div>
           ) : (
@@ -126,7 +135,7 @@ export function LeadInfoSection({
                 value={editingValue.status || EMPTY_SELECT_VALUE}
                 onValueChange={(val) => setField("status", val === EMPTY_SELECT_VALUE ? "" : val)}
               >
-                <SelectTrigger>
+                <SelectTrigger className="border-line-strong">
                   <SelectValue placeholder="Select Status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -167,21 +176,26 @@ export function LeadInfoSection({
                   )
                 }
                 placeholder="Manual estimate"
+                className="border-line-strong"
               />
             </div>
           ) : (
-            <DetailField
-              icon={DollarSign}
-              label="Estimate"
-              value={lead.estimate != null ? `$${Number(lead.estimate).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : undefined}
-            />
+            <DetailField icon={DollarSign} label="Estimate" value={estimateText}>
+              {estimateText ? (
+                <p className="font-mono tabular-nums text-foreground">{estimateText}</p>
+              ) : undefined}
+            </DetailField>
           )}
 
           <DetailField
             icon={DollarSign}
             label="Estimate (QuickBooks)"
-            value={lead.financial?.estimatedAmount != null ? `$${Number(lead.financial.estimatedAmount).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : undefined}
-          />
+            value={qboEstimateText}
+          >
+            {qboEstimateText ? (
+              <p className="font-mono tabular-nums text-foreground">{qboEstimateText}</p>
+            ) : undefined}
+          </DetailField>
         </div>
 
         <Separator />

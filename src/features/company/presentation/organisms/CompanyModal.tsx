@@ -47,7 +47,7 @@ export function CompanyModal({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="flex flex-col max-h-[90vh]">
         <DialogHeader className="shrink-0">
-          <DialogTitle>{title}</DialogTitle>
+          <DialogTitle className="font-display">{title}</DialogTitle>
         </DialogHeader>
         <div className="overflow-y-auto flex-1 [scrollbar-gutter:stable]">
           <div className="py-1 px-4">

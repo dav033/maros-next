@@ -13,18 +13,22 @@ export function ProjectTypeBadge({ projectType }: ProjectTypeBadgeProps) {
     return <span className="text-muted-foreground">—</span>;
   }
 
+  // Colores desde tokens CSS compartidos (--badge-*), no hex crudo: ver globals.css.
   const colorFromName = (name: string): string | null => {
     const n = name.toLowerCase();
-    if (n.includes("roof") || n.includes("techo")) return "#ef4444";
-    if (n.includes("plumb") || n.includes("plomer")) return "#3b82f6";
-    if (n.includes("construction") || n.includes("construc")) return "#f59e0b";
-    if (n.includes("electric") || n.includes("eléctric")) return "#10b981";
-    if (n.includes("hvac") || n.includes("clima")) return "#8b5cf6";
-    if (n.includes("paint") || n.includes("pintura")) return "#6366f1";
+    if (n.includes("roof") || n.includes("techo")) return "hsl(var(--badge-red))";
+    if (n.includes("plumb") || n.includes("plomer")) return "hsl(var(--badge-blue))";
+    if (n.includes("construction") || n.includes("construc")) return "hsl(var(--badge-amber))";
+    if (n.includes("electric") || n.includes("eléctric")) return "hsl(var(--badge-green))";
+    if (n.includes("hvac") || n.includes("clima")) return "hsl(var(--badge-violet))";
+    if (n.includes("paint") || n.includes("pintura")) return "hsl(var(--badge-indigo))";
     return null;
   };
 
-  const color = projectType.color ?? colorFromName(projectType.name) ?? "#9ca3af";
+  // `||`, no `??`: el mapper entrega "" cuando el backend no trae color, y una
+  // cadena vacía no es null — con `??` estos dos respaldos nunca se ejecutaban.
+  const color =
+    projectType.color || colorFromName(projectType.name) || "hsl(var(--badge-neutral))";
 
   return (
     <Badge

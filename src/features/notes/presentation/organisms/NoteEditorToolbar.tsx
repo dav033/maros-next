@@ -89,7 +89,7 @@ export function NoteEditorToolbar({ editor }: { editor: Editor }) {
       <div
         role="group"
         aria-label="Text formatting"
-        className="sticky top-0 z-10 -mx-1 mb-5 flex flex-wrap items-center gap-0.5 border-y border-border/60 bg-background px-1 py-2"
+        className="sticky top-0 z-10 -mx-1 mb-4 flex flex-wrap items-center gap-0.5 border-y border-line bg-elev-1 px-1 py-2"
       >
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

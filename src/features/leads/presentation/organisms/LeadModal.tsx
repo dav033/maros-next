@@ -189,14 +189,14 @@ export function LeadModal({
     <>
       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
         <DialogContent className="!flex max-h-[92vh] w-[96vw] max-w-2xl flex-col overflow-hidden p-0">
-        <div className="border-b border-border/70 px-5 py-4 pr-12 sm:px-6 sm:pr-12">
-          <DialogTitle className="text-left">{title}</DialogTitle>
+        <div className="border-b border-line px-4 py-4 pr-12 sm:px-6 sm:pr-12">
+          <DialogTitle className="text-left font-display">{title}</DialogTitle>
         </div>
-        <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-5 py-4 sm:px-6">
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-4 sm:px-6">
           {isCreateMode && createController && (
             <>
-              <div className="space-y-3 rounded-lg border border-border/70 bg-muted/20 p-3">
-                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              <div className="space-y-3 rounded-lg border border-line bg-elev-3 p-3">
+                <p className="font-display text-xs font-medium uppercase tracking-wide text-muted-foreground">
                   Contact
                 </p>
                 <ContactModeSelector
@@ -229,8 +229,8 @@ export function LeadModal({
                 )}
               </div>
 
-              <div className="space-y-3 rounded-lg border border-border/70 bg-muted/35 p-3">
-                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              <div className="space-y-3 rounded-lg border border-line bg-elev-3 p-3">
+                <p className="font-display text-xs font-medium uppercase tracking-wide text-muted-foreground">
                   Lead details
                 </p>
                 <LeadForm
@@ -257,13 +257,13 @@ export function LeadModal({
           )}
 
           {error && (
-            <div className="flex items-start gap-2 rounded-lg border border-red-500/20 bg-red-500/10 p-3">
-              <span className="mt-0.5 text-red-400">!</span>
-              <p className="text-sm text-red-400">{error}</p>
+            <div className="flex items-start gap-2 rounded-lg border border-destructive/40 bg-destructive/10 p-3">
+              <span className="mt-0.5 text-destructive">!</span>
+              <p className="text-sm text-destructive">{error}</p>
             </div>
           )}
         </div>
-        <div className="flex flex-col-reverse gap-2 border-t border-border/70 bg-background px-5 py-4 sm:flex-row sm:justify-end sm:px-6">
+        <div className="flex flex-col-reverse gap-2 border-t border-line px-4 py-4 sm:flex-row sm:justify-end sm:px-6">
           <Button variant="outline" onClick={onClose} disabled={isLoading} className="w-full sm:w-auto">
             Cancel
           </Button>
@@ -271,7 +271,7 @@ export function LeadModal({
             variant="default"
             onClick={onSubmit}
             disabled={!canSubmit || isLoading}
-            className="w-full bg-sidebar-accent text-sidebar-accent-foreground hover:bg-sidebar-accent/90 sm:w-auto"
+            className="w-full sm:w-auto"
           >
             {isLoading ? (
               <>

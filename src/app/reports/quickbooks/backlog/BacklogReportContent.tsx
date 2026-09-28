@@ -43,7 +43,7 @@ export function BacklogReportContent() {
     <section className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold">QuickBooks Backlog Report</h1>
+          <h1 className="font-display text-xl font-semibold">QuickBooks Backlog Report</h1>
           <p className="text-sm text-muted-foreground">Estimated vs invoiced by project</p>
         </div>
         <Button asChild variant="outline" className="gap-2">
@@ -69,9 +69,9 @@ export function BacklogReportContent() {
                 <TableRow>
                   <TableHead>Client</TableHead>
                   <TableHead>Project Number</TableHead>
-                  <TableHead className="text-right">Estimated</TableHead>
-                  <TableHead className="text-right">Invoiced</TableHead>
-                  <TableHead className="text-right">Backlog</TableHead>
+                  <TableHead className="font-display text-right">Estimated</TableHead>
+                  <TableHead className="font-display text-right">Invoiced</TableHead>
+                  <TableHead className="font-display text-right">Backlog</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -85,9 +85,9 @@ export function BacklogReportContent() {
                       <TableCell>
                         {href ? <Link href={href} className="underline">{row.projectNumber ?? "-"}</Link> : (row.projectNumber ?? "-")}
                       </TableCell>
-                      <TableCell className="text-right">{money.format(row.estimatedAmount)}</TableCell>
-                      <TableCell className="text-right">{money.format(row.invoicedAmount)}</TableCell>
-                      <TableCell className="text-right">{money.format(row.backlogAmount)}</TableCell>
+                      <TableCell className="text-right font-mono tabular-nums">{money.format(row.estimatedAmount)}</TableCell>
+                      <TableCell className="text-right font-mono tabular-nums">{money.format(row.invoicedAmount)}</TableCell>
+                      <TableCell className="text-right font-mono tabular-nums">{money.format(row.backlogAmount)}</TableCell>
                     </TableRow>
                   );
                 })}

@@ -256,7 +256,7 @@ export function CompanyContactsSection({
               {contacts.map((contact) => (
                 <Card
                   key={contact.id}
-                  className="border-l-4 border-l-primary cursor-pointer hover:bg-accent/30 transition-colors"
+                  className="cursor-pointer border-l-4 border-l-primary bg-elev-3 transition-colors hover:bg-elev-4"
                   onClick={() => router.push(`/contact/${contact.id}`)}
                 >
                   <CardHeader className="pb-3">

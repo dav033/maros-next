@@ -22,10 +22,10 @@ function PipelineTooltip({ active, payload }: { active?: boolean; payload?: Pipe
     <div className="space-y-1 rounded-md border border-border bg-popover p-2.5 text-xs shadow-md">
       <p className="font-semibold text-foreground">{item.status}</p>
       <p className="text-muted-foreground">
-        Count: <span className="font-medium text-foreground">{item.count}</span>
+        Count: <span className="font-mono font-medium tabular-nums text-foreground">{item.count}</span>
       </p>
       <p className="text-muted-foreground">
-        Estimated: <span className="font-medium text-foreground">{money.format(item.estimatedValue)}</span>
+        Estimated: <span className="font-mono font-medium tabular-nums text-foreground">{money.format(item.estimatedValue)}</span>
       </p>
     </div>
   );
@@ -33,7 +33,7 @@ function PipelineTooltip({ active, payload }: { active?: boolean; payload?: Pipe
 
 export function PipelineFunnelChart({ data }: PipelineFunnelChartProps) {
   return (
-    <Card className="border-border/60">
+    <Card className="border-line">
       <WidgetCardHeader
         icon={Workflow}
         title="Pipeline by Status"
@@ -46,12 +46,12 @@ export function PipelineFunnelChart({ data }: PipelineFunnelChartProps) {
           <BarChart data={data} margin={{ left: -20, right: 12, top: 8 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
             <XAxis dataKey="status" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))", fontFamily: "var(--font-mono)" }} axisLine={false} tickLine={false} />
             <Tooltip cursor={{ fill: "hsl(var(--accent))", opacity: 0.35 }} content={<PipelineTooltip />} />
             <Bar
               dataKey="count"
               fill="hsl(var(--primary))"
-              radius={[6, 6, 0, 0]}
+              radius={[4, 4, 0, 0]}
               isAnimationActive
               animationBegin={80}
               animationDuration={900}

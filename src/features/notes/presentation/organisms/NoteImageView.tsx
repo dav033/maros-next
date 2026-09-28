@@ -25,13 +25,13 @@ export function NoteImageView({ node }: NodeViewProps) {
   return (
     <NodeViewWrapper className="my-2">
       {isLoading ? (
-        <div className="flex h-40 w-full items-center justify-center rounded-md border border-border bg-muted/30">
+        <div className="flex h-40 w-full items-center justify-center rounded-md border border-line bg-elev-2">
           <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
         </div>
       ) : url ? (
         <img src={url} alt={alt} className="max-w-full rounded-md" />
       ) : (
-        <div className="flex h-40 w-full items-center justify-center gap-2 rounded-md border border-border bg-muted/30 text-muted-foreground">
+        <div className="flex h-40 w-full items-center justify-center gap-2 rounded-md border border-line bg-elev-2 text-muted-foreground">
           <ImageOff className="h-5 w-5" />
           <span className="text-sm">Image unavailable</span>
         </div>

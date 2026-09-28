@@ -88,7 +88,7 @@ export function CustomerContactsSection({
     <>
       <section className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-medium text-foreground">Contact Customers</h2>
+          <h2 className="font-display text-lg font-medium text-foreground">Contact Customers</h2>
           <span />
         </div>
 
@@ -97,7 +97,7 @@ export function CustomerContactsSection({
             <div className="flex items-center gap-2 w-full">
               <div className="w-32 shrink-0">
                 <Select value={searchField} onValueChange={setSearchField}>
-                  <SelectTrigger className="bg-background border-input">
+                  <SelectTrigger className="border-line-strong">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-popover border-border">
@@ -116,7 +116,7 @@ export function CustomerContactsSection({
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={customerContactsSearchPlaceholder}
-                  className="pl-9 bg-background border-input"
+                  className="border-line-strong pl-9"
                 />
               </div>
               {searchQuery.trim().length > 0 && (

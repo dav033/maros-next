@@ -74,7 +74,7 @@ export function TaskBulkActionBar({
 
   return (
     <>
-      <div className="fixed bottom-6 left-1/2 z-40 flex -translate-x-1/2 items-center gap-2 rounded-full border border-border bg-card px-3 py-2 shadow-lg">
+      <div className="fixed bottom-6 left-1/2 z-40 flex -translate-x-1/2 items-center gap-2 rounded-full border border-line bg-elev-4 px-3 py-2 shadow-lg">
         <span className="px-1.5 text-sm font-medium">
           {count} selected
         </span>
@@ -105,7 +105,7 @@ export function TaskBulkActionBar({
             applyStatus(next);
           }}
         >
-          <SelectTrigger className="h-8 w-auto gap-1.5 border-none bg-transparent px-2 text-sm shadow-none hover:bg-accent/60">
+          <SelectTrigger className="h-8 w-auto gap-1.5 border-none bg-transparent px-2 text-sm shadow-none hover:bg-elev-5">
             <SelectValue placeholder="Move to…" />
           </SelectTrigger>
           <SelectContent>
@@ -145,7 +145,7 @@ export function TaskBulkActionBar({
           Delete
         </Button>
 
-        <div className="mx-1 h-5 w-px bg-border" />
+        <div className="mx-1 h-5 w-px bg-line" />
 
         <Button
           type="button"

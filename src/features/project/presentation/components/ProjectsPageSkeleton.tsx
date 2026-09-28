@@ -53,7 +53,7 @@ export function ProjectsPageSkeleton({
             <div className="col-span-2 grid min-w-0 grid-cols-[7rem_minmax(0,1fr)] gap-2 sm:contents">
               <div className="w-28 shrink-0 sm:w-32">
                 <Select disabled>
-                  <SelectTrigger className="bg-background/60 border-border/60 h-9 text-xs">
+                  <SelectTrigger className="bg-elev-2 border-line-strong h-9 text-xs">
                     <SelectValue placeholder="Name" />
                   </SelectTrigger>
                   <SelectContent />
@@ -65,13 +65,13 @@ export function ProjectsPageSkeleton({
                   type="text"
                   placeholder="Search projects..."
                   disabled
-                  className="pl-9 bg-background/60 border-border/60 h-9"
+                  className="pl-9 bg-elev-2 border-line-strong h-9"
                 />
               </div>
             </div>
             <div className="w-full min-w-0 sm:w-36 sm:shrink-0">
               <Select disabled>
-                <SelectTrigger className="bg-background/60 border-border/60 h-9 text-xs">
+                <SelectTrigger className="bg-elev-2 border-line-strong h-9 text-xs">
                   <Filter className="h-3.5 w-3.5 mr-1.5 shrink-0 text-muted-foreground" />
                   <SelectValue placeholder="All progress" />
                 </SelectTrigger>
@@ -80,7 +80,7 @@ export function ProjectsPageSkeleton({
             </div>
             <div className="w-full min-w-0 sm:w-36 sm:shrink-0">
               <Select disabled>
-                <SelectTrigger className="bg-background/60 border-border/60 h-9 text-xs">
+                <SelectTrigger className="bg-elev-2 border-line-strong h-9 text-xs">
                   <Receipt className="h-3.5 w-3.5 mr-1.5 shrink-0 text-muted-foreground" />
                   <SelectValue placeholder="All invoices" />
                 </SelectTrigger>
@@ -89,7 +89,7 @@ export function ProjectsPageSkeleton({
             </div>
             <div className="col-span-2 w-full min-w-0 sm:w-36 sm:shrink-0">
               <Select disabled>
-                <SelectTrigger className="bg-background/60 border-border/60 h-9 text-xs">
+                <SelectTrigger className="bg-elev-2 border-line-strong h-9 text-xs">
                   <Layers className="h-3.5 w-3.5 mr-1.5 shrink-0 text-muted-foreground" />
                   <SelectValue placeholder="No grouping" />
                 </SelectTrigger>

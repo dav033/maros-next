@@ -54,25 +54,25 @@ export function TaskCalendarPageView() {
   return (
     <div className="flex w-full flex-1 flex-col gap-3 sm:gap-4">
       <PageHeaderCard icon={CalendarDays} title="Task calendar" description="Schedule work by day, job, and responsible person." belowSlot={<div className="flex flex-wrap items-center gap-3"><TaskViewSwitcher current="calendar" /><TaskScopeBar /><TaskSavedViews /></div>} />
-      <div className="flex items-center justify-between rounded-lg border border-border/60 bg-card px-3 py-2">
+      <div className="flex items-center justify-between rounded-lg border border-line bg-elev-1 px-3 py-2">
         <Button type="button" variant="ghost" size="sm" onClick={() => setWeek((current) => addDays(current, -7))} aria-label="Previous week"><ChevronLeft className="h-4 w-4" /></Button>
         <span className="text-sm font-medium">{format(days[0], "MMM d")} – {format(days[6], "MMM d, yyyy")}</span>
         <Button type="button" variant="ghost" size="sm" onClick={() => setWeek((current) => addDays(current, 7))} aria-label="Next week"><ChevronRight className="h-4 w-4" /></Button>
       </div>
-      <section className="min-w-[980px] overflow-x-auto rounded-xl border border-border/60 bg-card">
-        <div className="grid grid-cols-[12rem_repeat(7,minmax(9rem,1fr))] border-b border-border/60 bg-muted/20">
+      <section className="min-w-[980px] overflow-x-auto rounded-xl border border-line bg-elev-2">
+        <div className="grid grid-cols-[12rem_repeat(7,minmax(9rem,1fr))] border-b border-line bg-elev-3 font-display">
           <div className="px-3 py-2 text-xs font-semibold text-muted-foreground">Assignee</div>
-          {days.map((day) => <div key={format(day, "yyyy-MM-dd")} className="border-l border-border/40 px-3 py-2"><p className="text-xs font-semibold">{format(day, "EEE")}</p><p className="text-xs text-muted-foreground">{format(day, "MMM d")}</p></div>)}
+          {days.map((day) => <div key={format(day, "yyyy-MM-dd")} className="border-l border-line px-3 py-2"><p className="text-xs font-semibold">{format(day, "EEE")}</p><p className="text-xs text-muted-foreground">{format(day, "MMM d")}</p></div>)}
         </div>
         {isPending ? <div className="p-6 text-sm text-muted-foreground">Loading schedule…</div> : null}
         {rows.map((row) => {
           const { hours: load, overloaded } = assigneeLoad(row.tasks, format(days[0], "yyyy-MM-dd"), format(days[6], "yyyy-MM-dd"));
-          return <div key={row.id ?? "unassigned"} className="grid grid-cols-[12rem_repeat(7,minmax(9rem,1fr))] border-b border-border/40 last:border-0">
-            <div className="flex items-start gap-2 px-3 py-3"><AssigneeAvatar person={row.tasks[0]?.assignee ?? null} /><div><p className="text-xs font-medium">{row.label}</p><p className={overloaded ? "text-[10px] font-semibold text-destructive" : "text-[10px] text-muted-foreground"}>{load.toFixed(1)} / {CALENDAR_CAPACITY_HOURS}h{overloaded ? " · overloaded" : ""}</p></div></div>
+          return <div key={row.id ?? "unassigned"} className="grid grid-cols-[12rem_repeat(7,minmax(9rem,1fr))] border-b border-line last:border-0">
+            <div className="flex items-start gap-2 px-3 py-3"><AssigneeAvatar person={row.tasks[0]?.assignee ?? null} /><div><p className="text-xs font-medium">{row.label}</p><p className={overloaded ? "font-mono text-[10px] font-semibold tabular-nums text-destructive" : "font-mono text-[10px] tabular-nums text-muted-foreground"}>{load.toFixed(1)} / {CALENDAR_CAPACITY_HOURS}h{overloaded ? " · overloaded" : ""}</p></div></div>
             {days.map((day) => {
               const dayKey = format(day, "yyyy-MM-dd");
-              return <div key={dayKey} className="min-h-28 border-l border-border/40 p-1.5" onDragOver={(event) => event.preventDefault()} onDrop={() => handleDrop(dayKey, row.id)}>
-                <div className="space-y-1.5">{row.tasks.filter((task) => taskIsOnCalendarDay(task, dayKey)).map((task) => <button key={task.id} type="button" draggable onDragStart={() => setDraggedTaskId(task.id)} onDragEnd={() => setDraggedTaskId(null)} onClick={() => openTask(task.id)} className="flex w-full flex-col gap-1 rounded-lg border border-border/60 bg-background p-2 text-left hover:border-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><span className="flex items-center gap-1.5"><TaskKindIcon kind={task.kind} /><span className="line-clamp-2 text-xs font-medium">{task.title}</span></span><span className="flex items-center justify-between gap-1"><AssigneeAvatar person={task.assignee} /><TaskPriorityBadge priority={task.priority} showLabel={false} pill /></span></button>)}</div>
+              return <div key={dayKey} className="min-h-28 border-l border-line p-1.5" onDragOver={(event) => event.preventDefault()} onDrop={() => handleDrop(dayKey, row.id)}>
+                <div className="space-y-1.5">{row.tasks.filter((task) => taskIsOnCalendarDay(task, dayKey)).map((task) => <button key={task.id} type="button" draggable onDragStart={() => setDraggedTaskId(task.id)} onDragEnd={() => setDraggedTaskId(null)} onClick={() => openTask(task.id)} className="flex w-full flex-col gap-1 rounded-lg border border-line bg-elev-3 p-2 text-left hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><span className="flex items-center gap-1.5"><TaskKindIcon kind={task.kind} /><span className="line-clamp-2 text-xs font-medium">{task.title}</span></span><span className="flex items-center justify-between gap-1"><AssigneeAvatar person={task.assignee} /><TaskPriorityBadge priority={task.priority} showLabel={false} pill /></span></button>)}</div>
               </div>;
             })}
           </div>;

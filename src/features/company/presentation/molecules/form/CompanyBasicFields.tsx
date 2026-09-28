@@ -50,7 +50,7 @@ export function CompanyBasicFields({
           placeholder="Company name"
           disabled={disabled}
           required
-          className="pl-10"
+          className="border-line-strong pl-10"
         />
       </div>
       <LocationField
@@ -74,7 +74,7 @@ export function CompanyBasicFields({
             placeholder="Phone"
             disabled={disabled}
             type="tel"
-            className="pl-10"
+            className="border-line-strong pl-10"
           />
         </div>
         <div className="relative">
@@ -87,7 +87,7 @@ export function CompanyBasicFields({
             placeholder="Email"
             disabled={disabled}
             type="email"
-            className="pl-10"
+            className="border-line-strong pl-10"
           />
         </div>
       </div>
@@ -100,7 +100,7 @@ export function CompanyBasicFields({
           onChange={(e: ChangeEvent<HTMLInputElement>) => onSubmizChange(e.target.value)}
           placeholder="Submiz"
           disabled={disabled}
-          className="pl-10"
+          className="border-line-strong pl-10"
         />
       </div>
     </>

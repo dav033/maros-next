@@ -228,6 +228,7 @@ export function LeadContactSection({
                   value={editingValue.name || ""}
                   onChange={(e) => setField("name", e.target.value)}
                   placeholder="Enter name"
+                  className="border-line-strong"
                 />
               </div>
               <div>
@@ -237,6 +238,7 @@ export function LeadContactSection({
                   value={editingValue.phone || ""}
                   onChange={(e) => setField("phone", e.target.value)}
                   placeholder="Enter phone (optional)"
+                  className="border-line-strong"
                 />
               </div>
               <div>
@@ -247,6 +249,7 @@ export function LeadContactSection({
                   value={editingValue.email || ""}
                   onChange={(e) => setField("email", e.target.value)}
                   placeholder="Enter email (optional)"
+                  className="border-line-strong"
                 />
               </div>
               <div>
@@ -271,7 +274,7 @@ export function LeadContactSection({
                   value={editingValue.role || EMPTY_SELECT_VALUE}
                   onValueChange={(val) => setField("role", val === EMPTY_SELECT_VALUE ? "" : val)}
                 >
-                  <SelectTrigger id="contact-role">
+                  <SelectTrigger id="contact-role" className="border-line-strong">
                     <SelectValue placeholder="Select role" />
                   </SelectTrigger>
                   <SelectContent>
@@ -332,8 +335,22 @@ export function LeadContactSection({
               <DetailField icon={Briefcase} label="Role" value={contact.role} />
               
               <div className="flex items-center gap-2 pt-2">
-                {contact.isCustomer && <Badge className="bg-green-500/10 text-green-600 border-green-500/20">Customer</Badge>}
-                {contact.isClient && <Badge className="bg-green-500/10 text-green-600 border-green-500/20">Supplier</Badge>}
+                {contact.isCustomer && (
+                  <Badge
+                    variant="outline"
+                    style={{ borderColor: "hsl(var(--badge-green))", color: "hsl(var(--badge-green))" }}
+                  >
+                    Customer
+                  </Badge>
+                )}
+                {contact.isClient && (
+                  <Badge
+                    variant="outline"
+                    style={{ borderColor: "hsl(var(--badge-green))", color: "hsl(var(--badge-green))" }}
+                  >
+                    Supplier
+                  </Badge>
+                )}
               </div>
 
               {/* Show company if present */}
@@ -343,7 +360,7 @@ export function LeadContactSection({
                     <Building className="size-4 text-muted-foreground" />
                     <p className="font-medium text-sm text-foreground">Associated Company</p>
                   </div>
-                  <div className="space-y-3 bg-muted/30 p-3 rounded-md">
+                  <div className="space-y-3 rounded-lg border border-line bg-elev-3 p-3">
                     <Link href={`/company/${contact.company.id}`} className="font-medium text-primary hover:underline text-sm block">
                       {contact.company.name}
                     </Link>

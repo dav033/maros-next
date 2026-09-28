@@ -95,7 +95,7 @@ export function TaskActivityFeed({ activity }: { activity: TaskActivityEntry[] }
               <Icon className="h-3.5 w-3.5" />
             </span>
             <div className="min-w-0 flex-1">
-              <p className="text-foreground/90">{describe(entry)}</p>
+              <p className="text-foreground">{describe(entry)}</p>
               <p className="text-xs text-muted-foreground">
                 {formatDistanceToNow(new Date(entry.createdAt), { addSuffix: true })}
               </p>

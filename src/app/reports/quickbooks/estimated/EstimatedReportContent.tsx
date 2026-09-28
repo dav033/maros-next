@@ -44,7 +44,7 @@ export function EstimatedReportContent() {
     <section className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold">QuickBooks Estimated Report</h1>
+          <h1 className="font-display text-xl font-semibold">QuickBooks Estimated Report</h1>
           <p className="text-sm text-muted-foreground">
             Project financial profile (estimated, invoiced, paid, outstanding) — same source as the Projects table.
           </p>
@@ -71,10 +71,10 @@ export function EstimatedReportContent() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Project Number</TableHead>
-                  <TableHead className="text-right">Estimated</TableHead>
-                  <TableHead className="text-right">Invoiced</TableHead>
-                  <TableHead className="text-right">Paid</TableHead>
-                  <TableHead className="text-right">Outstanding</TableHead>
+                  <TableHead className="font-display text-right">Estimated</TableHead>
+                  <TableHead className="font-display text-right">Invoiced</TableHead>
+                  <TableHead className="font-display text-right">Paid</TableHead>
+                  <TableHead className="font-display text-right">Outstanding</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -85,10 +85,10 @@ export function EstimatedReportContent() {
                       <TableCell>
                         {href ? <Link href={href} className="underline">{row.projectNumber}</Link> : row.projectNumber}
                       </TableCell>
-                      <TableCell className="text-right">{money.format(row.estimatedAmount)}</TableCell>
-                      <TableCell className="text-right">{money.format(row.invoicedAmount)}</TableCell>
-                      <TableCell className="text-right">{money.format(row.paidAmount)}</TableCell>
-                      <TableCell className="text-right">{money.format(row.outstandingAmount)}</TableCell>
+                      <TableCell className="text-right font-mono tabular-nums">{money.format(row.estimatedAmount)}</TableCell>
+                      <TableCell className="text-right font-mono tabular-nums">{money.format(row.invoicedAmount)}</TableCell>
+                      <TableCell className="text-right font-mono tabular-nums">{money.format(row.paidAmount)}</TableCell>
+                      <TableCell className="text-right font-mono tabular-nums">{money.format(row.outstandingAmount)}</TableCell>
                     </TableRow>
                   );
                 })}

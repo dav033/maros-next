@@ -146,7 +146,7 @@ export function LeadsInReviewPageView({ logic }: LeadsInReviewPageViewProps) {
               value={toolbarSearchController.searchTerm}
               onChange={(e) => toolbarSearchController.onSearchChange(e.target.value)}
               placeholder={toolbarSearchController.placeholder}
-              className="pl-9 bg-background/60 border-border/60 h-9"
+              className="h-9 border-line-strong pl-9"
             />
             {toolbarSearchController.searchTerm.trim().length > 0 && (
               <Button
@@ -231,7 +231,7 @@ export function LeadsInReviewPageView({ logic }: LeadsInReviewPageViewProps) {
           <Dialog open={rejectConfirmModal.isOpen} onOpenChange={(open) => !open && rejectConfirmModal.onClose()}>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Reject this lead?</DialogTitle>
+                <DialogTitle className="font-display">Reject this lead?</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
               <p className="text-foreground">
@@ -248,14 +248,14 @@ export function LeadsInReviewPageView({ logic }: LeadsInReviewPageViewProps) {
                   Loading...
                 </div>
               ) : rejectConfirmModal.rejectionInfo && (
-                <div className="space-y-3 pt-2 border-t border-border-primary">
+                <div className="space-y-3 border-t border-line pt-2">
                   {rejectConfirmModal.rejectionInfo.contact?.canDelete && (
                     <label className="flex items-start gap-3 cursor-pointer group">
                       <input
                         type="checkbox"
                         checked={rejectConfirmModal.deleteContact}
                         onChange={(e) => rejectConfirmModal.setDeleteContact(e.target.checked)}
-                        className="mt-0.5 w-4 h-4 rounded border-border bg-background text-red-500 focus:ring-red-500/50"
+                        className="mt-0.5 h-4 w-4 rounded-sm border-line-strong bg-input text-destructive focus:ring-ring"
                       />
                       <div className="flex-1">
                         <span className="text-sm text-foreground group-hover:text-foreground">
@@ -277,7 +277,7 @@ export function LeadsInReviewPageView({ logic }: LeadsInReviewPageViewProps) {
                         type="checkbox"
                         checked={rejectConfirmModal.deleteCompany}
                         onChange={(e) => rejectConfirmModal.setDeleteCompany(e.target.checked)}
-                        className="mt-0.5 w-4 h-4 rounded border-border bg-background text-red-500 focus:ring-red-500/50"
+                        className="mt-0.5 h-4 w-4 rounded-sm border-line-strong bg-input text-destructive focus:ring-ring"
                       />
                       <div className="flex-1">
                         <span className="text-sm text-foreground group-hover:text-foreground">
@@ -302,7 +302,7 @@ export function LeadsInReviewPageView({ logic }: LeadsInReviewPageViewProps) {
                 </div>
               )}
               
-              <p className="text-sm text-red-400/80">
+              <p className="text-sm text-destructive/80">
                 This action cannot be undone.
               </p>
               

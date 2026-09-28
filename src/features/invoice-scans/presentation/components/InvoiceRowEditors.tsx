@@ -59,7 +59,7 @@ export function ProjectCell({ scan }: { scan: InvoiceScan }) {
           disabled={saving}
           aria-label={`Project of ${scan.fileName}`}
           className={cn(
-            "inline-flex h-8 min-w-24 items-center justify-between gap-2 rounded-md border border-transparent px-2 text-sm tabular-nums hover:border-input focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60",
+            "inline-flex h-8 min-w-24 items-center justify-between gap-2 rounded-md border border-line-strong px-2 font-mono text-sm tabular-nums hover:bg-elev-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60",
             !current && "text-muted-foreground",
           )}
         >
@@ -121,7 +121,7 @@ export function CategoryCell({ scan }: { scan: InvoiceScan }) {
     >
       <SelectTrigger
         aria-label={`Category of ${scan.fileName}`}
-        className="h-8 min-w-36 border-transparent bg-transparent px-2 shadow-none hover:border-input"
+        className="h-8 min-w-36 border-line-strong bg-transparent px-2 shadow-none hover:bg-elev-3"
       >
         <SelectValue />
       </SelectTrigger>
@@ -160,7 +160,7 @@ export function CommentsCell({ scan }: { scan: InvoiceScan }) {
       disabled={saving}
       placeholder="Add a comment"
       aria-label={`Comments on ${scan.fileName}`}
-      className="h-8 min-w-44 border-transparent bg-transparent px-2 shadow-none hover:border-input"
+      className="h-8 min-w-44 border-line-strong bg-transparent px-2 shadow-none hover:bg-elev-3"
       onChange={(event) => setDraft(event.target.value)}
       onBlur={commit}
       onKeyDown={(event) => {

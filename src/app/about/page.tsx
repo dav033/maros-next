@@ -6,14 +6,14 @@ export default function AboutPage() {
       <div className="mx-auto max-w-3xl space-y-10">
         <header className="space-y-4">
           <p className="text-sm font-medium uppercase tracking-[0.18em] text-primary">Maros Construction</p>
-          <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">Maros Construction CRM</h1>
+          <h1 className="font-display text-4xl font-semibold tracking-tight sm:text-5xl">Maros Construction CRM</h1>
           <p className="max-w-2xl text-lg text-muted-foreground">
             A workspace for authorized Maros Construction team members to manage customers, projects, tasks, invoices, and meetings.
           </p>
         </header>
 
         <section className="space-y-3 rounded-2xl border bg-card p-6 sm:p-8">
-          <h2 className="text-xl font-semibold">Calendar and Google Meet</h2>
+          <h2 className="font-display text-xl font-semibold">Calendar and Google Meet</h2>
           <p className="text-sm leading-6 text-muted-foreground">
             Team members can connect Google Calendar when they choose to schedule a meeting. Maros creates, updates, or cancels events on the connected user’s primary calendar, creates a Google Meet link, and can send invitations to the email addresses selected for that event. Maros does not import or search unrelated calendar events.
           </p>

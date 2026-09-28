@@ -63,7 +63,7 @@ export function PublicNoteReader({ token, data, tree }: PublicNoteReaderProps) {
 
   return (
     <PublicNoteImageSource token={token}>
-      <div className="mx-auto flex max-w-6xl gap-10 px-4 py-6 sm:px-8 sm:py-10 lg:py-14">
+      <div className="mx-auto flex max-w-6xl gap-10 px-4 py-6 sm:px-8 sm:py-10 lg:py-12">
         {navRows.length > 1 && (
           <nav
             aria-label="Pages"
@@ -82,7 +82,7 @@ export function PublicNoteReader({ token, data, tree }: PublicNoteReaderProps) {
                   className={
                     row.id === page.id
                       ? "flex items-center gap-1.5 rounded px-2 py-1 text-[13px] font-medium text-foreground"
-                      : "flex items-center gap-1.5 rounded px-2 py-1 text-[13px] text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+                      : "flex items-center gap-1.5 rounded px-2 py-1 text-[13px] text-muted-foreground hover:bg-elev-3 hover:text-foreground"
                   }
                 >
                   {row.kind === "folder" ? (
@@ -98,10 +98,10 @@ export function PublicNoteReader({ token, data, tree }: PublicNoteReaderProps) {
         )}
 
         <article className="min-w-0 flex-1">
-          <header className="mb-8 border-b border-border/60 pb-6">
+          <header className="mb-8 border-b border-line pb-6">
             <div className="mb-3 flex items-start gap-3">
               {page.icon && <span className="text-3xl leading-none">{page.icon}</span>}
-              <h1 className="min-w-0 break-words text-3xl font-semibold leading-tight sm:text-4xl">
+              <h1 className="min-w-0 break-words font-display text-3xl font-semibold leading-tight sm:text-4xl">
                 {page.title || "Untitled"}
               </h1>
             </div>
@@ -145,9 +145,9 @@ export function PublicNoteReader({ token, data, tree }: PublicNoteReaderProps) {
           {toc.length > 2 && (
             <nav
               aria-label="Contents"
-              className="mb-8 rounded-lg border border-border/60 p-4 print:hidden"
+              className="mb-8 rounded-lg border border-line p-4 print:hidden"
             >
-              <div className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              <div className="mb-2 font-display text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Contents
               </div>
               <ul className="space-y-1">
@@ -170,7 +170,7 @@ export function PublicNoteReader({ token, data, tree }: PublicNoteReaderProps) {
 
           <NoteReadOnlyView content={page.content} />
 
-          <footer className="mt-12 border-t border-border/60 pt-5 text-xs text-muted-foreground">
+          <footer className="mt-12 border-t border-line pt-4 text-xs text-muted-foreground">
             Shared from Maros Construction
           </footer>
         </article>

@@ -50,7 +50,7 @@ export function LeadsPageSkeleton({
         <PageToolbarCard icon={SlidersHorizontal} label="Filters & search">
           <div className="w-32 shrink-0">
             <Select disabled>
-              <SelectTrigger className="bg-background/60 border-border/60 h-9 text-xs">
+              <SelectTrigger className="h-9 border-line-strong text-xs">
                 <SelectValue placeholder="Name" />
               </SelectTrigger>
               <SelectContent />
@@ -62,12 +62,12 @@ export function LeadsPageSkeleton({
               type="text"
               placeholder="Search leads..."
               disabled
-              className="pl-9 bg-background/60 border-border/60 h-9"
+              className="h-9 border-line-strong pl-9"
             />
           </div>
           <div className="w-36 shrink-0">
             <Select disabled>
-              <SelectTrigger className="bg-background/60 border-border/60 h-9 text-xs">
+              <SelectTrigger className="h-9 border-line-strong text-xs">
                 <Filter className="h-3.5 w-3.5 mr-1.5 shrink-0 text-muted-foreground" />
                 <SelectValue placeholder="All statuses" />
               </SelectTrigger>
@@ -76,7 +76,7 @@ export function LeadsPageSkeleton({
           </div>
           <div className="w-36 shrink-0">
             <Select disabled>
-              <SelectTrigger className="bg-background/60 border-border/60 h-9 text-xs">
+              <SelectTrigger className="h-9 border-line-strong text-xs">
                 <Layers className="h-3.5 w-3.5 mr-1.5 shrink-0 text-muted-foreground" />
                 <SelectValue placeholder="No grouping" />
               </SelectTrigger>

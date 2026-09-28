@@ -215,7 +215,7 @@ function ProjectMoneySummary({
 function PaymentsTable({ payments }: { payments: Payment[] }) {
   if (!payments.length) {
     return (
-      <div className="flex items-center gap-3 p-3 rounded-md border border-dashed border-muted-foreground/30">
+      <div className="flex items-center gap-3 p-3 rounded-md border border-dashed border-line">
         <DollarSign className="size-4 text-muted-foreground" />
         <div>
           <p className="text-sm text-muted-foreground">Payments List</p>

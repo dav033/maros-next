@@ -26,13 +26,13 @@ export function PageHeaderCard({
   return (
     <header
       className={cn(
-        "dashboard-section-enter rounded-2xl border border-border/60 bg-card/40 p-5 shadow-sm backdrop-blur-sm",
+        "dashboard-section-enter rounded-2xl border border-line bg-elev-1 p-4 shadow-sm",
         className,
       )}
     >
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex items-center gap-3 min-w-0">
-          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-primary/15 text-primary">
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-primary-container text-primary-on-container">
             <Icon className="h-4 w-4" />
           </span>
           <div className="min-w-0">
@@ -46,7 +46,7 @@ export function PageHeaderCard({
         {rightSlot ? <div className="flex flex-wrap items-center gap-2">{rightSlot}</div> : null}
       </div>
 
-      {belowSlot ? <div className="mt-5">{belowSlot}</div> : null}
+      {belowSlot ? <div className="mt-4">{belowSlot}</div> : null}
 
       {metaSlot ? (
         <div className="mt-4 flex flex-wrap items-center gap-2 text-xs">{metaSlot}</div>

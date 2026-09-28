@@ -22,7 +22,7 @@ export function AssigneeAvatar({
     return (
       <span
         className={cn(
-          "grid shrink-0 place-items-center rounded-full border border-dashed border-border/60 text-muted-foreground",
+          "grid shrink-0 place-items-center rounded-full border border-dashed border-line text-muted-foreground",
           dimension,
           className
         )}

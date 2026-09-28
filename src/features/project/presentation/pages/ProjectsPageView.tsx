@@ -195,7 +195,7 @@ export function ProjectsPageView({ logic }: ProjectsPageViewProps) {
             <div className="col-span-2 flex min-w-0 gap-2 sm:contents">
               <div className="w-28 shrink-0 sm:w-32">
                 <Select value={toolbarSearchController.selectedField} onValueChange={toolbarSearchController.onFieldChange}>
-                  <SelectTrigger className="bg-background/60 border-border/60 h-9 text-xs">
+                  <SelectTrigger className="bg-elev-2 border-line-strong h-9 text-xs">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-popover border-border">
@@ -214,7 +214,7 @@ export function ProjectsPageView({ logic }: ProjectsPageViewProps) {
                   value={toolbarSearchController.searchTerm}
                   onChange={(e) => toolbarSearchController.onSearchChange(e.target.value)}
                   placeholder={toolbarSearchController.placeholder}
-                  className="pl-9 bg-background/60 border-border/60 h-9"
+                  className="pl-9 bg-elev-2 border-line-strong h-9"
                 />
                 {toolbarSearchController.searchTerm.trim().length > 0 && (
                   <Button
@@ -256,7 +256,7 @@ export function ProjectsPageView({ logic }: ProjectsPageViewProps) {
             {/* Group by */}
             <div className="col-span-2 w-full min-w-0 sm:w-36 sm:shrink-0">
               <Select value={groupBy} onValueChange={(v) => setGroupBy(v as ProjectGroupBy)}>
-                <SelectTrigger className="bg-background/60 border-border/60 h-9 text-xs">
+                <SelectTrigger className="bg-elev-2 border-line-strong h-9 text-xs">
                   <Layers className="h-3.5 w-3.5 mr-1.5 shrink-0 text-muted-foreground" />
                   <SelectValue />
                 </SelectTrigger>

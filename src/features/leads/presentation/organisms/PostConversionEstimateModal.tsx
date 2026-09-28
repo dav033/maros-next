@@ -166,9 +166,9 @@ export function PostConversionEstimateModal({
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="!flex max-h-[92vh] w-[calc(100vw-2rem)] max-w-2xl flex-col overflow-hidden border-border/70 bg-background p-0 text-foreground shadow-2xl sm:rounded-xl">
-        <DialogHeader className="border-b border-border/70 bg-muted/20 px-5 py-4 pr-12 text-left sm:px-6 sm:pr-12">
-          <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+      <DialogContent className="!flex max-h-[92vh] w-[calc(100vw-2rem)] max-w-2xl flex-col overflow-hidden p-0 sm:rounded-xl">
+        <DialogHeader className="border-b border-line px-4 py-4 pr-12 text-left sm:px-6 sm:pr-12">
+          <DialogTitle className="flex items-center gap-2 font-display text-base sm:text-lg">
             <span className="flex size-9 items-center justify-center rounded-full bg-primary/15 text-primary">
               <Mail className="size-4" />
             </span>
@@ -180,8 +180,8 @@ export function PostConversionEstimateModal({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex-1 space-y-4 overflow-y-auto px-5 py-4 sm:px-6">
-          <div className="flex items-start gap-3 rounded-lg border border-border/70 bg-muted/25 p-3 text-sm">
+        <div className="flex-1 space-y-4 overflow-y-auto px-4 py-4 sm:px-6">
+          <div className="flex items-start gap-3 rounded-lg border border-line bg-elev-3 p-3 text-sm">
             <Paperclip className="mt-0.5 size-4 shrink-0 text-primary" />
             {isLoadingFile ? (
               <span className="flex min-w-0 items-center gap-2 text-muted-foreground">
@@ -190,7 +190,7 @@ export function PostConversionEstimateModal({
               </span>
             ) : estimateFile ? (
               <div className="min-w-0 space-y-0.5">
-                <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                <p className="font-display text-xs uppercase tracking-wide text-muted-foreground">
                   Attachment ready
                 </p>
                 <p className="truncate font-medium text-foreground">
@@ -233,6 +233,7 @@ export function PostConversionEstimateModal({
                 onChange={(e) => setTo(e.target.value)}
                 placeholder={contactEmail ?? "recipient@example.com"}
                 disabled={isSending || isUploading}
+                className="border-line-strong"
               />
             </div>
 
@@ -244,6 +245,7 @@ export function PostConversionEstimateModal({
                 onChange={(e) => setCc(e.target.value)}
                 placeholder="cc@example.com"
                 disabled={isSending || isUploading}
+                className="border-line-strong"
               />
             </div>
           </div>
@@ -255,6 +257,7 @@ export function PostConversionEstimateModal({
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
               disabled={isSending || isUploading}
+              className="border-line-strong"
             />
           </div>
 
@@ -266,11 +269,12 @@ export function PostConversionEstimateModal({
               onChange={(e) => setMessage(e.target.value)}
               rows={4}
               disabled={isSending || isUploading}
+              className="border-line-strong"
             />
           </div>
         </div>
 
-        <div className="border-t border-border/70 bg-muted/10 px-5 py-4 sm:px-6">
+        <div className="border-t border-line px-4 py-4 sm:px-6">
           <div className="grid gap-2 sm:grid-cols-2">
             <Button
               type="button"

@@ -69,7 +69,9 @@ export function useContactsTableColumns({
         header: "Phone",
         className: "w-[180px]",
         render: (contact: Contact) => (
-          <span className="text-foreground">{contact.phone ?? "—"}</span>
+          <span className="whitespace-nowrap font-mono tabular-nums text-foreground">
+            {contact.phone ?? "—"}
+          </span>
         ),
         sortable: true,
         sortValue: (contact: Contact) => contact.phone ?? "",

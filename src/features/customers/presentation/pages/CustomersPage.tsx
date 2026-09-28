@@ -33,7 +33,7 @@ export function CustomersPage({ initialData }: CustomersPageProps = {}) {
               <span className="h-1.5 w-1.5 rounded-full bg-primary" />
               {safeContacts.length} contacts
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-background/40 px-2.5 py-1 font-medium text-foreground">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-elev-4 px-2.5 py-1 font-medium text-foreground">
               <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground" />
               {safeCompanies.length} companies
             </span>

@@ -49,7 +49,7 @@ export function MyTaskRow({
 
   return (
     <div
-      className="flex flex-col gap-2.5 rounded-xl border border-border/60 bg-card/60 p-4 shadow-sm"
+      className="flex flex-col gap-3 rounded-xl border border-line bg-elev-2 p-4 shadow-sm"
       onTouchStart={(event) => { touchStartX.current = event.touches[0]?.clientX ?? null; }}
       onTouchEnd={(event) => {
         if (touchStartX.current == null) return;

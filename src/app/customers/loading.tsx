@@ -14,13 +14,13 @@ export default function Loading() {
       />
 
       <section className="mt-2 flex flex-col gap-6">
-        <div className="rounded-xl border border-border/60 bg-card/40 p-4 space-y-3">
+        <div className="rounded-xl border border-line bg-elev-2 p-4 space-y-3">
           <Skeleton className="h-5 w-48" />
           {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className="h-10 w-full" />
           ))}
         </div>
-        <div className="rounded-xl border border-border/60 bg-card/40 p-4 space-y-3">
+        <div className="rounded-xl border border-line bg-elev-2 p-4 space-y-3">
           <Skeleton className="h-5 w-48" />
           {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className="h-10 w-full" />

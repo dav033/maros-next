@@ -13,7 +13,7 @@ type RevenueTrendChartProps = {
 
 export function RevenueTrendChart({ data }: RevenueTrendChartProps) {
   return (
-    <Card className="border-border/60">
+    <Card className="border-line">
       <WidgetCardHeader
         icon={TrendingUp}
         iconBg="bg-emerald-500/10"
@@ -28,13 +28,13 @@ export function RevenueTrendChart({ data }: RevenueTrendChartProps) {
           <AreaChart data={data} margin={{ left: -16, right: 12, top: 8 }}>
             <defs>
               <linearGradient id="revenue-gradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#10b981" stopOpacity={0.35} />
-                <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
+                <stop offset="0%" stopColor="var(--money-in)" stopOpacity={0.35} />
+                <stop offset="100%" stopColor="var(--money-in)" stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
             <XAxis dataKey="month" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))", fontFamily: "var(--font-mono)" }} axisLine={false} tickLine={false} />
             <Tooltip
               cursor={{ stroke: "hsl(var(--primary))", strokeOpacity: 0.3, strokeWidth: 1 }}
               contentStyle={{
@@ -49,11 +49,11 @@ export function RevenueTrendChart({ data }: RevenueTrendChartProps) {
             <Area
               type="monotone"
               dataKey="revenue"
-              stroke="#10b981"
+              stroke="var(--money-in)"
               strokeWidth={2.5}
               fill="url(#revenue-gradient)"
               dot={false}
-              activeDot={{ r: 4, strokeWidth: 0, fill: "#10b981" }}
+              activeDot={{ r: 4, strokeWidth: 0, fill: "var(--money-in)" }}
               isAnimationActive
               animationBegin={120}
               animationDuration={1100}

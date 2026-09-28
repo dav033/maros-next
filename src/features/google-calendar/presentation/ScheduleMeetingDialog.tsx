@@ -124,7 +124,7 @@ export function ScheduleMeetingDialog({
         {connectionQuery.isPending ? (
           <div className="flex items-center gap-2 py-5 text-sm text-muted-foreground"><LoaderCircle className="size-4 animate-spin" />Checking Google Calendar connection…</div>
         ) : connectionQuery.isError ? (
-          <div className="space-y-3 rounded-xl border bg-muted/20 p-4">
+          <div className="space-y-3 rounded-xl border border-line bg-elev-3 p-4">
             <p className="text-sm text-muted-foreground">Could not check the Google Calendar connection. Make sure the integration database setup is complete.</p>
             <Button type="button" variant="outline" onClick={() => void connectionQuery.refetch()}>Try again</Button>
           </div>
@@ -132,16 +132,16 @@ export function ScheduleMeetingDialog({
           <>
             <p className="text-sm text-muted-foreground">Connected as <span className="font-medium text-foreground">{connectionQuery.data.email}</span></p>
             <form onSubmit={submit} className="space-y-4">
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 <Label htmlFor="meet-title">Meeting title</Label>
                 <Input id="meet-title" value={title} onChange={(event) => setTitle(event.target.value)} maxLength={255} required />
               </div>
-              <div className="grid grid-cols-1 gap-4 rounded-xl bg-muted/25 p-4 sm:grid-cols-[1fr_170px]">
-                <div className="space-y-1.5">
+              <div className="grid grid-cols-1 gap-4 rounded-xl bg-elev-3 p-4 sm:grid-cols-[1fr_170px]">
+                <div className="space-y-2">
                   <Label htmlFor="meet-start">Date and time</Label>
                   <Input id="meet-start" type="datetime-local" value={startsAt} onChange={(event) => setStartsAt(event.target.value)} required />
                 </div>
-                <div className="space-y-1.5">
+                <div className="space-y-2">
                   <Label htmlFor="meet-duration">Duration</Label>
                   <Select value={durationMinutes} onValueChange={setDurationMinutes}>
                     <SelectTrigger id="meet-duration" aria-label="Duration"><SelectValue /></SelectTrigger>
@@ -154,7 +154,7 @@ export function ScheduleMeetingDialog({
                   </Select>
                 </div>
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 <Label>Participants <span className="font-normal text-muted-foreground">(optional)</span></Label>
                 <MeetingParticipantsPicker value={attendees} onChange={setAttendees} disabled={createMeeting.isPending} />
               </div>
@@ -166,7 +166,7 @@ export function ScheduleMeetingDialog({
               </DialogFooter>
             </form>
 
-            <section className="space-y-2 border-t pt-4" aria-label="Scheduled meetings">
+            <section className="space-y-2 border-t border-line pt-4" aria-label="Scheduled meetings">
               <h3 className="text-sm font-medium">Meetings for this {entityKind}</h3>
               {meetingsQuery.isPending ? <p className="text-sm text-muted-foreground">Loading meetings…</p> : null}
               {meetingsQuery.data?.length === 0 ? <p className="text-sm text-muted-foreground">No meetings scheduled yet.</p> : null}

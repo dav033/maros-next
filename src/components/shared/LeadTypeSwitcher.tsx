@@ -59,7 +59,7 @@ export function LeadTypeSwitcher({ currentType, basePath }: LeadTypeSwitcherProp
   const effectiveType = routeType ?? currentType;
 
   return (
-    <div className="mx-auto w-full max-w-[88rem] rounded-xl border border-zinc-600/50 bg-gradient-to-r from-muted/35 via-muted/20 to-background p-1.5 sm:p-2">
+    <div className="mx-auto w-full max-w-[88rem] rounded-xl border border-line bg-elev-1 p-2">
       <div className="flex gap-1 sm:grid sm:grid-cols-2 sm:gap-2 lg:grid-cols-3">
         {options.map((option) => {
           const active = option.type === effectiveType;
@@ -69,27 +69,27 @@ export function LeadTypeSwitcher({ currentType, basePath }: LeadTypeSwitcherProp
             <Link
               key={option.type}
               href={`${basePath}/${leadTypeToRouteSegment(option.type)}`}
-              className={`group flex min-w-0 flex-1 items-center justify-center rounded-lg border px-1 py-2 text-center transition-all sm:justify-start sm:gap-3 sm:px-3 sm:py-2.5 sm:text-left ${
+              className={`group flex min-w-0 flex-1 items-center justify-center rounded-lg border px-1 py-2 text-center transition-all sm:justify-start sm:gap-3 sm:px-3 sm:py-2 sm:text-left ${
                 active
-                  ? "border-border bg-background text-foreground shadow-[inset_0_0_0_1px_hsl(var(--sidebar-accent)/0.45)]"
-                  : "border-border/60 bg-background/75 text-muted-foreground hover:border-border hover:bg-background"
-              } outline-none focus:outline-none focus:ring-2 focus:ring-zinc-400/45 focus:ring-offset-1 focus:ring-offset-background focus-visible:ring-2 focus-visible:ring-zinc-400/45 focus-visible:ring-offset-1 focus-visible:ring-offset-background`}
+                  ? "border-line-strong bg-elev-3 text-foreground"
+                  : "border-line bg-elev-2 text-muted-foreground hover:border-line-strong hover:bg-elev-3"
+              } outline-none focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1 focus:ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background`}
               aria-current={active ? "page" : undefined}
             >
               <span
                 className={`hidden size-8 shrink-0 items-center justify-center rounded-md border transition-all sm:inline-flex ${
                   active
-                    ? "border-2 border-zinc-400/80 bg-sidebar-accent/20 text-sidebar-accent-foreground"
-                    : "border-[1.5px] border-zinc-500/70 bg-muted/40 text-muted-foreground"
+                    ? "border-line-strong bg-elev-4 text-primary"
+                    : "border-line bg-elev-3 text-muted-foreground"
                 }`}
               >
                 <Icon className="size-4" />
               </span>
               <span className="min-w-0">
-                <span className={`block truncate text-[11px] font-medium sm:text-sm ${active ? "text-foreground" : "text-foreground/85"}`}>
+                <span className={`block truncate font-display text-xs font-medium sm:text-sm ${active ? "text-foreground" : "text-fg-dim"}`}>
                   {option.label}
                 </span>
-                <span className="hidden text-[11px] leading-tight text-muted-foreground sm:block">
+                <span className="hidden text-xs leading-tight text-muted-foreground sm:block">
                   {option.subtitle}
                 </span>
               </span>

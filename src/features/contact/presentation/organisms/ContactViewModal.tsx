@@ -34,7 +34,7 @@ export function ContactViewModal({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Contact Information</DialogTitle>
+          <DialogTitle className="font-display">Contact Information</DialogTitle>
         </DialogHeader>
         <div className="space-y-2 p-4">
           <div>

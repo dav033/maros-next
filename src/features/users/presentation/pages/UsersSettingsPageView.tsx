@@ -5,7 +5,7 @@ import { UsersTable } from "../organisms/UsersTable";
 export function UsersSettingsPageView() {
   return (
     <div className="mx-auto max-w-4xl px-8 py-10">
-      <h1 className="text-2xl font-semibold">Users</h1>
+      <h1 className="font-display text-2xl font-semibold">Users</h1>
       <p className="mb-6 text-sm text-muted-foreground">
         Anyone with a @marosconstruction.com Google account gets access automatically on
         first login. Everybody else needs an invitation — use Invitar. Change their role

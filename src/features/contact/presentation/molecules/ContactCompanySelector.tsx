@@ -61,7 +61,7 @@ export function ContactCompanySelector({
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         disabled={disabled}
-        className="flex h-9 w-full items-center gap-2 rounded-md border border-input bg-input px-3 text-left text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+        className="flex h-9 w-full items-center gap-2 rounded-md border border-line-strong bg-input px-3 text-left text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
       >
         <Building className="size-4 text-muted-foreground" />
         <span className="flex-1 truncate">{displayText}</span>
@@ -74,9 +74,9 @@ export function ContactCompanySelector({
       {isOpen && (
         <div
           ref={dropdownRef}
-          className="absolute z-10 mt-1 w-full rounded-md border border-border bg-popover shadow-lg"
+          className="absolute z-10 mt-1 w-full rounded-md border border-line bg-elev-4 shadow-lg"
         >
-          <div className="border-b border-border p-2 space-y-2">
+          <div className="space-y-2 border-b border-line p-2">
             <div className="relative">
               <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                 <Search className="size-4" />
@@ -85,7 +85,7 @@ export function ContactCompanySelector({
                 value={searchQuery}
                 onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
                 placeholder="Search companies..."
-                className="pl-10"
+                className="border-line-strong pl-10"
               />
             </div>
             {onCreateNewCompany && (
@@ -107,8 +107,8 @@ export function ContactCompanySelector({
             <button
               type="button"
               onClick={() => handleSelectCompany(null)}
-              className={`flex w-full items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-accent ${
-                selectedCompanyId === null ? "bg-accent/50" : ""
+              className={`flex w-full items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-elev-5 ${
+                selectedCompanyId === null ? "bg-elev-5 font-medium" : ""
               }`}
             >
               <span className="flex-1 text-left">No company</span>
@@ -123,8 +123,8 @@ export function ContactCompanySelector({
                   key={company.id}
                   type="button"
                   onClick={() => handleSelectCompany(company.id)}
-                  className={`flex w-full items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-accent ${
-                    selectedCompanyId === company.id ? "bg-accent/50" : ""
+                  className={`flex w-full items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-elev-5 ${
+                    selectedCompanyId === company.id ? "bg-elev-5 font-medium" : ""
                   }`}
                 >
                   <span className="flex-1 truncate text-left">{company.name}</span>

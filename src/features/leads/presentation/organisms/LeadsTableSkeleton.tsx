@@ -28,15 +28,15 @@ export function LeadsTableSkeleton() {
   };
 
   return (
-    <div className="w-full overflow-auto">
+    <div className="w-full overflow-auto rounded-2xl bg-elev-2">
       <table className="w-full border-collapse">
-        <thead>
-          <tr className="border-b border-border">
+        <thead className="bg-elev-3">
+          <tr className="h-12 border-b border-line">
             {columns.map((col, idx) => (
               <th
                 key={idx}
                 className={`
-                  ${getWidth(col)} px-4 py-3 text-sm font-medium text-muted-foreground
+                  ${getWidth(col)} px-4 py-3 font-display text-xs uppercase tracking-wide text-muted-foreground
                   ${col.className?.includes("text-center") ? "text-center" : "text-left"}
                   ${col.className?.includes("text-right") ? "text-right" : ""}
                 `}
@@ -48,7 +48,7 @@ export function LeadsTableSkeleton() {
         </thead>
         <tbody>
           {Array.from({ length: 13 }).map((_, rowIdx) => (
-            <tr key={rowIdx} className="border-b border-border/50">
+            <tr key={rowIdx} className="border-b border-line">
               {columns.map((col, colIdx) => {
                 const isBadge = col.key === "status" || col.key === "projectType";
                 const skeletonWidth = getSkeletonWidth(col);

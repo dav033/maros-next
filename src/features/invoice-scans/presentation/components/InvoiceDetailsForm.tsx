@@ -92,10 +92,10 @@ export function InvoiceDetailsForm({ data, onSave, saving, disabled }: Props) {
   });
 
   return (
-    <form onSubmit={submit} className="space-y-5" aria-label="Invoice details">
+    <form onSubmit={submit} className="space-y-4" aria-label="Invoice details">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold">Invoice details</h2>
+          <h2 className="font-display text-lg font-semibold">Invoice details</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             {data
               ? "Read from the document. Fix anything that does not match the original."
@@ -177,7 +177,7 @@ export function InvoiceDetailsForm({ data, onSave, saving, disabled }: Props) {
 
       <div className="border-t pt-4">
         <div className="flex items-center justify-between gap-3">
-          <h3 className="font-semibold">Line items</h3>
+          <h3 className="font-display font-semibold">Line items</h3>
           <Button
             type="button"
             variant="outline"
@@ -214,15 +214,15 @@ export function InvoiceDetailsForm({ data, onSave, saving, disabled }: Props) {
                       />
                     </td>
                     <td className="px-1 py-1">
-                      <Input aria-label={`Line ${index + 1} quantity`} inputMode="decimal" {...register(`lineItems.${index}.quantity`)} disabled={locked} />
+                      <Input aria-label={`Line ${index + 1} quantity`} inputMode="decimal" className="font-mono tabular-nums" {...register(`lineItems.${index}.quantity`)} disabled={locked} />
                       {errors.lineItems?.[index]?.quantity && <p className="mt-1 text-xs text-destructive">{errors.lineItems[index]?.quantity?.message}</p>}
                     </td>
                     <td className="px-1 py-1">
-                      <Input aria-label={`Line ${index + 1} unit price`} inputMode="decimal" {...register(`lineItems.${index}.unitPrice`)} disabled={locked} />
+                      <Input aria-label={`Line ${index + 1} unit price`} inputMode="decimal" className="font-mono tabular-nums" {...register(`lineItems.${index}.unitPrice`)} disabled={locked} />
                       {errors.lineItems?.[index]?.unitPrice && <p className="mt-1 text-xs text-destructive">{errors.lineItems[index]?.unitPrice?.message}</p>}
                     </td>
                     <td className="px-1 py-1">
-                      <Input aria-label={`Line ${index + 1} amount`} inputMode="decimal" {...register(`lineItems.${index}.amount`)} disabled={locked} />
+                      <Input aria-label={`Line ${index + 1} amount`} inputMode="decimal" className="font-mono tabular-nums" {...register(`lineItems.${index}.amount`)} disabled={locked} />
                       {errors.lineItems?.[index]?.amount && <p className="mt-1 text-xs text-destructive">{errors.lineItems[index]?.amount?.message}</p>}
                     </td>
                     <td className="py-1 pl-1">
@@ -246,21 +246,21 @@ export function InvoiceDetailsForm({ data, onSave, saving, disabled }: Props) {
         )}
       </div>
 
-      <div className="ml-auto grid max-w-md gap-3 rounded-lg bg-muted/60 p-4 sm:grid-cols-3">
+      <div className="ml-auto grid max-w-md gap-3 rounded-lg bg-elev-3 p-4 sm:grid-cols-3">
         <Field label="Subtotal" htmlFor="subtotal" error={errors.subtotal?.message}>
-          <Input id="subtotal" inputMode="decimal" {...register("subtotal")} disabled={locked} />
+          <Input id="subtotal" inputMode="decimal" className="font-mono tabular-nums" {...register("subtotal")} disabled={locked} />
         </Field>
         <Field label="Tax" htmlFor="taxTotal" error={errors.taxTotal?.message}>
-          <Input id="taxTotal" inputMode="decimal" {...register("taxTotal")} disabled={locked} />
+          <Input id="taxTotal" inputMode="decimal" className="font-mono tabular-nums" {...register("taxTotal")} disabled={locked} />
         </Field>
         <Field label="Total" htmlFor="total" error={errors.total?.message}>
-          <Input id="total" inputMode="decimal" {...register("total")} disabled={locked} className="font-semibold" />
+          <Input id="total" inputMode="decimal" {...register("total")} disabled={locked} className="font-mono font-semibold tabular-nums" />
         </Field>
       </div>
 
       {(dirty || saving) && (
         <div
-          className="sticky bottom-3 flex flex-wrap items-center justify-between gap-3 rounded-lg border bg-card/95 px-4 py-3 shadow-lg backdrop-blur"
+          className="sticky bottom-3 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-line bg-elev-4 px-4 py-3 shadow-lg"
           role="region"
           aria-label="Unsaved changes"
         >

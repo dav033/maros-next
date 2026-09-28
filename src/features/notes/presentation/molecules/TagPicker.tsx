@@ -67,7 +67,7 @@ export function TagPicker({
             {tags.map((tag) => (
               <label
                 key={tag.id}
-                className="flex cursor-pointer items-center gap-2 rounded-sm px-1 py-1.5 text-sm hover:bg-accent/50"
+                className="flex cursor-pointer items-center gap-2 rounded-sm px-1 py-1.5 text-sm hover:bg-elev-3"
               >
                 <Checkbox
                   checked={selectedTagIds.includes(tag.id)}
@@ -102,7 +102,7 @@ export function TagPicker({
             <button
               type="button"
               onClick={() => setIsManagingLabels(true)}
-              className="flex w-full items-center gap-2 rounded-sm px-1 py-1.5 text-sm text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+              className="flex w-full items-center gap-2 rounded-sm px-1 py-1.5 text-sm text-muted-foreground hover:bg-elev-3 hover:text-foreground"
             >
               <Settings className="h-3.5 w-3.5" aria-hidden="true" />
               Manage labels

@@ -36,7 +36,7 @@ export function ContactsPageSkeleton() {
         <PageToolbarCard icon={SlidersHorizontal} label="Filters & search">
           <div className="w-32 shrink-0">
             <Select disabled>
-              <SelectTrigger className="bg-background/60 border-border/60 h-9 text-xs">
+              <SelectTrigger className="h-9 border-line-strong text-xs">
                 <SelectValue placeholder="Name" />
               </SelectTrigger>
               <SelectContent />
@@ -48,23 +48,23 @@ export function ContactsPageSkeleton() {
               type="text"
               placeholder="Search contacts..."
               disabled
-              className="pl-9 bg-background/60 border-border/60 h-9"
+              className="h-9 border-line-strong pl-9"
             />
           </div>
           <Select disabled>
-            <SelectTrigger className="w-36 bg-background/60 border-border/60 h-9 text-xs">
+            <SelectTrigger className="w-36 h-9 border-line-strong text-xs">
               <SelectValue placeholder="All customers" />
             </SelectTrigger>
             <SelectContent />
           </Select>
           <Select disabled>
-            <SelectTrigger className="w-32 bg-background/60 border-border/60 h-9 text-xs">
+            <SelectTrigger className="w-32 h-9 border-line-strong text-xs">
               <SelectValue placeholder="All clients" />
             </SelectTrigger>
             <SelectContent />
           </Select>
           <Select disabled>
-            <SelectTrigger className="w-40 bg-background/60 border-border/60 h-9 text-xs">
+            <SelectTrigger className="w-40 h-9 border-line-strong text-xs">
               <Layers className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
               <SelectValue placeholder="No grouping" />
             </SelectTrigger>

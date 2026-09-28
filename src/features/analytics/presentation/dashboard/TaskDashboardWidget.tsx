@@ -26,33 +26,37 @@ export function TaskDashboardWidget() {
   }
   const loadRows = [...load.values()].sort((a, b) => b.count - a.count).slice(0, 5);
 
-  if (showSkeleton) return <div className="h-48 animate-pulse rounded-xl border border-border bg-card" />;
-  if (error) return <div className="rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground">Could not load task signals.</div>;
+  if (showSkeleton) return <div className="h-48 animate-pulse rounded-xl border border-line bg-card" />;
+  if (error) return <div className="rounded-xl border border-line bg-card p-4 text-sm text-muted-foreground">Could not load task signals.</div>;
 
   return (
     <div className="grid gap-4 lg:grid-cols-2">
-      <div className="rounded-xl border border-border bg-card p-4">
+      <div className="rounded-xl border border-line bg-card p-4">
         <div className="mb-3 flex items-start justify-between gap-3">
           <div>
-            <h3 className="text-sm font-semibold">This week</h3>
+            <h3 className="font-display text-sm font-semibold">This week</h3>
             <p className="text-xs text-muted-foreground">Open work needing attention</p>
           </div>
           <CalendarClock className="h-4 w-4 text-primary" aria-hidden="true" />
         </div>
         <div className="grid grid-cols-3 gap-2">
-          <SignalLink href="/tasks?due=overdue" label="Overdue" value={overdue.length} tone="text-destructive" />
-          <SignalLink href="/tasks?due=today" label="Today" value={dueToday.length} tone="text-amber-600" />
-          <SignalLink href="/tasks?status=blocked" label="Blocked" value={blocked.length} tone="text-violet-600" />
+          {/* Badge tokens, not the raw Tailwind palette: on bg-card (elev-2)
+              text-violet-600 was 2.94:1 and text-destructive 2.87:1, both under
+              the 3:1 floor for large text. The contract hues read 5.58 (red),
+              7.85 (amber) and 5.65 (violet) on that surface. */}
+          <SignalLink href="/tasks?due=overdue" label="Overdue" value={overdue.length} tone="text-badge-red" />
+          <SignalLink href="/tasks?due=today" label="Today" value={dueToday.length} tone="text-badge-amber" />
+          <SignalLink href="/tasks?status=blocked" label="Blocked" value={blocked.length} tone="text-badge-violet" />
         </div>
         <Link href={`/tasks?view=calendar&from=${today}&to=${weekEnd}`} className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline">
           Open calendar <ArrowRight className="h-3 w-3" aria-hidden="true" />
         </Link>
       </div>
 
-      <div className="rounded-xl border border-border bg-card p-4">
+      <div className="rounded-xl border border-line bg-card p-4">
         <div className="mb-3 flex items-start justify-between gap-3">
           <div>
-            <h3 className="text-sm font-semibold">Load by person</h3>
+            <h3 className="font-display text-sm font-semibold">Load by person</h3>
             <p className="text-xs text-muted-foreground">Open tasks currently assigned</p>
           </div>
           <Users className="h-4 w-4 text-primary" aria-hidden="true" />
@@ -62,7 +66,7 @@ export function TaskDashboardWidget() {
             {loadRows.map((row) => (
               <div key={row.id ?? "unassigned"} className="flex items-center justify-between gap-3 text-sm">
                 {row.id == null ? <span className="truncate text-muted-foreground">{row.label}</span> : <Link href={`/tasks?assignee=${row.id}`} className="truncate hover:underline">{row.label}</Link>}
-                <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-xs font-medium">{row.count}</span>
+                <span className="shrink-0 rounded-full bg-elev-4 px-2 py-0.5 font-mono text-xs font-medium tabular-nums">{row.count}</span>
               </div>
             ))}
           </div>
@@ -77,9 +81,9 @@ export function TaskDashboardWidget() {
 
 function SignalLink({ href, label, value, tone }: { href: string; label: string; value: number; tone: string }) {
   return (
-    <Link href={href} className="rounded-lg border border-border/70 p-2 transition-colors hover:bg-accent/40">
-      <span className="flex items-center gap-1 text-[11px] text-muted-foreground"><Ban className="h-3 w-3" aria-hidden="true" />{label}</span>
-      <span className={`text-xl font-semibold ${tone}`}>{value}</span>
+    <Link href={href} className="rounded-lg border border-line-strong p-2 transition-colors hover:bg-elev-3">
+      <span className="flex items-center gap-1 text-xs text-muted-foreground"><Ban className="h-3 w-3" aria-hidden="true" />{label}</span>
+      <span className={`font-mono text-xl font-semibold tabular-nums ${tone}`}>{value}</span>
     </Link>
   );
 }

@@ -35,13 +35,13 @@ export function PublicNoteUnlockForm({ token }: { token: string }) {
     <div className="flex min-h-svh items-center justify-center px-6">
       <form
         onSubmit={submit}
-        className="w-full max-w-sm space-y-4 rounded-xl border border-border/60 p-6"
+        className="w-full max-w-sm space-y-4 rounded-xl border border-line p-6"
       >
         <div className="flex flex-col items-center gap-2 text-center">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent text-primary">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-elev-4 text-primary">
             <KeyRound className="h-5 w-5" />
           </div>
-          <h1 className="text-lg font-semibold">This note is protected</h1>
+          <h1 className="font-display text-lg font-semibold">This note is protected</h1>
           <p className="text-sm text-muted-foreground">
             Enter the password you were given to read it.
           </p>

@@ -80,7 +80,7 @@ export function NotesWorkspaceView({
         aria-busy="true"
         aria-label="Loading notes"
       >
-        <Skeleton className="mb-5 h-5 w-32" />
+        <Skeleton className="mb-4 h-5 w-32" />
         <Skeleton className="mb-8 h-10 w-2/3" />
         {[1, 2, 3, 4].map((line) => (
           <Skeleton key={line} className="mb-4 h-8 w-full" />
@@ -99,13 +99,13 @@ export function NotesWorkspaceView({
             className="mx-auto mb-4 size-8 text-muted-foreground"
             aria-hidden="true"
           />
-          <h2 className="text-lg font-semibold">
+          <h2 className="font-display text-lg font-semibold">
             This page couldn't be opened
           </h2>
           <p className="mt-2 text-sm text-muted-foreground">
             Try again, or return to your notes to find another page.
           </p>
-          <div className="mt-5 flex justify-center gap-2">
+          <div className="mt-4 flex justify-center gap-2">
             <Button variant="outline" onClick={() => void logic.retryPage()}>
               Try again
             </Button>
@@ -128,10 +128,10 @@ export function NotesWorkspaceView({
           creating={logic.creating}
         />
       ) : (
-        <div className="mx-auto max-w-4xl px-4 py-5 sm:px-8 sm:py-8 lg:px-10">
+        <div className="mx-auto max-w-4xl px-4 py-4 sm:px-8 sm:py-8 lg:px-10">
           <nav
             aria-label="Note location"
-            className="mb-7 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground"
+            className="mb-6 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground"
           >
             <Link
               href="/notes"
@@ -160,7 +160,7 @@ export function NotesWorkspaceView({
           </nav>
 
           <div className="mb-4 flex min-w-0 items-center gap-3 sm:gap-4">
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted/50 text-muted-foreground">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-elev-4 text-muted-foreground">
               {isFolder ? (
                 <Folder className="h-5 w-5" aria-hidden="true" />
               ) : (
@@ -181,12 +181,12 @@ export function NotesWorkspaceView({
                   }
                 }}
                 placeholder="Untitled"
-                className="block min-h-11 w-full min-w-0 resize-none rounded-sm border-none bg-transparent px-0 py-1 text-2xl font-semibold leading-snug tracking-tight [field-sizing:content] placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring sm:text-3xl"
+                className="block min-h-11 w-full min-w-0 resize-none rounded-sm border-none bg-transparent px-0 py-1 font-display text-2xl font-semibold leading-snug tracking-tight [field-sizing:content] placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring sm:text-3xl"
               />
             ) : (
               // A disabled Input still reads as a field you might be able to use. A
               // read-only page simply has no field.
-              <h1 className="min-w-0 truncate text-2xl font-semibold sm:text-3xl">
+              <h1 className="min-w-0 truncate font-display text-2xl font-semibold sm:text-3xl">
                 {logic.title || "Untitled"}
               </h1>
             )}
@@ -281,7 +281,7 @@ export function NotesWorkspaceView({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-8 gap-1.5 bg-background/40"
+                  className="h-8 gap-1.5"
                   onClick={() => logic.setShareOpen(true)}
                   title="Share"
                 >
@@ -325,7 +325,7 @@ export function NotesWorkspaceView({
           </div>
 
           {!logic.canEdit && (
-            <div className="mb-4 flex items-center gap-2 rounded-lg border border-border/60 bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+            <div className="mb-4 flex items-center gap-2 rounded-lg border border-line bg-elev-2 px-3 py-2 text-xs text-muted-foreground">
               <Eye className="h-3.5 w-3.5 shrink-0" />
               <span>
                 This note was shared with you as read-only. Ask its owner if you
@@ -334,7 +334,7 @@ export function NotesWorkspaceView({
             </div>
           )}
 
-          <details className="group/details mb-6 rounded-lg border border-border/60">
+          <details className="group/details mb-6 rounded-lg border border-line">
             <summary className="flex cursor-pointer list-none items-center gap-2 rounded-lg px-3 py-2.5 text-xs text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
               <ChevronRight
                 className="size-3.5 transition-transform group-open/details:rotate-90 motion-reduce:transition-none"
@@ -352,7 +352,7 @@ export function NotesWorkspaceView({
               <div className="mb-3 flex flex-wrap items-center gap-2">
                 {logic.activePage?.entityKind &&
                 logic.activePage.entityId != null ? (
-                  <span className="inline-flex items-center gap-1.5 rounded-md border border-border/60 bg-muted/30 py-1 pl-2 pr-1 text-[12.5px]">
+                  <span className="inline-flex items-center gap-1.5 rounded-md border border-line bg-elev-4 py-1 pl-2 pr-1 text-xs">
                     <Briefcase
                       className="h-3.5 w-3.5 text-muted-foreground"
                       aria-hidden="true"
@@ -380,7 +380,7 @@ export function NotesWorkspaceView({
                         }
                         title="Unassign"
                         aria-label="Unassign from lead or project"
-                        className="rounded p-0.5 text-muted-foreground hover:bg-background hover:text-foreground"
+                        className="rounded p-0.5 text-muted-foreground hover:bg-elev-5 hover:text-foreground"
                       >
                         <X className="h-3 w-3" aria-hidden="true" />
                       </button>
@@ -392,7 +392,7 @@ export function NotesWorkspaceView({
                     trigger={
                       <button
                         type="button"
-                        className="inline-flex items-center gap-1.5 rounded-md border border-dashed border-border px-2.5 py-1.5 text-[12.5px] text-muted-foreground transition-colors hover:border-solid hover:bg-accent/50 hover:text-foreground"
+                        className="inline-flex items-center gap-1.5 rounded-md border border-dashed border-line-strong px-2.5 py-1.5 text-xs text-muted-foreground transition-colors hover:border-solid hover:bg-elev-4 hover:text-foreground"
                       >
                         <Briefcase className="h-3.5 w-3.5" aria-hidden="true" />
                         Link a record
@@ -406,10 +406,10 @@ export function NotesWorkspaceView({
                 {(logic.activePage?.tags ?? []).map((tag) => (
                   <span
                     key={tag.id}
-                    className="inline-flex items-center gap-1.5 rounded-full bg-muted/50 px-2 py-1 text-[12px] font-medium text-foreground/90"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-elev-4 px-2 py-1 text-xs font-medium text-foreground/90"
                   >
                     <span
-                      className="h-[7px] w-[7px] shrink-0 rounded-full"
+                      className="size-2 shrink-0 rounded-full"
                       style={{ backgroundColor: noteTagColor(tag.color) }}
                     />
                     {tag.name}
@@ -424,7 +424,7 @@ export function NotesWorkspaceView({
                     trigger={
                       <button
                         type="button"
-                        className="inline-flex items-center gap-1 rounded-md border border-dashed border-border px-2 py-1 text-[12.5px] text-muted-foreground transition-colors hover:border-solid hover:bg-accent/50 hover:text-foreground"
+                        className="inline-flex items-center gap-1 rounded-md border border-dashed border-line-strong px-2 py-1 text-xs text-muted-foreground transition-colors hover:border-solid hover:bg-elev-4 hover:text-foreground"
                       >
                         <Plus className="h-3 w-3" aria-hidden="true" />
                         Add label

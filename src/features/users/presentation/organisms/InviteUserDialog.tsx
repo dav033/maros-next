@@ -154,7 +154,7 @@ export function InviteUserDialog({ open, onOpenChange }: Props) {
     >
       <DialogContent className="max-h-[85vh] max-w-lg overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Invitar a una persona</DialogTitle>
+          <DialogTitle className="font-display">Invitar a una persona</DialogTitle>
           <DialogDescription>
             Entra con su propia cuenta de Google, así que el correo que escribas tiene
             que ser el de esa cuenta. El correo que le enviamos es solo un aviso con el
@@ -171,6 +171,7 @@ export function InviteUserDialog({ open, onOpenChange }: Props) {
               placeholder="persona@empresa.com"
               disabled={isPending}
               {...register("email")}
+              className="border-line-strong"
             />
           </Field>
 
@@ -193,7 +194,7 @@ export function InviteUserDialog({ open, onOpenChange }: Props) {
                   disabled={isPending}
                   onValueChange={field.onChange}
                 >
-                  <SelectTrigger id="invite-role">
+                  <SelectTrigger id="invite-role" className="border-line-strong">
                     <SelectValue placeholder="Elige un rol" />
                   </SelectTrigger>
                   <SelectContent>
@@ -228,7 +229,7 @@ export function InviteUserDialog({ open, onOpenChange }: Props) {
                     }
                   }}
                 >
-                  <SelectTrigger id="invite-user-type">
+                  <SelectTrigger id="invite-user-type" className="border-line-strong">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>

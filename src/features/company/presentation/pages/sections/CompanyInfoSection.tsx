@@ -83,6 +83,7 @@ export function CompanyInfoSection({
                 value={editingValue.name || ""}
                 onChange={(e) => setField("name", e.target.value)}
                 placeholder="Enter company name"
+                className="border-line-strong"
               />
             </div>
             <div>
@@ -94,6 +95,7 @@ export function CompanyInfoSection({
                 value={editingValue.phone || ""}
                 onChange={(e) => setField("phone", e.target.value)}
                 placeholder="Enter phone (optional)"
+                className="border-line-strong"
               />
             </div>
             <div>
@@ -106,6 +108,7 @@ export function CompanyInfoSection({
                 value={editingValue.email || ""}
                 onChange={(e) => setField("email", e.target.value)}
                 placeholder="Enter email (optional)"
+                className="border-line-strong"
               />
             </div>
             <div>
@@ -137,6 +140,7 @@ export function CompanyInfoSection({
                 value={editingValue.submiz || ""}
                 onChange={(e) => setField("submiz", e.target.value)}
                 placeholder="Enter submiz (optional)"
+                className="border-line-strong"
               />
             </div>
             <div>
@@ -154,7 +158,7 @@ export function CompanyInfoSection({
                   )
                 }
               >
-                <SelectTrigger id="company-type">
+                <SelectTrigger id="company-type" className="border-line-strong">
                   <SelectValue placeholder="Select type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -223,12 +227,18 @@ export function CompanyInfoSection({
             />
             <div className="flex items-center gap-2 pt-2">
               {company.isCustomer && (
-                <Badge className="bg-green-500/10 text-green-600 border-green-500/20">
+                <Badge
+                  variant="outline"
+                  style={{ borderColor: "hsl(var(--badge-green))", color: "hsl(var(--badge-green))" }}
+                >
                   Customer
                 </Badge>
               )}
               {company.isClient && (
-                <Badge className="bg-green-500/10 text-green-600 border-green-500/20">
+                <Badge
+                  variant="outline"
+                  style={{ borderColor: "hsl(var(--badge-green))", color: "hsl(var(--badge-green))" }}
+                >
                   Supplier
                 </Badge>
               )}

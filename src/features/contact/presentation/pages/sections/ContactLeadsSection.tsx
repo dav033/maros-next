@@ -72,7 +72,7 @@ export function ContactLeadsSection({ leads, onCreateLead }: ContactLeadsSection
               {leads.map((lead) => (
                 <Card 
                   key={lead.id} 
-                  className="border-l-4 border-l-primary cursor-pointer hover:bg-accent/30 transition-colors"
+                  className="cursor-pointer border-l-4 border-l-primary bg-elev-3 transition-colors hover:bg-elev-4"
                   onClick={() => router.push(`/lead/${lead.id}`)}
                 >
                   <CardHeader className="pb-3">
@@ -159,7 +159,9 @@ export function ContactLeadsSection({ leads, onCreateLead }: ContactLeadsSection
               {projects.map((lead) => (
                 <Card 
                   key={lead.id} 
-                  className="border-l-4 border-l-green-500 cursor-pointer hover:bg-accent/30 transition-colors"
+                  className="cursor-pointer border-l-4 bg-elev-3 transition-colors hover:bg-elev-4"
+                  // Color desde token CSS compartido (--badge-*), no paleta cruda: ver globals.css.
+                  style={{ borderLeftColor: "hsl(var(--badge-green))" }}
                   onClick={() => router.push(`/project/${lead.project!.id}`)}
                 >
                   <CardHeader className="pb-3">

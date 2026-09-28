@@ -86,12 +86,12 @@ export function MeetingParticipantsPicker({
           {value.map((email) => {
             const person = participants.get(email.toLowerCase());
             return (
-              <span key={email} className="inline-flex max-w-full items-center gap-1 rounded-full border border-primary/15 bg-primary/10 py-1 pl-2.5 pr-1 text-xs">
+              <span key={email} className="inline-flex max-w-full items-center gap-1 rounded-full border border-line bg-elev-4 py-1 pl-2.5 pr-1 text-xs">
                 <span className="truncate">{person?.name ?? email}</span>
                 <button
                   type="button"
                   aria-label={`Remove ${person?.name ?? email}`}
-                  className="rounded-full p-1 text-muted-foreground hover:bg-background hover:text-foreground"
+                  className="rounded-full p-1 text-muted-foreground hover:bg-elev-5 hover:text-foreground"
                   disabled={disabled}
                   onClick={() => onChange(value.filter((item) => item.toLowerCase() !== email.toLowerCase()))}
                 >

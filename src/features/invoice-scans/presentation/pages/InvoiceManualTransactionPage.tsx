@@ -60,7 +60,7 @@ export function InvoiceManualTransactionPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-5">
+    <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-4">
       <PageHeaderCard
         icon={CircleDollarSign}
         title="Add a transaction"
@@ -74,11 +74,11 @@ export function InvoiceManualTransactionPage() {
         aria-label="Add a manual transaction"
       >
         <fieldset className="space-y-3">
-          <legend className="text-base font-semibold">Payment direction</legend>
+          <legend className="font-display text-base font-semibold">Payment direction</legend>
           <div className="grid gap-3 sm:grid-cols-2">
             <label
               className={cn(
-                "flex cursor-pointer items-start gap-3 rounded-2xl border bg-background p-4 transition-colors hover:bg-muted/40",
+                "flex cursor-pointer items-start gap-3 rounded-2xl border bg-elev-3 p-4 transition-colors hover:bg-elev-4",
                 direction === "payment_made" && "border-primary/50 bg-primary/10 shadow-sm",
                 "has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring",
               )}
@@ -104,7 +104,7 @@ export function InvoiceManualTransactionPage() {
             </label>
             <label
               className={cn(
-                "flex cursor-pointer items-start gap-3 rounded-2xl border bg-background p-4 transition-colors hover:bg-muted/40",
+                "flex cursor-pointer items-start gap-3 rounded-2xl border bg-elev-3 p-4 transition-colors hover:bg-elev-4",
                 direction === "payment_received" &&
                   "border-primary/50 bg-primary/10 shadow-sm",
                 "has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring",
@@ -132,7 +132,7 @@ export function InvoiceManualTransactionPage() {
           </div>
         </fieldset>
 
-        <section className="grid gap-4 border-t pt-5 sm:grid-cols-2">
+        <section className="grid gap-4 border-t pt-4 sm:grid-cols-2">
           <div className="space-y-1.5 sm:col-span-2">
             <Label htmlFor="description">What was the payment for?</Label>
             <Input
@@ -170,6 +170,7 @@ export function InvoiceManualTransactionPage() {
               min="0.01"
               step="0.01"
               inputMode="decimal"
+              className="font-mono tabular-nums"
               required
             />
           </div>
@@ -195,7 +196,7 @@ export function InvoiceManualTransactionPage() {
           </div>
         </section>
 
-        <div className="flex flex-wrap justify-end gap-2 border-t pt-5">
+        <div className="flex flex-wrap justify-end gap-2 border-t pt-4">
           <Button asChild variant="outline">
             <Link href="/finance/invoices">Cancel</Link>
           </Button>

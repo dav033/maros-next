@@ -154,7 +154,7 @@ export function SharePublicLinkPanel({
     <div className="space-y-4">
       {!activeLink ? (
         <>
-          <div className="space-y-3 rounded-lg border border-border/60 p-3">
+          <div className="space-y-3 rounded-lg border border-line p-3">
             <div className="space-y-1.5">
               <Label htmlFor="share-password" className="text-xs">
                 Password (optional)
@@ -238,7 +238,7 @@ export function SharePublicLinkPanel({
               </p>
             </div>
           ) : (
-            <div className="rounded-lg border border-border/60 p-3 text-sm">
+            <div className="rounded-lg border border-line p-3 text-sm">
               <div className="font-medium">This note is published</div>
               <p className="mt-1 text-xs text-muted-foreground">
                 The URL ends in{" "}

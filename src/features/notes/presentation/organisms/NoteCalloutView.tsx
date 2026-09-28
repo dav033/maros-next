@@ -55,7 +55,7 @@ export function NoteCalloutView({ node, updateAttributes, editor }: NodeViewProp
     <NodeViewWrapper
       data-type="callout"
       data-variant={variant}
-      className="my-2 flex items-start gap-2.5 rounded-lg border border-border bg-muted/40 px-4 py-3.5"
+      className="my-2 flex items-start gap-2.5 rounded-lg border border-line bg-elev-2 px-4 py-3.5"
     >
       <button
         type="button"
@@ -66,7 +66,7 @@ export function NoteCalloutView({ node, updateAttributes, editor }: NodeViewProp
         onClick={cycleVariant}
         title={`${style.label} — click to change`}
         aria-label={`Callout type: ${style.label}. Click to change.`}
-        className={cn("mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded", style.tone, editor.isEditable && "cursor-pointer hover:bg-accent/60")}
+        className={cn("mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded", style.tone, editor.isEditable && "cursor-pointer hover:bg-elev-3")}
       >
         <Icon className="h-4 w-4" aria-hidden="true" />
       </button>

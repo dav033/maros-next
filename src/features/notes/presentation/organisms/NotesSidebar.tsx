@@ -99,7 +99,7 @@ export function NotesSidebar() {
   return (
     <aside
       aria-label="Notes navigation"
-      className="flex w-full shrink-0 flex-col border-b border-border/60 bg-card/60 md:w-60 md:border-b-0 md:border-r lg:w-64"
+      className="flex w-full shrink-0 flex-col border-b border-line bg-elev-3 md:w-60 md:border-b-0 md:border-r lg:w-64"
     >
       <Button
         variant="ghost"
@@ -141,7 +141,7 @@ export function NotesSidebar() {
         </div>
         <nav
           aria-label="Note collections"
-          className="space-y-1 border-t border-border/60 p-2"
+          className="space-y-1 border-t border-line p-2"
         >
           {secondaryLinks.map(({ href, label, icon: Icon }) => {
             const isActive = pathname === href;

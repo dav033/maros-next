@@ -7,13 +7,13 @@ export function ProjectsTableSkeleton() {
     <>
       <div className="space-y-3 xl:hidden">
         {Array.from({ length: 5 }).map((_, rowIdx) => (
-          <div key={rowIdx} className="space-y-3 rounded-xl border border-border/70 bg-card p-4 shadow-sm">
+          <div key={rowIdx} className="space-y-3 rounded-xl border border-line bg-elev-2 p-4 shadow-sm">
             <div className="space-y-2">
               <Skeleton className="h-3 w-24" />
               <Skeleton className="h-5 w-3/4" />
               <Skeleton className="h-3 w-1/2" />
             </div>
-            <div className="grid gap-3 border-y border-border/50 py-3 md:grid-cols-2">
+            <div className="grid gap-3 border-y border-line py-3 md:grid-cols-2">
               <div className="space-y-2">
                 <Skeleton className="h-3 w-24" />
                 <div className="space-y-2.5">
@@ -25,7 +25,7 @@ export function ProjectsTableSkeleton() {
                   ))}
                 </div>
               </div>
-              <div className="space-y-2 border-t border-border/50 pt-3 md:border-l md:border-t-0 md:pl-4 md:pt-0">
+              <div className="space-y-2 border-t border-line pt-3 md:border-l md:border-t-0 md:pl-4 md:pt-0">
                 <Skeleton className="h-3 w-28" />
                 <div className="space-y-2.5">
                   {Array.from({ length: 3 }).map((__, metricIdx) => (
@@ -70,7 +70,7 @@ export function ProjectsTableSkeleton() {
         </thead>
         <tbody>
           {Array.from({ length: 13 }).map((_, rowIdx) => (
-            <tr key={rowIdx} className="border-b border-border/50">
+            <tr key={rowIdx} className="border-b border-line">
               <td className="px-4 py-3">
                 <Skeleton className="h-4 w-24" />
               </td>

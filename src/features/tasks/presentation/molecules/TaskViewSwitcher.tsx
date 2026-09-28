@@ -14,7 +14,7 @@ export function TaskViewSwitcher({ current }: { current: TasksView }) {
   ];
 
   return (
-    <div className="inline-flex rounded-lg border border-border/60 bg-background/60 p-0.5">
+    <div className="inline-flex rounded-lg border border-line bg-elev-1 p-0.5">
       {options.map((option) => {
         const active = option.value === current;
         const Icon = option.icon;

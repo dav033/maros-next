@@ -40,7 +40,7 @@ export function PublicLinksSettingsView({ initialLinks }: { initialLinks: NoteAd
     <div className="mx-auto max-w-5xl px-4 py-6 sm:px-8 sm:py-10">
       <div className="mb-6 flex flex-col items-stretch justify-between gap-4 sm:flex-row sm:items-start">
         <div className="min-w-0">
-          <h1 className="flex items-center gap-2 text-2xl font-semibold"><Globe className="h-6 w-6" />Public links</h1>
+          <h1 className="flex items-center gap-2 font-display text-2xl font-semibold"><Globe className="h-6 w-6" />Public links</h1>
           <p className="mt-1 text-sm text-muted-foreground">Active note links across the workspace. Tokens are never shown or exported.</p>
         </div>
         <Button variant="outline" className="w-full shrink-0 sm:w-auto" onClick={exportCsv} disabled={links.length === 0}><Download className="mr-2 h-4 w-4" />Export CSV</Button>

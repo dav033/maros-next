@@ -41,8 +41,8 @@ export function ContactForm({
   const { handleTextChange } = useFormHandlers(value, onChange);
 
   return (
-    <div className="space-y-5">
-      <div className="flex gap-2.5">
+    <div className="space-y-4">
+      <div className="flex gap-3">
         <div className="flex-[2] min-w-0 relative">
           <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
             <User className="size-4" />
@@ -53,7 +53,7 @@ export function ContactForm({
             placeholder="Contact name"
             disabled={disabled}
             required
-            className="pl-10"
+            className="border-line-strong pl-10"
           />
         </div>
         <div className="flex-[1.5] min-w-0">
@@ -62,7 +62,7 @@ export function ContactForm({
             onValueChange={(val) => onChange({ ...value, role: val === EMPTY_SELECT_VALUE ? undefined : val })}
             disabled={disabled}
           >
-            <SelectTrigger>
+            <SelectTrigger className="border-line-strong">
               <Briefcase className="size-4 text-muted-foreground mr-2" />
               <SelectValue placeholder="Select role" />
             </SelectTrigger>
@@ -77,7 +77,7 @@ export function ContactForm({
           </Select>
         </div>
       </div>
-      <div className="flex gap-2.5">
+      <div className="flex gap-3">
         <div className="flex-1 min-w-0 relative">
           <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
             <Phone className="size-4" />
@@ -87,7 +87,7 @@ export function ContactForm({
             onChange={(event: ChangeEvent<HTMLInputElement>) => handleTextChange(event, "phone")}
             placeholder="Phone number"
             disabled={disabled}
-            className="pl-10"
+            className="border-line-strong pl-10"
           />
         </div>
         <div className="flex-1 min-w-0 relative">
@@ -100,7 +100,7 @@ export function ContactForm({
             onChange={(event: ChangeEvent<HTMLInputElement>) => handleTextChange(event, "email")}
             placeholder="email@example.com"
             disabled={disabled}
-            className="pl-10"
+            className="border-line-strong pl-10"
           />
         </div>
       </div>

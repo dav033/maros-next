@@ -20,9 +20,9 @@ export function ArchivedTasksPage() {
   return (
     <div className="flex w-full flex-1 flex-col gap-4">
       <PageHeaderCard icon={Archive} title="Archived tasks" description="Restore tasks and their subtasks when work resumes." />
-      <section className="rounded-xl border border-border bg-card">
+      <section className="rounded-xl border border-line bg-elev-2">
         {tasks.length === 0 ? <p className="p-6 text-sm text-muted-foreground">No archived tasks.</p> : tasks.map((task) => (
-          <div key={task.id} className="flex items-center gap-3 border-b border-border/60 px-4 py-3 last:border-0">
+          <div key={task.id} className="flex items-center gap-3 border-b border-line px-4 py-3 last:border-0">
             <span className="min-w-0 flex-1 truncate text-sm font-medium">T-{task.id} · {task.title}</span>
             <span className="text-xs text-muted-foreground">{new Date(task.updatedAt).toLocaleDateString()}</span>
             <Button type="button" size="sm" variant="outline" className="h-8 gap-1.5" disabled={restore.isPending} onClick={() => restore.mutate(task.id)}><RotateCcw className="h-3.5 w-3.5" />Restore</Button>

@@ -90,7 +90,7 @@ export function ContactModeSelector({
               onChange={(e: ChangeEvent<HTMLInputElement>) => onChange("contactName", e.target.value)}
               placeholder="Contact Name"
               disabled={disabled}
-              className="pl-10"
+              className="border-line-strong pl-10"
             />
           </div>
           <div className="relative">
@@ -102,7 +102,7 @@ export function ContactModeSelector({
               onChange={(e: ChangeEvent<HTMLInputElement>) => onChange("phone", e.target.value)}
               placeholder="Phone"
               disabled={disabled}
-              className="pl-10"
+              className="border-line-strong pl-10"
             />
           </div>
         </div>
@@ -115,7 +115,7 @@ export function ContactModeSelector({
             onChange={(e: ChangeEvent<HTMLInputElement>) => onChange("email", e.target.value)}
             placeholder="Email"
             disabled={disabled}
-            className="pl-10"
+            className="border-line-strong pl-10"
           />
         </div>
       </TabsContent>

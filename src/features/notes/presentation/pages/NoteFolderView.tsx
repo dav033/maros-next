@@ -64,9 +64,9 @@ export function NoteFolderView({
             <Link
               key={child.id}
               href={`/notes/${child.id}`}
-              className="flex min-w-0 items-center gap-3 rounded-lg border-b border-border/60 px-2 py-3 last:border-b-0 hover:bg-accent/35 sm:gap-3.5"
+              className="flex min-w-0 items-center gap-3 rounded-lg border-b border-line px-2 py-3 last:border-b-0 hover:bg-elev-3 sm:gap-3.5"
             >
-              <div className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-lg bg-accent text-muted-foreground">
+              <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-elev-4 text-muted-foreground">
                 {child.icon ??
                   (child.kind === "folder" ? (
                     <Folder className="h-4 w-4" />

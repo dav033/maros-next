@@ -17,8 +17,12 @@ export function BulkActionsBar({ count, onClear, children }: BulkActionsBarProps
   if (count === 0) return null;
 
   return (
-    <div className="dashboard-section-enter flex flex-wrap items-center gap-3 rounded-2xl border border-primary/30 bg-primary/10 px-4 py-3 shadow-sm">
-      <span className="text-sm font-medium text-foreground">
+    <div className="dashboard-section-enter flex flex-wrap items-center gap-3 rounded-2xl border border-primary bg-primary-container px-4 py-3 shadow-sm">
+      {/* La barra es una superficie primary-container, así que sus hijos van en
+          on-container: el hover gris de `ghost` (accent = elev-5) sobre verde
+          rendía 1.22:1 y se veía como una mancha. on-primary-container da
+          9.27:1 sobre el contenedor. */}
+      <span className="text-sm font-medium text-primary-on-container">
         {count} selected
       </span>
       <div className="flex flex-1 flex-wrap items-center gap-2">{children}</div>
@@ -27,7 +31,7 @@ export function BulkActionsBar({ count, onClear, children }: BulkActionsBarProps
         variant="ghost"
         size="sm"
         onClick={onClear}
-        className="gap-1.5 text-muted-foreground hover:text-foreground"
+        className="gap-1.5 text-primary-on-container hover:bg-primary-on-container/15 hover:text-primary-on-container"
       >
         <X className="h-3.5 w-3.5" />
         Clear

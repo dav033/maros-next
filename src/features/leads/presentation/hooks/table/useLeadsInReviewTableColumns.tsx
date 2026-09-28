@@ -18,6 +18,12 @@ interface UseLeadsInReviewTableColumnsProps {
   isRejecting?: number | null;
 }
 
+// Colores desde tokens CSS compartidos (--badge-*), no hex crudo: ver globals.css.
+const ACTION_COLORS = {
+  approve: "hsl(var(--badge-green))",
+  reject: "hsl(var(--badge-red))",
+} as const;
+
 // Styled action button component
 function ActionButton({
   onClick,
@@ -41,40 +47,36 @@ function ActionButton({
       title={disabled ? "Action not available" : tooltip}
       className={`
         group
-        relative w-[28px] h-[28px] rounded-md
+        relative size-7 rounded-sm
         flex items-center justify-center
-        bg-transparent border border-[#2D3341]/50
+        bg-transparent border border-line-strong
         transition-all duration-150 ease-out
         cursor-pointer
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50
+        focus:outline-none focus-visible:ring-2 focus-visible:ring-ring
         disabled:opacity-40 disabled:cursor-not-allowed
-        ${!disabled ? "hover:bg-accent/50 hover:border-border" : ""}
+        ${!disabled ? "hover:bg-elev-3" : ""}
         ${!disabled ? "active:scale-[0.95]" : ""}
       `}
     >
       {isLoading ? (
         <Loader className="size-3.5 animate-spin text-muted-foreground" />
       ) : isApprove ? (
-        <Check 
+        <Check
           className={`
             size-3.5
-            transition-colors duration-150
-            ${disabled 
-              ? "text-muted-foreground" 
-              : "text-emerald-600/60 group-hover:text-emerald-400"
-            }
+            transition-opacity duration-150
+            ${disabled ? "text-muted-foreground" : "opacity-70 group-hover:opacity-100"}
           `}
+          style={disabled ? undefined : { color: ACTION_COLORS.approve }}
         />
       ) : (
-        <X 
+        <X
           className={`
             size-3.5
-            transition-colors duration-150
-            ${disabled 
-              ? "text-muted-foreground" 
-              : "text-red-500/60 group-hover:text-red-400"
-            }
+            transition-opacity duration-150
+            ${disabled ? "text-muted-foreground" : "opacity-70 group-hover:opacity-100"}
           `}
+          style={disabled ? undefined : { color: ACTION_COLORS.reject }}
         />
       )}
     </button>
@@ -113,7 +115,9 @@ export function useLeadsInReviewTableColumns({
         header: "Lead #",
         className: "w-[110px]",
         render: (lead: Lead) => (
-          <span className="font-mono text-foreground">{lead.leadNumber}</span>
+          <span className="whitespace-nowrap font-mono tabular-nums text-foreground">
+            {lead.leadNumber}
+          </span>
         ),
         sortable: true,
         sortValue: (lead: Lead) => lead.leadNumber ?? "",
@@ -172,7 +176,7 @@ export function useLeadsInReviewTableColumns({
       {
         key: "actions",
         header: "",
-        className: "w-[100px] text-center sticky right-0 bg-secondary-900/95 backdrop-blur-sm",
+        className: "w-[100px] text-center sticky right-0 bg-elev-2",
         render: (lead: Lead) => {
           const isCurrentAccepting = isAccepting === lead.id;
           const isCurrentRejecting = isRejecting === lead.id;

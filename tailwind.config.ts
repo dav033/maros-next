@@ -34,6 +34,20 @@ const config: Config = {
           dim: "var(--fg-dim)",
           faint: "var(--fg-faint)",
         },
+        // Badge palette as utilities (text-badge-amber…), so a widget can name a
+        // contract hue in a className instead of reaching for raw Tailwind
+        // colors. Same values the style props read via hsl(var(--badge-*)).
+        badge: {
+          neutral: "hsl(var(--badge-neutral))",
+          blue: "hsl(var(--badge-blue))",
+          sky: "hsl(var(--badge-sky))",
+          indigo: "hsl(var(--badge-indigo))",
+          amber: "hsl(var(--badge-amber))",
+          orange: "hsl(var(--badge-orange))",
+          green: "hsl(var(--badge-green))",
+          violet: "hsl(var(--badge-violet))",
+          red: "hsl(var(--badge-red))",
+        },
         money: {
           in: "var(--money-in)",
           out: "var(--money-out)",

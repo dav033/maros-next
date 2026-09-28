@@ -34,7 +34,7 @@ export function CompanyTypeFields({
         onValueChange={(val) => onTypeChange(val === EMPTY_SELECT_VALUE ? "" : val)}
         disabled={disabled}
       >
-        <SelectTrigger>
+        <SelectTrigger className="border-line-strong">
           <Tag className="size-4 text-muted-foreground mr-2" />
           <SelectValue placeholder="No type" />
         </SelectTrigger>
@@ -52,7 +52,7 @@ export function CompanyTypeFields({
         onValueChange={(val) => onServiceChange(val === EMPTY_SELECT_VALUE ? "" : val)}
         disabled={disabled || !isSubcontractorType(type)}
       >
-        <SelectTrigger>
+        <SelectTrigger className="border-line-strong">
           <Wrench className="size-4 text-muted-foreground mr-2" />
           <SelectValue placeholder="No service" />
         </SelectTrigger>

@@ -70,7 +70,7 @@ export function NotificationBell() {
         </button>
       </PopoverTrigger>
       <PopoverContent className="w-80 p-0" align="start" side="top">
-        <div className="flex items-center justify-between border-b border-border/60 px-3 py-2">
+        <div className="flex items-center justify-between border-b border-line px-3 py-2">
           <span className="text-sm font-medium">Notifications</span>
           {notifications.some((n) => !n.readAt) ? (
             <Button
@@ -92,17 +92,17 @@ export function NotificationBell() {
           ) : notifications.length === 0 ? (
             <p className="px-3 py-6 text-center text-sm text-muted-foreground">Nothing yet.</p>
           ) : (
-            <ul className="divide-y divide-border/60">
+            <ul className="divide-y divide-line">
               {notifications.map((notification) => {
                 const href = taskHref(notification);
                 const content = (
                   <div
                     className={cn(
-                      "flex flex-col gap-0.5 px-3 py-2.5 text-sm hover:bg-accent/40",
-                      !notification.readAt && "bg-primary/5"
+                      "flex flex-col gap-0.5 px-3 py-2.5 text-sm hover:bg-elev-4",
+                      !notification.readAt && "bg-elev-3"
                     )}
                   >
-                    <p className="text-foreground/90">{describe(notification)}</p>
+                    <p className="text-foreground">{describe(notification)}</p>
                     <p className="text-xs text-muted-foreground">
                       {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
                     </p>

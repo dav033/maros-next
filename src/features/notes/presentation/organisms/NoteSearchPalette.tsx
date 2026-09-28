@@ -64,13 +64,13 @@ export function NoteSearchPalette({
           type="button"
           variant="outline"
           size="sm"
-          className="gap-2 bg-background/40"
+          className="gap-2"
           onClick={() => setOpen(true)}
           aria-label="Search notes"
         >
           <Search className="h-3.5 w-3.5" aria-hidden="true" />
           <span>Search notes</span>
-          <kbd className="hidden rounded border border-border/70 bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">
+          <kbd className="hidden rounded border border-line bg-elev-4 px-1.5 py-0.5 font-mono text-[10px] font-medium text-muted-foreground sm:inline">
             {typeof navigator !== "undefined" &&
             /Mac|iPhone|iPad/.test(navigator.platform)
               ? "⌘K"

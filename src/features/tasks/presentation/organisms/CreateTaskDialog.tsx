@@ -295,7 +295,7 @@ export function CreateTaskDialog({
                 trigger={
                   <button
                     type="button"
-                    className="flex h-9 w-full items-center gap-2 rounded-md border border-input bg-transparent px-3 text-sm hover:bg-accent/40"
+                    className="flex h-9 w-full items-center gap-2 rounded-md border border-line-strong bg-transparent px-3 text-sm hover:bg-elev-3"
                   >
                     <AssigneeAvatar person={assigneeUserId ? { id: assigneeUserId, name: assigneeLabel, email: "", picture: null } : null} />
                     <span className="truncate">{assigneeLabel}</span>
@@ -320,7 +320,7 @@ export function CreateTaskDialog({
           </button>
 
           {showMore ? (
-            <div className="space-y-4 border-t border-border/60 pt-4">
+            <div className="space-y-4 border-t border-line pt-4">
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label className="text-xs text-muted-foreground">Start date</Label>
@@ -336,7 +336,7 @@ export function CreateTaskDialog({
                     trigger={
                       <button
                         type="button"
-                        className="flex h-9 w-full items-center gap-1 rounded-md border border-input bg-transparent px-3 text-sm hover:bg-accent/40"
+                        className="flex h-9 w-full items-center gap-1 rounded-md border border-line-strong bg-transparent px-3 text-sm hover:bg-elev-3"
                       >
                         {labelIds.size > 0 ? (
                           <span className="truncate">{labelIds.size} selected</span>
@@ -379,7 +379,7 @@ export function CreateTaskDialog({
                     where you opened this from.
                   </p>
                 ) : entityLink ? (
-                  <div className="flex items-center gap-2 rounded-md border border-border/60 px-3 py-2 text-sm">
+                  <div className="flex items-center gap-2 rounded-md border border-line px-3 py-2 text-sm">
                     <Link2 className="h-3.5 w-3.5 text-muted-foreground" />
                     <span className="flex-1 truncate">
                       {entityLink.label ?? taskEntityLabel(null, entityLink.entityKind, entityLink.entityId)}

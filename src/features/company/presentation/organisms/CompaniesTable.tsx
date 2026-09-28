@@ -91,9 +91,9 @@ export function CompaniesTable({
       defaultSort={{ key: "name", dir: "asc" }}
       loadingState={<DefaultTableLoading label="Loading companies…" />}
       emptyState={
-        <div className="flex flex-col items-center justify-center rounded-lg border border-border bg-card/40 p-8 text-center">
+        <div className="flex flex-col items-center justify-center rounded-lg border border-line bg-elev-2 p-8 text-center">
           <Building className="size-12 text-muted-foreground/50 mb-4" />
-          <h3 className="text-lg font-medium text-foreground">No companies found.</h3>
+          <h3 className="font-display text-lg font-medium text-foreground">No companies found.</h3>
           <p className="text-sm text-muted-foreground mt-1">
             Use the button above to create a new company.
           </p>

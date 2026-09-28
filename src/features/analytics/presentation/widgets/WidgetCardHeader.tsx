@@ -39,7 +39,7 @@ export function WidgetCardHeader({
         {href ? (
           <Link
             href={href}
-            className="group inline-flex items-center gap-1 rounded-md border border-border/60 bg-background/40 px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
+            className="group inline-flex items-center gap-1 rounded-md border border-line-strong bg-elev-3 px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
           >
             {hrefLabel}
             <ArrowUpRight className="h-3 w-3 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />

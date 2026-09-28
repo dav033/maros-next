@@ -114,7 +114,7 @@ function TagRow({ tag, noteCount }: { tag: NoteTag; noteCount: number }) {
   }
 
   return (
-    <div className="group flex items-center gap-3 rounded-lg px-2 py-2 hover:bg-accent/50">
+    <div className="group flex items-center gap-3 rounded-lg px-2 py-2 hover:bg-elev-3">
       <span
         className="h-3 w-3 shrink-0 rounded-full"
         style={{ backgroundColor: noteTagColor(tag.color) }}
@@ -194,7 +194,7 @@ export function ManageLabelsDialog({
         </div>
 
         <div className="flex flex-col gap-2 border-t border-border pt-4">
-          <div className="text-[10.5px] font-semibold uppercase tracking-wide text-muted-foreground/80">
+          <div className="font-display text-[10px] font-semibold uppercase tracking-wide text-muted-foreground/80">
             New label
           </div>
           <div className="flex flex-wrap items-center gap-2">

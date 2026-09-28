@@ -31,7 +31,7 @@ function ToolbarButton({
       aria-label={label}
       aria-pressed={active}
       className={cn(
-        "grid h-7 w-7 place-items-center rounded text-muted-foreground hover:bg-accent hover:text-foreground",
+        "grid h-7 w-7 place-items-center rounded-sm text-muted-foreground hover:bg-accent hover:text-foreground",
         active && "bg-accent text-foreground"
       )}
     >
@@ -115,7 +115,7 @@ export function TaskRichTextEditor({
       )}
     >
       {editable ? (
-        <div className="flex items-center gap-0.5 border-b border-border/60 px-1.5 py-1">
+        <div className="flex items-center gap-0.5 border-b border-line px-1.5 py-1">
           <ToolbarButton
             label="Bold"
             active={editor.isActive("bold")}

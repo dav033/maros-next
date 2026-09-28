@@ -138,7 +138,7 @@ export function ProjectQboReportPage({ projectId }: { projectId: number }) {
           </Link>
         </Button>
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Reporte de QuickBooks</h1>
+          <h1 className="font-display text-3xl font-bold text-foreground">Reporte de QuickBooks</h1>
           <p className="text-muted-foreground">
             Proyecto {data?.leadNumber ? `#${data.leadNumber}` : `#${projectId}`}
           </p>
@@ -147,8 +147,8 @@ export function ProjectQboReportPage({ projectId }: { projectId: number }) {
 
       <Card>
         <CardContent className="flex flex-wrap items-end gap-4 p-6">
-          <div className="space-y-1.5">
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          <div className="space-y-2">
+            <p className="font-display text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Reporte
             </p>
             <Select value={report} onValueChange={(value) => setReport(value as QboReportName)}>
@@ -165,14 +165,14 @@ export function ProjectQboReportPage({ projectId }: { projectId: number }) {
             </Select>
           </div>
 
-          <div className="space-y-1.5">
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          <div className="space-y-2">
+            <p className="font-display text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Método contable
             </p>
             <div
               role="group"
               aria-label="Método contable"
-              className="flex h-10 items-center gap-1 rounded-lg border border-border/60 bg-background/40 p-1"
+              className="flex h-10 items-center gap-1 rounded-lg border border-line bg-elev-3 p-1"
             >
               {QBO_ACCOUNTING_METHODS.map((method) => (
                 <Button
@@ -191,8 +191,8 @@ export function ProjectQboReportPage({ projectId }: { projectId: number }) {
           </div>
 
           {pointInTime ? (
-            <div className="space-y-1.5">
-              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            <div className="space-y-2">
+              <p className="font-display text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Fecha de corte
               </p>
               <Input
@@ -204,8 +204,8 @@ export function ProjectQboReportPage({ projectId }: { projectId: number }) {
             </div>
           ) : (
             <>
-              <div className="space-y-1.5">
-                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              <div className="space-y-2">
+                <p className="font-display text-xs font-medium uppercase tracking-wide text-muted-foreground">
                   Desde
                 </p>
                 <Input
@@ -217,8 +217,8 @@ export function ProjectQboReportPage({ projectId }: { projectId: number }) {
                   className="h-10 w-[170px]"
                 />
               </div>
-              <div className="space-y-1.5">
-                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              <div className="space-y-2">
+                <p className="font-display text-xs font-medium uppercase tracking-wide text-muted-foreground">
                   Hasta
                 </p>
                 <Input

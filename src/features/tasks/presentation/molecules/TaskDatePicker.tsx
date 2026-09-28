@@ -85,7 +85,7 @@ export function TaskDatePicker({
         )}
       </div>
       <PopoverContent className="w-auto p-0" align="start">
-        <div className="flex items-center gap-1 border-b border-border/60 p-2">
+        <div className="flex items-center gap-1 border-b border-line p-2">
           {PRESETS.map((preset) => (
             <Button
               key={preset.label}

@@ -114,6 +114,11 @@
   --chart-3: 30 80% 55%;
   --chart-4: 280 65% 60%;
   --chart-5: 340 75% 55%;
+  /* Six categorical slots are needed: ProjectProgressStatus has six members and
+     the pie indexes COLORS[i % COLORS.length], so a fifth-slot palette makes two
+     statuses share a color. Seven keeps a slot of headroom. */
+  --chart-6: 190 75% 45%;
+  --chart-7: 95 55% 45%;
 
   /* Badge palette: shared categorical colors for status/type/boolean badges
      across leads, projects, companies and contacts. Named by hue, not by
@@ -121,25 +126,30 @@
      tables (e.g. blue = "Contacted" status and "Plumbing" lead type).
 
      These hues are used as TEXT color (12px semibold badge labels), so each one
-     has to clear WCAG AA 4.5:1 against the darkest surface it lands on. Ratios
-     measured against --elev-1 #141917, --elev-2 #191F1D and --elev-3 #1D2422;
-     only the lightness moved, the hue and saturation are the originals:
-       neutral 5.77 / 5.45 / 5.16   sky   8.06 / 7.61 / 7.21
-       amber   8.28 / 7.82 / 7.41   green 7.70 / 7.27 / 6.89
-       orange  6.36 / 6.01 / 5.69
-       blue    5.23 / 4.94 / 4.68  (was 4.88 / 4.61 / 4.36 at 60%)
-       indigo  5.16 / 4.87 / 4.61  (was 4.00 / 3.77 / 3.58 at 67%)
-       violet  5.19 / 4.90 / 4.65  (was 4.11 / 3.88 / 3.67 at 66%)
-       red     5.21 / 4.92 / 4.66  (was 4.68 / 4.42 / 4.19 at 60%) */
-  --badge-neutral: 218 10% 59%;
-  --badge-blue: 217 91% 62%;
+     has to clear WCAG AA 4.5:1 against the darkest surface it lands on. They
+     were first tuned against elev-1/elev-2/elev-3 only, but chips and pills are
+     placed on elev-4 (the contract's own chip surface) and elev-5, where the
+     five darkest hues fell under 4.5. The lightness moved again so the palette
+     is valid on the WHOLE elevation scale; hue and saturation are the
+     originals. Ratios against elev-1 / elev-2 / elev-3 / elev-4 / elev-5:
+       sky     8.07 / 7.60 / 7.18 / 6.67 / 6.17   (unchanged)
+       amber   8.34 / 7.85 / 7.42 / 6.89 / 6.37   (unchanged)
+       green   7.72 / 7.27 / 6.87 / 6.38 / 5.90   (unchanged)
+       orange  6.38 / 6.01 / 5.68 / 5.28 / 4.88   (unchanged)
+       neutral 5.98 / 5.62 / 5.32 / 4.94 / 4.57   (was …/4.81/4.44 at 59%)
+       blue    6.04 / 5.68 / 5.37 / 4.99 / 4.61   (was …/4.36/4.03 at 62%)
+       indigo  6.00 / 5.65 / 5.34 / 4.96 / 4.59   (was …/4.30/3.98 at 72%)
+       violet  6.01 / 5.65 / 5.34 / 4.97 / 4.59   (was …/4.30/3.97 at 71%)
+       red     5.93 / 5.58 / 5.27 / 4.90 / 4.53   (was …/4.32/3.99 at 64%) */
+  --badge-neutral: 218 10% 60%;
+  --badge-blue: 217 91% 66%;
   --badge-sky: 199 89% 60%;
-  --badge-indigo: 239 84% 72%;
+  --badge-indigo: 239 84% 75%;
   --badge-amber: 38 92% 50%;
   --badge-orange: 25 95% 53%;
   --badge-green: 142 71% 45%;
-  --badge-violet: 258 90% 71%;
-  --badge-red: 0 84% 64%;
+  --badge-violet: 258 90% 74%;
+  --badge-red: 0 84% 68%;
 }
 
 * {

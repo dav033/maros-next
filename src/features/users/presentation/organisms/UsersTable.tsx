@@ -121,7 +121,7 @@ export function UsersTable() {
                       updateMutation.mutate({ id: user.id, patch: { roleId: Number(value) } })
                     }
                   >
-                    <SelectTrigger className="w-40">
+                    <SelectTrigger className="w-40 border-line-strong">
                       <SelectValue placeholder="No role" />
                     </SelectTrigger>
                     <SelectContent>
@@ -194,7 +194,7 @@ export function UsersTable() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>
+            <AlertDialogTitle className="font-display">
               ¿Cancelar la invitación de {pendingRevoke?.email}?
             </AlertDialogTitle>
             <AlertDialogDescription>

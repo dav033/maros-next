@@ -7,7 +7,7 @@ export default function Loading() {
         <Skeleton className="h-6 w-56" />
         <Skeleton className="h-3 w-72" />
       </div>
-      <div className="rounded-xl border border-border/60 bg-card/40 p-4 space-y-3">
+      <div className="rounded-xl border border-line bg-elev-2 p-4 space-y-3">
         {Array.from({ length: 8 }).map((_, i) => (
           <Skeleton key={i} className="h-12 w-full" />
         ))}

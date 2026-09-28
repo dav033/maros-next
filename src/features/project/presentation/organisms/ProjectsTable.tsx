@@ -104,7 +104,7 @@ function ProjectMobileCard({
           {status ? (
             <Badge
               variant="outline"
-              className="gap-1.5 text-[10px]"
+              className="gap-1.5 text-xs"
               style={{ borderColor: PROGRESS_COLORS[status], color: PROGRESS_COLORS[status] }}
             >
               <span className="size-1.5 rounded-full" style={{ backgroundColor: PROGRESS_COLORS[status] }} />
@@ -132,9 +132,9 @@ function ProjectMobileCard({
       </div>
 
       {canReadFinance ? (
-        <div className="min-w-0 space-y-2 border-y border-border py-3">
+        <div className="min-w-0 space-y-2 border-y border-line py-3">
           <div className="flex items-baseline justify-between gap-2">
-            <h3 className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+            <h3 className="font-display text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Contract
             </h3>
             <span className="font-mono text-xs font-medium tabular-nums">
@@ -150,7 +150,7 @@ function ProjectMobileCard({
             label={project.lead.name}
           />
           <div className="flex items-baseline justify-between gap-2">
-            <h3 className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+            <h3 className="font-display text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Profit
             </h3>
             <span className="font-mono text-xs font-medium tabular-nums">
@@ -339,7 +339,7 @@ export function ProjectsTable({
       className={DENSE_ROW_CLASS}
       emptyState={
         <div className="flex flex-col items-center justify-center rounded-lg border border-border bg-elev-2 p-8 text-center">
-          <FolderX className="size-12 text-muted-foreground/50 mb-4" />
+          <FolderX className="size-12 text-fg-faint mb-4" />
           <h3 className="text-lg font-medium text-foreground">No projects found</h3>
           <p className="text-sm text-muted-foreground mt-1">
             Get started by creating a new project.

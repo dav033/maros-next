@@ -57,9 +57,12 @@ export function ContactInfoDisplay({
       onClick={handleClick}
       // max-w-full lets the pill shrink inside a squeezed column instead of forcing
       // its 160px onto the cell and pushing the rest of the row out of shape.
-      className={`inline-flex w-[160px] max-w-full items-center gap-2 rounded-md border border-indigo-500/30 bg-indigo-500/10 px-2.5 py-1 text-xs font-medium text-indigo-300 hover:bg-indigo-500/20 transition-colors cursor-pointer ${className}`}
+      // Chip dentro de una fila (elev-2): sube a la superficie de chip (elev-4) y su
+      // hover, un escalon mas. El matiz sale del token compartido, no de la paleta cruda.
+      className={`inline-flex w-[160px] max-w-full cursor-pointer items-center gap-2 rounded-md border bg-elev-4 px-2.5 py-1 text-xs font-medium transition-colors hover:bg-elev-5 ${className}`}
+      style={{ borderColor: "hsl(var(--badge-indigo))", color: "hsl(var(--badge-indigo))" }}
     >
-      <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-indigo-500/20 text-indigo-300">
+      <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-elev-5">
         <User className="size-2.5" />
       </div>
       <span className="truncate">{contact.name}</span>

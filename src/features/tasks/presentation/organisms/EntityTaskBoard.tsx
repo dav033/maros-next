@@ -56,13 +56,13 @@ function EntityColumn({ status, tasks, onOpenTask, onComplete, onQuickAdd }: {
     <section
       ref={setNodeRef}
       className={cn(
-        "flex min-h-40 w-60 shrink-0 flex-col rounded-lg border border-border bg-card",
-        isOver && "border-primary/50 bg-primary/5",
+        "flex min-h-40 w-60 shrink-0 flex-col rounded-lg border border-line bg-elev-2",
+        isOver && "border-primary bg-primary/5",
       )}
     >
-      <header className="flex items-center justify-between border-b border-border/40 px-3 py-2">
+      <header className="flex items-center justify-between border-b border-line px-3 py-2">
         <h3 className="text-xs font-semibold text-muted-foreground">{TASK_STATUS_LABELS[status]}</h3>
-        <span className="rounded-full bg-muted px-1.5 py-0.5 text-[11px] text-muted-foreground">{tasks.length}</span>
+        <span className="rounded-full border border-line bg-elev-4 px-2 py-0.5 font-mono text-[11px] tabular-nums text-muted-foreground">{tasks.length}</span>
       </header>
       <div className={cn("flex flex-1 flex-col gap-2 p-2", tasks.length === 0 && "justify-center")}>
         <SortableContext items={tasks.map((task) => task.id)} strategy={verticalListSortingStrategy}>

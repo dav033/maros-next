@@ -43,7 +43,7 @@ export function OutstandingReportContent() {
     <section className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold">QuickBooks Outstanding Balances</h1>
+          <h1 className="font-display text-xl font-semibold">QuickBooks Outstanding Balances</h1>
           <p className="text-sm text-muted-foreground">Top outstanding balances by project</p>
         </div>
         <Button asChild variant="outline" className="gap-2">
@@ -69,9 +69,9 @@ export function OutstandingReportContent() {
                 <TableRow>
                   <TableHead>Client</TableHead>
                   <TableHead>Project Number</TableHead>
-                  <TableHead className="text-right">Invoiced</TableHead>
-                  <TableHead className="text-right">Outstanding</TableHead>
-                  <TableHead className="text-right">Invoices</TableHead>
+                  <TableHead className="font-display text-right">Invoiced</TableHead>
+                  <TableHead className="font-display text-right">Outstanding</TableHead>
+                  <TableHead className="font-display text-right">Invoices</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -85,9 +85,9 @@ export function OutstandingReportContent() {
                       <TableCell>
                         {href ? <Link href={href} className="underline">{row.projectNumber ?? "-"}</Link> : (row.projectNumber ?? "-")}
                       </TableCell>
-                      <TableCell className="text-right">{money.format(row.totalInvoiced)}</TableCell>
-                      <TableCell className="text-right">{money.format(row.totalOutstanding)}</TableCell>
-                      <TableCell className="text-right">{row.invoiceCount}</TableCell>
+                      <TableCell className="text-right font-mono tabular-nums">{money.format(row.totalInvoiced)}</TableCell>
+                      <TableCell className="text-right font-mono tabular-nums">{money.format(row.totalOutstanding)}</TableCell>
+                      <TableCell className="text-right font-mono tabular-nums">{row.invoiceCount}</TableCell>
                     </TableRow>
                   );
                 })}

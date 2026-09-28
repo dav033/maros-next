@@ -73,21 +73,21 @@ export function MeetingEditDialog({
           <DialogDescription>Update the event details or participants. Google Calendar will email everyone about the changes.</DialogDescription>
         </DialogHeader>
         <form onSubmit={submit} className="space-y-4">
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             <Label htmlFor="edit-meeting-title">Meeting title</Label>
             <Input id="edit-meeting-title" value={title} onChange={(event) => setTitle(event.target.value)} maxLength={255} required />
           </div>
-          <div className="grid grid-cols-1 gap-4 rounded-xl bg-muted/25 p-4 sm:grid-cols-[1fr_170px]">
-            <div className="space-y-1.5">
+          <div className="grid grid-cols-1 gap-4 rounded-xl bg-elev-3 p-4 sm:grid-cols-[1fr_170px]">
+            <div className="space-y-2">
               <Label htmlFor="edit-meeting-start">Date and time</Label>
               <Input id="edit-meeting-start" type="datetime-local" value={startsAt} onChange={(event) => setStartsAt(event.target.value)} required />
             </div>
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label htmlFor="edit-meeting-duration">Duration (minutes)</Label>
               <Input id="edit-meeting-duration" type="number" min={15} max={480} step={15} value={durationMinutes} onChange={(event) => setDurationMinutes(Number(event.target.value))} required />
             </div>
           </div>
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             <Label>Participants</Label>
             <MeetingParticipantsPicker value={attendees} onChange={setAttendees} disabled={update.isPending} />
           </div>

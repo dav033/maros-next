@@ -77,7 +77,7 @@ export function EntityTasksSection({
               key={task.id}
               type="button"
               onClick={() => openTask(task.id)}
-              className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-accent/50"
+              className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-elev-3"
             >
               <TaskKindIcon kind={task.kind} />
               <span className="min-w-0 flex-1 truncate">{task.title}</span>

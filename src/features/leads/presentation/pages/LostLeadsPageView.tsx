@@ -79,7 +79,7 @@ export function LostLeadsPageView({ logic }: LostLeadsPageViewProps) {
               value={toolbarSearchController.searchTerm}
               onChange={(e) => toolbarSearchController.onSearchChange(e.target.value)}
               placeholder={toolbarSearchController.placeholder}
-              className="pl-9 bg-background/60 border-border/60 h-9"
+              className="h-9 border-line-strong pl-9"
             />
             {toolbarSearchController.searchTerm.trim().length > 0 && (
               <Button

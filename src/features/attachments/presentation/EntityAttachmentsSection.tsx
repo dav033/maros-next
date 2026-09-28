@@ -115,7 +115,7 @@ function AttachmentThumbnail({
     <button
       type="button"
       onClick={onClick}
-      className="flex h-16 w-20 shrink-0 items-center justify-center overflow-hidden rounded-md border border-border/70 bg-background/70 p-1 hover:border-primary/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+      className="flex h-16 w-20 shrink-0 items-center justify-center overflow-hidden rounded-md border border-line-strong bg-elev-3 p-1 hover:border-primary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
       aria-label={`Preview ${getFileName(keyName)}`}
       title="Preview image"
     >
@@ -167,7 +167,7 @@ function SortableItem({
     <li
       ref={setNodeRef}
       style={style}
-      className="flex items-center justify-between gap-2 text-sm p-2 rounded-md border bg-muted/30"
+      className="flex items-center justify-between gap-2 text-sm p-2 rounded-md border border-line bg-elev-2"
     >
       <button
         {...attributes}
@@ -182,13 +182,13 @@ function SortableItem({
 
       <button
         type="button"
-        className="group flex min-w-0 flex-1 items-center gap-2 rounded px-2 py-1 text-left hover:bg-accent/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+        className="group flex min-w-0 flex-1 items-center gap-2 rounded-sm px-2 py-1 text-left hover:bg-elev-3 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         onClick={() => (canPreview ? onPreview(id) : onDownload(id))}
         disabled={!canPreview && downloadingKey === id}
         title={canPreview ? "Preview attachment" : "Open attachment"}
       >
         <span className="truncate">{getFileName(id)}</span>
-        <span className="ml-auto shrink-0 rounded-full border border-border/70 px-2 py-0.5 text-[10px] uppercase tracking-wide text-muted-foreground group-hover:text-foreground">
+        <span className="ml-auto shrink-0 rounded-full border border-line px-2 py-0.5 font-display text-xs uppercase tracking-wide text-muted-foreground group-hover:text-foreground">
           {canPreview ? "Preview" : "Open"}
         </span>
       </button>
@@ -382,8 +382,8 @@ export function EntityAttachmentsSection({
           className={[
             "border-2 border-dashed rounded-lg px-4 py-6 text-center cursor-pointer transition-colors",
             isDragging
-              ? "border-primary bg-primary/5 text-primary"
-              : "border-muted-foreground/25 text-muted-foreground hover:border-muted-foreground/50 hover:bg-muted/30",
+              ? "border-primary bg-primary-container text-primary-on-container"
+              : "border-line text-muted-foreground hover:border-line-strong hover:bg-elev-3",
             isUploading ? "pointer-events-none opacity-60" : "",
           ].join(" ")}
         >

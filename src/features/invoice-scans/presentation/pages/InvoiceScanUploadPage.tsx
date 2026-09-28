@@ -89,7 +89,7 @@ export function InvoiceScanUploadPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-5">
+    <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-4">
       <Link
         href="/finance/invoices"
         className="inline-flex w-fit items-center gap-2 text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -99,7 +99,7 @@ export function InvoiceScanUploadPage() {
       </Link>
 
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Scan an invoice</h1>
+        <h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">Scan an invoice</h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
           One invoice per file. Take a clear photo of the whole page or choose a photo or PDF.
           The scan starts right away; you can fix any field afterwards.
@@ -120,11 +120,11 @@ export function InvoiceScanUploadPage() {
         onDrop={onDrop}
       >
         {preview ? (
-          <div className="relative mb-5 aspect-[4/3] overflow-hidden rounded-lg border bg-background sm:aspect-[16/9]">
+          <div className="relative mb-4 aspect-[4/3] overflow-hidden rounded-lg border bg-background sm:aspect-[16/9]">
             <Image src={preview} alt="Selected invoice photo preview" fill unoptimized className="object-contain" />
           </div>
         ) : pdfName ? (
-          <div className="mb-5 flex min-h-52 items-center justify-center gap-4 rounded-lg border border-dashed bg-background px-6 py-8">
+          <div className="mb-4 flex min-h-52 items-center justify-center gap-4 rounded-lg border border-dashed bg-background px-6 py-8">
             <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl border bg-card text-primary">
               <FileText className="h-6 w-6" aria-hidden="true" />
             </div>
@@ -134,7 +134,7 @@ export function InvoiceScanUploadPage() {
             </div>
           </div>
         ) : (
-          <div className="mb-5 flex min-h-52 flex-col items-center justify-center rounded-lg border border-dashed border-primary/25 bg-background px-6 py-8 text-center">
+          <div className="mb-4 flex min-h-52 flex-col items-center justify-center rounded-lg border border-dashed border-primary/25 bg-background px-6 py-8 text-center">
             <div className="mb-4 grid h-12 w-12 place-items-center rounded-xl border bg-card text-primary">
               <ScanLine className="h-6 w-6" aria-hidden="true" />
             </div>
@@ -147,7 +147,7 @@ export function InvoiceScanUploadPage() {
         )}
 
         {error && (
-          <Alert variant="destructive" className="mb-5">
+          <Alert variant="destructive" className="mb-4">
             <AlertCircle aria-hidden="true" />
             <AlertDescription>{error}</AlertDescription>
           </Alert>
@@ -155,7 +155,7 @@ export function InvoiceScanUploadPage() {
 
         {busy ? (
           <div
-            className="flex items-center justify-center gap-3 rounded-md bg-muted/60 px-4 py-4 text-sm"
+            className="flex items-center justify-center gap-3 rounded-md bg-elev-3 px-4 py-4 text-sm"
             role="status"
           >
             <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden="true" />

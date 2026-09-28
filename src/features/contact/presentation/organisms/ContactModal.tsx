@@ -45,7 +45,7 @@ export function ContactModal({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
+          <DialogTitle className="font-display">{title}</DialogTitle>
         </DialogHeader>
         <ContactForm
           value={formValue}
@@ -55,8 +55,8 @@ export function ContactModal({
           onCreateNewCompany={onCreateNewCompany}
         />
         {error && (
-          <div className="mt-4 rounded-lg bg-red-500/10 border border-red-500/20 p-3">
-            <p className="text-sm text-red-400">{error}</p>
+          <div className="mt-4 rounded-lg border border-destructive/40 bg-destructive/10 p-3">
+            <p className="text-sm text-destructive">{error}</p>
           </div>
         )}
         <DialogFooter>

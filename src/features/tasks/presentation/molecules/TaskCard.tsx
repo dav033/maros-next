@@ -86,7 +86,7 @@ export function TaskCard({
             : undefined
         }
         className={cn(
-          "group flex min-h-[132px] flex-col gap-2 rounded-lg border border-border bg-card p-3 text-left shadow-sm transition-colors hover:border-primary/40 hover:bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+          "group flex min-h-[132px] flex-col gap-2 rounded-lg border border-border bg-card p-3 text-left shadow-sm transition-colors hover:border-primary hover:bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
           onClick && "cursor-pointer",
           selected && "ring-2 ring-primary ring-offset-1",
           className,

@@ -125,7 +125,7 @@ export function TaskCommentList({
                   </div>
                 </div>
               ) : (
-                <div className="mt-0.5 text-sm text-foreground/90">
+                <div className="mt-0.5 text-sm text-foreground">
                   <TaskRichTextEditor content={comment.body} editable={false} mentionable />
                 </div>
               )}
@@ -156,7 +156,7 @@ export function TaskCommentList({
         {comments.length === 0 && <p className="text-sm text-muted-foreground">No comments yet.</p>}
       </ul> : null}
 
-      <div className="space-y-1.5 border-t border-border/60 pt-3">
+      <div className="space-y-1.5 border-t border-line pt-3">
         <TaskRichTextEditor
           key={composerKey}
           content={EMPTY_DOC}

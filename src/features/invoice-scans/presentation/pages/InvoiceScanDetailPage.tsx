@@ -51,7 +51,7 @@ function QboSuggestions({ scan }: { scan: InvoiceScan }) {
   const suggestions = scan.qboSuggestions;
   return (
     <section className="rounded-2xl border bg-card p-4 shadow-sm sm:p-6" aria-labelledby="qbo-title">
-      <h2 id="qbo-title" className="font-semibold">QuickBooks matches</h2>
+      <h2 id="qbo-title" className="font-display font-semibold">QuickBooks matches</h2>
       <p className="mt-1 text-sm text-muted-foreground">
         Suggestions only; nothing is created in QuickBooks from here.
       </p>
@@ -72,10 +72,10 @@ function QboSuggestions({ scan }: { scan: InvoiceScan }) {
                 {suggestions.counterparties.map((candidate) => (
                   <li
                     key={candidate.id}
-                    className="flex items-center justify-between gap-3 rounded-xl bg-muted/70 px-3 py-2"
+                    className="flex items-center justify-between gap-3 rounded-xl bg-elev-3 px-3 py-2"
                   >
                     <span className="min-w-0 truncate">{candidate.name}</span>
-                    <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
+                    <span className="shrink-0 font-mono text-xs tabular-nums text-muted-foreground">
                       {candidate.confidence}%
                     </span>
                   </li>
@@ -177,7 +177,7 @@ export function InvoiceScanDetailPage({ id }: { id: string }) {
 
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
-          <h1 className="break-words text-2xl font-semibold tracking-tight sm:text-3xl">
+          <h1 className="break-words font-display text-2xl font-semibold tracking-tight sm:text-3xl">
             {invoiceTitle(scan)}
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -232,7 +232,7 @@ export function InvoiceScanDetailPage({ id }: { id: string }) {
 
       <section
         aria-label="Review"
-        className="grid gap-4 rounded-2xl border bg-card p-4 shadow-sm sm:p-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end"
+        className="grid gap-4 rounded-2xl border bg-card p-4 shadow-sm sm:p-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end"
       >
         <div className="space-y-1.5">
           <p className="text-xs font-medium text-muted-foreground">Project</p>
@@ -246,7 +246,7 @@ export function InvoiceScanDetailPage({ id }: { id: string }) {
         <EnteredCheckbox
           scan={scan}
           withLabel
-          className="rounded-md border px-3 py-2 lg:mb-0.5"
+          className="rounded-md border border-line-strong px-3 py-2 lg:mb-0.5"
         />
       </section>
 
@@ -263,11 +263,11 @@ export function InvoiceScanDetailPage({ id }: { id: string }) {
               <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-rose-500/10 text-rose-300"><ArrowUpRight className="size-5" aria-hidden="true" /></span>
             )}
             <div>
-              <h2 id="transaction-details-title" className="font-semibold">Manual transaction</h2>
+              <h2 id="transaction-details-title" className="font-display font-semibold">Manual transaction</h2>
               <p className="mt-1 text-sm text-muted-foreground">{invoice?.description || "Payment"}</p>
             </div>
           </div>
-          <dl className="mt-6 grid gap-x-8 gap-y-4 border-t pt-5 sm:grid-cols-2">
+          <dl className="mt-6 grid gap-x-8 gap-y-4 border-t pt-4 sm:grid-cols-2">
             <div>
               <dt className="text-xs font-medium text-muted-foreground">Direction</dt>
               <dd className="mt-1 text-sm font-medium">
@@ -276,7 +276,7 @@ export function InvoiceScanDetailPage({ id }: { id: string }) {
             </div>
             <div>
               <dt className="text-xs font-medium text-muted-foreground">Amount</dt>
-              <dd className="mt-1 text-lg font-semibold tabular-nums text-primary">
+              <dd className="mt-1 font-mono text-lg font-semibold tabular-nums text-primary">
                 {formatMoney(invoice?.total, invoice?.currency)}
               </dd>
             </div>
@@ -292,7 +292,7 @@ export function InvoiceScanDetailPage({ id }: { id: string }) {
             </div>
           </dl>
           {scan.enteredAt && (
-            <p className="mt-5 border-t pt-4 text-xs text-muted-foreground">
+            <p className="mt-4 border-t pt-4 text-xs text-muted-foreground">
               This transaction is marked as entered in QuickBooks. Untick above to return it to the queue.
             </p>
           )}

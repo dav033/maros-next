@@ -48,7 +48,7 @@ export function DetailField({
     return (
       <div
         className={cn(
-          "flex items-center justify-between p-3 rounded-md border border-dashed border-muted-foreground/30",
+          "flex items-center justify-between p-3 rounded-md border border-dashed border-line",
           className,
         )}
       >

@@ -28,7 +28,7 @@ export function TaskEmptyState({
     return (
       <div
         className={cn(
-          "rounded-md border border-dashed border-border/40 px-2 py-6 text-center text-xs text-muted-foreground",
+          "rounded-md border border-dashed border-line px-2 py-6 text-center text-xs text-muted-foreground",
           className
         )}
       >
@@ -40,11 +40,11 @@ export function TaskEmptyState({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border/60 p-8 text-center",
+        "flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-line p-8 text-center",
         className
       )}
     >
-      {Icon ? <Icon className="mb-1 size-10 text-muted-foreground/50" /> : null}
+      {Icon ? <Icon className="mb-1 size-10 text-fg-faint" /> : null}
       <h3 className="text-sm font-medium text-foreground">{title}</h3>
       {description ? <p className="text-xs text-muted-foreground">{description}</p> : null}
       {action ? <div className="mt-2">{action}</div> : null}

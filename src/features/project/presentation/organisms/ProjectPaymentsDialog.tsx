@@ -104,7 +104,7 @@ function PaymentContent({
   return (
     <section className="space-y-4" aria-label="Project payment activity">
       <div className="flex items-baseline justify-between gap-3">
-        <h3 className="text-sm font-medium">Payment activity</h3>
+        <h3 className="font-display text-sm font-medium">Payment activity</h3>
         <span className="text-xs text-muted-foreground">
           {data.count} {data.count === 1 ? "payment" : "payments"}
         </span>
@@ -141,7 +141,7 @@ function PaymentContent({
             return (
               <article
                 key={item.id}
-                className="rounded-md border border-border/60 bg-background/40 p-3"
+                className="rounded-md border border-line bg-elev-3 p-3"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
@@ -152,7 +152,8 @@ function PaymentContent({
                           role="img"
                           aria-label={item.warnings.join(". ")}
                           title={item.warnings.join(". ")}
-                          className="shrink-0 text-amber-300"
+                          className="shrink-0"
+                          style={{ color: "hsl(var(--badge-amber))" }}
                         >
                           <AlertTriangle className="size-3.5" aria-hidden="true" />
                         </span>
@@ -167,18 +168,18 @@ function PaymentContent({
                     <p className="font-mono text-sm font-semibold tabular-nums">
                       {formatCurrency(item.amount)}
                     </p>
-                    <p className="text-[10px] text-muted-foreground">Payment</p>
+                    <p className="text-xs text-muted-foreground">Payment</p>
                   </div>
                 </div>
 
-                <dl className="mt-3 grid grid-cols-2 gap-3 border-t border-border/50 pt-2 text-xs">
+                <dl className="mt-3 grid grid-cols-2 gap-3 border-t border-line pt-2 text-xs">
                   <div className="min-w-0">
                     <dt className="text-muted-foreground">Invoice</dt>
                     <dd className="mt-0.5 break-words font-mono tabular-nums">
                       {hasInvoiceAmounts ? formatCurrency(invoiceAmount) : "—"}
                     </dd>
                     {invoiceNumbers ? (
-                      <dd className="mt-0.5 break-words text-[10px] text-muted-foreground">
+                      <dd className="mt-0.5 break-words text-xs text-muted-foreground">
                         {invoiceNumbers}
                       </dd>
                     ) : null}
@@ -204,7 +205,7 @@ function PaymentContent({
         >
           <table className="w-full min-w-[760px] text-sm">
             <thead>
-              <tr className="border-b text-left text-xs uppercase tracking-wide text-muted-foreground">
+              <tr className="border-b border-line text-left font-display text-xs uppercase tracking-wide text-muted-foreground">
                 <th className="min-w-[220px] p-2">Process</th>
                 <th className="p-2 text-right">Percentage</th>
                 <th className="p-2 text-right">Invoice</th>
@@ -241,7 +242,7 @@ function PaymentContent({
                 return (
                   <tr
                     key={item.id}
-                    className="border-b border-border/60 align-top"
+                    className="border-b border-line align-top"
                   >
                     <td className="p-2">
                       <div className="flex items-start gap-2">
@@ -258,7 +259,8 @@ function PaymentContent({
                             role="img"
                             aria-label={item.warnings.join(". ")}
                             title={item.warnings.join(". ")}
-                            className="shrink-0 text-amber-300"
+                            className="shrink-0"
+                            style={{ color: "hsl(var(--badge-amber))" }}
                           >
                             <AlertTriangle
                               className="size-3.5"
@@ -303,7 +305,7 @@ function PaymentContent({
         </>
       )}
 
-      <dl className="grid grid-cols-1 divide-y divide-border border-y border-border sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+      <dl className="grid grid-cols-1 divide-y divide-line border-y border-line sm:grid-cols-3 sm:divide-x sm:divide-y-0">
         <div className="min-w-0 py-3 sm:pr-3">
           <dt className="text-xs text-muted-foreground">Total Paid</dt>
           <dd className="mt-1 font-mono text-sm font-semibold tabular-nums">

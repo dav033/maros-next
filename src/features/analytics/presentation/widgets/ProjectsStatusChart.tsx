@@ -6,7 +6,18 @@ import { Card, CardContent } from "@/components/ui/card";
 import type { ProjectsStatusBucket } from "../../domain";
 import { WidgetCardHeader } from "./WidgetCardHeader";
 
-const COLORS = ["#14b8a6", "#0ea5e9", "#6366f1", "#a855f7", "#f59e0b", "#f97316", "#ef4444"];
+// Seven slots because the chart indexes COLORS[i % COLORS.length] and
+// ProjectProgressStatus already has six members: with five, the sixth status
+// would repeat the first one's color in the pie and in the legend.
+const COLORS = [
+  "hsl(var(--chart-1))",
+  "hsl(var(--chart-2))",
+  "hsl(var(--chart-3))",
+  "hsl(var(--chart-4))",
+  "hsl(var(--chart-5))",
+  "hsl(var(--chart-6))",
+  "hsl(var(--chart-7))",
+];
 
 type ProjectsStatusChartProps = {
   data: ProjectsStatusBucket[];
@@ -28,7 +39,8 @@ function StatusTooltip({
     <div className="space-y-0.5 rounded-md border border-border bg-popover p-2.5 text-xs shadow-md">
       <p className="font-semibold text-foreground">{item.status}</p>
       <p className="text-muted-foreground">
-        <span className="font-medium text-foreground">{item.count}</span> projects · {pct}%
+        <span className="font-mono font-medium tabular-nums text-foreground">{item.count}</span> projects ·{" "}
+        <span className="font-mono tabular-nums">{pct}%</span>
       </p>
     </div>
   );
@@ -40,7 +52,7 @@ export function ProjectsStatusChart({ data }: ProjectsStatusChartProps) {
 
   if (chartData.length === 0) {
     return (
-      <Card className="border-border/60">
+      <Card className="border-line">
         <WidgetCardHeader
           icon={PieChartIcon}
           iconBg="bg-sky-500/10"
@@ -58,7 +70,7 @@ export function ProjectsStatusChart({ data }: ProjectsStatusChartProps) {
   }
 
   return (
-    <Card className="border-border/60">
+    <Card className="border-line">
       <WidgetCardHeader
         icon={PieChartIcon}
         iconBg="bg-sky-500/10"
@@ -103,8 +115,8 @@ export function ProjectsStatusChart({ data }: ProjectsStatusChartProps) {
                     style={{ backgroundColor: COLORS[index % COLORS.length] }}
                   />
                   <span className="text-muted-foreground">{item.status}</span>
-                  <span className="ml-auto font-medium text-foreground">{item.count}</span>
-                  <span className="w-8 text-right text-muted-foreground">{pct}%</span>
+                  <span className="ml-auto font-mono font-medium tabular-nums text-foreground">{item.count}</span>
+                  <span className="w-8 text-right font-mono tabular-nums text-muted-foreground">{pct}%</span>
                 </li>
               );
             })}

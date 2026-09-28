@@ -74,7 +74,7 @@ export function ProjectsByStatusPageView({
               value={toolbarSearchController.searchTerm}
               onChange={(e) => toolbarSearchController.onSearchChange(e.target.value)}
               placeholder={toolbarSearchController.placeholder}
-              className="pl-9 bg-background/60 border-border/60 h-9"
+              className="pl-9 bg-elev-2 border-line-strong h-9"
             />
             {toolbarSearchController.searchTerm.trim().length > 0 && (
               <Button

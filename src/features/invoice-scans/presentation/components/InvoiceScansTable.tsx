@@ -72,7 +72,7 @@ export function InvoiceScansTable({ scans, variant }: Props) {
     <>
       <div className="hidden overflow-x-auto md:block">
         <Table>
-          <TableHeader className="bg-muted/40">
+          <TableHeader className="bg-elev-2">
             <TableRow>
               <TableHead className="w-12">
                 <span className="sr-only">Entered in QuickBooks</span>
@@ -92,7 +92,7 @@ export function InvoiceScansTable({ scans, variant }: Props) {
             {scans.map((scan) => {
               const invoice = scan.extractedData;
               return (
-                <TableRow key={scan.id} className={scan.enteredAt ? "text-muted-foreground" : "transition-colors hover:bg-muted/25"}>
+                <TableRow key={scan.id} className={scan.enteredAt ? "text-muted-foreground" : "transition-colors hover:bg-elev-3"}>
                   <TableCell>
                     <EnteredCheckbox scan={scan} />
                   </TableCell>
@@ -122,7 +122,7 @@ export function InvoiceScansTable({ scans, variant }: Props) {
                   <TableCell>
                     <LastEditorCell scan={scan} users={users} />
                   </TableCell>
-                  <TableCell className="text-right tabular-nums">
+                  <TableCell className="text-right font-mono tabular-nums">
                     {formatMoney(invoice?.total, invoice?.currency)}
                   </TableCell>
                   <TableCell>
@@ -140,7 +140,7 @@ export function InvoiceScansTable({ scans, variant }: Props) {
         {scans.map((scan) => {
           const invoice = scan.extractedData;
           return (
-            <li key={scan.id} className="flex gap-3 p-4 transition-colors hover:bg-muted/20">
+            <li key={scan.id} className="flex gap-3 p-4 transition-colors hover:bg-elev-3">
               <EnteredCheckbox scan={scan} className="pt-1" />
               <Link
                 href={`/finance/invoices/${scan.id}`}
@@ -153,7 +153,7 @@ export function InvoiceScansTable({ scans, variant }: Props) {
                       {invoice?.counterpartyName || "Counterparty not identified"}
                     </p>
                   </div>
-                  <p className="shrink-0 font-semibold tabular-nums">
+                  <p className="shrink-0 font-mono font-semibold tabular-nums">
                     {formatMoney(invoice?.total, invoice?.currency)}
                   </p>
                 </div>

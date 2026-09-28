@@ -89,7 +89,7 @@ export function SharePeoplePanel({
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
         <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
           <PopoverTrigger asChild>
@@ -232,7 +232,7 @@ export function SharePeoplePanel({
         ))}
       </div>
 
-      <div className="rounded-lg border border-border/60 p-3">
+      <div className="rounded-lg border border-line p-3">
         <div className="mb-2 flex items-center gap-2 text-sm font-medium">
           <Lock className="h-3.5 w-3.5 text-muted-foreground" />
           General access

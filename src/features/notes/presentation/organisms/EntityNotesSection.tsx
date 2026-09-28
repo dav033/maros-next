@@ -57,7 +57,7 @@ export function EntityNotesSection({
             <Link
               key={page.id}
               href={`/notes/${page.id}`}
-              className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-accent/50"
+              className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-elev-3"
             >
               <span className="shrink-0">
                 {page.icon ?? <FileText className="h-4 w-4 text-muted-foreground" />}

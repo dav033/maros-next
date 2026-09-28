@@ -16,7 +16,7 @@ function LoadingRows() {
   return (
     <div className="divide-y" role="status" aria-label="Loading invoice scans">
       {Array.from({ length: 4 }, (_, index) => (
-        <div key={index} className="flex items-center gap-4 px-4 py-5 sm:px-6">
+        <div key={index} className="flex items-center gap-4 px-4 py-4 sm:px-6">
           <span className="h-4 w-4 animate-pulse rounded bg-muted" />
           <span className="h-4 w-40 max-w-[30%] animate-pulse rounded bg-muted" />
           <span className="hidden h-4 w-36 animate-pulse rounded bg-muted sm:block" />
@@ -70,12 +70,12 @@ export function InvoiceScansPage() {
         </Alert>
       )}
 
-      <section aria-labelledby="pending-title" className="overflow-hidden rounded-2xl border bg-card shadow-sm">
-        <header className="flex flex-wrap items-center justify-between gap-2 border-b bg-muted/20 px-4 py-4 sm:px-6">
-          <h2 id="pending-title" className="font-semibold">
+      <section aria-labelledby="pending-title" className="overflow-hidden rounded-2xl border border-line bg-elev-1 shadow-sm">
+        <header className="flex flex-wrap items-center justify-between gap-2 border-b border-line bg-elev-2 px-4 py-4 sm:px-6">
+          <h2 id="pending-title" className="font-display font-semibold">
             To enter
             {!query.isLoading && (
-              <span className="ml-2 rounded-full bg-primary/15 px-2.5 py-1 text-xs font-medium text-primary tabular-nums">
+              <span className="ml-2 rounded-full bg-primary/15 px-2.5 py-1 font-mono text-xs font-medium text-primary tabular-nums">
                 {pending.length}
               </span>
             )}
@@ -91,7 +91,7 @@ export function InvoiceScansPage() {
             <div className="mb-4 grid h-12 w-12 place-items-center rounded-full bg-primary/10 text-primary">
               <Camera className="h-5 w-5" aria-hidden="true" />
             </div>
-            <h3 className="text-lg font-semibold tracking-tight">
+            <h3 className="font-display text-lg font-semibold tracking-tight">
               {query.data?.length ? "Everything is entered" : "No invoices or transactions yet"}
             </h3>
             <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">
@@ -106,12 +106,12 @@ export function InvoiceScansPage() {
       </section>
 
       {completed.length > 0 && (
-        <section aria-labelledby="completed-title" className="overflow-hidden rounded-2xl border bg-card/60 shadow-sm">
-          <header className="flex flex-wrap items-center gap-2 border-b bg-muted/20 px-4 py-4 sm:px-6">
+        <section aria-labelledby="completed-title" className="overflow-hidden rounded-2xl border border-line bg-elev-1 shadow-sm">
+          <header className="flex flex-wrap items-center gap-2 border-b border-line bg-elev-2 px-4 py-4 sm:px-6">
             <CheckCircle2 className="h-4 w-4 text-emerald-300" aria-hidden="true" />
-            <h2 id="completed-title" className="font-semibold">
+            <h2 id="completed-title" className="font-display font-semibold">
               Entered in QuickBooks
-              <span className="ml-2 rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">
+              <span className="ml-2 rounded-full bg-elev-4 px-2 py-0.5 font-mono text-xs font-medium text-muted-foreground tabular-nums">
                 {completed.length}
               </span>
             </h2>

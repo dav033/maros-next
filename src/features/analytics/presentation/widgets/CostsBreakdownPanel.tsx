@@ -20,10 +20,10 @@ type SectionSpec = {
 
 function TotalTile({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
-    <div className="rounded-lg border border-border/60 bg-muted/20 px-4 py-3">
+    <div className="rounded-lg border border-line bg-elev-3 px-4 py-3">
       <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="mt-1 text-lg font-semibold tracking-tight text-foreground">{value}</p>
-      {hint ? <p className="mt-0.5 text-[11px] text-muted-foreground">{hint}</p> : null}
+      <p className="mt-1 font-mono text-lg font-semibold tabular-nums tracking-tight text-foreground">{value}</p>
+      {hint ? <p className="mt-0.5 text-xs text-muted-foreground">{hint}</p> : null}
     </div>
   );
 }
@@ -34,12 +34,12 @@ function CategoryList({ spec, categories }: { spec: SectionSpec; categories: Cos
 
   return (
     <div className="min-w-0">
-      <div className="flex items-center justify-between gap-2 border-b border-border/40 pb-2">
+      <div className="flex items-center justify-between gap-2 border-b border-line pb-2">
         <div className="flex items-center gap-2">
           <span className={`h-2.5 w-2.5 rounded-sm ${spec.dotClass}`} />
           <p className="text-xs font-semibold text-foreground">{spec.label}</p>
         </div>
-        <p className="text-xs font-medium text-muted-foreground">{money.format(spec.total)}</p>
+        <p className="font-mono text-xs font-medium tabular-nums text-muted-foreground">{money.format(spec.total)}</p>
       </div>
       {items.length === 0 ? (
         <p className="py-4 text-center text-xs text-muted-foreground">
@@ -53,11 +53,11 @@ function CategoryList({ spec, categories }: { spec: SectionSpec; categories: Cos
                 <p className="truncate text-xs text-foreground" title={item.category}>
                   {item.category}
                 </p>
-                <p className="shrink-0 text-xs font-medium tabular-nums text-foreground">
+                <p className="shrink-0 font-mono text-xs font-medium tabular-nums text-foreground">
                   {money.format(item.amount)}
                 </p>
               </div>
-              <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-muted/40">
+              <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-money-track">
                 <div
                   className={`h-full rounded-full ${spec.barClass}`}
                   style={{ width: `${Math.max((Math.abs(item.amount) / maxAmount) * 100, 2)}%` }}
@@ -90,7 +90,7 @@ export function CostsBreakdownPanel({ data }: CostsBreakdownPanelProps) {
   ];
 
   return (
-    <Card className="border-border/60">
+    <Card className="border-line">
       <WidgetCardHeader
         icon={Wallet}
         iconBg="bg-amber-500/10"
@@ -100,7 +100,7 @@ export function CostsBreakdownPanel({ data }: CostsBreakdownPanelProps) {
         href="/reports"
         hrefLabel="Reports"
       />
-      <CardContent className="space-y-5 pt-2">
+      <CardContent className="space-y-4 pt-2">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <TotalTile label="Total Costs" value={money.format(data.totalCosts)} hint="Expenses + COGS" />
           <TotalTile label="Total Expenses" value={money.format(data.totalExpenses)} hint="From P&L (Cash basis)" />

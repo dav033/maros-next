@@ -34,7 +34,7 @@ function buildColumns(onOpen: (id: number) => void): SimpleTableColumn<Task>[] {
       key: "id",
       header: "Key",
       sortable: true,
-      className: "w-20 font-mono text-xs text-muted-foreground",
+      className: "w-20 font-mono text-xs tabular-nums text-muted-foreground",
       render: (task) => `T-${task.id}`,
     },
     {
@@ -170,7 +170,7 @@ export function TaskListTable({
           icon={ListTodo}
           title="No tasks found."
           description="Use the button above to create one."
-          className="bg-card/40"
+          className="bg-elev-3"
         />
       }
     />

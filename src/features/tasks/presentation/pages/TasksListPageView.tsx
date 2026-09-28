@@ -95,7 +95,7 @@ export function TasksListPageView() {
             value={searchDraft}
             onChange={(e) => setSearchDraft(e.target.value)}
             placeholder="Search tasks…"
-            className="h-9 border-border/60 bg-background/60 pl-9"
+            className="h-9 border-line-strong pl-9"
           />
           {state.q.trim().length > 0 && (
             <Button

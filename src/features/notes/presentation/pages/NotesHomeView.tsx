@@ -51,10 +51,10 @@ export function NotesHomeView({
     );
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-5 py-7 sm:px-8 sm:py-9">
-      <div className="mb-7 flex flex-wrap items-start justify-between gap-4">
+    <div className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-8 sm:py-8">
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-semibold tracking-tight">Your notes</h2>
+          <h2 className="font-display text-2xl font-semibold tracking-tight">Your notes</h2>
           <p className="mt-1.5 text-sm text-muted-foreground">
             Pick up where you left off, or start a new page.
           </p>
@@ -84,7 +84,7 @@ export function NotesHomeView({
             className="mx-auto size-8 text-muted-foreground"
             aria-hidden="true"
           />
-          <h3 className="mt-4 text-base font-medium">
+          <h3 className="mt-4 font-display text-base font-medium">
             A place for the details
           </h3>
           <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-muted-foreground">
@@ -92,7 +92,7 @@ export function NotesHomeView({
             folders to keep related pages together.
           </p>
           <Button
-            className="mt-5"
+            className="mt-4"
             disabled={creating}
             onClick={() => onCreate("page")}
           >
@@ -112,7 +112,7 @@ export function NotesHomeView({
                 placeholder="Find a page or label…"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                className="pl-9 pr-9"
+                className="border-line-strong pl-9 pr-9"
               />
               {query && (
                 <Button
@@ -130,13 +130,13 @@ export function NotesHomeView({
               aria-label="Sort pages"
               value={sort}
               onChange={(event) => setSort(event.target.value)}
-              className="h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="h-9 rounded-md border border-line-strong bg-elev-1 px-3 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <option value="recent">Last edited</option>
               <option value="name">Title A–Z</option>
             </select>
           </div>
-          <div className="mt-4 flex items-center justify-between gap-2 border-b border-border/60 pb-3">
+          <div className="mt-4 flex items-center justify-between gap-2 border-b border-line pb-3">
             <div className="flex gap-1" role="group" aria-label="Page type">
               {(
                 [
@@ -185,17 +185,17 @@ export function NotesHomeView({
               </Button>
             </div>
           ) : (
-            <ul className="divide-y divide-border/50">
+            <ul className="divide-y divide-line">
               {visible.map((page) => (
                 <li
                   key={page.id}
-                  className="group flex min-w-0 items-center gap-1 rounded-md hover:bg-accent/30"
+                  className="group flex min-w-0 items-center gap-1 rounded-md hover:bg-elev-3"
                 >
                   <Link
                     href={`/notes/${page.id}`}
                     className="flex min-w-0 flex-1 items-center gap-3 rounded-md px-2 py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
-                    <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted/40 text-muted-foreground">
+                    <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-elev-4 text-muted-foreground">
                       {page.icon ||
                         (page.kind === "folder" ? (
                           <Folder className="size-4" aria-hidden="true" />

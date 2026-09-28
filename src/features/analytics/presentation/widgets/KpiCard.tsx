@@ -52,21 +52,21 @@ export function KpiCard({ label, value, icon: Icon, hint, tone = "primary", href
 
   const content = (
     <Card
-      className={`group relative h-full overflow-hidden border-border/60 transition-all ${
-        href ? "cursor-pointer hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg" : "hover:-translate-y-0.5 hover:border-border hover:shadow-md"
+      className={`group relative h-full overflow-hidden border-line transition-all ${
+        href ? "cursor-pointer hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg" : "hover:-translate-y-0.5 hover:border-line-strong hover:shadow-md"
       }`}
     >
       <div
         className={`pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b ${styles.accent} to-transparent opacity-60`}
       />
-      <CardContent className="relative flex flex-col gap-3 p-5">
+      <CardContent className="relative flex flex-col gap-3 p-4">
         <div className="flex items-start justify-between gap-3">
-          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
+          <p className="font-display text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
           <span className={`grid h-9 w-9 place-items-center rounded-lg ${styles.iconBg} ${styles.iconText}`}>
             <Icon className="h-4 w-4" />
           </span>
         </div>
-        <p className="text-2xl font-semibold tracking-tight text-foreground sm:text-[1.7rem]">{value}</p>
+        <p className="font-mono text-2xl font-semibold tabular-nums tracking-tight text-foreground">{value}</p>
         <div className="flex items-end justify-between gap-2">
           {hint ? (
             <Tooltip>

@@ -73,7 +73,7 @@ export function RoleEditorDialog({ open, onOpenChange, role }: Props) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[85vh] max-w-xl overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{role ? `Edit ${role.name}` : "New role"}</DialogTitle>
+          <DialogTitle className="font-display">{role ? `Edit ${role.name}` : "New role"}</DialogTitle>
           <DialogDescription>
             {isSystem
               ? "Built-in role — name is fixed, but its permissions can still be changed."
@@ -90,6 +90,7 @@ export function RoleEditorDialog({ open, onOpenChange, role }: Props) {
               disabled={isSystem}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Sales"
+              className="border-line-strong"
             />
           </div>
 
@@ -100,13 +101,14 @@ export function RoleEditorDialog({ open, onOpenChange, role }: Props) {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Optional"
+              className="border-line-strong"
             />
           </div>
 
           <div className="space-y-3">
             <Label>Permissions</Label>
             {catalog.groups.map((group: PermissionGroup) => (
-              <div key={group.key} className="rounded-md border border-border/60 p-3">
+              <div key={group.key} className="rounded-lg border border-line bg-elev-3 p-3">
                 <div className="mb-2 text-sm font-medium">{group.label}</div>
                 <div className="grid grid-cols-2 gap-2">
                   {group.permissions.map((permission) => (

@@ -391,7 +391,7 @@ function EntityTableInner<T>({
           "transition-colors",
           mutating && "opacity-60 pointer-events-none",
           onRowClick &&
-            "cursor-pointer hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring",
+            "cursor-pointer hover:bg-elev-3 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring",
           getRowClassName?.(row),
         )}
       >
@@ -446,7 +446,7 @@ function EntityTableInner<T>({
         key={rowKey(row)}
         data-mutating={mutating || undefined}
         className={cn(
-          "rounded-xl border border-border/70 bg-card p-4 shadow-sm",
+          "rounded-xl border border-line bg-elev-2 p-4 shadow-sm",
           mutating && "pointer-events-none opacity-60",
           getRowClassName?.(row),
         )}
@@ -548,14 +548,14 @@ function EntityTableInner<T>({
 
       <section
         className={cn(
-          "rounded-2xl bg-card shadow-sm overflow-x-auto",
+          "rounded-2xl bg-elev-2 shadow-sm overflow-x-auto",
           mobileRender && "hidden xl:block",
           className,
         )}
       >
         <Table style={minWidth ? { minWidth } : undefined}>
-          <TableHeader className="bg-muted/50">
-            <TableRow className="text-left font-display text-xs uppercase tracking-wide text-muted-foreground h-12 border-b border-border">
+          <TableHeader className="bg-elev-3">
+            <TableRow className="text-left font-display text-xs uppercase tracking-wide text-muted-foreground h-12 border-b border-line">
               {selection ? (
                 <TableHead className="w-10 px-4 py-3">
                   <Checkbox
@@ -704,7 +704,10 @@ function GroupRowsInner<T>({
 }) {
   return (
     <>
-      <TableRow className="bg-muted/20 hover:bg-muted/20">
+      {/* elev-3 is also the data-row hover surface, so the fill alone does not
+          mark a group break: the top rule does. Not elev-4 either — that is the
+          selected-row surface. */}
+      <TableRow className="border-t border-line-strong bg-elev-3 hover:bg-elev-3">
         <TableCell
           colSpan={columnsCount}
           className="px-4 py-2 text-xs font-semibold uppercase tracking-wider"
@@ -727,8 +730,8 @@ export const EntityTable = memo(EntityTableInner) as typeof EntityTableInner;
 
 export function DefaultTableLoading({ label }: { label?: string }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-lg border border-border bg-card/40 p-8 text-center">
-      <Loader className="size-12 text-muted-foreground/50 mb-4 animate-spin" />
+    <div className="flex flex-col items-center justify-center rounded-lg border border-line bg-elev-2 p-8 text-center">
+      <Loader className="size-12 text-fg-faint mb-4 animate-spin" />
       <h3 className="text-lg font-medium text-foreground">{label ?? "Loading…"}</h3>
     </div>
   );

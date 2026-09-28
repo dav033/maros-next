@@ -12,7 +12,7 @@ type LeadsPerMonthChartProps = {
 
 export function LeadsPerMonthChart({ data }: LeadsPerMonthChartProps) {
   return (
-    <Card className="border-border/60">
+    <Card className="border-line">
       <WidgetCardHeader
         icon={CalendarDays}
         iconBg="bg-sky-500/10"
@@ -27,7 +27,7 @@ export function LeadsPerMonthChart({ data }: LeadsPerMonthChartProps) {
           <BarChart data={data} margin={{ left: -20, right: 12, top: 8 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
             <XAxis dataKey="month" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
-            <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+            <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))", fontFamily: "var(--font-mono)" }} axisLine={false} tickLine={false} />
             <Tooltip
               cursor={{ fill: "hsl(var(--accent))", opacity: 0.35 }}
               contentStyle={{
@@ -41,8 +41,8 @@ export function LeadsPerMonthChart({ data }: LeadsPerMonthChartProps) {
             />
             <Bar
               dataKey="count"
-              fill="#38bdf8"
-              radius={[6, 6, 0, 0]}
+              fill="hsl(var(--chart-1))"
+              radius={[4, 4, 0, 0]}
               isAnimationActive
               animationBegin={80}
               animationDuration={900}

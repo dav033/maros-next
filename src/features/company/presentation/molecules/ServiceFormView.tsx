@@ -36,7 +36,7 @@ export function ServiceFormView({
             placeholder="Service name"
             disabled={isPending}
             required
-            className="pl-10"
+            className="border-line-strong pl-10"
           />
         </div>
         <ColorPicker
@@ -47,9 +47,9 @@ export function ServiceFormView({
         />
       </div>
       {serverError && (
-        <div className="mt-4 flex items-start gap-2 rounded-lg bg-red-500/10 border border-red-500/20 p-3">
-          <AlertCircle className="size-4 text-red-400 mt-0.5" />
-          <p className="text-sm text-red-400">{serverError}</p>
+        <div className="mt-4 flex items-start gap-2 rounded-lg border border-destructive/40 bg-destructive/10 p-3">
+          <AlertCircle className="size-4 text-destructive mt-0.5" />
+          <p className="text-sm text-destructive">{serverError}</p>
         </div>
       )}
     </>

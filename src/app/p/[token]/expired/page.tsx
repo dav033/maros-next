@@ -14,7 +14,7 @@ export default function PublicNoteExpiredPage() {
   return (
     <div className="flex min-h-svh flex-col items-center justify-center gap-3 px-6 text-center">
       <CalendarX className="h-10 w-10 text-muted-foreground" />
-      <h1 className="text-xl font-semibold">This link has expired</h1>
+      <h1 className="font-display text-xl font-semibold">This link has expired</h1>
       <p className="max-w-sm text-sm text-muted-foreground">
         The note is still there — the link just reached the end of the period it was
         shared for. Ask whoever sent it to you for a new one.

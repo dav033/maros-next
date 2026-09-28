@@ -4,7 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export function WidgetError({ text }: { text: string }) {
   return (
-    <div className="flex min-h-[180px] flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border/60 bg-card/30 p-6 text-center">
+    <div className="flex min-h-[180px] flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-line bg-elev-2 p-6 text-center">
       <span className="grid h-10 w-10 place-items-center rounded-full bg-muted text-muted-foreground">
         <Inbox className="h-5 w-5" />
       </span>
@@ -30,7 +30,7 @@ export function WidgetErrorWithRetry({ text, onRetry }: { text: string; onRetry:
 
 function CardShellSkeleton({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={`rounded-xl border border-border/60 bg-card/40 p-5 shadow ${className ?? ""}`}>
+    <div className={`rounded-xl border border-line bg-elev-2 p-4 shadow ${className ?? ""}`}>
       {children}
     </div>
   );
@@ -60,7 +60,7 @@ export function WidgetSkeleton({ className }: { className?: string }) {
   return (
     <CardShellSkeleton className={className}>
       <CardHeaderSkeleton />
-      <Skeleton className="mt-5 h-[240px] w-full rounded-md" />
+      <Skeleton className="mt-4 h-[240px] w-full rounded-md" />
     </CardShellSkeleton>
   );
 }
@@ -69,7 +69,7 @@ export function KpiOverviewSkeleton() {
   return (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
       {Array.from({ length: 5 }).map((_, index) => (
-        <div key={index} className="rounded-xl border border-border/60 bg-card/40 p-5 shadow">
+        <div key={index} className="rounded-xl border border-line bg-elev-2 p-4 shadow">
           <div className="flex items-start justify-between">
             <Skeleton className="h-3 w-24" />
             <Skeleton className="h-9 w-9 rounded-lg" />
@@ -188,7 +188,7 @@ export function FinancialSnapshotSkeleton() {
         {Array.from({ length: 4 }).map((_, index) => (
           <div
             key={index}
-            className="flex items-center gap-3 rounded-lg border border-border/60 bg-muted/20 px-4 py-3"
+            className="flex items-center gap-3 rounded-lg border border-line bg-elev-3 px-4 py-3"
           >
             <Skeleton className="h-10 w-10 rounded-lg" />
             <div className="flex-1 space-y-2">
@@ -208,16 +208,16 @@ export function CostsBreakdownSkeleton() {
       <CardHeaderSkeleton titleWidth="w-36" />
       <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
         {Array.from({ length: 3 }).map((_, index) => (
-          <div key={index} className="rounded-lg border border-border/60 bg-muted/20 px-4 py-3">
+          <div key={index} className="rounded-lg border border-line bg-elev-3 px-4 py-3">
             <Skeleton className="h-3 w-20" />
             <Skeleton className="mt-2 h-6 w-24" />
           </div>
         ))}
       </div>
-      <div className="mt-5 grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="mt-4 grid grid-cols-1 gap-6 lg:grid-cols-2">
         {Array.from({ length: 2 }).map((_, column) => (
           <div key={column} className="space-y-3">
-            <div className="flex items-center justify-between border-b border-border/40 pb-2">
+            <div className="flex items-center justify-between border-b border-line pb-2">
               <Skeleton className="h-3 w-24" />
               <Skeleton className="h-3 w-16" />
             </div>
@@ -251,7 +251,7 @@ export function TopClientsSkeleton() {
         <Skeleton className="h-9 w-[170px] rounded-lg" />
       </div>
       <div className="space-y-2">
-        <div className="flex items-center gap-4 border-b border-border/40 pb-2">
+        <div className="flex items-center gap-4 border-b border-line pb-2">
           <Skeleton className="h-3 w-6" />
           <Skeleton className="h-3 w-20" />
           <Skeleton className="h-3 w-16" />
@@ -286,7 +286,7 @@ export function ProjectHealthSkeleton() {
         {Array.from({ length: 3 }).map((_, index) => (
           <div
             key={index}
-            className="rounded-lg border border-border/60 border-l-4 border-l-muted bg-muted/20 p-3"
+            className="rounded-lg border border-line border-l-4 border-l-muted bg-elev-3 p-3"
           >
             <div className="flex items-center justify-between gap-3">
               <div className="space-y-2">

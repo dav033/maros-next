@@ -33,7 +33,7 @@ export function LeadsPageClient() {
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-4">
         <header className="flex flex-col gap-1">
-          <h1 className="text-xl font-semibold text-foreground sm:text-2xl">Leads</h1>
+          <h1 className="font-display text-xl font-semibold text-foreground sm:text-2xl">Leads</h1>
             <p className="text-xs text-muted-foreground sm:text-sm">Manage your leads</p>
         </header>
         <div className="w-48 flex-shrink-0">

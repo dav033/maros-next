@@ -49,7 +49,7 @@ export function CompanyForm({ value, onChange, disabled, services = [], contacts
   } = useCompanyFormHandlers(value, onChange);
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       <div className="space-y-4">
         <CompanyBasicFields
           name={value.name}
@@ -109,6 +109,7 @@ export function CompanyForm({ value, onChange, disabled, services = [], contacts
           placeholder="Add a note (optional)"
           disabled={disabled}
           rows={2}
+          className="border-line-strong"
         />
       </div>
     </div>

@@ -51,7 +51,7 @@ function Section({ icon: Icon, title, description, children, delay = 0 }: Sectio
           <Icon className="h-4 w-4" />
         </span>
         <div>
-          <h2 className="text-sm font-semibold tracking-tight text-foreground">{title}</h2>
+          <h2 className="font-display text-sm font-semibold tracking-tight text-foreground">{title}</h2>
           <p className="text-xs text-muted-foreground">{description}</p>
         </div>
       </div>

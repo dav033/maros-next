@@ -64,7 +64,7 @@ export function ColorPicker({
       </div>
       <div className="flex items-center gap-2">
         <div
-          className="h-9 w-9 rounded-md border border-input shrink-0"
+          className="h-9 w-9 rounded-md border border-line shrink-0"
           style={{ backgroundColor: value }}
         />
         <Input
@@ -80,7 +80,7 @@ export function ColorPicker({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           disabled={disabled}
-          className="h-9 w-9 cursor-pointer rounded-md border border-input bg-transparent p-0.5"
+          className="h-9 w-9 cursor-pointer rounded-md border border-line-strong bg-transparent p-0.5"
         />
       </div>
     </div>

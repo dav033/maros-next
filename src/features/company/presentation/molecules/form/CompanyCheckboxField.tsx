@@ -17,7 +17,7 @@ export function CompanyCheckboxField({
   onChange,
 }: CompanyCheckboxFieldProps) {
   return (
-    <div className="flex items-center gap-2 rounded-2xl bg-card px-3 py-1.5">
+    <div className="flex items-center gap-2 rounded-lg bg-elev-3 px-3 py-2">
       <Checkbox
         id={id}
         checked={checked}

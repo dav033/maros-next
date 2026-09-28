@@ -54,12 +54,12 @@ function SortableSubtask({
         transition: prefersReducedMotion ? undefined : transition,
         opacity: isDragging ? 0.5 : 1,
       }}
-      className="flex items-center gap-2 rounded-md border border-border/50 bg-card px-2.5 py-2 text-sm"
+      className="flex items-center gap-2 rounded-md border border-line bg-elev-3 px-3 py-2 text-sm"
     >
       <button
         type="button"
         aria-label={`Reorder ${subtask.title}`}
-        className="cursor-grab touch-none text-muted-foreground/60 hover:text-foreground active:cursor-grabbing"
+        className="cursor-grab touch-none text-fg-faint hover:text-foreground active:cursor-grabbing"
         {...attributes}
         {...listeners}
       >
@@ -73,7 +73,7 @@ function SortableSubtask({
           "grid h-4 w-4 shrink-0 place-items-center rounded-sm border",
           subtask.status === "done"
             ? "border-primary bg-primary text-primary-foreground"
-            : "border-muted-foreground/40"
+            : "border-line-strong"
         )}
       >
         {subtask.status === "done" && <Check className="h-3 w-3" />}

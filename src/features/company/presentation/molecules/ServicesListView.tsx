@@ -32,7 +32,7 @@ export function ServicesListView({
       </div>
 
       {services.length === 0 ? (
-        <div className="flex items-center justify-center rounded-lg border border-dashed border-border bg-card/50 p-8">
+        <div className="flex items-center justify-center rounded-lg border border-dashed border-line bg-elev-3 p-8">
           <div className="text-center">
             <Wrench
               className="size-10 mx-auto mb-3 text-muted-foreground"
@@ -47,7 +47,7 @@ export function ServicesListView({
           {services.map((service) => (
             <div
               key={service.id}
-              className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card/50 px-3 py-2 hover:bg-accent/30 transition-colors"
+              className="flex items-center justify-between gap-3 rounded-lg border border-line bg-elev-3 px-3 py-2 transition-colors hover:bg-elev-4"
             >
               <div className="flex items-center gap-2 min-w-0 flex-1">
                 {service.color ? (
@@ -56,7 +56,7 @@ export function ServicesListView({
                     style={{ backgroundColor: service.color }}
                   />
                 ) : (
-                  <div className="h-3.5 w-3.5 rounded-full shrink-0 border border-border" />
+                  <div className="h-3.5 w-3.5 shrink-0 rounded-full border border-line" />
                 )}
                 <span className="text-sm text-foreground truncate">
                   {service.name}
@@ -69,7 +69,7 @@ export function ServicesListView({
                   size="sm"
                   title="Edit service"
                   disabled={isDeleting}
-                  className="h-7 w-7 p-0 min-h-0 rounded text-muted-foreground hover:bg-blue-500/10 hover:text-blue-400"
+                  className="h-7 w-7 min-h-0 rounded-sm p-0 text-muted-foreground hover:bg-elev-4 hover:text-foreground"
                 >
                   <Edit className="size-3.5" />
                 </Button>
@@ -79,7 +79,7 @@ export function ServicesListView({
                   size="sm"
                   title="Delete service"
                   disabled={isDeleting}
-                  className="h-7 w-7 p-0 min-h-0 rounded text-muted-foreground hover:bg-red-500/10 hover:text-red-400"
+                  className="h-7 w-7 min-h-0 rounded-sm p-0 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                 >
                   <Trash className="size-3.5" />
                 </Button>

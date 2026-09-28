@@ -118,7 +118,7 @@ export function NoteEditor({
       {editable && editor && <NoteEditorToolbar editor={editor} />}
       <EditorContent editor={editor} />
       {editable && (
-        <p className="mt-8 border-t border-border/40 pt-3 text-xs text-muted-foreground">
+        <p className="mt-8 border-t border-line pt-3 text-xs text-muted-foreground">
           Type / for blocks · Paste or drop images into your note
         </p>
       )}

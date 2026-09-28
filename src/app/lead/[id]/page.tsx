@@ -11,7 +11,7 @@ async function LeadDetailsPageWithData({ params }: { params: Promise<{ id: strin
     return (
       <div className="container mx-auto p-6">
         <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-6">
-          <h2 className="text-lg font-semibold text-destructive mb-2">Invalid Lead ID</h2>
+          <h2 className="font-display text-lg font-semibold text-destructive mb-2">Invalid Lead ID</h2>
           <p className="text-sm text-muted-foreground">
             No lead ID provided. Please check the URL and try again.
           </p>
@@ -26,7 +26,7 @@ async function LeadDetailsPageWithData({ params }: { params: Promise<{ id: strin
     return (
       <div className="container mx-auto p-6">
         <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-6">
-          <h2 className="text-lg font-semibold text-destructive mb-2">Invalid Lead ID</h2>
+          <h2 className="font-display text-lg font-semibold text-destructive mb-2">Invalid Lead ID</h2>
           <p className="text-sm text-muted-foreground">
             The lead ID "{idString}" is not valid. Please check the URL and try again.
           </p>

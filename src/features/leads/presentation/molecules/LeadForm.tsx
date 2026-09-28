@@ -73,7 +73,7 @@ export function LeadForm({
         }}
         disabled={disabled}
       >
-        <SelectTrigger className="w-full bg-background/95">
+        <SelectTrigger className="w-full border-line-strong">
           <div className="flex items-center">
             <FolderTree className="size-4 text-muted-foreground mr-2 shrink-0" />
             <SelectValue placeholder="Select Lead Type" />
@@ -93,7 +93,7 @@ export function LeadForm({
         onChange={(e: ChangeEvent<HTMLInputElement>) => onChange("leadName", e.target.value)}
         placeholder="Lead Name (optional)"
         disabled={disabled}
-        className="bg-background/95"
+        className="border-line-strong"
       />
 
       <LocationField
@@ -118,7 +118,7 @@ export function LeadForm({
           onValueChange={(val) => onChange("projectTypeId", val === EMPTY_SELECT_VALUE ? undefined : Number(val))}
           disabled={disabled}
         >
-          <SelectTrigger className="bg-background/95">
+          <SelectTrigger className="border-line-strong">
             <Wrench className="size-4 text-muted-foreground mr-2" />
             <SelectValue placeholder="Select Project Type" />
           </SelectTrigger>
@@ -145,7 +145,7 @@ export function LeadForm({
           }
           placeholder="Estimate (optional)"
           disabled={disabled}
-          className="bg-background/95 pl-9"
+          className="border-line-strong pl-9 font-mono tabular-nums"
         />
       </div>
 
@@ -154,7 +154,7 @@ export function LeadForm({
         onChange={(e: ChangeEvent<HTMLInputElement>) => onChange("note", e.target.value)}
         placeholder="Add a note (optional)"
         disabled={disabled}
-        className="bg-background/95"
+        className="border-line-strong"
       />
     </div>
   );

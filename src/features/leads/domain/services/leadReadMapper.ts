@@ -167,7 +167,9 @@ export function mapLeadFromDTO(dto: ApiLeadDTO): Lead {
     projectType: {
       id: projectTypeId,
       name: projectTypeName || "Unclassified",
-      color: projectTypeColor || "#cccccc",
+      // Sin color del backend se deja vacío: el color por defecto lo decide la
+      // presentación (ProjectTypeBadge), no un hex crudo en el dominio.
+      color: projectTypeColor,
     },
     project:
       typeof dto?.project?.id === "number"

@@ -22,7 +22,7 @@ export function CompanyDetailsModal({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Company Details</DialogTitle>
+          <DialogTitle className="font-display">Company Details</DialogTitle>
         </DialogHeader>
       {company ? (
         <div className="space-y-2 p-4">

@@ -13,7 +13,7 @@ export function QuickAddTask({ onAdd }: { onAdd: (value: string) => Promise<void
     try { await onAdd(value); setValue(""); } finally { setIsAdding(false); }
   };
   return (
-    <div className="border-t border-border/60 p-2">
+    <div className="border-t border-line p-2">
       <div className="flex items-center gap-2 rounded-md border border-dashed border-border bg-background px-2">
         <Plus className="h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
         <Input

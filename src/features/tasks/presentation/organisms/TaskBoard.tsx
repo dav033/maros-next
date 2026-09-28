@@ -147,7 +147,7 @@ function QuickFilterPill({
       aria-pressed={active}
       className={cn(
         "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition-colors",
-        active ? activeClassName : "text-muted-foreground hover:bg-muted/60"
+        active ? activeClassName : "text-muted-foreground hover:bg-elev-3"
       )}
     >
       <span className={cn("font-semibold", active ? undefined : countClassName)}>{count}</span>
@@ -215,16 +215,16 @@ function BoardColumn({
     <div
       ref={setNodeRef}
       className={cn(
-        "flex w-72 shrink-0 flex-col rounded-xl border border-border bg-card transition-colors",
-        isOver && "border-primary/50 bg-primary/5"
+        "flex w-72 shrink-0 flex-col rounded-xl border border-line bg-elev-1 transition-colors",
+        isOver && "border-primary bg-primary/5"
       )}
     >
-      <div className="flex items-center justify-between border-b border-border/40 px-3 py-2.5">
+      <div className="flex items-center justify-between border-b border-line px-3 py-2">
         <span className="flex items-center gap-2 text-xs font-semibold text-foreground">
           <span className="h-2 w-2 rounded-full" style={{ backgroundColor: TASK_STATUS_COLORS[status] }} aria-hidden="true" />
           {TASK_STATUS_LABELS[status]}
         </span>
-        <span className="rounded-full bg-muted px-1.5 py-0.5 text-[11px] text-muted-foreground">
+        <span className="rounded-full border border-line bg-elev-4 px-2 py-0.5 font-mono text-[11px] tabular-nums text-muted-foreground">
           {hasMoreThanShown ? `${tasks.length} of ${totalCount}` : tasks.length}
         </span>
       </div>
@@ -256,7 +256,7 @@ function BoardColumn({
         // — the rest are one click away in the list, not silently missing.
         <Link
           href="/tasks?view=list&status=done"
-          className="border-t border-border/40 px-3 py-2 text-center text-[11px] font-medium text-primary hover:underline"
+          className="border-t border-line px-3 py-2 text-center text-[11px] font-medium text-primary hover:underline"
         >
           View all {totalCount} completed
         </Link>
@@ -301,13 +301,13 @@ function AssigneeSwimlane({
   const { setNodeRef, isOver } = useDroppable({ id: `${ASSIGNEE_PREFIX}${group.key}` });
   const groupTaskIds = BOARD_STATUSES.flatMap((status) => (group.columns[status] ?? []).map((task) => task.id));
   return (
-    <div ref={setNodeRef} className={cn("flex flex-col gap-2 rounded-xl border border-border bg-card p-3", (isOver || isDropPreview) && "border-primary/50 bg-primary/5")}>
+    <div ref={setNodeRef} className={cn("flex flex-col gap-2 rounded-xl border border-line bg-elev-1 p-3", (isOver || isDropPreview) && "border-primary bg-primary/5")}>
       <div className="flex items-center gap-2">
         <AssigneeAvatar person={group.person} size="md" />
         <span className="text-sm font-medium text-foreground">
           {group.person ? (group.person.name ?? group.person.email) : "Unassigned"}
         </span>
-        <span className="rounded-full bg-background/60 px-1.5 py-0.5 text-[10px] text-muted-foreground">
+        <span className="rounded-full border border-line bg-elev-4 px-2 py-0.5 font-mono text-[10px] tabular-nums text-muted-foreground">
            {group.total}
          </span>
         {isDropPreview ? <span className="ml-auto text-[10px] font-medium text-primary">Drop here</span> : null}
@@ -319,7 +319,7 @@ function AssigneeSwimlane({
             return (
               <div
                 key={status}
-              className="flex w-56 shrink-0 flex-col gap-2 rounded-lg border border-border bg-card p-2"
+              className="flex w-56 shrink-0 flex-col gap-2 rounded-lg border border-line bg-elev-2 p-2"
               >
                 <div className="flex items-center justify-between px-1">
                   <span className="text-[11px] font-semibold tracking-wide text-muted-foreground">
@@ -346,7 +346,7 @@ function AssigneeSwimlane({
                     />
                   ))}
                   {tasks.length === 0 ? (
-                    <div className="rounded-md border border-dashed border-border/30 px-2 py-3 text-center text-[10px] text-muted-foreground">
+                    <div className="rounded-md border border-dashed border-line px-2 py-3 text-center text-[10px] text-muted-foreground">
                       —
                     </div>
                   ) : null}
@@ -378,12 +378,12 @@ function BoardSkeleton() {
 function GenericGroupLane({ group, children, isDropPreview = false, previewTask, onQuickAdd }: { group: { key: string; label: string; tasks: Task[] }; children: ReactNode; isDropPreview?: boolean; previewTask?: Task | null; onQuickAdd: (value: string) => Promise<void> }) {
   const { setNodeRef, isOver } = useDroppable({ id: `${GROUP_PREFIX}${group.key}` });
   return (
-    <div ref={setNodeRef} className={cn("rounded-xl border border-border bg-card p-3", (isOver || isDropPreview) && "border-primary/60 bg-primary/5")}>
+    <div ref={setNodeRef} className={cn("rounded-xl border border-line bg-elev-1 p-3", (isOver || isDropPreview) && "border-primary bg-primary/5")}>
       <div className="mb-2 flex items-center justify-between">
         <span className="text-sm font-medium capitalize">{group.label}</span>
         <span className="flex items-center gap-2">
           {isDropPreview ? <span className="text-[10px] font-medium text-primary">Drop here</span> : null}
-          <span className="rounded-full bg-muted px-1.5 py-0.5 text-[11px] text-muted-foreground">{group.tasks.length}</span>
+          <span className="rounded-full border border-line bg-elev-4 px-2 py-0.5 font-mono text-[11px] tabular-nums text-muted-foreground">{group.tasks.length}</span>
         </span>
       </div>
       <div className="flex flex-col gap-2">
@@ -858,7 +858,7 @@ export function TaskBoard({
             value={searchDraft}
             onChange={(e) => setSearchDraft(e.target.value)}
             placeholder="Search tasks…"
-            className="h-9 border-border/60 bg-background/60 pl-9"
+            className="h-9 border-line-strong pl-9"
           />
           {state.q.trim().length > 0 && (
             <Button
@@ -895,7 +895,7 @@ export function TaskBoard({
             label="in progress"
             count={stats.inProgress}
             active={quickFilter === "in_progress"}
-            activeClassName="bg-foreground/10 text-foreground"
+            activeClassName="bg-elev-4 text-foreground"
             countClassName="text-foreground"
             onClick={() => toggleQuickFilter("in_progress")}
           />
@@ -969,7 +969,7 @@ export function TaskBoard({
         <div className="flex items-center gap-1.5">
           <Rows3 className="h-3.5 w-3.5 text-muted-foreground" />
           <Select value={state.group} onValueChange={(value) => replaceState({ group: value as typeof state.group })}>
-            <SelectTrigger className="h-9 w-36 border-border/60 text-xs">
+            <SelectTrigger className="h-9 w-36 border-line-strong text-xs">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

@@ -35,8 +35,8 @@ export function NoteTrashPageView() {
       <div className="mx-auto max-w-2xl px-4 py-6 sm:px-8 sm:py-10">
         <div className="mb-1 flex flex-wrap items-center justify-between gap-3 sm:gap-4">
           <div className="flex items-center gap-2.5">
-            <Trash className="h-[22px] w-[22px] text-muted-foreground" />
-            <h1 className="text-[26px] font-semibold">Trash</h1>
+            <Trash className="size-6 text-muted-foreground" />
+            <h1 className="font-display text-2xl font-semibold">Trash</h1>
           </div>
           <Button
             variant="outline"
@@ -64,9 +64,9 @@ export function NoteTrashPageView() {
             return (
               <div
                 key={page.id}
-                className="flex items-center gap-3.5 border-b border-border/60 py-3 px-2 last:border-b-0"
+                className="flex items-center gap-3.5 border-b border-line py-3 px-2 last:border-b-0"
               >
-                <div className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-lg bg-accent/60 text-muted-foreground/70">
+                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-elev-4 text-muted-foreground/70">
                   {page.icon ?? <FileText className="h-4 w-4" />}
                 </div>
                 <div className="min-w-0 flex-1">

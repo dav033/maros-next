@@ -100,7 +100,7 @@ export function TopClientsTable({ data, by, onByChange }: TopClientsTableProps) 
   }, [projects]);
 
   return (
-    <Card className="border-border/60">
+    <Card className="border-line">
       <WidgetCardHeader
         icon={Crown}
         iconBg="bg-amber-500/10"
@@ -108,7 +108,7 @@ export function TopClientsTable({ data, by, onByChange }: TopClientsTableProps) 
         title="Top Clients"
         subtitle={sortLabel}
         rightSlot={
-          <div className="flex items-center gap-1 rounded-lg border border-border/60 bg-background/40 p-1">
+          <div className="flex items-center gap-1 rounded-lg border border-line bg-elev-3 p-1">
             <Button
               type="button"
               size="sm"
@@ -134,13 +134,13 @@ export function TopClientsTable({ data, by, onByChange }: TopClientsTableProps) 
         <Table>
           <TableHeader>
             <TableRow className="hover:bg-transparent">
-              <TableHead className="w-10 text-xs uppercase tracking-wide text-muted-foreground">#</TableHead>
-              <TableHead className="text-xs uppercase tracking-wide text-muted-foreground">Client</TableHead>
-              <TableHead className="text-xs uppercase tracking-wide text-muted-foreground">Project</TableHead>
-              <TableHead className="text-right text-xs uppercase tracking-wide text-muted-foreground">
+              <TableHead className="w-10 font-display text-xs uppercase tracking-wide text-muted-foreground">#</TableHead>
+              <TableHead className="font-display text-xs uppercase tracking-wide text-muted-foreground">Client</TableHead>
+              <TableHead className="font-display text-xs uppercase tracking-wide text-muted-foreground">Project</TableHead>
+              <TableHead className="font-display text-right text-xs uppercase tracking-wide text-muted-foreground">
                 Invoiced
               </TableHead>
-              <TableHead className="text-right text-xs uppercase tracking-wide text-muted-foreground">
+              <TableHead className="font-display text-right text-xs uppercase tracking-wide text-muted-foreground">
                 Invoices
               </TableHead>
             </TableRow>
@@ -153,7 +153,7 @@ export function TopClientsTable({ data, by, onByChange }: TopClientsTableProps) 
                 <TableRow
                   key={`${client.customerName}-${client.jobId}`}
                   className={`transition-colors ${
-                    isClickable ? "cursor-pointer hover:bg-primary/5" : "hover:bg-muted/40"
+                    isClickable ? "cursor-pointer hover:bg-primary/5" : "hover:bg-elev-3"
                   }`}
                   onClick={() => href && router.push(href)}
                   onKeyDown={(event) => {
@@ -167,11 +167,11 @@ export function TopClientsTable({ data, by, onByChange }: TopClientsTableProps) 
                   role={isClickable ? "link" : undefined}
                   title={isClickable ? "View project details" : undefined}
                 >
-                  <TableCell className="text-xs font-medium text-muted-foreground">{index + 1}</TableCell>
+                  <TableCell className="font-mono text-xs font-medium tabular-nums text-muted-foreground">{index + 1}</TableCell>
                   <TableCell className="font-medium">{client.customerName}</TableCell>
-                  <TableCell className="text-muted-foreground">{client.projectNumber ?? "—"}</TableCell>
-                  <TableCell className="text-right font-medium">{money.format(client.totalInvoiced)}</TableCell>
-                  <TableCell className="text-right text-muted-foreground">{client.invoiceCount}</TableCell>
+                  <TableCell className="font-mono text-muted-foreground">{client.projectNumber ?? "—"}</TableCell>
+                  <TableCell className="text-right font-mono font-medium tabular-nums">{money.format(client.totalInvoiced)}</TableCell>
+                  <TableCell className="text-right font-mono tabular-nums text-muted-foreground">{client.invoiceCount}</TableCell>
                 </TableRow>
               );
             })}

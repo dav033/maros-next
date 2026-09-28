@@ -53,7 +53,7 @@ function flattenRows(rows: QboReportRow[] | undefined, depth: number, prefix: st
 const ROW_CLASSES: Record<FlatRowKind, string> = {
   header: "font-medium",
   data: "",
-  summary: "bg-muted/30 font-medium",
+  summary: "bg-elev-3 font-medium",
 };
 
 export function QboReportTable({ raw }: { raw: QboRawReport }) {

@@ -9,8 +9,9 @@ export interface ServiceBadgeProps {
 }
 
 export function ServiceBadge({ service }: ServiceBadgeProps) {
-  const color = service.color || "#9ca3af";
-  
+  // Colores desde tokens CSS compartidos (--badge-*), no hex crudo: ver globals.css.
+  const color = service.color || "hsl(var(--badge-neutral))";
+
   return (
     <Badge
       variant="outline"

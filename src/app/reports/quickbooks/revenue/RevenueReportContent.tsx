@@ -82,7 +82,7 @@ export function RevenueReportContent() {
     <section className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold">QuickBooks Revenue Report</h1>
+          <h1 className="font-display text-xl font-semibold">QuickBooks Revenue Report</h1>
           <p className="text-sm text-muted-foreground">
             Revenue trend and totals for {range.from} to {range.to}
           </p>
@@ -102,7 +102,7 @@ export function RevenueReportContent() {
           </CardHeader>
           <CardContent className="flex items-center gap-2">
             <DollarSign className="h-4 w-4 text-emerald-500" />
-            <p className="text-2xl font-semibold">{money.format(totalRevenue)}</p>
+            <p className="font-mono text-2xl font-semibold tabular-nums">{money.format(totalRevenue)}</p>
           </CardContent>
         </Card>
 
@@ -111,7 +111,7 @@ export function RevenueReportContent() {
             <CardTitle className="text-sm">Outstanding</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-semibold">
+            <p className="font-mono text-2xl font-semibold tabular-nums">
               {money.format(overview.data?.outstandingTotal ?? 0)}
             </p>
           </CardContent>
@@ -157,7 +157,7 @@ export function RevenueReportContent() {
                 <TableRow>
                   <TableHead>Section</TableHead>
                   <TableHead>Label</TableHead>
-                  <TableHead className="text-right">Amount</TableHead>
+                  <TableHead className="font-display text-right">Amount</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -165,7 +165,7 @@ export function RevenueReportContent() {
                   <TableRow key={`${row.section}-${row.label}-${index}`}>
                     <TableCell className="text-muted-foreground">{row.section || "-"}</TableCell>
                     <TableCell>{row.label}</TableCell>
-                    <TableCell className="text-right font-medium">{money.format(row.amount)}</TableCell>
+                    <TableCell className="text-right font-mono font-medium tabular-nums">{money.format(row.amount)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

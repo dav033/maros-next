@@ -64,7 +64,7 @@ export function LeadEditForm({
         value={form.leadName ?? ""}
         onChange={(e: ChangeEvent<HTMLInputElement>) => onChange("leadName", e.target.value)}
         disabled={disabled}
-        className="w-full"
+        className="w-full border-line-strong"
       />
 
       <LocationField
@@ -82,7 +82,7 @@ export function LeadEditForm({
           onValueChange={(val) => onChange("projectTypeId", val === EMPTY_SELECT_VALUE ? undefined : Number(val))}
           disabled={disabled}
         >
-          <SelectTrigger className="w-full">
+          <SelectTrigger className="w-full border-line-strong">
             <div className="flex items-center">
               <Wrench className="size-4 text-muted-foreground mr-2 shrink-0" />
               <SelectValue placeholder="Select Project Type" />
@@ -103,7 +103,7 @@ export function LeadEditForm({
           onValueChange={(val) => onChange("status", val === EMPTY_SELECT_VALUE ? undefined : val)}
           disabled={disabled}
         >
-          <SelectTrigger className="w-full">
+          <SelectTrigger className="w-full border-line-strong">
             <div className="flex items-center">
               <Flag className="size-4 text-muted-foreground mr-2 shrink-0" />
               <SelectValue placeholder="Select Status" />
@@ -132,7 +132,7 @@ export function LeadEditForm({
             onChange("estimate", e.target.value === "" ? undefined : Number(e.target.value))
           }
           disabled={disabled}
-          className="w-full pl-9"
+          className="w-full border-line-strong pl-9 font-mono tabular-nums"
         />
       </div>
 
@@ -141,7 +141,7 @@ export function LeadEditForm({
         onValueChange={(val) => onChange("contactId", val === EMPTY_SELECT_VALUE ? undefined : Number(val))}
         disabled={disabled}
       >
-        <SelectTrigger className="w-full">
+        <SelectTrigger className="w-full border-line-strong">
           <div className="flex items-center">
             <User className="size-4 text-muted-foreground mr-2 shrink-0" />
             <SelectValue placeholder="Select Contact" />

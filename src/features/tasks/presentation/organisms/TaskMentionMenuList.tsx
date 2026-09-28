@@ -51,14 +51,14 @@ export const TaskMentionMenuList = forwardRef<TaskMentionMenuListHandle, TaskMen
 
     if (items.length === 0) {
       return (
-        <div className="w-64 rounded-md border border-border bg-popover p-2 text-sm text-muted-foreground shadow-md">
+        <div className="w-64 rounded-md border border-line bg-elev-4 p-2 text-sm text-muted-foreground shadow-md">
           No matches
         </div>
       );
     }
 
     return (
-      <div className="w-64 max-h-64 overflow-y-auto rounded-md border border-border bg-popover p-1 shadow-md">
+      <div className="w-64 max-h-64 overflow-y-auto rounded-md border border-line bg-elev-4 p-1 shadow-md">
         {items.map((user, index) => (
           <button
             key={user.id}
@@ -66,7 +66,7 @@ export const TaskMentionMenuList = forwardRef<TaskMentionMenuListHandle, TaskMen
             onClick={() => selectItem(index)}
             className={cn(
               "flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm",
-              index === selectedIndex ? "bg-accent text-accent-foreground" : "hover:bg-accent/50"
+              index === selectedIndex ? "bg-elev-5 text-foreground" : "hover:bg-elev-5"
             )}
           >
             <AssigneeAvatar person={user} />

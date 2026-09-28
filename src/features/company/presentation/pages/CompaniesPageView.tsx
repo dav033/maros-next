@@ -175,7 +175,7 @@ export function CompaniesPageView({ logic }: CompaniesPageViewProps) {
         >
           <div className="w-32 shrink-0">
             <Select value={toolbarSearchController.selectedField} onValueChange={toolbarSearchController.onFieldChange}>
-              <SelectTrigger className="bg-background/60 border-border/60 h-9 text-xs">
+              <SelectTrigger className="h-9 border-line-strong text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-popover border-border">
@@ -194,7 +194,7 @@ export function CompaniesPageView({ logic }: CompaniesPageViewProps) {
               value={toolbarSearchController.searchTerm}
               onChange={(e) => toolbarSearchController.onSearchChange(e.target.value)}
               placeholder={toolbarSearchController.placeholder}
-              className="pl-9 bg-background/60 border-border/60 h-9"
+              className="h-9 border-line-strong pl-9"
             />
             {toolbarSearchController.searchTerm.trim().length > 0 && (
               <Button
@@ -210,7 +210,7 @@ export function CompaniesPageView({ logic }: CompaniesPageViewProps) {
             )}
           </div>
           <Select value={String(typeFilter)} onValueChange={(v) => setTypeFilter(v as CompanyType | "all")}>
-            <SelectTrigger className="w-44 bg-background/60 border-border/60 h-9 text-xs">
+            <SelectTrigger className="w-44 h-9 border-line-strong text-xs">
               <Building className="h-3.5 w-3.5 mr-1.5 shrink-0 text-muted-foreground" />
               <SelectValue placeholder="Type" />
             </SelectTrigger>
@@ -225,7 +225,7 @@ export function CompaniesPageView({ logic }: CompaniesPageViewProps) {
             </SelectContent>
           </Select>
           <Select value={String(customerFilter)} onValueChange={(v) => setCustomerFilter(v === "all" ? "all" : v === "true")}>
-            <SelectTrigger className="w-36 bg-background/60 border-border/60 h-9 text-xs">
+            <SelectTrigger className="w-36 h-9 border-line-strong text-xs">
               <SelectValue placeholder="Customer" />
             </SelectTrigger>
             <SelectContent className="bg-popover border-border">
@@ -235,7 +235,7 @@ export function CompaniesPageView({ logic }: CompaniesPageViewProps) {
             </SelectContent>
           </Select>
           <Select value={String(clientFilter)} onValueChange={(v) => setClientFilter(v === "all" ? "all" : v === "true")}>
-            <SelectTrigger className="w-36 bg-background/60 border-border/60 h-9 text-xs">
+            <SelectTrigger className="w-36 h-9 border-line-strong text-xs">
               <SelectValue placeholder="Supplier" />
             </SelectTrigger>
             <SelectContent className="bg-popover border-border">
@@ -245,7 +245,7 @@ export function CompaniesPageView({ logic }: CompaniesPageViewProps) {
             </SelectContent>
           </Select>
           <Select value={groupBy} onValueChange={(v) => setGroupBy(v as CompanyGroupBy)}>
-            <SelectTrigger className="w-40 bg-background/60 border-border/60 h-9 text-xs">
+            <SelectTrigger className="w-40 h-9 border-line-strong text-xs">
               <Layers className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
               <SelectValue />
             </SelectTrigger>

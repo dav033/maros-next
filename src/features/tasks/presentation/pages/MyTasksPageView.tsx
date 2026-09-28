@@ -288,15 +288,15 @@ export function MyTasksPageView() {
         // Capped width: rows carry a full-bleed h-12 CTA button by design (mobile-first,
         // one-tap — see PLAN-TAREAS.md §6.3), which reads fine on a phone but stretches
         // into an absurdly wide, mostly-empty bar on a desktop-width column.
-        <div className="dashboard-section-enter flex w-full flex-1 flex-col gap-5">
+        <div className="dashboard-section-enter flex w-full flex-1 flex-col gap-4">
           {groups.map((job) => (
             <section key={job.key} className="flex flex-col gap-3">
-              <header className="flex items-baseline justify-between gap-3 border-b border-border/60 pb-2">
+              <header className="flex items-baseline justify-between gap-3 border-b border-line pb-2">
                 <div className="min-w-0">
-                  <h2 className="truncate text-sm font-semibold text-foreground">{job.label}</h2>
+                  <h2 className="truncate font-display text-sm font-semibold text-foreground">{job.label}</h2>
                   {job.address ? <JobAddressLink address={{ label: job.address, href: job.addressLink }} /> : null}
                 </div>
-                <span className="shrink-0 text-xs text-muted-foreground">{job.tasks.length}</span>
+                <span className="shrink-0 font-mono text-xs tabular-nums text-muted-foreground">{job.tasks.length}</span>
               </header>
               {SECTIONS.map(({ key, label }) => {
                 const tasks = job.tasks.filter((task) => buckets[key].some((candidate) => candidate.id === task.id));
@@ -304,7 +304,7 @@ export function MyTasksPageView() {
                 return (
                   <div key={key} className="space-y-2">
                     <h3 className="text-xs font-medium text-muted-foreground">{label} · {tasks.length}</h3>
-                    <div className="grid gap-2.5 lg:grid-cols-2 xl:grid-cols-3">
+                    <div className="grid gap-3 lg:grid-cols-2 xl:grid-cols-3">
                       {tasks.map((task) => (
                         <MyTaskRow
                           key={task.id}

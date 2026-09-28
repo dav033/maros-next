@@ -43,7 +43,7 @@ export function RolesList() {
         {roles.map((role) => (
           <div
             key={role.id}
-            className="flex items-center justify-between rounded-md border border-border/60 p-4"
+            className="flex items-center justify-between rounded-lg border border-line bg-elev-2 p-4"
           >
             <div>
               <div className="flex items-center gap-2 font-medium">
@@ -92,7 +92,7 @@ export function RolesList() {
       <AlertDialog open={Boolean(pendingDelete)} onOpenChange={(open) => !open && setPendingDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete role "{pendingDelete?.name}"?</AlertDialogTitle>
+            <AlertDialogTitle className="font-display">Delete role "{pendingDelete?.name}"?</AlertDialogTitle>
             <AlertDialogDescription>
               This only works if no user is currently assigned to it. This cannot be undone.
             </AlertDialogDescription>

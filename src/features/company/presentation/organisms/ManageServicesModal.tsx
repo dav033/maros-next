@@ -56,16 +56,17 @@ export function ManageServicesModal({ isOpen, onClose, services }: ManageService
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle className="font-display">
             {mode === "list" ? (
               "Manage Services"
             ) : mode === "create" ? (
               "New Service"
             ) : (
               <div className="flex items-center gap-2">
-                <div 
-                  className="h-4 w-4 rounded-full shrink-0"
-                  style={{ backgroundColor: currentService?.color || "#000000" }}
+                {/* Colores desde tokens CSS compartidos (--badge-*), no hex crudo: ver globals.css. */}
+                <div
+                  className="h-4 w-4 shrink-0 rounded-full"
+                  style={{ backgroundColor: currentService?.color || "hsl(var(--badge-neutral))" }}
                 />
                 <span>Edit Service</span>
               </div>

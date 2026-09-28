@@ -11,7 +11,7 @@ export default function Loading() {
         <Skeleton className="h-9 w-40" />
       </div>
 
-      <div className="rounded-xl border border-border/60 bg-card/40 p-4 space-y-3">
+      <div className="rounded-xl border border-line bg-elev-2 p-4 space-y-3">
         <Skeleton className="h-5 w-48" />
         <div className="space-y-2">
           {Array.from({ length: 10 }).map((_, i) => (

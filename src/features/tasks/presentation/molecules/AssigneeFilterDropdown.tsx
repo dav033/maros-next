@@ -58,8 +58,8 @@ export function AssigneeFilterDropdown({
         <button
           type="button"
           className={cn(
-            "inline-flex h-9 items-center justify-between gap-1.5 rounded-md border border-border/60 bg-background/60 px-3 text-xs shadow-sm transition-colors hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
-            hasFilter && "border-primary/40 text-primary"
+            "inline-flex h-9 items-center justify-between gap-1.5 rounded-md border border-line-strong bg-elev-2 px-3 text-xs shadow-sm transition-colors hover:bg-elev-3 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+            hasFilter && "border-primary text-primary"
           )}
         >
           <span className="inline-flex min-w-0 items-center gap-1.5">

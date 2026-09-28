@@ -21,7 +21,7 @@ export default function GlobalRouteError({ error, reset }: Props) {
   return (
     <div className="min-h-[60vh] flex items-center justify-center px-4">
       <div className="max-w-md w-full text-center space-y-6">
-        <h1 className="text-2xl font-semibold text-foreground">
+        <h1 className="font-display text-2xl font-semibold text-foreground">
           Algo no salió como esperábamos
         </h1>
         <p className="text-muted-foreground">{userMessage}</p>
@@ -29,13 +29,13 @@ export default function GlobalRouteError({ error, reset }: Props) {
           <button
             type="button"
             onClick={reset}
-            className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary/90"
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
             Intentar de nuevo
           </button>
           <Link
             href="/"
-            className="inline-flex items-center gap-2 rounded-lg border border-border px-5 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+            className="inline-flex items-center gap-2 rounded-lg border border-line-strong px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-elev-3"
           >
             Ir al inicio
           </Link>

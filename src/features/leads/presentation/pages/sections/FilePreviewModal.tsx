@@ -49,7 +49,7 @@ function ImagePreview({ url, fileName }: { url: string; fileName: string }) {
 
   if (error) {
     return (
-      <div className="flex min-h-64 flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-border bg-muted/20 p-6 text-center">
+      <div className="flex min-h-64 flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-line bg-elev-3 p-6 text-center">
         <p className="text-sm text-muted-foreground">
           This image could not be rendered in the preview.
         </p>
@@ -64,7 +64,7 @@ function ImagePreview({ url, fileName }: { url: string; fileName: string }) {
   }
 
   return (
-    <div className="relative flex min-h-64 max-h-[78vh] items-center justify-center overflow-auto rounded-lg border border-border bg-black/30 p-2">
+    <div className="relative flex min-h-64 max-h-[78vh] items-center justify-center overflow-auto rounded-lg border border-line bg-elev-3 p-2">
       {!loaded && (
         <div className="absolute inset-0 flex items-center justify-center gap-2 text-sm text-muted-foreground">
           <Loader2 className="size-5 animate-spin" />
@@ -75,7 +75,7 @@ function ImagePreview({ url, fileName }: { url: string; fileName: string }) {
       <img
         src={url}
         alt={fileName}
-        className="max-h-[76vh] max-w-full rounded object-contain"
+        className="max-h-[76vh] max-w-full rounded-sm object-contain"
         onLoad={() => setLoaded(true)}
         onError={() => setError(true)}
       />
@@ -88,7 +88,7 @@ function PdfPreview({ url }: { url: string }) {
     <embed
       src={url}
       type="application/pdf"
-      className="w-full rounded border"
+      className="w-full rounded-sm border border-line"
       style={{ height: "70vh" }}
     />
   );
@@ -131,7 +131,7 @@ function DocxPreview({ url }: { url: string }) {
 
   return (
     <div
-      className="prose prose-sm prose-invert max-w-none overflow-auto max-h-[70vh] p-4 border rounded bg-background"
+      className="prose prose-sm prose-invert max-w-none overflow-auto max-h-[70vh] rounded-sm border border-line bg-elev-3 p-4"
       dangerouslySetInnerHTML={{ __html: html }}
     />
   );
@@ -142,9 +142,9 @@ export function FilePreviewModal({ open, onClose, fileName, presignedUrl }: File
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="!flex max-h-[92vh] w-[calc(100vw-2rem)] max-w-5xl flex-col overflow-hidden bg-background p-0">
-        <DialogHeader className="border-b border-border/70 px-5 py-4 pr-12 sm:px-6 sm:pr-12">
-          <DialogTitle className="truncate text-sm font-medium">{fileName}</DialogTitle>
+      <DialogContent className="!flex max-h-[92vh] w-[calc(100vw-2rem)] max-w-5xl flex-col overflow-hidden p-0">
+        <DialogHeader className="border-b border-line px-4 py-4 pr-12 sm:px-6 sm:pr-12">
+          <DialogTitle className="truncate text-sm font-medium font-display">{fileName}</DialogTitle>
         </DialogHeader>
 
         <div className="min-h-0 flex-1 overflow-auto p-4 sm:p-6">

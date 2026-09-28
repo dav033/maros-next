@@ -40,7 +40,7 @@ export function useLeadsTableColumns({
         header: "Lead #",
         className: "w-[110px]",
         render: (lead: Lead) => (
-          <span className="whitespace-nowrap font-mono text-foreground">
+          <span className="whitespace-nowrap font-mono tabular-nums text-foreground">
             {lead.leadNumber}
           </span>
         ),
@@ -102,7 +102,7 @@ export function useLeadsTableColumns({
         header: "Estimate",
         className: "w-[120px] text-right",
         render: (lead: Lead) => (
-          <span className="whitespace-nowrap font-mono text-sm text-foreground">
+          <span className="whitespace-nowrap font-mono text-sm tabular-nums text-foreground">
             {lead.estimate != null
               ? `$${Number(lead.estimate).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
               : "—"}

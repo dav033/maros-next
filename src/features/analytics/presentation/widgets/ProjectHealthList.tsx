@@ -34,7 +34,7 @@ export function ProjectHealthList({ data }: ProjectHealthListProps) {
   const hasAlerts = data.length > 0;
 
   return (
-    <Card className="border-border/60">
+    <Card className="border-line">
       <WidgetCardHeader
         icon={Siren}
         iconBg="bg-rose-500/10"
@@ -68,10 +68,10 @@ export function ProjectHealthList({ data }: ProjectHealthListProps) {
                 <div className="flex items-center justify-between gap-3">
                   <div className="min-w-0">
                     <p className="truncate text-sm font-semibold">{item.projectName}</p>
-                    <p className="text-xs text-muted-foreground">{item.projectNumber}</p>
+                    <p className="font-mono text-xs text-muted-foreground">{item.projectNumber}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge className={`text-[10px] font-semibold uppercase tracking-wide ${styles.badge}`}>
+                    <Badge className={`font-display text-xs font-semibold uppercase tracking-wide ${styles.badge}`}>
                       <span className={`mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${styles.dot}`} />
                       {item.riskLevel}
                     </Badge>
@@ -91,9 +91,9 @@ export function ProjectHealthList({ data }: ProjectHealthListProps) {
               </>
             );
 
-            const baseClasses = `group block rounded-lg border border-border/60 border-l-4 bg-muted/20 p-3 transition-all ${styles.border} ${
+            const baseClasses = `group block rounded-lg border border-line-strong border-l-4 bg-elev-3 p-3 transition-all ${styles.border} ${
               hasLink
-                ? "hover:-translate-y-0.5 hover:border-primary/30 hover:bg-muted/40 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                ? "hover:-translate-y-0.5 hover:border-primary/30 hover:bg-elev-4 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 : ""
             }`;
 

@@ -147,7 +147,7 @@ function AttachmentRow({ attachment, searchTerm, onRefreshed, onError }: Attachm
       disabled={!canOpen}
       title={canOpen ? `Open ${displayName} in a new tab` : "No download URL available"}
       aria-label={canOpen ? `Open ${displayName} in a new tab` : `${displayName} (no URL)`}
-      className="group flex w-full items-start gap-3 rounded-md border bg-card/40 p-3 text-left transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-60"
+      className="group flex w-full items-start gap-3 rounded-md border border-line bg-elev-4 p-3 text-left transition-colors hover:bg-elev-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-60"
     >
       <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
         <Icon className="size-4" />
@@ -157,20 +157,24 @@ function AttachmentRow({ attachment, searchTerm, onRefreshed, onError }: Attachm
           <p className="truncate text-sm font-medium text-foreground" title={displayName}>
             {searchTerm ? highlightMatch(displayName, searchTerm) : displayName}
           </p>
-          <Badge variant="outline" className="text-[10px]">
+          <Badge variant="outline" className="text-xs">
             {attachment.linkedEntityType}
           </Badge>
           {attachment.linkedEntityAmount != null && (
             <Badge
               variant="outline"
-              className="border-emerald-500/40 bg-emerald-500/10 text-[10px] font-semibold text-emerald-400"
+              className="text-xs font-mono font-semibold tabular-nums"
+              style={{
+                borderColor: "hsl(var(--badge-green))",
+                color: "hsl(var(--badge-green))",
+              }}
               title={`Amount of the linked ${attachment.linkedEntityType}`}
             >
               {attachmentMoney.format(attachment.linkedEntityAmount)}
             </Badge>
           )}
           {!attachment.includeOnSend && (
-            <Badge variant="secondary" className="text-[10px]">
+            <Badge variant="secondary" className="text-xs">
               Private
             </Badge>
           )}
@@ -251,11 +255,11 @@ function SectionBlock({
   const [open, setOpen] = useState(defaultOpen);
 
   return (
-    <Collapsible open={open} onOpenChange={setOpen} className="rounded-md border bg-background/60">
+    <Collapsible open={open} onOpenChange={setOpen} className="rounded-md border border-line bg-elev-3">
       <CollapsibleTrigger asChild>
         <button
           type="button"
-          className="flex w-full items-center justify-between gap-3 px-3 py-2 text-left hover:bg-muted/40"
+          className="flex w-full items-center justify-between gap-3 px-3 py-2 text-left hover:bg-elev-4"
         >
           <div className="flex min-w-0 items-center gap-3">
             <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
@@ -273,7 +277,7 @@ function SectionBlock({
           </div>
           <div className="flex items-center gap-2">
             {fallbackUsed && (
-              <Badge variant="secondary" className="text-[10px]">
+              <Badge variant="secondary" className="text-xs">
                 Fallback scan
               </Badge>
             )}
@@ -302,7 +306,7 @@ function AttachmentsSkeleton() {
   return (
     <div className="space-y-3">
       {[0, 1, 2].map((i) => (
-        <div key={i} className="flex items-start gap-3 rounded-md border bg-card/40 p-3">
+        <div key={i} className="flex items-start gap-3 rounded-md border border-line bg-elev-4 p-3">
           <Skeleton className="size-9" />
           <div className="flex-1 space-y-2">
             <Skeleton className="h-3 w-2/3" />
@@ -324,7 +328,10 @@ function CoverageBanner({ data }: { data: QboProjectAttachments }) {
   if (!notFound && !lowCoverage && warnings.length === 0) return null;
 
   return (
-    <div className="flex items-start gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-200">
+    <div
+      className="flex items-start gap-2 rounded-md border border-line bg-elev-3 p-3 text-xs"
+      style={{ color: "hsl(var(--badge-amber))" }}
+    >
       <TriangleAlert className="mt-0.5 size-3.5 shrink-0" />
       <div className="space-y-1">
         {notFound && (
@@ -377,14 +384,14 @@ function TypeFilterChips({ sections, active, onToggle, disabled }: TypeFilterChi
             className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${
               isActive
                 ? "border-primary bg-primary text-primary-foreground"
-                : "border-border bg-background text-muted-foreground hover:bg-muted/60"
+                : "border-line-strong bg-elev-3 text-muted-foreground hover:bg-elev-4"
             }`}
             aria-pressed={isActive}
           >
             <Icon className="size-3.5" />
             <span>{section.label}</span>
             <span
-              className={`rounded-full px-1.5 text-[10px] ${
+              className={`rounded-full px-1.5 font-mono text-xs tabular-nums ${
                 isActive ? "bg-primary-foreground/20 text-primary-foreground" : "bg-muted text-muted-foreground"
               }`}
             >
@@ -460,14 +467,14 @@ export function QuickbooksProjectAttachments({
             Could not load QuickBooks attachments. Try again in a moment.
           </div>
         ) : !query.data ? (
-          <div className="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground">
+          <div className="rounded-md border border-dashed border-line p-6 text-center text-sm text-muted-foreground">
             No data available.
           </div>
         ) : (
           <>
             <CoverageBanner data={query.data} />
             {noAttachments ? (
-              <div className="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground">
+              <div className="rounded-md border border-dashed border-line p-6 text-center text-sm text-muted-foreground">
                 <p>No QuickBooks attachments found for this project.</p>
                 <p className="mt-1 text-xs">
                   Upload files directly in QuickBooks and they will show up here.
@@ -521,7 +528,7 @@ export function QuickbooksProjectAttachments({
                 />
 
                 {noMatches ? (
-                  <div className="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground">
+                  <div className="rounded-md border border-dashed border-line p-6 text-center text-sm text-muted-foreground">
                     <p>No attachments match your search.</p>
                     <p className="mt-1 text-xs">Try a different term or clear the filters.</p>
                   </div>

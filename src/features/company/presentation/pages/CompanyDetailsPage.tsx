@@ -118,12 +118,18 @@ export function CompanyDetailsPage({
         actions={
           <>
             {companyDetails.isCustomer && (
-              <Badge className="bg-green-500/10 text-green-600 border-green-500/20">
+              <Badge
+                variant="outline"
+                style={{ borderColor: "hsl(var(--badge-green))", color: "hsl(var(--badge-green))" }}
+              >
                 Customer
               </Badge>
             )}
             {companyDetails.isClient && (
-              <Badge className="bg-green-500/10 text-green-600 border-green-500/20">
+              <Badge
+                variant="outline"
+                style={{ borderColor: "hsl(var(--badge-green))", color: "hsl(var(--badge-green))" }}
+              >
                 Client
               </Badge>
             )}

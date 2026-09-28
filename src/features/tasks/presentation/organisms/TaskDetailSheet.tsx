@@ -307,7 +307,7 @@ export function TaskDetailDialog({
                       }
                     }}
                     onBlur={saveTitle}
-                    className="min-h-9 min-w-0 flex-1 resize-none border-none bg-transparent px-0 py-1 text-xl font-semibold leading-snug shadow-none [field-sizing:content] focus-visible:ring-1 md:text-xl"
+                    className="min-h-9 min-w-0 flex-1 resize-none border-none bg-transparent px-0 py-1 font-display text-xl font-semibold leading-snug shadow-none [field-sizing:content] focus-visible:ring-1 md:text-xl"
                   />
                   {canScheduleMeetings ? (
                     <Button
@@ -338,8 +338,8 @@ export function TaskDetailDialog({
               </DialogHeader>
 
               {task.entity ? (
-                <div className="mt-4 rounded-lg border border-border/60 bg-card/60 px-3 py-2">
-                  <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Job context</p>
+                <div className="mt-4 rounded-lg border border-line bg-elev-1 px-3 py-2">
+                  <p className="font-display text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Job context</p>
                   <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
                     <Link href={task.entity.href} className="min-w-0 break-words font-medium hover:underline">{task.entity.label}</Link>
                     {task.entity.leadNumber ? <span className="font-mono text-xs text-muted-foreground">{task.entity.leadNumber}</span> : null}
@@ -364,7 +364,7 @@ export function TaskDetailDialog({
                     <div className="space-y-1.5">
                       <Label className="text-xs text-muted-foreground">Status</Label>
                       <Select value={task.status} onValueChange={changeStatus}>
-                        <SelectTrigger className="h-8 rounded-full border-0 bg-muted/40 px-3" style={{ color: TASK_STATUS_COLORS[task.status] }}>
+                        <SelectTrigger className="h-8 rounded-full border-0 bg-elev-4 px-3" style={{ color: TASK_STATUS_COLORS[task.status] }}>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -386,7 +386,7 @@ export function TaskDetailDialog({
                           void saveTaskPatch({ priority: priority as (typeof TASK_PRIORITIES)[number] })
                         }
                       >
-                        <SelectTrigger className="h-8 rounded-full border-0 bg-muted/40 px-3" style={{ color: TASK_PRIORITY_COLORS[task.priority] }}>
+                        <SelectTrigger className="h-8 rounded-full border-0 bg-elev-4 px-3" style={{ color: TASK_PRIORITY_COLORS[task.priority] }}>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -433,7 +433,7 @@ export function TaskDetailDialog({
                           <button
                             type="button"
                             data-task-assignee
-                            className="flex h-9 w-full items-center gap-2 rounded-md border border-input bg-transparent px-3 text-sm hover:bg-accent/40"
+                            className="flex h-9 w-full items-center gap-2 rounded-md border border-line-strong bg-transparent px-3 text-sm hover:bg-elev-3"
                           >
                             <AssigneeAvatar person={task.assignee} />
                             <span className="truncate">
@@ -513,7 +513,7 @@ export function TaskDetailDialog({
                   <div className="space-y-1.5">
                     <Label className="text-xs text-muted-foreground">Linked record</Label>
                     {task.entityKind && task.entityId ? (
-                      <div className="flex items-start gap-2 rounded-md border border-border/60 px-3 py-2 text-sm">
+                      <div className="flex items-start gap-2 rounded-md border border-line px-3 py-2 text-sm">
                         <Link2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                         <div className="min-w-0 flex-1">
                           {task.entity ? (
@@ -606,7 +606,7 @@ export function TaskDetailDialog({
                     }}
                   />
                   {task.subtasks.length > 0 && task.status !== "done" && task.status !== "cancelled" && task.subtasks.every((subtask) => subtask.status === "done") ? (
-                    <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2.5">
+                    <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-primary bg-primary/5 px-3 py-2">
                       <p className="text-xs text-foreground">All subtasks are complete. Close the parent task?</p>
                       <Button type="button" size="sm" className="h-8" onClick={() => moveMutation.mutate({ id: task.id, input: { status: "done" } })}>Mark parent done</Button>
                     </div>
@@ -625,28 +625,28 @@ export function TaskDetailDialog({
 
               </Tabs>
               {pageMode ? (
-                <aside aria-label="Task facts" className="mt-6 min-w-0 space-y-3 rounded-xl border border-border/60 bg-card/50 p-4 text-xs @min-[56rem]/task-detail:mt-0">
-                  <p className="font-semibold text-foreground">Task facts</p>
+                <aside aria-label="Task facts" className="mt-6 min-w-0 space-y-3 rounded-xl border border-line bg-elev-1 p-4 text-xs @min-[56rem]/task-detail:mt-0">
+                  <p className="font-display font-semibold text-foreground">Task facts</p>
                   <dl className="space-y-2 text-muted-foreground">
                     <div className="flex justify-between gap-3"><dt>Status</dt><dd className="font-medium text-foreground">{TASK_STATUS_LABELS[task.status]}</dd></div>
                     <div className="flex justify-between gap-3"><dt>Priority</dt><dd className="font-medium text-foreground">{TASK_PRIORITY_LABELS[task.priority]}</dd></div>
-                    <div className="flex justify-between gap-3"><dt>Comments</dt><dd className="font-medium text-foreground">{task.comments.length}</dd></div>
-                    <div className="flex justify-between gap-3"><dt>Watchers</dt><dd className="font-medium text-foreground">{task.watcherIds?.length ?? 0}</dd></div>
+                    <div className="flex justify-between gap-3"><dt>Comments</dt><dd className="font-mono font-medium tabular-nums text-foreground">{task.comments.length}</dd></div>
+                    <div className="flex justify-between gap-3"><dt>Watchers</dt><dd className="font-mono font-medium tabular-nums text-foreground">{task.watcherIds?.length ?? 0}</dd></div>
                   </dl>
                 </aside>
               ) : null}
               </div>
 
-              <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-border/60 pt-4 text-xs text-muted-foreground">
+              <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-4 text-xs text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <span>Reporter</span>
                   <AssigneePicker
                     onSelect={(user) => void saveTaskPatch({ reporterId: user?.id ?? null })}
-                    trigger={<button type="button" className="inline-flex items-center gap-1 rounded-md border border-border/60 px-2 py-1 text-xs hover:bg-accent/40"><AssigneeAvatar person={task.reporter} /><span>{task.reporter?.name ?? task.reporter?.email ?? "Unassigned"}</span></button>}
+                    trigger={<button type="button" className="inline-flex items-center gap-1 rounded-md border border-line-strong px-2 py-1 text-xs hover:bg-elev-3"><AssigneeAvatar person={task.reporter} /><span>{task.reporter?.name ?? task.reporter?.email ?? "Unassigned"}</span></button>}
                   />
                 </div>
                 <div className="text-[11px] text-muted-foreground">
-                  <span role="status" aria-live="polite" className="mr-2 font-medium text-foreground/70">
+                  <span role="status" aria-live="polite" className="mr-2 font-medium text-fg-dim">
                     {saveStatus === "saving" ? "Saving…" : saveStatus === "saved" ? "Saved" : ""}
                   </span>
                   Created {new Date(task.createdAt).toLocaleDateString()} · Updated {new Date(task.updatedAt).toLocaleString()}

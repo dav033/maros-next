@@ -38,7 +38,7 @@ export function TaskSavedViews() {
           const view = views.find((candidate) => candidate.id === Number(event.target.value));
           if (view) replaceState(view.state as Partial<TasksViewState>);
         }}
-        className="h-8 max-w-40 rounded-md border border-border/60 bg-background px-2 text-xs text-muted-foreground"
+        className="h-8 max-w-40 rounded-md border border-line-strong bg-elev-1 px-2 text-xs text-muted-foreground"
       >
         <option value="">Saved views</option>
         {views.map((view) => <option key={view.id} value={view.id}>{view.name}{view.shared ? " · shared" : ""}</option>)}

@@ -313,7 +313,7 @@ export function LocationField({
 
       {useGoogleMapsAutocomplete && (
         <div className="space-y-2">
-          <div className="w-full h-64 rounded-md overflow-hidden border border-border bg-muted/30">
+          <div className="w-full h-64 rounded-md overflow-hidden border border-line bg-elev-2">
             <div ref={mapContainerRef} className="h-full w-full" />
           </div>
           {address ? (

@@ -191,25 +191,25 @@ export function ContactDetailsPage({ contactId, initialData }: ContactDetailsPag
         <Card>
           <CardHeader className="pb-3">
             <CardDescription>Total Leads</CardDescription>
-            <CardTitle className="text-2xl">{contactDetails.stats.totalLeads}</CardTitle>
+            <CardTitle className="font-mono text-2xl tabular-nums">{contactDetails.stats.totalLeads}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-3">
             <CardDescription>Total Projects</CardDescription>
-            <CardTitle className="text-2xl">{contactDetails.stats.totalProjects}</CardTitle>
+            <CardTitle className="font-mono text-2xl tabular-nums">{contactDetails.stats.totalProjects}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-3">
             <CardDescription>Active Projects</CardDescription>
-            <CardTitle className="text-2xl">{contactDetails.stats.activeProjects}</CardTitle>
+            <CardTitle className="font-mono text-2xl tabular-nums">{contactDetails.stats.activeProjects}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-3">
             <CardDescription>Completed Projects</CardDescription>
-            <CardTitle className="text-2xl">{contactDetails.stats.completedProjects}</CardTitle>
+            <CardTitle className="font-mono text-2xl tabular-nums">{contactDetails.stats.completedProjects}</CardTitle>
           </CardHeader>
         </Card>
       </div>
