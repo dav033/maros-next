@@ -18,7 +18,10 @@ import { useLinkProjectQboLink } from "@/features/quickbooks/presentation/hooks/
 
 import { useQuickbooksImportJobs } from "../hooks/data/useQuickbooksImportJobs";
 
-interface QuickbooksLinkProjectButtonProps {
+interface QuickbooksLinkProjectDialogProps {
+  /** Abre y cierra desde fuera: la ficha lo hace con su botón, la lista desde el menú contextual. */
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   projectId: number;
   /** Número del proyecto. Se usa para ordenar y resaltar el job más probable. */
   projectNumber?: string | null;
@@ -26,6 +29,10 @@ interface QuickbooksLinkProjectButtonProps {
   qboCustomerId?: string | null;
   /** Se llama tras enlazar, para refrescar lo que dependa del proyecto. */
   onLinked?: () => void;
+}
+
+interface QuickbooksLinkProjectButtonProps
+  extends Omit<QuickbooksLinkProjectDialogProps, "open" | "onOpenChange"> {
   disabled?: boolean;
 }
 
@@ -44,14 +51,14 @@ function normalize(value: string): string {
  * ficha abierta y se le dice cuál es su job — incluido el caso que la
  * importación no puede resolver, el job cuyo nombre no lleva número.
  */
-export function QuickbooksLinkProjectButton({
+export function QuickbooksLinkProjectDialog({
+  open: isOpen,
+  onOpenChange,
   projectId,
   projectNumber,
   qboCustomerId,
   onLinked,
-  disabled,
-}: QuickbooksLinkProjectButtonProps) {
-  const [isOpen, setIsOpen] = useState(false);
+}: QuickbooksLinkProjectDialogProps) {
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<string | null>(null);
 
@@ -62,9 +69,11 @@ export function QuickbooksLinkProjectButton({
 
   const isRelink = !!qboCustomerId;
 
+  const wantedNumber = normalize(projectNumber ?? "");
+
   const jobs = useMemo(() => {
     const rows = jobsQuery.data ?? [];
-    const wanted = normalize(projectNumber ?? "");
+    const wanted = wantedNumber;
     // El job que lleva el número del proyecto es el candidato obvio: primero.
     return [...rows].sort((a, b) => {
       const aMatch = wanted && normalize(a.projectNumber ?? "") === wanted ? 0 : 1;
@@ -72,7 +81,7 @@ export function QuickbooksLinkProjectButton({
       if (aMatch !== bMatch) return aMatch - bMatch;
       return a.displayName.localeCompare(b.displayName);
     });
-  }, [jobsQuery.data, projectNumber]);
+  }, [jobsQuery.data, wantedNumber]);
 
   const filtered = useMemo(() => {
     const term = normalize(query);
@@ -90,7 +99,7 @@ export function QuickbooksLinkProjectButton({
 
   const close = () => {
     if (linkMutation.isPending) return;
-    setIsOpen(false);
+    onOpenChange(false);
     setQuery("");
     setSelected(null);
   };
@@ -112,7 +121,7 @@ export function QuickbooksLinkProjectButton({
               `Proyecto enlazado con ${result.jobDisplayName || result.qboCustomerId}.`,
             );
           }
-          setIsOpen(false);
+          onOpenChange(false);
           setQuery("");
           setSelected(null);
           onLinked?.();
@@ -127,18 +136,7 @@ export function QuickbooksLinkProjectButton({
   };
 
   return (
-    <>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => setIsOpen(true)}
-        disabled={disabled}
-      >
-        <Link2 className="size-4 mr-2" />
-        {isRelink ? "Cambiar job de QuickBooks" : "Enlazar con QuickBooks"}
-      </Button>
-
-      <Dialog open={isOpen} onOpenChange={(open) => (open ? setIsOpen(true) : close())}>
+    <Dialog open={isOpen} onOpenChange={(open) => (open ? onOpenChange(true) : close())}>
         <DialogContent className="!flex max-h-[85vh] w-[calc(100vw-2rem)] max-w-2xl flex-col overflow-hidden">
           <DialogHeader className="text-left">
             <DialogTitle>
@@ -192,22 +190,51 @@ export function QuickbooksLinkProjectButton({
                   const isCurrent = job.qboCustomerId === qboCustomerId;
                   const takenByAnother =
                     job.importedProjectId != null && job.importedProjectId !== projectId;
+                  // El job cuyo nombre lleva el número del proyecto. No se recomienda
+                  // el que ya es de otro proyecto (enlazarlo daría 409) ni el que ya
+                  // está enlazado aquí, que la propia fila rotula como tal.
+                  const isRecommended =
+                    !!wantedNumber &&
+                    normalize(job.projectNumber ?? "") === wantedNumber &&
+                    !takenByAnother &&
+                    !isCurrent;
                   return (
                     <li key={job.qboCustomerId}>
                       <button
                         type="button"
                         onClick={() => setSelected(job.qboCustomerId)}
                         disabled={takenByAnother || linkMutation.isPending}
-                        className={`flex w-full items-start gap-3 px-3 py-2 text-left text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
-                          isSelected ? "bg-primary/10" : "hover:bg-elev-3"
+                        className={`flex w-full items-start gap-3 border-l-2 px-3 py-2 text-left text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+                          isSelected
+                            ? "bg-primary/10"
+                            : isRecommended
+                              ? "bg-[color-mix(in_srgb,var(--money-in)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--money-in)_18%,transparent)]"
+                              : "hover:bg-elev-3"
                         }`}
+                        style={{
+                          borderLeftColor: isRecommended ? "var(--money-in)" : "transparent",
+                        }}
                       >
                         <span className="mt-0.5 size-4 shrink-0 text-primary">
                           {isSelected ? <Check className="size-4" /> : null}
                         </span>
                         <span className="min-w-0 flex-1">
-                          <span className="block truncate font-medium text-foreground">
-                            {job.displayName}
+                          <span className="flex items-center gap-2">
+                            <span className="min-w-0 truncate font-medium text-foreground">
+                              {job.displayName}
+                            </span>
+                            {isRecommended ? (
+                              <span
+                                className="shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide"
+                                style={{
+                                  backgroundColor:
+                                    "color-mix(in srgb, var(--money-in) 22%, transparent)",
+                                  color: "var(--money-in)",
+                                }}
+                              >
+                                Recomendado
+                              </span>
+                            ) : null}
                           </span>
                           <span className="block truncate text-xs text-muted-foreground">
                             id {job.qboCustomerId}
@@ -259,7 +286,25 @@ export function QuickbooksLinkProjectButton({
             </Button>
           </DialogFooter>
         </DialogContent>
-      </Dialog>
+    </Dialog>
+  );
+}
+
+/** El botón de la ficha del proyecto: abre el mismo diálogo. */
+export function QuickbooksLinkProjectButton({
+  disabled,
+  ...dialogProps
+}: QuickbooksLinkProjectButtonProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const isRelink = !!dialogProps.qboCustomerId;
+
+  return (
+    <>
+      <Button variant="outline" size="sm" onClick={() => setIsOpen(true)} disabled={disabled}>
+        <Link2 className="size-4 mr-2" />
+        {isRelink ? "Cambiar job de QuickBooks" : "Enlazar con QuickBooks"}
+      </Button>
+      <QuickbooksLinkProjectDialog open={isOpen} onOpenChange={setIsOpen} {...dialogProps} />
     </>
   );
 }

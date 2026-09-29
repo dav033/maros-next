@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 import { useRouter } from "next/navigation";
 import type { Project, ProjectProgressStatus } from "@/project/domain";
 import {
@@ -24,6 +26,11 @@ export interface UseProjectsByStatusPageLogicReturn {
     loading: boolean;
   };
   openNotesModal: (project: Project) => void;
+  /** Proyecto cuyo diálogo de enlace con QuickBooks está abierto, desde el menú contextual. */
+  quickbooksLink: {
+    target: Project | null;
+    close: () => void;
+  };
 }
 
 /** Lógica compartida por las páginas "Projects Completed" y "Projects Lost": mismas
@@ -50,6 +57,10 @@ export function useProjectsByStatusPageLogic(
   };
 
   // 3) Tabla (búsqueda e interacciones; sin filtro de progress/invoice, ya viene acotada)
+  // Proyecto cuyo diálogo de enlace con QuickBooks está abierto. Se guarda el
+  // proyecto entero y no sólo el id porque el diálogo necesita su número.
+  const [linkTarget, setLinkTarget] = useState<Project | null>(null);
+
   const table = useProjectsTableLogic({
     projects: data.projects,
     onEdit: (project) => router.push(`/project/${project.id}`),
@@ -60,6 +71,7 @@ export function useProjectsByStatusPageLogic(
     onUpdateStatus: handleUpdateStatus,
     isUpdatingStatus: (project) =>
       updateMutation.isPending && updateMutation.variables?.id === project.id,
+    onLinkQuickbooks: setLinkTarget,
     // Namespace propio: esta página no tiene UI de progressFilter/invoiceFilter, no debe
     // heredar en silencio el filtro que el usuario haya dejado seteado en /projects.
     persistNamespace: "projects-by-status",
@@ -70,5 +82,9 @@ export function useProjectsByStatusPageLogic(
     table,
     notesModal: notesLogic.modalProps,
     openNotesModal: notesLogic.openFromProject,
+    quickbooksLink: {
+      target: linkTarget,
+      close: () => setLinkTarget(null),
+    },
   };
 }

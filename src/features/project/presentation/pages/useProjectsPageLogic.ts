@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 import {
   useProjectCreateModal,
   useProjectEditModal,
@@ -31,6 +33,11 @@ export interface UseProjectsPageLogicReturn {
   };
   table: UseProjectsTableLogicReturn;
   bulkActions: UseProjectsBulkActionsReturn;
+  /** Proyecto cuyo diálogo de enlace con QuickBooks está abierto, desde el menú contextual. */
+  quickbooksLink: {
+    target: Project | null;
+    close: () => void;
+  };
   notesModal: {
     isOpen: boolean;
     title: string;
@@ -84,6 +91,10 @@ export function useProjectsPageLogic({
   };
 
   // 5) Tabla (búsqueda, filtrado e interacciones)
+  // Proyecto cuyo diálogo de enlace con QuickBooks está abierto. Se guarda el
+  // proyecto entero y no sólo el id porque el diálogo necesita su número.
+  const [linkTarget, setLinkTarget] = useState<Project | null>(null);
+
   const table = useProjectsTableLogic({
     projects: data.projects,
     onEdit: editModal.open,
@@ -94,6 +105,7 @@ export function useProjectsPageLogic({
     onUpdateStatus: handleUpdateStatus,
     isUpdatingStatus: (project) =>
       updateMutation.isPending && updateMutation.variables?.id === project.id,
+    onLinkQuickbooks: setLinkTarget,
   });
 
   // 6) Selección múltiple y acciones en lote
@@ -119,6 +131,10 @@ export function useProjectsPageLogic({
     },
     table,
     bulkActions,
+    quickbooksLink: {
+      target: linkTarget,
+      close: () => setLinkTarget(null),
+    },
     notesModal: notesLogic.modalProps,
     openNotesModal: notesLogic.openFromProject,
   };

@@ -30,19 +30,19 @@ import { useProjectQboReport } from "../hooks/data/useProjectQboReport";
 import { QboReportTable } from "../organisms/QboReportTable";
 
 const REPORT_LABELS: Record<QboReportName, string> = {
-  ProfitAndLossDetail: "Pérdidas y ganancias (detalle)",
-  ProfitAndLoss: "Pérdidas y ganancias",
-  GeneralLedgerDetail: "Libro mayor (detalle)",
-  AgedPayables: "Cuentas por pagar por antigüedad",
-  VendorExpenses: "Gastos por proveedor",
-  VendorBalanceDetail: "Saldo de proveedores (detalle)",
-  CashFlow: "Flujo de caja",
-  BalanceSheet: "Balance general",
+  ProfitAndLossDetail: "Profit and Loss Detail",
+  ProfitAndLoss: "Profit and Loss",
+  GeneralLedgerDetail: "General Ledger Detail",
+  AgedPayables: "Aged Payables",
+  VendorExpenses: "Vendor Expenses",
+  VendorBalanceDetail: "Vendor Balance Detail",
+  CashFlow: "Statement of Cash Flows",
+  BalanceSheet: "Balance Sheet",
 };
 
 const METHOD_LABELS: Record<QboAccountingMethod, string> = {
-  Accrual: "Causación",
-  Cash: "Efectivo",
+  Accrual: "Accrual",
+  Cash: "Cash",
 };
 
 function toDateString(date: Date): string {
@@ -66,7 +66,7 @@ function ReportError({
       <Alert>
         <Link2Off className="size-4" />
         <AlertTitle>
-          No hay ningún cliente de QuickBooks para este proyecto
+          There is no QuickBooks customer for this project
         </AlertTitle>
         <AlertDescription className="space-y-3">
           {/* El backend ya intentó las dos vías antes de llegar aquí: el vínculo
@@ -76,14 +76,14 @@ function ReportError({
               mano desde la ficha, que es lo único que resuelve el caso. */}
           <p>
             {error.serverMessage ??
-              "Ni hay un job de QuickBooks enlazado a este proyecto ni ninguno cuyo nombre lleve su número de proyecto."}
+              "This project has no linked QuickBooks job, and no job name carries its project number."}
           </p>
           <div className="flex flex-wrap gap-2">
             <Button asChild variant="outline" size="sm">
-              <Link href={`/project/${projectId}`}>Enlazarlo desde la ficha del proyecto</Link>
+              <Link href={`/project/${projectId}`}>Link it from the project page</Link>
             </Button>
             <Button asChild variant="ghost" size="sm">
-              <Link href="/projects/import-from-quickbooks">Ir a la importación de QuickBooks</Link>
+              <Link href="/projects/import-from-quickbooks">Go to the QuickBooks import</Link>
             </Button>
           </div>
         </AlertDescription>
@@ -95,15 +95,15 @@ function ReportError({
     return (
       <Alert variant="destructive">
         <AlertCircle className="size-4" />
-        <AlertTitle>La conexión con QuickBooks necesita autorizarse de nuevo</AlertTitle>
+        <AlertTitle>The QuickBooks connection has to be authorized again</AlertTitle>
         <AlertDescription className="space-y-3">
           <p>
-            QuickBooks rechazó la sesión de la empresa. Un administrador tiene que volver a
-            conectar QuickBooks; mientras tanto ningún reporte se puede consultar.
+            QuickBooks rejected the company session. An administrator has to reconnect
+            QuickBooks; until then no report can be read.
           </p>
           <Button variant="outline" size="sm" onClick={onRetry}>
             <RotateCcw className="size-4 mr-2" />
-            Reintentar
+            Retry
           </Button>
         </AlertDescription>
       </Alert>
@@ -113,12 +113,12 @@ function ReportError({
   return (
     <Alert variant="destructive">
       <AlertCircle className="size-4" />
-      <AlertTitle>No pudimos traer el reporte</AlertTitle>
+      <AlertTitle>We could not load the report</AlertTitle>
       <AlertDescription className="space-y-3">
         <p>{error.userMessage}</p>
         <Button variant="outline" size="sm" onClick={onRetry}>
           <RotateCcw className="size-4 mr-2" />
-          Reintentar
+          Retry
         </Button>
       </AlertDescription>
     </Alert>
@@ -152,15 +152,15 @@ export function ProjectQboReportPage({ projectId }: { projectId: number }) {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center gap-4">
-        <Button asChild variant="ghost" size="icon" aria-label="Volver al proyecto">
+        <Button asChild variant="ghost" size="icon" aria-label="Back to the project">
           <Link href={`/project/${projectId}`}>
             <ArrowLeft className="size-4" />
           </Link>
         </Button>
         <div>
-          <h1 className="font-display text-3xl font-bold text-foreground">Reporte de QuickBooks</h1>
+          <h1 className="font-display text-3xl font-bold text-foreground">QuickBooks report</h1>
           <p className="text-muted-foreground">
-            Proyecto {data?.leadNumber ? `#${data.leadNumber}` : `#${projectId}`}
+            Project {data?.leadNumber ? `#${data.leadNumber}` : `#${projectId}`}
           </p>
         </div>
       </div>
@@ -169,7 +169,7 @@ export function ProjectQboReportPage({ projectId }: { projectId: number }) {
         <CardContent className="flex flex-wrap items-end gap-4 p-6">
           <div className="space-y-2">
             <p className="font-display text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Reporte
+              Report
             </p>
             <Select value={report} onValueChange={(value) => setReport(value as QboReportName)}>
               <SelectTrigger className="h-10 w-[280px]">
@@ -187,11 +187,11 @@ export function ProjectQboReportPage({ projectId }: { projectId: number }) {
 
           <div className="space-y-2">
             <p className="font-display text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Método contable
+              Accounting method
             </p>
             <div
               role="group"
-              aria-label="Método contable"
+              aria-label="Accounting method"
               className="flex h-10 items-center gap-1 rounded-lg border border-line bg-elev-3 p-1"
             >
               {QBO_ACCOUNTING_METHODS.map((method) => (
@@ -213,7 +213,7 @@ export function ProjectQboReportPage({ projectId }: { projectId: number }) {
           {pointInTime ? (
             <div className="space-y-2">
               <p className="font-display text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Fecha de corte
+                As of
               </p>
               <Input
                 type="date"
@@ -226,7 +226,7 @@ export function ProjectQboReportPage({ projectId }: { projectId: number }) {
             <>
               <div className="space-y-2">
                 <p className="font-display text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  Desde
+                  From
                 </p>
                 <Input
                   type="date"
@@ -239,7 +239,7 @@ export function ProjectQboReportPage({ projectId }: { projectId: number }) {
               </div>
               <div className="space-y-2">
                 <p className="font-display text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  Hasta
+                  To
                 </p>
                 <Input
                   type="date"
@@ -258,11 +258,11 @@ export function ProjectQboReportPage({ projectId }: { projectId: number }) {
       {!canQuery ? (
         <Alert>
           <AlertCircle className="size-4" />
-          <AlertTitle>Faltan fechas</AlertTitle>
+          <AlertTitle>Missing dates</AlertTitle>
           <AlertDescription>
             {invertedDates
-              ? "La fecha inicial debe ser anterior o igual a la final."
-              : "Elige las fechas del reporte para consultarlo."}
+              ? "The start date has to be on or before the end date."
+              : "Pick the report dates to run it."}
           </AlertDescription>
         </Alert>
       ) : error ? (
@@ -283,32 +283,32 @@ export function ProjectQboReportPage({ projectId }: { projectId: number }) {
         <>
           <p className="text-sm text-muted-foreground">
             {REPORT_LABELS[data.report]} · {METHOD_LABELS[data.accountingMethod]} ·{" "}
-            {data.startDate ? `${data.startDate} → ${data.endDate}` : `al ${data.endDate}`} · cliente
-            de QuickBooks {data.qboCustomerId}
+            {data.startDate ? `${data.startDate} → ${data.endDate}` : `as of ${data.endDate}`} ·
+            QuickBooks customer {data.qboCustomerId}
           </p>
           {data.linkSource === "project-number" ? (
             <Alert>
               <Link2Off className="size-4" />
               <AlertTitle>
-                Este reporte se resolvió por número de proyecto, no por un vínculo guardado
+                This report was resolved by project number, not by a stored link
               </AlertTitle>
               <AlertDescription>
-                El proyecto no tiene guardado su cliente de QuickBooks, así que se usó el job{" "}
-                <span className="font-mono">{data.qboCustomerId}</span>, cuyo nombre lleva el
-                número {data.leadNumber ?? `#${data.projectId}`} — exactamente lo que ya hace el
-                resto de la ficha. Funciona, pero es una coincidencia por nombre: enlázalo desde
-                la ficha del proyecto para dejarlo fijo.
+                The project has no QuickBooks customer stored, so job{" "}
+                <span className="font-mono">{data.qboCustomerId}</span> was used — its name
+                carries the number {data.leadNumber ?? `#${data.projectId}`}, which is exactly
+                what the rest of the project page already does. It works, but it is a match by
+                name: link it from the project page to pin it down.
               </AlertDescription>
             </Alert>
           ) : null}
           {data.scope === "company" ? (
             <Alert>
               <AlertCircle className="size-4" />
-              <AlertTitle>Estas cifras son de toda la empresa, no de este proyecto</AlertTitle>
+              <AlertTitle>These figures are company-wide, not this project's</AlertTitle>
               <AlertDescription>
-                QuickBooks no acepta el filtro por cliente en este reporte: lo ignora y responde con
-                los números de toda la empresa. El filtro se envía igual, pero lo que ves abajo no
-                está acotado al proyecto #{data.leadNumber ?? data.projectId}.
+                QuickBooks does not accept the customer filter on this report: it ignores it and
+                answers with the whole company's numbers. The filter is sent anyway, but what you
+                see below is not scoped to project #{data.leadNumber ?? data.projectId}.
               </AlertDescription>
             </Alert>
           ) : null}

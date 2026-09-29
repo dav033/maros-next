@@ -197,12 +197,12 @@ export function MoneyLine({
 }: MoneyLineProps) {
   const inputs: MoneyLineBarInput[] = [
     ...(showContract
-      ? [{ label: "Contract", value: estimate ?? null, kind: "contract" as const }]
+      ? [{ label: "Estimate", value: estimate ?? null, kind: "contract" as const }]
       : []),
     ...(collected === undefined
       ? []
       : [{ label: "Collected", value: collected, kind: "in" as const }]),
-    ...(spent === undefined ? [] : [{ label: "Spent", value: spent, kind: "out" as const }]),
+    ...(spent === undefined ? [] : [{ label: "Cost paid", value: spent, kind: "out" as const }]),
     ...(profit === undefined ? [] : [{ label: "Profit", value: profit, kind: "in" as const }]),
     ...(backlog === undefined
       ? []

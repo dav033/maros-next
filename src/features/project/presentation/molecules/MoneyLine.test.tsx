@@ -14,7 +14,7 @@ describe("MoneyLine", () => {
   it("reports the real share of the contract on an overrun", () => {
     render(<MoneyLine estimate={100_000} collected={60_000} spent={128_000} label="Kitchen" />);
 
-    const spent = screen.getByRole("progressbar", { name: /spent/i });
+    const spent = screen.getByRole("progressbar", { name: /cost paid/i });
     expect(spent).toHaveAttribute("aria-valuenow", "128");
     expect(spent.title).toContain("128% of contract");
   });
@@ -33,7 +33,7 @@ describe("MoneyLine", () => {
     // retainage) and must keep its own colour; only the spend lane is an alarm.
     expect(barStyle(/collected/i).backgroundColor).toBe("var(--money-in)");
     expect(barStyle(/backlog/i).backgroundColor).toBe("var(--money-hold)");
-    expect(barStyle(/spent/i).backgroundColor).toBe("var(--money-over)");
+    expect(barStyle(/cost paid/i).backgroundColor).toBe("var(--money-over)");
   });
 
   it("still paints a negative lane as alarm whatever its kind", () => {
@@ -66,7 +66,7 @@ describe("MoneyLine", () => {
       />
     );
 
-    const spent = screen.getByRole("progressbar", { name: /spent/i });
+    const spent = screen.getByRole("progressbar", { name: /cost paid/i });
     // Full to the end of the axis, but the figure and the share still tell the truth.
     expect(spent.style.width).toBe("100%");
     expect(spent).toHaveAttribute("aria-valuenow", "400");
@@ -80,7 +80,7 @@ describe("MoneyLine", () => {
     render(<MoneyLine estimate={100_000} collected={60_000} spent={20_000} />);
 
     expect(screen.getByText("Collected")).toBeInTheDocument();
-    expect(screen.getByText("Spent")).toBeInTheDocument();
+    expect(screen.getByText("Cost paid")).toBeInTheDocument();
   });
 
   it("says out loud why the track is empty when there is no contract", () => {
@@ -111,7 +111,7 @@ describe('MoneyLine layout="rows"', () => {
       />
     );
 
-    for (const lane of ["Contract", "Collected", "Spent"]) {
+    for (const lane of ["Estimate", "Collected", "Cost paid"]) {
       expect(screen.getByText(lane)).toBeInTheDocument();
     }
     expect(screen.getByText("$100,000.00")).toBeInTheDocument();
@@ -131,7 +131,7 @@ describe('MoneyLine layout="rows"', () => {
       />
     );
 
-    const spent = screen.getByRole("progressbar", { name: /spent/i });
+    const spent = screen.getByRole("progressbar", { name: /cost paid/i });
     expect(spent).toHaveAttribute("aria-valuenow", "128");
     expect(spent.style.backgroundColor).toBe("var(--money-over)");
     // A 128% cost must not draw like a 100% one.

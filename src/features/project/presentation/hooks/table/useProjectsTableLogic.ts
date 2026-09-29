@@ -10,7 +10,7 @@ import {
   type ContextMenuItem,
 } from "@/common/hooks";
 import React from "react";
-import { Check, FileBarChart } from "lucide-react";
+import { Check, FileBarChart, Link2 } from "lucide-react";
 
 import type { Project } from "@/project/domain";
 import { ProjectProgressStatus, InvoiceStatus } from "@/project/domain";
@@ -27,6 +27,8 @@ interface UseProjectsTableLogicProps {
   onUpdateStatus?: (project: Project, status: ProjectProgressStatus) => Promise<void> | void;
   /** Predicate que retorna `true` si el project está siendo actualizado (status). Deshabilita el submenú. */
   isUpdatingStatus?: (project: Project) => boolean;
+  /** Abre el diálogo para enlazar el proyecto con un job de QuickBooks, sin salir de la lista. */
+  onLinkQuickbooks?: (project: Project) => void;
   /** Prefijo de las keys de localStorage para persistir búsqueda/filtros/orden. Páginas sin UI
    * para progressFilter/invoiceFilter (Completed/Lost) deben pasar un namespace propio para no
    * heredar en silencio el filtro seteado en la página principal de Projects. */
@@ -71,6 +73,7 @@ export function useProjectsTableLogic({
   onOpenNotesModal,
   onUpdateStatus,
   isUpdatingStatus,
+  onLinkQuickbooks,
   persistNamespace = "projects",
 }: UseProjectsTableLogicProps): UseProjectsTableLogicReturn {
   const router = useRouter();
@@ -134,6 +137,17 @@ export function useProjectsTableLogic({
         icon: React.createElement(FileBarChart, { className: "size-4" }),
         onClick: () => router.push(`/project/${project.id}/report`),
       });
+
+      if (onLinkQuickbooks) {
+        // La lista no trae el vínculo actual del proyecto (no viaja en el DTO del
+        // listado), así que el rótulo es siempre el mismo; el diálogo ya avisa y
+        // reemplaza si resulta que ya había uno.
+        items.push({
+          label: "Enlazar con QuickBooks",
+          icon: React.createElement(Link2, { className: "size-4" }),
+          onClick: () => onLinkQuickbooks(project),
+        });
+      }
 
       return items;
     },

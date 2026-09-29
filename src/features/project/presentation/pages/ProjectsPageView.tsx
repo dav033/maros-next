@@ -53,6 +53,7 @@ import { useProjectsNotesModalController } from "../hooks/modals/useProjectsNote
 import { useInstantLeadsByType } from "@/leads/presentation";
 import { LeadTypeSwitcher } from "@/components/shared/LeadTypeSwitcher";
 import { ProjectPaymentsDialog } from "../organisms/ProjectPaymentsDialog";
+import { QuickbooksLinkProjectDialog } from "../organisms/QuickbooksLinkProjectButton";
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -89,7 +90,7 @@ export interface ProjectsPageViewProps {
 export function ProjectsPageView({ logic }: ProjectsPageViewProps) {
   const [paymentsProject, setPaymentsProject] = useState<Project | null>(null);
   const pathname = usePathname();
-  const { leadType, data, crud, table, bulkActions, notesModal, openNotesModal } = logic;
+  const { leadType, data, crud, table, bulkActions, notesModal, openNotesModal, quickbooksLink } = logic;
 
   const { projects, showSkeleton, financialsLoading } = data;
 
@@ -397,6 +398,20 @@ export function ProjectsPageView({ logic }: ProjectsPageViewProps) {
 
           <NotesEditorModal controller={notesModalController} />
           <ProjectPaymentsDialog project={paymentsProject} onClose={() => setPaymentsProject(null)} />
+
+          {/* Se abre con el botón derecho sobre una fila: el otro camino para enlazar,
+              sin tener que entrar al proyecto. */}
+          {quickbooksLink.target && (
+            <QuickbooksLinkProjectDialog
+              open
+              onOpenChange={(open) => {
+                if (!open) quickbooksLink.close();
+              }}
+              projectId={quickbooksLink.target.id}
+              projectNumber={quickbooksLink.target.lead?.leadNumber}
+              onLinked={quickbooksLink.close}
+            />
+          )}
         </>
       }
     />

@@ -230,7 +230,7 @@ export function useProjectsTableColumns(
         // contrato y una perdida cae a la izquierda del cero. Donde el aspecto de main
         // y esa regla chocaban, gana la regla.
         key: "contractVsCash",
-        header: "Contract / Collected / Spent",
+        header: "Estimate / Collected / Cost paid",
         className: "w-[232px]",
         render: (project: Project) => (
           <MoneyLine

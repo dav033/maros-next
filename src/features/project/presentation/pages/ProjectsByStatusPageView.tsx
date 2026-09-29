@@ -16,6 +16,7 @@ import { ProjectsTableSkeleton } from "../organisms/ProjectsTableSkeleton";
 import type { UseProjectsByStatusPageLogicReturn } from "./useProjectsByStatusPageLogic";
 import { useProjectsToolbarSearchController } from "../hooks/table/useProjectsToolbarSearchController";
 import { useProjectsNotesModalController } from "../hooks/modals/useProjectsNotesModalController";
+import { QuickbooksLinkProjectDialog } from "../organisms/QuickbooksLinkProjectButton";
 
 export interface ProjectsByStatusPageViewProps {
   logic: UseProjectsByStatusPageLogicReturn;
@@ -125,6 +126,19 @@ export function ProjectsByStatusPageView({
           />
 
           <NotesEditorModal controller={notesModalController} />
+
+          {/* Mismo camino que en la lista principal: botón derecho sobre la fila. */}
+          {logic.quickbooksLink.target && (
+            <QuickbooksLinkProjectDialog
+              open
+              onOpenChange={(open) => {
+                if (!open) logic.quickbooksLink.close();
+              }}
+              projectId={logic.quickbooksLink.target.id}
+              projectNumber={logic.quickbooksLink.target.lead?.leadNumber}
+              onLinked={logic.quickbooksLink.close}
+            />
+          )}
         </>
       }
     />
