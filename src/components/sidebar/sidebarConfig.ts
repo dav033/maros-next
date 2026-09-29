@@ -5,8 +5,6 @@ import {
   Users,
   Building,
   UserCog,
-  FileBarChart2,
-  FileCheck2,
   LayoutDashboard,
   XCircle,
   CheckCircle2,
@@ -167,24 +165,6 @@ const directorySection: SidebarSection = {
   ],
 };
 
-const reportsSection: SidebarSection = {
-  section: "Reports",
-  items: [
-    {
-      title: "Restoration Visit",
-      href: "/reports/restoration-visit",
-      icon: FileBarChart2,
-      permission: "reports:read",
-    },
-    {
-      title: "Restoration Final",
-      href: "/reports/restoration-final",
-      icon: FileCheck2,
-      permission: "reports:read",
-    },
-  ],
-};
-
 // Dashboard es un solo link: el filtro por tipo de lead vive en la propia
 // página (DashboardFiltersBar).
 const analyticsSection: SidebarSection = {
@@ -276,7 +256,6 @@ export const SIDEBAR_CONFIG: SidebarConfig = {
     workspaceSection,
     directorySection,
     financeSection,
-    reportsSection,
     integrationsSection,
     settingsSection,
   ],
