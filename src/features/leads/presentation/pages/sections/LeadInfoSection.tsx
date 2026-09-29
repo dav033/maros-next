@@ -23,7 +23,7 @@ export interface LeadInfoSectionProps {
     /** Estimado manual, editable desde el CRM. */
     estimate?: number | null;
     /** Monto del Estimate real en QuickBooks (solo lectura, informativo). */
-    financial?: { estimatedAmount?: number | null } | null;
+    financial?: { estimatedAmount?: number | null; found?: boolean } | null;
   };
   projectTypes: Array<{ id: number; name: string }>;
   inlineEdit: UseInlineEditReturn<{
@@ -59,8 +59,12 @@ export function LeadInfoSection({
   const formatMoney = (amount: number) =>
     `$${amount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   const estimateText = lead.estimate != null ? formatMoney(Number(lead.estimate)) : undefined;
+  // El backend responde con el bloque financiero en ceros y `found: false` cuando
+  // QuickBooks no conoce este número de lead. Sin mirar `found`, la ficha decía
+  // "Estimate (QuickBooks) $0.00", que es una cifra inventada: lo que pasa es que no
+  // hay estimado allá, no que valga cero.
   const qboEstimateText =
-    lead.financial?.estimatedAmount != null
+    lead.financial?.found !== false && lead.financial?.estimatedAmount != null
       ? formatMoney(Number(lead.financial.estimatedAmount))
       : undefined;
 

@@ -69,12 +69,21 @@ export interface QboRawReport {
   Rows?: { Row?: QboReportRow[] };
 }
 
+/**
+ * Alcance real de las cifras. QuickBooks sólo acepta el filtro `customer` en
+ * algunos reportes: en los demás ignora el parámetro y responde con los números
+ * de toda la empresa. El backend lo declara por reporte y la pantalla lo avisa,
+ * para no presentar cifras de la empresa como si fueran del proyecto.
+ */
+export type QboReportScope = "project" | "company";
+
 export interface ProjectQboReport {
   projectId: number;
   leadNumber: string | null;
   qboCustomerId: string;
   report: QboReportName;
   accountingMethod: QboAccountingMethod;
+  scope?: QboReportScope;
   startDate: string | null;
   endDate: string | null;
   raw: QboRawReport;

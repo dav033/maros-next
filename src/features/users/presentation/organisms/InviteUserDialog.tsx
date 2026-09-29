@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader } from "lucide-react";
-import { type ReactNode, useMemo } from "react";
+import { type ReactNode, useEffect, useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -105,6 +105,21 @@ export function InviteUserDialog({ open, onOpenChange }: Props) {
     userType === "external" ? companyId : null
   );
 
+  // Un externo es alguien de fuera de Maros: sólo puede entrar con un rol sin permisos,
+  // y el servidor rechaza lo contrario. Ofrecer aquí los roles con permisos sería
+  // ofrecer un error, así que la lista se acota y la selección previa se descarta.
+  const selectableRoles = useMemo(
+    () => (userType === "external" ? roles.filter((role) => role.permissions.length === 0) : roles),
+    [roles, userType]
+  );
+
+  const roleId = watch("roleId");
+  useEffect(() => {
+    if (!roleId) return;
+    if (selectableRoles.some((role) => String(role.id) === roleId)) return;
+    setValue("roleId", "");
+  }, [roleId, selectableRoles, setValue]);
+
   const companyOptions = useMemo(
     () => companies.map((company) => ({ value: String(company.id), label: company.name })),
     [companies]
@@ -184,7 +199,16 @@ export function InviteUserDialog({ open, onOpenChange }: Props) {
             <Input id="invite-name" disabled={isPending} {...register("name")} />
           </Field>
 
-          <Field label="Rol" htmlFor="invite-role" error={errors.roleId?.message}>
+          <Field
+            label="Rol"
+            htmlFor="invite-role"
+            hint={
+              userType === "external"
+                ? "Un externo sólo puede entrar con un rol sin permisos."
+                : undefined
+            }
+            error={errors.roleId?.message}
+          >
             <Controller
               control={control}
               name="roleId"
@@ -198,7 +222,7 @@ export function InviteUserDialog({ open, onOpenChange }: Props) {
                     <SelectValue placeholder="Elige un rol" />
                   </SelectTrigger>
                   <SelectContent>
-                    {roles.map((role) => (
+                    {selectableRoles.map((role) => (
                       <SelectItem key={role.id} value={String(role.id)}>
                         {role.name}
                       </SelectItem>

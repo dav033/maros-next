@@ -212,6 +212,47 @@ function ProjectMoneySummary({
   );
 }
 
+/**
+ * `/projects/:id/details` devuelve las transacciones de QuickBooks tal cual las da la
+ * API (`txnDate`, `totalAmount`, `linkedTxn`), mientras que `/projects/financials`
+ * devuelve la fila ya recortada (`date`, `amount`, `linkedInvoice`). La tabla leía solo
+ * la segunda forma, así que un proyecto abierto desde su propia página mostraba una fila
+ * de guiones para un pago que sí existe.
+ */
+function toPaymentRows(input: unknown): Payment[] {
+  if (!Array.isArray(input)) return [];
+
+  const rows: Payment[] = [];
+  for (const row of input) {
+    if (!row || typeof row !== "object") continue;
+    const rec = row as Record<string, unknown>;
+
+    const rawAmount = rec.amount ?? rec.totalAmount;
+    const amount =
+      typeof rawAmount === "number" ? rawAmount : parseFloat(String(rawAmount ?? ""));
+    if (!Number.isFinite(amount)) continue;
+
+    const linkedTxn = Array.isArray(rec.linkedTxn) ? rec.linkedTxn : [];
+    const invoice = linkedTxn.find(
+      (txn): txn is { txnId?: unknown } =>
+        !!txn && typeof txn === "object" && (txn as { txnType?: unknown }).txnType === "Invoice",
+    );
+
+    const text = (value: unknown) =>
+      typeof value === "string" && value.trim() !== "" ? value : undefined;
+
+    rows.push({
+      id: text(rec.id) ?? text(rec.entityId),
+      date: text(rec.date) ?? text(rec.txnDate),
+      amount,
+      method: text(rec.method) ?? text(rec.paymentMethod),
+      reference: text(rec.reference) ?? text(rec.docNumber),
+      linkedInvoice: text(rec.linkedInvoice) ?? text(invoice?.txnId),
+    });
+  }
+  return rows;
+}
+
 function PaymentsTable({ payments }: { payments: Payment[] }) {
   if (!payments.length) {
     return (
@@ -619,7 +660,7 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
   }
 
   const lead = projectDetails.lead;
-  const paymentRows = projectDetails.financial?.payments ?? [];
+  const paymentRows = toPaymentRows(projectDetails.financial?.payments);
 
   return (
     <div className="container mx-auto p-6 space-y-6">

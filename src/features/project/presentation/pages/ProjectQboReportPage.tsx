@@ -262,6 +262,17 @@ export function ProjectQboReportPage({ projectId }: { projectId: number }) {
             {data.startDate ? `${data.startDate} → ${data.endDate}` : `al ${data.endDate}`} · cliente
             de QuickBooks {data.qboCustomerId}
           </p>
+          {data.scope === "company" ? (
+            <Alert>
+              <AlertCircle className="size-4" />
+              <AlertTitle>Estas cifras son de toda la empresa, no de este proyecto</AlertTitle>
+              <AlertDescription>
+                QuickBooks no acepta el filtro por cliente en este reporte: lo ignora y responde con
+                los números de toda la empresa. El filtro se envía igual, pero lo que ves abajo no
+                está acotado al proyecto #{data.leadNumber ?? data.projectId}.
+              </AlertDescription>
+            </Alert>
+          ) : null}
           <Card>
             <CardContent className="p-0">
               <QboReportTable raw={data.raw} />

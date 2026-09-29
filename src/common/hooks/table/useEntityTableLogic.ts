@@ -38,7 +38,12 @@ export function useEntityTableLogic<T, TId = number>({
   getId = (item: any) => item.id,
   buildExtraMenuItems,
 }: UseEntityTableLogicOptions<T, TId>) {
-  const [rows, setRows] = useState<T[]>([]);
+  // Sembrar con los items y no con [] importa para el render del servidor: ahí los
+  // efectos no corren, así que arrancar vacío hacía que la página se enviara con el
+  // estado "no hay nada" aunque el loader ya traía las filas, y solo se llenaba cuando
+  // la hidratación terminaba. El efecto de abajo sigue encargándose de los cambios
+  // posteriores.
+  const [rows, setRows] = useState<T[]>(() => items ?? []);
 
   // Comparar solo los ids no alcanza: hay datos que llegan después del primer
   // render y se mezclan en las filas ya existentes (los montos de QuickBooks en

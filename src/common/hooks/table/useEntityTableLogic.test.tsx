@@ -25,6 +25,14 @@ describe("useEntityTableLogic", () => {
     ]);
   });
 
+  it("ya trae las filas en el primer render, sin esperar al efecto", () => {
+    // En el servidor los efectos no corren: si las filas arrancaran vacías, la página
+    // se enviaba con el estado "no hay nada" aunque el loader ya traía los datos.
+    const { result } = renderHook(() => useEntityTableLogic<Row>({ items: [{ id: 1 }, { id: 2 }] }));
+
+    expect(result.current.rows).toHaveLength(2);
+  });
+
   it("mantiene la misma referencia de filas cuando los items no cambiaron", () => {
     const items: Row[] = [{ id: 1 }];
     const { result, rerender } = renderHook(({ items }) => useEntityTableLogic<Row>({ items }), {

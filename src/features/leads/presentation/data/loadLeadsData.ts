@@ -1,4 +1,4 @@
-import { createServerApiClient } from "@/shared/infra/http";
+import { createServerApiClient, orFallback } from "@/shared/infra/http";
 import { headers } from "next/headers";
 import { LeadHttpRepository, makeLeadsAppContext, LeadNumberAvailabilityHttpService } from "@/leads";
 import { listLeadsByType } from "@/leads/application";
@@ -45,9 +45,9 @@ export async function loadLeadsData(leadType: LeadType): Promise<LeadsPageData> 
   };
 
   const [leads, contacts, projectTypes] = await Promise.all([
-    listLeadsByType(leadsCtx, leadType).catch(() => []),
-    listContacts(contactsCtx).catch(() => []),
-    listProjectTypes(projectTypesCtx).catch(() => []),
+    orFallback(`leads (${leadType})`, listLeadsByType(leadsCtx, leadType), []),
+    orFallback("contacts for the leads page", listContacts(contactsCtx), []),
+    orFallback("project types for the leads page", listProjectTypes(projectTypesCtx), []),
   ]);
 
   return {
