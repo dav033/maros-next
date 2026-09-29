@@ -10,7 +10,12 @@
  * value sits to the left of zero.
  */
 
-export type MoneyLineBarKind = "in" | "out" | "hold";
+/**
+ * "contract" es la propia cifra del contrato dibujada como barra: ocupa siempre el
+ * ancho entero del eje y sirve de regla para las demás. No es una vía de dinero, así
+ * que se pinta en neutro y nunca se marca en rojo.
+ */
+export type MoneyLineBarKind = "contract" | "in" | "out" | "hold";
 
 export type MoneyLineBarInput = {
   label: string;

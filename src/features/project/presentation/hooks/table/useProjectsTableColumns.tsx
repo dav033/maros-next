@@ -227,11 +227,12 @@ export function useProjectsTableColumns(
         // figure column: the number still matters even when the bar does not fit.
         // The axis is pinned so the contract marker lands on the same x in every row.
         key: "contractVsCash",
-        header: "Collected / Spent vs contract",
+        header: "Contract / Collected / Spent",
         className: "w-[240px]",
         render: (project: Project) => (
           <MoneyLine
             estimate={toAmount(project.financial?.estimatedAmount)}
+            showContract
             collected={getCollected(project)}
             spent={toAmount(project.financial?.cashOutPaid)}
             axisMaxPercent={LIST_AXIS_MAX_PERCENT}
@@ -249,45 +250,37 @@ export function useProjectsTableColumns(
         },
       },
       {
-        // Cash profit is a figure, not a bar: the money line already owns the bars,
-        // but the number itself still has to be visible and sortable.
+        // Sobre el mismo eje que la columna del contrato, así que una pérdida cruza el
+        // cero hacia la izquierda y se pinta en rojo sola. La leyenda sigue imprimiendo
+        // la cifra, que es lo que se ordena.
         key: "cashProfit",
         header: "Profit",
-        className: "w-[110px]",
-        render: (project: Project) => {
-          const profit = getCashProfit(project);
-          if (profit === null) return <span className="text-muted-foreground">—</span>;
-          return (
-            <span
-              className="font-mono text-xs font-semibold tabular-nums"
-              style={{ color: profit < 0 ? "var(--money-over)" : undefined }}
-            >
-              {formatCurrency(profit)}
-            </span>
-          );
-        },
+        className: "w-[150px]",
+        render: (project: Project) => (
+          <MoneyLine
+            estimate={toAmount(project.financial?.estimatedAmount)}
+            profit={getCashProfit(project)}
+            axisMaxPercent={LIST_AXIS_MAX_PERCENT}
+            label={`${project.lead.name} profit`}
+          />
+        ),
         sortable: true,
         sortValue: (project: Project) => getCashProfit(project) ?? 0,
       },
       {
-        // Contracted work not yet invoiced. A figure, not a bar, for the same
-        // reason as Profit: the money line owns the bars, but the number has to
-        // stay visible and sortable.
+        // Trabajo contratado y todavía sin facturar, contra el mismo eje: se ve de un
+        // vistazo qué parte del contrato queda por delante.
         key: "backlog",
         header: "Backlog",
-        className: "w-[110px]",
-        render: (project: Project) => {
-          const backlog = computeBacklog(project);
-          if (backlog === null) return <span className="text-muted-foreground">—</span>;
-          return (
-            <span
-              className="font-mono text-xs font-semibold tabular-nums"
-              style={{ color: backlog === 0 ? "var(--money-in)" : "var(--money-hold)" }}
-            >
-              {formatCurrency(backlog)}
-            </span>
-          );
-        },
+        className: "w-[150px]",
+        render: (project: Project) => (
+          <MoneyLine
+            estimate={toAmount(project.financial?.estimatedAmount)}
+            backlog={computeBacklog(project)}
+            axisMaxPercent={LIST_AXIS_MAX_PERCENT}
+            label={`${project.lead.name} backlog`}
+          />
+        ),
         sortable: true,
         sortValue: (project: Project) => computeBacklog(project) ?? 0,
       },

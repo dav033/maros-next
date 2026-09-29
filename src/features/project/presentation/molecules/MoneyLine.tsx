@@ -12,6 +12,7 @@ import {
 } from "./moneyLineGeometry";
 
 const KIND_COLOR: Record<MoneyLineBarKind, string> = {
+  contract: "var(--fg-faint)",
   in: "var(--money-in)",
   out: "var(--money-out)",
   hold: "var(--money-hold)",
@@ -29,6 +30,8 @@ const CLIP_EDGE =
   "repeating-linear-gradient(-45deg, var(--money-track) 0 1px, transparent 1px 3px)";
 
 function barColor(bar: MoneyLineBarGeometry): string {
+  // La barra del contrato es la regla, no una vía de dinero: nunca se alarma de sí misma.
+  if (bar.kind === "contract") return KIND_COLOR.contract;
   // A negative lane is money lost whatever it is. Past the contract is only alarming
   // when the money is going out: collecting or holding more than the contract is good
   // news (change orders, released retainage), and the contract marker already shows it.
@@ -47,10 +50,18 @@ function barTitle(bar: MoneyLineBarGeometry): string {
 export type MoneyLineProps = {
   /** Contract amount; it defines the width of the track. null or <= 0 leaves it empty. */
   estimate: number | null;
-  /** Cash received from the client. */
-  collected: number | null;
+  /**
+   * Dibuja el propio contrato como primera barra, a lo ancho de todo el eje. Sirve de
+   * regla y, sobre todo, pone su monto en la leyenda: sin ella el contrato es un eje
+   * invisible y la fila no dice contra qué se están midiendo las demás cifras.
+   */
+  showContract?: boolean;
+  /** Cash received from the client. Omit it to leave that lane out. */
+  collected?: number | null;
   /** Cash actually paid out. Omit it where the data source cannot supply it. */
   spent?: number | null;
+  /** Cobrado menos gastado. Omitir donde no haya sitio para la barra. */
+  profit?: number | null;
   /** Contracted work not invoiced yet. Pass it only where there is room for a third bar. */
   backlog?: number | null;
   /**
@@ -73,16 +84,24 @@ export type MoneyLineProps = {
  */
 export function MoneyLine({
   estimate,
+  showContract,
   collected,
   spent,
+  profit,
   backlog,
   axisMaxPercent,
   label,
   className,
 }: MoneyLineProps) {
   const inputs: MoneyLineBarInput[] = [
-    { label: "Collected", value: collected, kind: "in" },
+    ...(showContract
+      ? [{ label: "Contract", value: estimate ?? null, kind: "contract" as const }]
+      : []),
+    ...(collected === undefined
+      ? []
+      : [{ label: "Collected", value: collected, kind: "in" as const }]),
     ...(spent === undefined ? [] : [{ label: "Spent", value: spent, kind: "out" as const }]),
+    ...(profit === undefined ? [] : [{ label: "Profit", value: profit, kind: "in" as const }]),
     ...(backlog === undefined
       ? []
       : [{ label: "Backlog", value: backlog, kind: "hold" as const }]),
