@@ -317,6 +317,73 @@ select option:focus {
   animation: contextMenuFadeIn 0.12s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* ---------------------------------------------------------------------------
+   Skeletons
+   One shimmer for the whole app. Every placeholder in the product renders
+   through <Skeleton> (components/ui/skeleton.tsx), which carries
+   `.skeleton-sheen`, so the loading state has a single speed and a single
+   direction everywhere instead of the mix of `animate-pulse` durations it grew
+   into. The surface stays on the token scale: --line as the body (>= 1.3:1 on
+   all five elevation steps) and a --fg wash at 9% as the travelling highlight,
+   so nothing here is a raw Tailwind grey.
+
+   `.skeleton-deferred` is the anti-flicker gate: the placeholder occupies its
+   space immediately (so the layout never jumps) but stays invisible for 200ms.
+   Anything that resolves faster than that -- a cached list, a filter change
+   answered by the local API -- is never seen loading. The QuickBooks screens,
+   which take 8-30s, are unaffected.
+--------------------------------------------------------------------------- */
+@keyframes skeletonSheen {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes skeletonReveal {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.skeleton-sheen {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--line);
+}
+
+.skeleton-sheen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    hsl(var(--fg-hsl) / 0.09) 50%,
+    transparent 100%
+  );
+  animation: skeletonSheen 1.6s ease-in-out infinite;
+}
+
+.skeleton-deferred {
+  animation: skeletonReveal 0.16s ease-out 0.2s both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-sheen::after {
+    animation: none;
+  }
+
+  .skeleton-deferred {
+    animation: none !important;
+  }
+}
+
 /* Force sidebar active state colors */
 [data-sidebar="menu-button"][data-active="true"],
 [data-sidebar="menu-sub-button"][data-active="true"] {
@@ -355,64 +422,137 @@ button[role="tab"][data-state="active"],
   margin-top: 0;
 }
 
-.note-editor .tableWrapper {
-  overflow-x: auto;
-}
-
 .note-editor h1,
 .note-editor h2,
 .note-editor h3 {
   text-wrap: balance;
 }
 
+/* The table is a piece of data sitting inside a document, so it gets the same
+   treatment as a CRM data table: an opaque framed surface, a header band one
+   elevation up, zebra rows and a hover row — not an article's hairlines. */
+.ProseMirror .tableWrapper {
+  overflow-x: auto;
+  margin: 1em 0;
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--shape-sm);
+  background: var(--elev-1);
+}
+
+.ProseMirror .tableWrapper > table {
+  margin: 0;
+  border: 0;
+}
+
 .ProseMirror table {
   border-collapse: collapse;
   table-layout: fixed;
   width: 100%;
-  margin: 0.75em 0;
-  overflow: hidden;
-  border-radius: 0.5rem;
+  margin: 1em 0;
   border: 1px solid hsl(var(--border));
+  border-radius: var(--shape-sm);
+  font-size: 0.8125rem;
+  line-height: 1.5;
 }
 
 .ProseMirror table td,
 .ProseMirror table th {
-  border: 1px solid hsl(var(--border));
-  padding: 8px 12px;
+  border-right: 1px solid hsl(var(--border));
+  border-bottom: 1px solid hsl(var(--border));
+  padding: 5px 10px;
   min-width: 1em;
   vertical-align: top;
   position: relative;
 }
 
+/* The frame lives on the wrapper, so the outermost cell edges would double it. */
+.ProseMirror table tr > *:last-child {
+  border-right: 0;
+}
+
+.ProseMirror table tr:last-child > * {
+  border-bottom: 0;
+}
+
+/* Typography gives every paragraph a ~1.25em margin top and bottom. Inside a cell
+   that turns an EMPTY three-by-three table into a ~210px block of nothing, which
+   is the single reason tables read as unusable here. A cell's paragraphs are
+   flush; consecutive ones keep a small gap so multi-line cells still parse. */
+.ProseMirror table td > p,
+.ProseMirror table th > p {
+  margin: 0;
+}
+
+.ProseMirror table td > p + p,
+.ProseMirror table th > p + p {
+  margin-top: 0.4em;
+}
+
+.ProseMirror table td > ul,
+.ProseMirror table td > ol {
+  margin: 0.15em 0;
+  padding-left: 1.1em;
+}
+
+.ProseMirror table td > ul li,
+.ProseMirror table td > ol li {
+  margin: 0.1em 0;
+}
+
 .ProseMirror table th {
-  background-color: hsl(var(--muted) / 0.5);
+  background-color: var(--elev-4);
   font-weight: 600;
   text-align: left;
   text-transform: uppercase;
   font-size: 0.6875rem;
-  letter-spacing: 0.03em;
-  color: hsl(var(--muted-foreground));
+  letter-spacing: 0.04em;
+  color: var(--fg-dim);
+}
+
+/* Zebra + row hover: a punch list is read across a row, and an unstriped grid of
+   short values is exactly where the eye loses its place. Opaque surfaces, so
+   nothing shows through when a table sits inside a callout or a list. */
+.ProseMirror table tr:nth-child(even) > td {
+  background-color: var(--elev-2);
+}
+
+.ProseMirror table tr:hover > td {
+  background-color: var(--elev-3);
 }
 
 .ProseMirror table .selectedCell {
   position: relative;
 }
+
 .ProseMirror table .selectedCell::after {
   content: "";
   position: absolute;
   inset: 0;
-  background-color: hsl(var(--primary) / 0.12);
+  background-color: hsl(var(--primary) / 0.16);
+  box-shadow: inset 0 0 0 1px hsl(var(--primary) / 0.45);
   pointer-events: none;
 }
 
+/* A 4px sliver painted mint at all times reads as content. The handle is a wide
+   invisible grab area that only shows its line while it is being used. */
 .ProseMirror table .column-resize-handle {
   position: absolute;
-  right: -2px;
+  right: -3px;
   top: 0;
   bottom: -2px;
-  width: 4px;
-  background-color: hsl(var(--primary));
+  width: 6px;
+  background-color: transparent;
+  border-right: 2px solid transparent;
   pointer-events: none;
+}
+
+.ProseMirror.resize-cursor .column-resize-handle,
+.ProseMirror table .column-resize-handle:hover {
+  border-right-color: hsl(var(--primary));
+}
+
+.ProseMirror.resize-cursor {
+  cursor: col-resize;
 }
 
 /* Typography's default `ul` bullet renders behind TipTap's checkbox markup

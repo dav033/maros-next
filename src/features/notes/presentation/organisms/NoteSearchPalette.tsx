@@ -20,6 +20,8 @@ import {
 } from "@/components/ui/command";
 import { useNoteSearch } from "../hooks/data/useNoteSearch";
 import { useInstantNoteTree } from "../hooks/data/useInstantNoteTree";
+import { onNoteContentSearch } from "./noteSearchBus";
+import { formatRelativeTime } from "../atoms/formatRelativeTime";
 
 export function NoteSearchPalette({
   showTrigger = false,
@@ -50,6 +52,16 @@ export function NoteSearchPalette({
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
   }, []);
+
+  // Opened with a query already in hand by the home list's "no results" state.
+  useEffect(
+    () =>
+      onNoteContentSearch((incoming) => {
+        setQuery(incoming);
+        setOpen(true);
+      }),
+    [],
+  );
 
   const handleSelect = (id: number) => {
     setOpen(false);
@@ -127,13 +139,30 @@ export function NoteSearchPalette({
                     key={hit.id}
                     value={String(hit.id)}
                     onSelect={() => handleSelect(hit.id)}
+                    className="gap-2"
                   >
-                    {hit.icon ? (
-                      <span>{hit.icon}</span>
-                    ) : (
-                      <FileText className="h-4 w-4" />
-                    )}
-                    <span className="truncate">{hit.title || "Untitled"}</span>
+                    <span className="flex size-5 shrink-0 items-center justify-center rounded bg-elev-3 text-muted-foreground">
+                      {hit.icon ? (
+                        <span className="text-[11px]">{hit.icon}</span>
+                      ) : (
+                        <FileText className="size-3" aria-hidden="true" />
+                      )}
+                    </span>
+                    <span
+                      className={
+                        hit.title
+                          ? "min-w-0 truncate text-[13px]"
+                          : "min-w-0 truncate text-[13px] italic text-muted-foreground"
+                      }
+                    >
+                      {hit.title || "Untitled"}
+                    </span>
+                    {/* Eight results all reading "Untitled" is the state this
+                        workspace is actually in, so the timestamp is what tells
+                        them apart. */}
+                    <span className="ml-auto shrink-0 text-[11px] text-muted-foreground">
+                      {formatRelativeTime(hit.updatedAt)}
+                    </span>
                   </CommandItem>
                 ))}
               </CommandGroup>

@@ -1,11 +1,10 @@
 "use client";
 
-import Link from "next/link";
-import { FileText, Folder, FolderPlus, Plus } from "lucide-react";
+import { FolderPlus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatRelativeTime } from "../atoms/formatRelativeTime";
 import { noteAuthorName } from "../atoms/noteAuthorInitials";
-import { noteTagColor } from "../atoms/noteVisualTokens";
+import { NoteListPanel, NoteListRow } from "../molecules/NoteListRow";
 import type { NoteKind, NotePageSummary } from "@/notes/domain";
 
 /**
@@ -32,76 +31,57 @@ export function NoteFolderView({
   return (
     <section>
       {canEdit && (
-        <div className="mb-3 flex items-center gap-2">
+        <div className="mb-2.5 flex items-center gap-1.5">
           <Button
             variant="outline"
             size="sm"
+            className="h-8 gap-1.5 px-2.5 text-xs"
             onClick={() => onCreateChild(folderId, "page")}
           >
-            <Plus className="mr-1 h-3.5 w-3.5" />
+            <Plus className="size-3.5" aria-hidden="true" />
             New page
           </Button>
           <Button
             variant="ghost"
             size="sm"
+            className="h-8 gap-1.5 px-2.5 text-xs"
             onClick={() => onCreateChild(folderId, "folder")}
           >
-            <FolderPlus className="mr-1 h-3.5 w-3.5" />
+            <FolderPlus className="size-3.5" aria-hidden="true" />
             New folder
           </Button>
         </div>
       )}
 
       {children.length === 0 ? (
-        <p className="py-6 text-sm text-muted-foreground">
-          {canEdit
-            ? "This folder is empty — add a page, or drag one in from the sidebar."
-            : "This folder has no pages yet."}
-        </p>
-      ) : (
-        <div className="flex flex-col">
-          {children.map((child) => (
-            <Link
-              key={child.id}
-              href={`/notes/${child.id}`}
-              className="flex min-w-0 items-center gap-3 rounded-lg border-b border-line px-2 py-3 last:border-b-0 hover:bg-elev-3 sm:gap-3.5"
-            >
-              <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-elev-4 text-muted-foreground">
-                {child.icon ??
-                  (child.kind === "folder" ? (
-                    <Folder className="h-4 w-4" />
-                  ) : (
-                    <FileText className="h-4 w-4" />
-                  ))}
-              </div>
-              <div className="min-w-0 flex-1">
-                <span className="block truncate text-[14.5px] font-medium">
-                  {child.title || "Untitled"}
-                </span>
-                <div className="flex items-center gap-2.5 text-xs text-muted-foreground">
-                  {child.lastEditedBy && (
-                    <span>{noteAuthorName(child.lastEditedBy)}</span>
-                  )}
-                  {child.tags.map((tag) => (
-                    <span
-                      key={tag.id}
-                      className="inline-flex items-center gap-1.5"
-                    >
-                      <span
-                        className="h-1.5 w-1.5 shrink-0 rounded-full"
-                        style={{ backgroundColor: noteTagColor(tag.color) }}
-                      />
-                      {tag.name}
-                    </span>
-                  ))}
-                </div>
-              </div>
-              <span className="shrink-0 text-xs text-muted-foreground">
-                {formatRelativeTime(child.updatedAt)}
-              </span>
-            </Link>
-          ))}
+        <div className="rounded-xl border border-dashed border-line bg-elev-1 px-6 py-10 text-center">
+          <p className="text-xs text-muted-foreground">
+            {canEdit
+              ? "This folder is empty — add a page, or drag one in from the sidebar."
+              : "This folder has no pages yet."}
+          </p>
         </div>
+      ) : (
+        <NoteListPanel>
+          <ul className="divide-y divide-line/60">
+            {children.map((child) => (
+              <NoteListRow
+                key={child.id}
+                href={`/notes/${child.id}`}
+                kind={child.kind}
+                icon={child.icon || undefined}
+                title={child.title}
+                tags={child.tags}
+                timestamp={formatRelativeTime(child.updatedAt)}
+                context={
+                  child.lastEditedBy
+                    ? noteAuthorName(child.lastEditedBy)
+                    : undefined
+                }
+              />
+            ))}
+          </ul>
+        </NoteListPanel>
       )}
     </section>
   );

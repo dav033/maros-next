@@ -103,7 +103,7 @@ export function NotesSidebar() {
     >
       <Button
         variant="ghost"
-        className="h-11 w-full justify-start gap-2 rounded-none px-4 md:hidden"
+        className="h-10 w-full justify-start gap-2 rounded-none px-3 text-sm md:hidden"
         aria-expanded={mobileOpen}
         aria-controls="notes-navigation"
         onClick={() => setMobileOpen(!mobileOpen)}
@@ -141,7 +141,7 @@ export function NotesSidebar() {
         </div>
         <nav
           aria-label="Note collections"
-          className="space-y-1 border-t border-line p-2"
+          className="shrink-0 space-y-0.5 border-t border-line bg-elev-2 p-1.5"
         >
           {secondaryLinks.map(({ href, label, icon: Icon }) => {
             const isActive = pathname === href;
@@ -151,13 +151,13 @@ export function NotesSidebar() {
                 href={href}
                 aria-current={isActive ? "page" : undefined}
                 className={cn(
-                  "flex min-h-9 items-center gap-2 rounded-md px-2.5 py-2 text-sm transition-colors",
+                  "flex min-h-8 items-center gap-2 rounded-md px-2 py-1.5 text-[13px] transition-colors",
                   isActive
-                    ? "bg-primary/10 font-medium text-primary"
-                    : "text-muted-foreground hover:bg-accent hover:text-foreground",
+                    ? "bg-elev-4 font-medium text-primary"
+                    : "text-muted-foreground hover:bg-elev-4 hover:text-foreground",
                 )}
               >
-                <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                <Icon className="size-3.5 shrink-0" aria-hidden="true" />
                 <span>{label}</span>
               </Link>
             );

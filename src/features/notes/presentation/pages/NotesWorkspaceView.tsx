@@ -128,10 +128,10 @@ export function NotesWorkspaceView({
           creating={logic.creating}
         />
       ) : (
-        <div className="mx-auto max-w-4xl px-4 py-4 sm:px-8 sm:py-8 lg:px-10">
+        <div className="mx-auto max-w-4xl px-4 py-3 sm:px-7 sm:py-5">
           <nav
             aria-label="Note location"
-            className="mb-6 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground"
+            className="mb-2.5 flex flex-wrap items-center gap-1 text-[11px] text-muted-foreground"
           >
             <Link
               href="/notes"
@@ -141,7 +141,7 @@ export function NotesWorkspaceView({
             </Link>
             {ancestors.map((ancestor) => (
               <span key={ancestor.id} className="flex items-center gap-1.5">
-                <ChevronRight className="h-3 w-3" aria-hidden="true" />
+                <ChevronRight className="size-3" aria-hidden="true" />
                 <Link
                   href={`/notes/${ancestor.id}`}
                   className="max-w-[10rem] truncate rounded-sm hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -150,7 +150,7 @@ export function NotesWorkspaceView({
                 </Link>
               </span>
             ))}
-            <ChevronRight className="h-3 w-3" aria-hidden="true" />
+            <ChevronRight className="size-3" aria-hidden="true" />
             <span
               aria-current="page"
               className="max-w-[14rem] truncate text-foreground/80"
@@ -159,12 +159,12 @@ export function NotesWorkspaceView({
             </span>
           </nav>
 
-          <div className="mb-4 flex min-w-0 items-center gap-3 sm:gap-4">
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-elev-4 text-muted-foreground">
+          <div className="mb-2 flex min-w-0 items-center gap-2.5">
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-elev-4 text-muted-foreground">
               {isFolder ? (
-                <Folder className="h-5 w-5" aria-hidden="true" />
+                <Folder className="size-4" aria-hidden="true" />
               ) : (
-                <FileText className="h-5 w-5" aria-hidden="true" />
+                <FileText className="size-4" aria-hidden="true" />
               )}
             </div>
             {logic.canEdit ? (
@@ -181,23 +181,23 @@ export function NotesWorkspaceView({
                   }
                 }}
                 placeholder="Untitled"
-                className="block min-h-11 w-full min-w-0 resize-none rounded-sm border-none bg-transparent px-0 py-1 font-display text-2xl font-semibold leading-snug tracking-tight [field-sizing:content] placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring sm:text-3xl"
+                className="block min-h-9 w-full min-w-0 resize-none rounded-sm border-none bg-transparent px-0 py-0.5 font-display text-xl font-semibold leading-snug tracking-tight [field-sizing:content] placeholder:text-muted-foreground/70 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring sm:text-2xl"
               />
             ) : (
               // A disabled Input still reads as a field you might be able to use. A
               // read-only page simply has no field.
-              <h1 className="min-w-0 truncate font-display text-2xl font-semibold sm:text-3xl">
+              <h1 className="min-w-0 truncate font-display text-xl font-semibold sm:text-2xl">
                 {logic.title || "Untitled"}
               </h1>
             )}
           </div>
 
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3 sm:gap-4">
+          <div className="mb-2.5 flex flex-wrap items-center justify-between gap-2 border-b border-line pb-2.5">
             <div
               role="status"
               aria-live="polite"
               className={cn(
-                "flex min-h-8 min-w-0 items-center gap-2 text-xs text-muted-foreground",
+                "flex min-h-7 min-w-0 items-center gap-1.5 text-[11px] text-muted-foreground",
                 (logic.saveStatus === "error" ||
                   logic.saveStatus === "conflict") &&
                   "text-red-400",
@@ -228,7 +228,7 @@ export function NotesWorkspaceView({
                 logic.activePage && (
                   <>
                     {editor && (
-                      <Avatar className="h-5 w-5">
+                      <Avatar className="size-4">
                         {editor.picture && (
                           <AvatarImage src={editor.picture} alt="" />
                         )}
@@ -248,7 +248,7 @@ export function NotesWorkspaceView({
             <div className="flex shrink-0 items-center gap-1">
               {logic.activePage?.isPublished && (
                 <span
-                  className="inline-flex items-center gap-1 rounded-md bg-emerald-500/10 px-2 py-1 text-[11px] font-medium text-emerald-700 dark:text-emerald-300"
+                  className="inline-flex items-center gap-1 rounded-md bg-elev-4 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-300"
                   title="This note is published on the web"
                 >
                   <Globe className="h-3 w-3" aria-hidden="true" />
@@ -258,7 +258,7 @@ export function NotesWorkspaceView({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8"
+                className="size-7"
                 onClick={logic.onToggleFavorite}
                 aria-pressed={logic.activePage?.isFavorite ?? false}
                 title="Toggle favorite"
@@ -271,7 +271,7 @@ export function NotesWorkspaceView({
                 <Star
                   aria-hidden="true"
                   className={cn(
-                    "h-4 w-4",
+                    "size-3.5",
                     logic.activePage?.isFavorite &&
                       "fill-current text-amber-400",
                   )}
@@ -281,11 +281,11 @@ export function NotesWorkspaceView({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-8 gap-1.5"
+                  className="h-7 gap-1.5 px-2 text-xs"
                   onClick={() => logic.setShareOpen(true)}
                   title="Share"
                 >
-                  <Share2 className="h-4 w-4" aria-hidden="true" />
+                  <Share2 className="size-3.5" aria-hidden="true" />
                   Share
                 </Button>
               )}
@@ -295,7 +295,7 @@ export function NotesWorkspaceView({
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="size-8"
+                      className="size-7"
                       aria-label="More page actions"
                     >
                       <MoreHorizontal className="size-4" aria-hidden="true" />
@@ -325,7 +325,7 @@ export function NotesWorkspaceView({
           </div>
 
           {!logic.canEdit && (
-            <div className="mb-4 flex items-center gap-2 rounded-lg border border-line bg-elev-2 px-3 py-2 text-xs text-muted-foreground">
+            <div className="mb-2.5 flex items-center gap-2 rounded-lg border border-line bg-elev-2 px-3 py-1.5 text-[11px] text-muted-foreground">
               <Eye className="h-3.5 w-3.5 shrink-0" />
               <span>
                 This note was shared with you as read-only. Ask its owner if you
@@ -334,107 +334,90 @@ export function NotesWorkspaceView({
             </div>
           )}
 
-          <details className="group/details mb-6 rounded-lg border border-line">
-            <summary className="flex cursor-pointer list-none items-center gap-2 rounded-lg px-3 py-2.5 text-xs text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
-              <ChevronRight
-                className="size-3.5 transition-transform group-open/details:rotate-90 motion-reduce:transition-none"
-                aria-hidden="true"
-              />
-              <span>Labels & linked record</span>
-              <span className="ml-auto truncate">
-                {(logic.activePage?.tags.length ?? 0) > 0
-                  ? `${logic.activePage?.tags.length} ${logic.activePage?.tags.length === 1 ? "label" : "labels"}`
-                  : ""}
-                {entity.label ? ` · ${entity.label}` : ""}
-              </span>
-            </summary>
-            <div className="px-3 pb-3">
-              <div className="mb-3 flex flex-wrap items-center gap-2">
-                {logic.activePage?.entityKind &&
-                logic.activePage.entityId != null ? (
-                  <span className="inline-flex items-center gap-1.5 rounded-md border border-line bg-elev-4 py-1 pl-2 pr-1 text-xs">
-                    <Briefcase
-                      className="h-3.5 w-3.5 text-muted-foreground"
-                      aria-hidden="true"
-                    />
-                    {entity.href ? (
-                      <Link
-                        href={entity.href}
-                        className="max-w-[16rem] truncate hover:underline"
-                      >
-                        {entity.label ?? "Loading…"}
-                      </Link>
-                    ) : (
-                      <span className="max-w-[16rem] truncate">
-                        {entity.label ?? "Loading…"}
-                      </span>
-                    )}
-                    {logic.canEdit && (
-                      <button
-                        type="button"
-                        onClick={() =>
-                          logic.onEntityLinkChange({
-                            entityKind: null,
-                            entityId: null,
-                          })
-                        }
-                        title="Unassign"
-                        aria-label="Unassign from lead or project"
-                        className="rounded p-0.5 text-muted-foreground hover:bg-elev-5 hover:text-foreground"
-                      >
-                        <X className="h-3 w-3" aria-hidden="true" />
-                      </button>
-                    )}
-                  </span>
-                ) : logic.canEdit ? (
-                  <NoteEntityPicker
-                    onSelect={logic.onEntityLinkChange}
-                    trigger={
-                      <button
-                        type="button"
-                        className="inline-flex items-center gap-1.5 rounded-md border border-dashed border-line-strong px-2.5 py-1.5 text-xs text-muted-foreground transition-colors hover:border-solid hover:bg-elev-4 hover:text-foreground"
-                      >
-                        <Briefcase className="h-3.5 w-3.5" aria-hidden="true" />
-                        Link a record
-                      </button>
-                    }
-                  />
-                ) : null}
-              </div>
-
-              <div className="flex flex-wrap items-center gap-2">
-                {(logic.activePage?.tags ?? []).map((tag) => (
-                  <span
-                    key={tag.id}
-                    className="inline-flex items-center gap-1.5 rounded-full bg-elev-4 px-2 py-1 text-xs font-medium text-foreground/90"
+          {/* Was a full-width collapsible bar that, on a note with no labels and no
+              linked record, was a 40px empty box hiding two empty things. The chips
+              are smaller than the bar they replace and say what they are. */}
+          <div className="mb-3 flex flex-wrap items-center gap-1.5">
+            {logic.activePage?.entityKind &&
+            logic.activePage.entityId != null ? (
+              <span className="inline-flex items-center gap-1.5 rounded-md bg-elev-4 py-0.5 pl-2 pr-1 text-[11px]">
+                <Briefcase
+                  className="size-3 text-muted-foreground"
+                  aria-hidden="true"
+                />
+                {entity.href ? (
+                  <Link
+                    href={entity.href}
+                    className="max-w-[16rem] truncate hover:underline"
                   >
-                    <span
-                      className="size-2 shrink-0 rounded-full"
-                      style={{ backgroundColor: noteTagColor(tag.color) }}
-                    />
-                    {tag.name}
+                    {entity.label ?? "Loading…"}
+                  </Link>
+                ) : (
+                  <span className="max-w-[16rem] truncate">
+                    {entity.label ?? "Loading…"}
                   </span>
-                ))}
-                {logic.canEdit && (
-                  <TagPicker
-                    selectedTagIds={
-                      logic.activePage?.tags.map((t) => t.id) ?? []
-                    }
-                    onChange={logic.onTagsChange}
-                    trigger={
-                      <button
-                        type="button"
-                        className="inline-flex items-center gap-1 rounded-md border border-dashed border-line-strong px-2 py-1 text-xs text-muted-foreground transition-colors hover:border-solid hover:bg-elev-4 hover:text-foreground"
-                      >
-                        <Plus className="h-3 w-3" aria-hidden="true" />
-                        Add label
-                      </button>
-                    }
-                  />
                 )}
-              </div>
-            </div>
-          </details>
+                {logic.canEdit && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      logic.onEntityLinkChange({
+                        entityKind: null,
+                        entityId: null,
+                      })
+                    }
+                    title="Unassign"
+                    aria-label="Unassign from lead or project"
+                    className="rounded p-0.5 text-muted-foreground hover:bg-elev-5 hover:text-foreground"
+                  >
+                    <X className="size-3" aria-hidden="true" />
+                  </button>
+                )}
+              </span>
+            ) : logic.canEdit ? (
+              <NoteEntityPicker
+                onSelect={logic.onEntityLinkChange}
+                trigger={
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1 rounded-md border border-dashed border-line-strong px-2 py-0.5 text-[11px] text-muted-foreground transition-colors hover:border-solid hover:bg-elev-4 hover:text-foreground"
+                  >
+                    <Briefcase className="size-3" aria-hidden="true" />
+                    Link a record
+                  </button>
+                }
+              />
+            ) : null}
+
+            {(logic.activePage?.tags ?? []).map((tag) => (
+              <span
+                key={tag.id}
+                className="inline-flex items-center gap-1.5 rounded-full bg-elev-4 px-2 py-0.5 text-[11px] font-medium text-foreground/90"
+              >
+                <span
+                  aria-hidden="true"
+                  className="size-1.5 shrink-0 rounded-full"
+                  style={{ backgroundColor: noteTagColor(tag.color) }}
+                />
+                {tag.name}
+              </span>
+            ))}
+            {logic.canEdit && (
+              <TagPicker
+                selectedTagIds={logic.activePage?.tags.map((t) => t.id) ?? []}
+                onChange={logic.onTagsChange}
+                trigger={
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1 rounded-md border border-dashed border-line-strong px-2 py-0.5 text-[11px] text-muted-foreground transition-colors hover:border-solid hover:bg-elev-4 hover:text-foreground"
+                  >
+                    <Plus className="size-3" aria-hidden="true" />
+                    Add label
+                  </button>
+                }
+              />
+            )}
+          </div>
 
           {!logic.activePageLoading &&
             (isFolder ? (

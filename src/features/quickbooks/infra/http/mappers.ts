@@ -5,6 +5,7 @@ import type {
   QboAttachmentWarning,
   QboProjectAttachmentRef,
   QboProjectAttachments,
+  QboProjectLinkAssignment,
   QboProjectLinkRemoval,
   QuickbooksConnection,
 } from "../../domain/models";
@@ -15,6 +16,7 @@ import type {
   QboAttachmentWarningResponse,
   QboProjectAttachmentRefResponse,
   QboProjectAttachmentsResponse,
+  QboProjectLinkAssignmentResponse,
   QboProjectLinkRemovalResponse,
   QuickbooksConnectionResponse,
 } from "./responses";
@@ -96,6 +98,22 @@ export function mapProjectLinkRemoval(
     leadId: data.leadId ?? null,
     previousQboCustomerId: data.previousQboCustomerId ?? null,
     unlinked: data.unlinked,
+  };
+}
+
+export function mapProjectLinkAssignment(
+  data: QboProjectLinkAssignmentResponse,
+): QboProjectLinkAssignment {
+  return {
+    projectId: data.projectId,
+    leadId: data.leadId ?? null,
+    projectNumber: data.projectNumber ?? null,
+    qboCustomerId: data.qboCustomerId,
+    jobDisplayName: data.jobDisplayName ?? "",
+    previousQboCustomerId: data.previousQboCustomerId ?? null,
+    linked: data.linked,
+    alreadyLinked: data.alreadyLinked,
+    projectNumberMatchesJob: data.projectNumberMatchesJob === true,
   };
 }
 

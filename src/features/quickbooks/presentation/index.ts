@@ -5,6 +5,7 @@ export { QuickbooksReportPrefetchBoundary } from "./QuickbooksReportPrefetchBoun
 export { useGroupedQboAttachments } from "./hooks/useGroupedQboAttachments";
 export { useFilteredQboAttachments } from "./hooks/useFilteredQboAttachments";
 export { useUnlinkProjectQboLink } from "./hooks/useUnlinkProjectQboLink";
+export { useLinkProjectQboLink } from "./hooks/useLinkProjectQboLink";
 export { getAllEntityTypeOrder, getEntityTypeMeta } from "./utils/entityTypeMeta";
 export type { QboAttachmentIcon, QboAttachmentSection, QboAttachmentsGrouped } from "./hooks/useGroupedQboAttachments";
 export type { QboAttachmentsFilter, QboFilteredAttachments } from "./hooks/useFilteredQboAttachments";

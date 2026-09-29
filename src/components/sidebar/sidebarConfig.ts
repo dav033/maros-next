@@ -231,7 +231,7 @@ const financeSection: SidebarSection = {
   section: "Finance",
   items: [
     {
-      title: "Invoice scans",
+      title: "Document scans",
       href: "/finance/invoices",
       icon: Receipt,
       activePrefix: "/finance/invoices",

@@ -1,12 +1,13 @@
 "use client";
 
-import Link from "next/link";
-import { FileText, Folder, Users } from "lucide-react";
+import { Users } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useInstantSharedWithMe } from "../hooks/data/useInstantSharedWithMe";
 import { formatRelativeTime } from "../atoms/formatRelativeTime";
 import { noteAuthorInitials, noteAuthorName } from "../atoms/noteAuthorInitials";
-import { noteTagColor } from "../atoms/noteVisualTokens";
+import { NoteCollectionShell } from "./NoteCollectionShell";
+import { NoteListRow } from "../molecules/NoteListRow";
 
 /**
  * Only pages reached through an explicit grant. Anything already visible to the whole
@@ -18,78 +19,47 @@ export function NoteSharedPageView() {
   const { pages, isLoading } = useInstantSharedWithMe();
 
   return (
-    <main className="notes-scrollbar flex-1 overflow-y-auto">
-      <div className="mx-auto max-w-2xl px-4 py-6 sm:px-8 sm:py-10">
-        <div className="mb-1 flex items-center gap-2.5">
-          <Users className="size-6 text-primary" />
-          <h1 className="font-display text-2xl font-semibold">Shared with me</h1>
-        </div>
-        <p className="mb-6 text-[13.5px] text-muted-foreground">
-          Notes a colleague gave you access to. Sub-pages are included even when they are
-          not listed here.
-        </p>
-
-        {!isLoading && pages.length === 0 && (
-          <p className="text-sm text-muted-foreground">
-            Nothing yet — notes people share with you will show up here.
-          </p>
-        )}
-
-        <div className="flex flex-col">
-          {pages.map((page) => (
-            <div
+    <NoteCollectionShell
+      icon={<Users className="size-4 text-primary" />}
+      title="Shared with me"
+      description="Notes a colleague gave you access to. Sub-pages are included."
+      count={isLoading ? null : pages.length}
+      isEmpty={!isLoading && pages.length === 0}
+      emptyTitle="Nothing shared with you"
+      emptyBody="When somebody grants you access to one of their notes, it shows up here."
+    >
+      {isLoading
+        ? [1, 2, 3].map((row) => (
+            <li key={row} className="px-2.5 py-2">
+              <Skeleton className="h-5 w-full" />
+            </li>
+          ))
+        : pages.map((page) => (
+            <NoteListRow
               key={page.id}
-              className="flex min-w-0 flex-wrap items-center gap-3 border-b border-line px-2 py-3 last:border-b-0 hover:rounded-lg hover:bg-elev-3 sm:flex-nowrap sm:gap-3.5"
-            >
-              <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-elev-4 text-muted-foreground">
-                {page.icon ??
-                  (page.kind === "folder" ? (
-                    <Folder className="h-4 w-4" />
-                  ) : (
-                    <FileText className="h-4 w-4" />
-                  ))}
-              </div>
-
-              <div className="min-w-0 flex-1">
-                <Link
-                  href={`/notes/${page.id}`}
-                  className="block truncate text-[14.5px] font-medium hover:underline"
-                >
-                  {page.title || "Untitled"}
-                </Link>
-                <div className="flex items-center gap-2.5 text-xs text-muted-foreground">
-                  {page.lastEditedBy && (
-                    <span className="inline-flex items-center gap-1.5">
-                      <Avatar className="h-4 w-4">
-                        {page.lastEditedBy.picture && (
-                          <AvatarImage src={page.lastEditedBy.picture} alt="" />
-                        )}
-                        <AvatarFallback className="text-[8px] font-semibold">
-                          {noteAuthorInitials(page.lastEditedBy)}
-                        </AvatarFallback>
-                      </Avatar>
-                      {noteAuthorName(page.lastEditedBy)}
-                    </span>
-                  )}
-                  {page.tags.map((tag) => (
-                    <span key={tag.id} className="inline-flex items-center gap-1.5">
-                      <span
-                        className="h-1.5 w-1.5 shrink-0 rounded-full"
-                        style={{ backgroundColor: noteTagColor(tag.color) }}
-                      />
-                      {tag.name}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              <span className="ml-auto shrink-0 text-xs text-muted-foreground">
-                {formatRelativeTime(page.updatedAt)}
-              </span>
-            </div>
+              href={`/notes/${page.id}`}
+              kind={page.kind}
+              icon={page.icon || undefined}
+              title={page.title}
+              tags={page.tags}
+              timestamp={formatRelativeTime(page.updatedAt)}
+              context={
+                page.lastEditedBy ? (
+                  <span className="inline-flex items-center gap-1.5 align-middle">
+                    <Avatar className="size-4">
+                      {page.lastEditedBy.picture && (
+                        <AvatarImage src={page.lastEditedBy.picture} alt="" />
+                      )}
+                      <AvatarFallback className="text-[8px] font-semibold">
+                        {noteAuthorInitials(page.lastEditedBy)}
+                      </AvatarFallback>
+                    </Avatar>
+                    {noteAuthorName(page.lastEditedBy)}
+                  </span>
+                ) : undefined
+              }
+            />
           ))}
-        </div>
-      </div>
-    </main>
+    </NoteCollectionShell>
   );
 }

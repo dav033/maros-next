@@ -1,103 +1,65 @@
 "use client";
 
-import { Skeleton } from "@/components/ui/skeleton";
+import { useMemo } from "react";
+import { SkeletonCardList, SkeletonTable, type SkeletonTableColumn } from "@/components/shared";
+import { useProjectsTableColumns } from "../hooks/table/useProjectsTableColumns";
 
+/** Columns whose cell is a MoneyLine rail rather than a line of text. */
+const MONEY_KEYS = new Set(["payments", "contractVsCash", "profitVsBacklog", "cashProfit", "backlog"]);
+
+/**
+ * Stand-in for ProjectsTable while the QuickBooks figures load — 8 to 30 seconds
+ * on this screen, so it is what the user looks at most of the time.
+ *
+ * It reads the real column definitions rather than restating them. The hand-kept
+ * copy had rotted into the pre-redesign table — Invoice Status, Invoice Amount,
+ * Last Payment and QuickBooks, 7 columns totalling 1055px against the 10 cells
+ * and 1490px the table actually renders — so the page re-laid itself the moment
+ * the rows arrived. Reading the hook also keeps the Payments column behind
+ * `finance:read` exactly as the table has it, and means the next column change
+ * lands here for free.
+ */
 export function ProjectsTableSkeleton() {
+  const columns = useProjectsTableColumns();
+
+  const skeletonColumns = useMemo<SkeletonTableColumn[]>(
+    () =>
+      columns.map((column) => {
+        const key = String(column.key);
+        if (key === "notes")
+          return { header: column.header, className: column.className, variant: "icon" };
+        if (key === "projectProgressStatus")
+          return { header: column.header, className: column.className, variant: "badge" };
+        if (MONEY_KEYS.has(key))
+          return { header: column.header, className: column.className, variant: "money" };
+        return {
+          header: column.header,
+          className: column.className,
+          variant: "text",
+          cellWidth: "w-3/4",
+        };
+      }),
+    [columns],
+  );
+
+  // ProjectsTable's own arithmetic: the column widths, plus 40px for the
+  // checkbox column and 40px for the row-actions cell.
+  const hasPayments = columns.some((column) => column.key === "payments");
+  const minWidth = (hasPayments ? 1410 : 1240) + 40 + 40;
+
   return (
     <>
-      <div className="space-y-3 xl:hidden">
-        {Array.from({ length: 5 }).map((_, rowIdx) => (
-          <div key={rowIdx} className="space-y-3 rounded-xl border border-line bg-elev-2 p-4 shadow-sm">
-            <div className="space-y-2">
-              <Skeleton className="h-3 w-24" />
-              <Skeleton className="h-5 w-3/4" />
-              <Skeleton className="h-3 w-1/2" />
-            </div>
-            <div className="grid gap-3 border-y border-line py-3 md:grid-cols-2">
-              <div className="space-y-2">
-                <Skeleton className="h-3 w-24" />
-                <div className="space-y-2.5">
-                  {Array.from({ length: 2 }).map((__, metricIdx) => (
-                    <div key={metricIdx} className="space-y-1">
-                      <Skeleton className="h-3 w-full" />
-                      <Skeleton className="h-1 w-full" />
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="space-y-2 border-t border-line pt-3 md:border-l md:border-t-0 md:pl-4 md:pt-0">
-                <Skeleton className="h-3 w-28" />
-                <div className="space-y-2.5">
-                  {Array.from({ length: 3 }).map((__, metricIdx) => (
-                    <div key={metricIdx} className="space-y-1">
-                      <Skeleton className="h-3 w-full" />
-                      <Skeleton className="h-1 w-full" />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-            <Skeleton className="h-10 w-full" />
-          </div>
-        ))}
-      </div>
-      <div className="hidden w-full overflow-auto xl:block">
-      <table className="w-full border-collapse">
-        <thead>
-          <tr className="border-b border-border">
-            <th className="w-[135px] px-4 py-3 text-left text-sm font-medium text-muted-foreground">
-              Project Number
-            </th>
-            <th className="w-[200px] px-4 py-3 text-left text-sm font-medium text-muted-foreground">
-              Project Name
-            </th>
-            <th className="w-[150px] px-4 py-3 text-left text-sm font-medium text-muted-foreground">
-              Progress Status
-            </th>
-            <th className="w-[150px] px-4 py-3 text-left text-sm font-medium text-muted-foreground">
-              Invoice Status
-            </th>
-            <th className="w-[150px] px-4 py-3 text-right text-sm font-medium text-muted-foreground">
-              Invoice Amount
-            </th>
-            <th className="w-[150px] px-4 py-3 text-right text-sm font-medium text-muted-foreground">
-              Last Payment
-            </th>
-            <th className="w-[120px] px-4 py-3 text-center text-sm font-medium text-muted-foreground">
-              QuickBooks
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {Array.from({ length: 13 }).map((_, rowIdx) => (
-            <tr key={rowIdx} className="border-b border-line">
-              <td className="px-4 py-3">
-                <Skeleton className="h-4 w-24" />
-              </td>
-              <td className="px-4 py-3">
-                <Skeleton className="h-4 w-3/4" />
-              </td>
-              <td className="px-4 py-3">
-                <Skeleton className="h-6 w-24 rounded-full" />
-              </td>
-              <td className="px-4 py-3">
-                <Skeleton className="h-6 w-24 rounded-full" />
-              </td>
-              <td className="px-4 py-3 text-right">
-                <Skeleton className="ml-auto h-4 w-20" />
-              </td>
-              <td className="px-4 py-3 text-right">
-                <Skeleton className="ml-auto h-4 w-20" />
-              </td>
-              <td className="px-4 py-3 text-center">
-                <Skeleton className="mx-auto h-6 w-16 rounded-full" />
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      </div>
+      <SkeletonCardList className="xl:hidden" count={5} />
+      <SkeletonTable
+        className="hidden xl:block"
+        columns={skeletonColumns}
+        rows={13}
+        minWidth={minWidth}
+        // ProjectsTable's DENSE_ROW_CLASS: 44px rows, not EntityTable's default 64.
+        dense
+        hasSelection
+        hasRowActions
+      />
     </>
   );
 }
-

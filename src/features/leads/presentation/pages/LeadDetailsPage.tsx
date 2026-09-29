@@ -2,9 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, useState, useEffect } from "react";
-import { CalendarPlus, FolderPlus } from "lucide-react";
+import { CalendarPlus, FolderPlus, LayoutDashboard, ListTodo, NotebookPen, Paperclip } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { DetailTabsBar, useUrlTabState, type DetailTabDef } from "@/components/shared/DetailTabs";
 import { useLeadsNotesLogic } from "../hooks/notes/useLeadsNotesLogic";
 import { useLeadsNotesModalController } from "../hooks/modals/useLeadsNotesModalController";
 import { EntityDetailHeader, EntityErrorPage, NotesEditorModal } from "@/components/shared";
@@ -39,6 +41,23 @@ import { EntityTasksSection } from "@/features/tasks/presentation/organisms/Enti
 import { PostConversionEstimateModal } from "../organisms/PostConversionEstimateModal";
 
 
+/**
+ * Mismo criterio que la ficha de proyecto: «Resumen» es la ficha de siempre
+ * —datos del lead, su contacto y la empresa asociada, que es lo que se mira para
+ * decidir—, y tareas, notas y archivos salen del scroll a su propia pestaña. Un
+ * lead no tiene bloque de QuickBooks propio: lo único que viene de allí es el
+ * monto del Estimate, que se lee dentro de Lead Information.
+ */
+const LEAD_TABS = [
+  { value: "resumen", label: "Resumen", icon: LayoutDashboard },
+  { value: "tareas", label: "Tareas", icon: ListTodo },
+  { value: "notas", label: "Notas", icon: NotebookPen },
+  { value: "archivos", label: "Archivos", icon: Paperclip },
+] as const satisfies readonly DetailTabDef[];
+
+const LEAD_TAB_VALUES = LEAD_TABS.map((tab) => tab.value);
+const DEFAULT_LEAD_TAB = "resumen";
+
 interface LeadDetailsPageProps {
   leadId: number;
   initialData: {
@@ -53,6 +72,7 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
   const [leadDetails, setLeadDetails] = useState(initialLeadDetails);
   const [scheduleMeetingOpen, setScheduleMeetingOpen] = useState(false);
   const canScheduleMeetings = useHasPermission("leads:write");
+  const { activeTab, setActiveTab } = useUrlTabState(LEAD_TAB_VALUES, DEFAULT_LEAD_TAB);
 
   useEffect(() => {
     setLeadDetails(initialLeadDetails);
@@ -351,49 +371,65 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
         }
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="space-y-6">
-          <LeadInfoSection
-            lead={leadDetails}
-            projectTypes={projectTypes}
-            inlineEdit={inlineEditLead}
-            onOpenNotesModal={() => notesLogic.openFromLead(leadDetails as unknown as Lead)}
+      {/* La cabecera —título, estado, Schedule Meet y Convert to Project— queda
+          fuera de <Tabs>, a la vista en todas las pestañas. */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+        <DetailTabsBar tabs={LEAD_TABS} />
+
+        <TabsContent value="resumen" className="mt-0">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="space-y-6">
+              <LeadInfoSection
+                lead={leadDetails}
+                projectTypes={projectTypes}
+                inlineEdit={inlineEditLead}
+                onOpenNotesModal={() => notesLogic.openFromLead(leadDetails as unknown as Lead)}
+              />
+            </div>
+
+            <div className="space-y-6">
+              <LeadContactSection
+                contact={leadDetails.contact ?? null}
+                companies={companies || []}
+                contacts={contacts}
+                inlineEdit={inlineEditContact}
+                leadLocation={leadDetails.location || undefined}
+                leadAddressLink={leadDetails.addressLink || undefined}
+                onOpenCompanyModal={openCompanyModal}
+                onRemoveContact={handleRemoveContactFromLead}
+                onLinkContact={handleLinkContactToLead}
+              />
+            </div>
+          </div>
+        </TabsContent>
+
+        {/* Radix desmonta el panel inactivo: las consultas de tareas y notas no
+            salen hasta que se abre la pestaña que las enseña. */}
+        <TabsContent value="tareas" className="mt-0">
+          <EntityTasksSection entityKind="lead" entityId={leadDetails.id} entityLabel={leadDetails.name} />
+        </TabsContent>
+
+        <TabsContent value="notas" className="mt-0">
+          <EntityNotesSection
+            entityKind="lead"
+            entityId={leadDetails.id}
+            defaultTitle={leadDetails.name || undefined}
           />
-        </div>
+        </TabsContent>
 
-        <div className="space-y-6">
-          <LeadContactSection
-            contact={leadDetails.contact ?? null}
-            companies={companies || []}
-            contacts={contacts}
-            inlineEdit={inlineEditContact}
-            leadLocation={leadDetails.location || undefined}
-            leadAddressLink={leadDetails.addressLink || undefined}
-            onOpenCompanyModal={openCompanyModal}
-            onRemoveContact={handleRemoveContactFromLead}
-            onLinkContact={handleLinkContactToLead}
+        <TabsContent value="archivos" className="mt-0">
+          <LeadAttachmentsSection
+            leadId={leadDetails.id}
+            attachments={leadDetails.attachments ?? []}
+            onAttachmentsChange={async (newAttachments) => {
+              if (leadDetails && typeof leadDetails.id === "number") {
+                await patchLead(ctx, leadDetails.id, { attachments: newAttachments }, {});
+                setLeadDetails({ ...leadDetails, attachments: newAttachments });
+              }
+            }}
           />
-        </div>
-      </div>
-
-      <LeadAttachmentsSection
-        leadId={leadDetails.id}
-        attachments={leadDetails.attachments ?? []}
-        onAttachmentsChange={async (newAttachments) => {
-          if (leadDetails && typeof leadDetails.id === "number") {
-            await patchLead(ctx, leadDetails.id, { attachments: newAttachments }, {});
-            setLeadDetails({ ...leadDetails, attachments: newAttachments });
-          }
-        }}
-      />
-
-      <EntityNotesSection
-        entityKind="lead"
-        entityId={leadDetails.id}
-        defaultTitle={leadDetails.name || undefined}
-      />
-
-      <EntityTasksSection entityKind="lead" entityId={leadDetails.id} entityLabel={leadDetails.name} />
+        </TabsContent>
+      </Tabs>
 
       <ScheduleMeetingDialog
         open={scheduleMeetingOpen}

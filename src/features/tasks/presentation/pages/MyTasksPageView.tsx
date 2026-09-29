@@ -272,9 +272,24 @@ export function MyTasksPageView() {
       {offlineWarning ? <p role="alert" className="rounded-md bg-destructive/10 px-3 py-2 text-xs text-destructive">{offlineWarning}</p> : null}
 
       {showSkeleton ? (
-        <div className="flex w-full flex-col gap-3">
-          {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-32 w-full rounded-xl" />
+        // Mirrors the loaded list: a job header with its count over a stack of
+        // rows, not the three anonymous 128px blocks this used to be.
+        <div className="skeleton-deferred flex w-full flex-1 flex-col gap-4">
+          {[1, 2, 3].map((group) => (
+            <section key={group} className="flex flex-col gap-3">
+              <header className="flex items-baseline justify-between gap-3 border-b border-line pb-2">
+                <Skeleton className="h-5 w-48" />
+                <Skeleton className="h-4 w-6" />
+              </header>
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-32" />
+                <div className="grid gap-3 lg:grid-cols-2 xl:grid-cols-3">
+                  {[1, 2, 3].map((row) => (
+                    <Skeleton key={row} className="h-32 w-full rounded-xl" />
+                  ))}
+                </div>
+              </div>
+            </section>
           ))}
         </div>
       ) : totalCount === 0 ? (

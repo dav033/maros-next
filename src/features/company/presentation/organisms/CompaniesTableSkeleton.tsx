@@ -1,70 +1,24 @@
 "use client";
 
-import { Skeleton } from "@/components/ui/skeleton";
+import { SkeletonTable, type SkeletonTableColumn } from "@/components/shared";
+
+/**
+ * Mirrors useCompaniesTableColumns. Three fixes against the real table:
+ * it drew a "Status" column that no longer exists (8 columns / 1100px against
+ * the table's 7 / 1000px), it called the last column "Client" where the table
+ * says "Supplier", and it centred the two flag columns the table right-aligns.
+ * It also left out the 40px row-actions column CompaniesTable renders.
+ */
+const COLUMNS: SkeletonTableColumn[] = [
+  { header: "Notes", className: "w-[80px] text-center", variant: "icon" },
+  { header: "Name", className: "w-[200px]", variant: "text", cellWidth: "w-3/4" },
+  { header: "Address", className: "w-[250px]", variant: "text", cellWidth: "w-4/5" },
+  { header: "Type", className: "w-[120px]", variant: "badge", cellWidth: "w-20" },
+  { header: "Service", className: "w-[150px]", variant: "badge" },
+  { header: "Customer", className: "w-[100px] text-right", variant: "number", cellWidth: "w-12" },
+  { header: "Supplier", className: "w-[100px] text-right", variant: "number", cellWidth: "w-12" },
+];
 
 export function CompaniesTableSkeleton() {
-  return (
-    <div className="w-full overflow-auto rounded-2xl bg-elev-2">
-      <table className="w-full border-collapse">
-        <thead className="bg-elev-3">
-          <tr className="h-12 border-b border-line">
-            <th className="w-[80px] px-4 py-3 text-center font-display text-xs uppercase tracking-wide text-muted-foreground">
-              Notes
-            </th>
-            <th className="w-[200px] px-4 py-3 text-left font-display text-xs uppercase tracking-wide text-muted-foreground">
-              Name
-            </th>
-            <th className="w-[250px] px-4 py-3 text-left font-display text-xs uppercase tracking-wide text-muted-foreground">
-              Address
-            </th>
-            <th className="w-[120px] px-4 py-3 text-left font-display text-xs uppercase tracking-wide text-muted-foreground">
-              Type
-            </th>
-            <th className="w-[150px] px-4 py-3 text-left font-display text-xs uppercase tracking-wide text-muted-foreground">
-              Service
-            </th>
-            <th className="w-[100px] px-4 py-3 text-center font-display text-xs uppercase tracking-wide text-muted-foreground">
-              Status
-            </th>
-            <th className="w-[100px] px-4 py-3 text-center font-display text-xs uppercase tracking-wide text-muted-foreground">
-              Customer
-            </th>
-            <th className="w-[100px] px-4 py-3 text-center font-display text-xs uppercase tracking-wide text-muted-foreground">
-              Client
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {Array.from({ length: 13 }).map((_, rowIdx) => (
-            <tr key={rowIdx} className="border-b border-line">
-              <td className="px-4 py-3 text-center">
-                <Skeleton className="h-4 w-12" />
-              </td>
-              <td className="px-4 py-3">
-                <Skeleton className="h-4 w-3/4" />
-              </td>
-              <td className="px-4 py-3">
-                <Skeleton className="h-4 w-4/5" />
-              </td>
-              <td className="px-4 py-3">
-                <Skeleton className="h-6 w-20 rounded-full" />
-              </td>
-              <td className="px-4 py-3">
-                <Skeleton className="h-6 w-24 rounded-full" />
-              </td>
-              <td className="px-4 py-3 text-center">
-                <Skeleton className="mx-auto h-6 w-16 rounded-full" />
-              </td>
-              <td className="px-4 py-3 text-center">
-                <Skeleton className="mx-auto h-6 w-16 rounded-full" />
-              </td>
-              <td className="px-4 py-3 text-center">
-                <Skeleton className="mx-auto h-6 w-16 rounded-full" />
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
+  return <SkeletonTable columns={COLUMNS} rows={13} hasRowActions />;
 }

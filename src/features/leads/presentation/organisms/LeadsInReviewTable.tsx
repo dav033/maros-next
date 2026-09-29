@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { ClipboardCheck } from "lucide-react";
 
 import {
-  DefaultTableLoading,
   EntityTable,
   type EntityContextMenuItem,
 } from "@/components/shared";
@@ -78,7 +77,6 @@ export function LeadsInReviewTable({
       onRowClick={(l) => l.id && router.push(`/lead/${l.id}`)}
       getRowHref={(l) => (l.id ? `/lead/${l.id}` : undefined)}
       paginated={pagination?.enabled}
-      loadingState={<DefaultTableLoading label="Loading leads…" />}
       emptyState={
         <div className="flex flex-col items-center justify-center rounded-lg border border-line bg-elev-2 p-8 text-center">
           <ClipboardCheck className="size-12 text-muted-foreground/50 mb-4" />

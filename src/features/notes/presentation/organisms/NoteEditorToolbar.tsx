@@ -11,6 +11,7 @@ import {
   Plus,
   Redo2,
   Strikethrough,
+  Table2,
   Undo2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,20 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { NOTE_SLASH_COMMANDS } from "@/features/notes/config/noteSlashCommands";
+import { NoteTableSizePicker } from "../molecules/NoteTableSizePicker";
+
+/** Handled by their own controls in the toolbar, so they'd be duplicates in "Insert". */
+const INSERT_EXCLUDED = [
+  "paragraph",
+  "heading1",
+  "heading2",
+  "heading3",
+  "bulletList",
+  "orderedList",
+  "taskList",
+  "image",
+  "table",
+];
 
 export function NoteEditorToolbar({ editor }: { editor: Editor }) {
   const state = useEditorState({
@@ -89,7 +104,7 @@ export function NoteEditorToolbar({ editor }: { editor: Editor }) {
       <div
         role="group"
         aria-label="Text formatting"
-        className="sticky top-0 z-10 -mx-1 mb-4 flex flex-wrap items-center gap-0.5 border-y border-line bg-elev-1 px-1 py-2"
+        className="sticky top-0 z-10 mb-3 flex flex-wrap items-center gap-0.5 rounded-md border border-line bg-elev-2 px-1.5 py-1"
       >
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -97,7 +112,7 @@ export function NoteEditorToolbar({ editor }: { editor: Editor }) {
               type="button"
               variant="ghost"
               size="sm"
-              className="mr-1 min-w-24 justify-between"
+              className="mr-1 h-7 min-w-20 justify-between px-2 text-xs"
               aria-label="Text style"
             >
               {state.heading ? `Heading ${state.heading}` : "Text"}
@@ -132,44 +147,56 @@ export function NoteEditorToolbar({ editor }: { editor: Editor }) {
                 aria-label={label}
                 aria-pressed={active}
                 className={cn(
-                  "size-8 text-muted-foreground",
-                  active && "bg-accent text-foreground",
-                  index === 3 && "ml-2",
+                  "size-7 text-muted-foreground",
+                  active && "bg-elev-4 text-foreground",
+                  index === 3 && "ml-1.5",
                 )}
                 onMouseDown={(event) => event.preventDefault()}
                 onClick={run}
               >
-                <Icon className="size-4" aria-hidden="true" />
+                <Icon className="size-3.5" aria-hidden="true" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>{label}</TooltipContent>
           </Tooltip>
         ))}
+        <NoteTableSizePicker
+          onInsert={(rows, cols) =>
+            editor
+              .chain()
+              .focus()
+              .insertTable({ rows: rows + 1, cols, withHeaderRow: true })
+              .run()
+          }
+          trigger={
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="ml-1.5 size-7 text-muted-foreground"
+              aria-label="Insert table"
+              title="Insert table"
+              onMouseDown={(event) => event.preventDefault()}
+            >
+              <Table2 className="size-3.5" aria-hidden="true" />
+            </Button>
+          }
+        />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               type="button"
               variant="ghost"
               size="sm"
-              className="ml-1 gap-1 text-muted-foreground"
+              className="ml-0.5 h-7 gap-1 px-2 text-xs text-muted-foreground"
             >
-              <Plus className="size-4" aria-hidden="true" /> Insert{" "}
+              <Plus className="size-3.5" aria-hidden="true" /> Insert{" "}
               <ChevronDown className="size-3" aria-hidden="true" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start">
             {NOTE_SLASH_COMMANDS.filter(
-              (command) =>
-                ![
-                  "paragraph",
-                  "heading1",
-                  "heading2",
-                  "heading3",
-                  "bulletList",
-                  "orderedList",
-                  "taskList",
-                  "image",
-                ].includes(command.id),
+              (command) => !INSERT_EXCLUDED.includes(command.id),
             ).map((command) => (
               <DropdownMenuItem
                 key={command.id}
@@ -208,14 +235,14 @@ export function NoteEditorToolbar({ editor }: { editor: Editor }) {
               type="button"
               variant="ghost"
               size="icon"
-              className="size-8 text-muted-foreground"
+              className="size-7 text-muted-foreground"
               aria-label={label}
               title={label}
               disabled={disabled}
               onMouseDown={(event) => event.preventDefault()}
               onClick={run}
             >
-              <Icon className="size-4" aria-hidden="true" />
+              <Icon className="size-3.5" aria-hidden="true" />
             </Button>
           ))}
         </div>

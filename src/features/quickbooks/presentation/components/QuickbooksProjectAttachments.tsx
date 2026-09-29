@@ -348,8 +348,11 @@ function CoverageBanner({ data }: { data: QboProjectAttachments }) {
         )}
         {warnings.length > 0 && (
           <ul className="list-inside list-disc space-y-0.5">
-            {warnings.slice(0, 3).map((w) => (
-              <li key={w.code}>
+            {/* El código es el tipo de aviso, no su identidad: un proyecto con cuatro
+                transacciones sin adjunto devuelve cuatro veces transaction_without_attachment.
+                La clave lleva la posición para que React no las tome por la misma fila. */}
+            {warnings.slice(0, 3).map((w, index) => (
+              <li key={`${w.code}-${index}`}>
                 <span className="font-medium">{w.code}:</span> {w.message}
               </li>
             ))}

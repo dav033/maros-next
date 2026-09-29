@@ -7,9 +7,9 @@ import {
   AsyncWidget,
   OutstandingBalancesPanel,
   ProjectHealthList,
+  OutstandingBalancesSkeleton,
   ProjectHealthSkeleton,
   TaskDashboardWidget,
-  TopClientsSkeleton,
   useOutstandingBalances,
   useProjectHealth,
 } from "@/analytics";
@@ -55,7 +55,7 @@ function MoneyStillOut() {
       query={outstanding}
       errorText="Could not load outstanding balances."
       emptyText="Nothing invoiced is waiting to be collected."
-      skeleton={<TopClientsSkeleton />}
+      skeleton={<OutstandingBalancesSkeleton />}
     >
       {(data) => <OutstandingBalancesPanel data={data} />}
     </AsyncWidget>

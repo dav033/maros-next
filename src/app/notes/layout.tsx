@@ -8,17 +8,17 @@ export default function NotesLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex h-[calc(100dvh-6rem)] min-h-[32rem] flex-col gap-4 md:h-[calc(100dvh-3rem)] lg:h-[calc(100dvh-4rem)]">
+    <div className="flex h-[calc(100dvh-6rem)] min-h-[32rem] flex-col gap-2.5 md:h-[calc(100dvh-3rem)] lg:h-[calc(100dvh-4rem)]">
       <header className="flex shrink-0 items-center justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-3">
-          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-elev-4 text-muted-foreground">
-            <NotebookPen className="h-4 w-4" aria-hidden="true" />
+        <div className="flex min-w-0 items-center gap-2.5">
+          <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-elev-4 text-muted-foreground">
+            <NotebookPen className="size-4" aria-hidden="true" />
           </span>
           <div className="min-w-0">
-            <h1 className="truncate font-display text-lg font-semibold tracking-tight">
+            <h1 className="truncate font-display text-base font-semibold tracking-tight">
               Notes
             </h1>
-            <p className="hidden truncate text-xs text-muted-foreground sm:block">
+            <p className="hidden truncate text-[11px] text-muted-foreground sm:block">
               Project context, decisions, and follow-ups.
             </p>
           </div>

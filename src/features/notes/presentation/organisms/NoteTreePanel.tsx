@@ -48,9 +48,9 @@ import {
 } from "@/notes/domain";
 import type { NoteKind, NotePageSummary, VisibleNoteRow } from "@/notes/domain";
 
-// Matches the 16px-per-depth indentation used to render each row below, so a
+// Matches the 14px-per-depth indentation used to render each row below, so a
 // horizontal drag of roughly one indent's worth of pixels nests/un-nests a page.
-const INDENT_WIDTH = 16;
+const INDENT_WIDTH = 14;
 import { usePersistedState, setStorageCodec } from "@/common/hooks/ui";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -61,9 +61,9 @@ function RowIcon({ row, isOpen }: { row: VisibleNoteRow; isOpen: boolean }) {
   if (row.icon) return <>{row.icon}</>;
   if (row.kind === "folder") {
     const Icon = isOpen ? FolderOpen : Folder;
-    return <Icon className="h-3.5 w-3.5 text-muted-foreground" />;
+    return <Icon className="size-3.5 shrink-0 text-muted-foreground" />;
   }
-  return <FileText className="h-3.5 w-3.5 text-muted-foreground" />;
+  return <FileText className="size-3.5 shrink-0 text-muted-foreground" />;
 }
 
 function SortableNoteTreeRow({
@@ -106,20 +106,25 @@ function SortableNoteTreeRow({
     <div ref={setNodeRef} style={style}>
       <div
         className={cn(
-          "group flex min-h-10 items-center gap-0.5 rounded-md px-1 py-1 text-sm transition-colors hover:bg-elev-4",
-          isActive && "bg-primary/10 text-primary",
+          // 28px instead of 40px: the tree is a list of names, and eight of them
+          // were filling a column that can hold twice that. The active row is an
+          // opaque surface plus a mint rail, not a 10%-alpha tint that reads as a
+          // rendering artefact next to the hover state.
+          "group relative flex min-h-7 items-center gap-0.5 rounded-md px-1 text-[13px] transition-colors hover:bg-elev-4",
+          isActive &&
+            "bg-elev-4 font-medium text-foreground before:absolute before:inset-y-1 before:left-0 before:w-0.5 before:rounded-full before:bg-primary",
         )}
-        style={{ paddingLeft: 4 + row.depth * 16 }}
+        style={{ paddingLeft: 4 + row.depth * INDENT_WIDTH }}
       >
         <button
           type="button"
           {...attributes}
           {...listeners}
-          className="flex h-7 w-4 shrink-0 cursor-grab touch-none items-center justify-center rounded text-muted-foreground opacity-0 hover:bg-accent focus-visible:opacity-100 group-hover:opacity-100 group-focus-within:opacity-100"
+          className="flex h-6 w-3.5 shrink-0 cursor-grab touch-none items-center justify-center rounded text-muted-foreground opacity-0 hover:bg-elev-5 focus-visible:opacity-100 group-hover:opacity-100 group-focus-within:opacity-100"
           aria-label="Drag to reorder"
           title="Drag to reorder"
         >
-          <GripVertical className="h-3.5 w-3.5" />
+          <GripVertical className="size-3" />
         </button>
         <button
           type="button"
@@ -130,36 +135,43 @@ function SortableNoteTreeRow({
             row.hasChildren ? (isOpen ? "Collapse" : "Expand") : undefined
           }
           className={cn(
-            "flex h-7 w-5 shrink-0 items-center justify-center rounded text-muted-foreground hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+            "flex h-6 w-4 shrink-0 items-center justify-center rounded text-muted-foreground hover:bg-elev-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
             !row.hasChildren && "invisible",
           )}
         >
           <ChevronRight
-            className={cn("size-3.5", isOpen && "rotate-90")}
+            className={cn("size-3 transition-transform motion-reduce:transition-none", isOpen && "rotate-90")}
             aria-hidden="true"
           />
         </button>
         <Link
           href={`/notes/${row.id}`}
           aria-current={isActive ? "page" : undefined}
-          className="flex min-h-8 min-w-0 flex-1 items-center gap-1.5 truncate rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="flex min-h-6 min-w-0 flex-1 items-center gap-1.5 truncate rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <span className="shrink-0">
             <RowIcon row={row} isOpen={isOpen} />
           </span>
-          <span className="truncate">{row.title || "Untitled"}</span>
+          <span
+            className={cn(
+              "truncate",
+              !row.title && "italic text-muted-foreground",
+            )}
+          >
+            {row.title || "Untitled"}
+          </span>
           {/* Two states worth seeing at a glance from the tree: this note left the
               building, and this note was handed to someone. Both stay visible rather
               than appearing on hover — that is the point of them. */}
           {row.isPublished && (
             <Globe
-              className="h-3 w-3 shrink-0 text-emerald-600 dark:text-emerald-400"
+              className="size-3 shrink-0 text-emerald-400"
               aria-label="Published on the web"
             />
           )}
           {row.isShared && !row.isPublished && (
             <Users
-              className="h-3 w-3 shrink-0 text-muted-foreground"
+              className="size-3 shrink-0 text-muted-foreground"
               aria-label="Shared with specific people"
             />
           )}
@@ -169,9 +181,7 @@ function SortableNoteTreeRow({
             type="button"
             onClick={() => onSetFavorite(row.id, !row.isFavorite)}
           // Keep favorites visible; other pages can be starred from their menu.
-            className={cn(
-              "flex h-7 w-5 shrink-0 items-center justify-center rounded text-muted-foreground hover:bg-accent",
-            )}
+            className="flex h-6 w-5 shrink-0 items-center justify-center rounded text-muted-foreground hover:bg-elev-5"
             title={
               row.isFavorite ? "Remove from favorites" : "Add to favorites"
             }
@@ -181,7 +191,7 @@ function SortableNoteTreeRow({
           >
             <Star
               className={cn(
-                "h-3.5 w-3.5",
+                "size-3",
                 row.isFavorite && "fill-amber-400 text-amber-400",
               )}
             />
@@ -191,11 +201,11 @@ function SortableNoteTreeRow({
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              className="flex h-8 w-6 shrink-0 items-center justify-center rounded text-muted-foreground hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100 data-[state=open]:opacity-100"
+              className="flex h-6 w-5 shrink-0 items-center justify-center rounded text-muted-foreground hover:bg-elev-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100 data-[state=open]:opacity-100"
               title="More actions"
               aria-label="More actions"
             >
-              <MoreHorizontal className="h-3.5 w-3.5" />
+              <MoreHorizontal className="size-3.5" />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-52">
@@ -321,52 +331,55 @@ export function NoteTreePanel({
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex h-14 shrink-0 items-center justify-between px-3">
-        <span className="text-sm font-medium text-muted-foreground">
-          Pages{" "}
-          <span className="ml-1 text-xs font-normal">
-            {isLoading ? "" : pages.length}
-          </span>
+      {/* The same micro-label + count chip the Projects and Tasks toolbars use. */}
+      <div className="flex h-10 shrink-0 items-center justify-between gap-1 border-b border-line px-2">
+        <span className="flex items-center gap-1.5 pl-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+          Pages
+          {!isLoading && (
+            <span className="rounded bg-elev-4 px-1.5 py-0.5 tabular-nums">
+              {pages.length}
+            </span>
+          )}
         </span>
         <div className="flex items-center gap-0.5">
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+            className="size-7 text-muted-foreground hover:text-foreground"
             title="New folder"
             aria-label="New folder"
             disabled={creating}
             onClick={() => onCreateRoot("folder")}
           >
-            <FolderPlus className="h-3.5 w-3.5" aria-hidden="true" />
+            <FolderPlus className="size-3.5" aria-hidden="true" />
           </Button>
           <Button
             variant="secondary"
             size="sm"
-            className="h-8 gap-1.5"
+            className="h-7 gap-1 px-2 text-xs"
             title="New page"
             aria-label="New page"
             disabled={creating}
             onClick={() => onCreateRoot("page")}
           >
-            <Plus className="h-3.5 w-3.5" aria-hidden="true" />
+            <Plus className="size-3.5" aria-hidden="true" />
             New
           </Button>
         </div>
       </div>
-      <div className="notes-scrollbar min-h-0 flex-1 overflow-y-auto px-1 pb-4">
+      <div className="notes-scrollbar min-h-0 flex-1 overflow-y-auto px-1 py-1.5">
         {isLoading ? (
-          <div className="space-y-2 p-2" aria-label="Loading pages">
-            {[1, 2, 3, 4].map((row) => (
-              <Skeleton key={row} className="h-8 w-full" />
+          <div className="space-y-1.5 p-1.5" aria-label="Loading pages">
+            {[1, 2, 3, 4, 5, 6].map((row) => (
+              <Skeleton key={row} className="h-6 w-full" />
             ))}
           </div>
         ) : visibleRows.length === 0 ? (
-          <div className="mx-2 mt-3 rounded-lg border border-dashed border-line bg-elev-4 px-3 py-4 text-center">
-            <p className="text-sm font-medium text-foreground/80">
+          <div className="mx-1.5 mt-2 rounded-lg border border-dashed border-line px-3 py-4 text-center">
+            <p className="text-xs font-medium text-foreground/80">
               No pages yet
             </p>
-            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+            <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
               Create a page to start your workspace.
             </p>
           </div>

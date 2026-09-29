@@ -77,6 +77,22 @@ export interface QboProjectLinkRemoval {
   unlinked: boolean;
 }
 
+/** Resultado de PUT /projects/:id/qbo-link: enlazar la ficha con un job. */
+export interface QboProjectLinkAssignment {
+  projectId: number;
+  leadId: number | null;
+  projectNumber: string | null;
+  qboCustomerId: string;
+  jobDisplayName: string;
+  /** Job que tenía antes, cuando el enlace se reemplazó. */
+  previousQboCustomerId: string | null;
+  /** false cuando ya estaba enlazado a ese mismo job: la llamada no cambió nada. */
+  linked: boolean;
+  alreadyLinked: boolean;
+  /** El nombre del job lleva el número de proyecto. Informativo: no bloquea. */
+  projectNumberMatchesJob: boolean;
+}
+
 export interface QuickbooksConnection {
   /** Hay credenciales guardadas. No garantiza que Intuit las siga aceptando. */
   connected: boolean;

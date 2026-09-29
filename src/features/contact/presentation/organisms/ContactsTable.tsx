@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { Users } from "lucide-react";
 
 import {
-  DefaultTableLoading,
   EntityTable,
   type EntityContextMenuItem,
   type EntityTableGroupBy,
@@ -116,7 +115,6 @@ export function ContactsTable({
       groupBy={buildGroupBy(groupBy)}
       paginated={pagination?.enabled}
       defaultSort={{ key: "name", dir: "asc" }}
-      loadingState={<DefaultTableLoading label="Loading contacts…" />}
       emptyState={
         <div className="flex flex-col items-center justify-center rounded-lg border border-line bg-elev-2 p-8 text-center">
           <Users className="size-12 text-muted-foreground/50 mb-4" />

@@ -68,6 +68,18 @@ export interface QboProjectLinkRemovalResponse {
   unlinked: boolean;
 }
 
+export interface QboProjectLinkAssignmentResponse {
+  projectId: number;
+  leadId: number | null;
+  projectNumber: string | null;
+  qboCustomerId: string;
+  jobDisplayName: string;
+  previousQboCustomerId: string | null;
+  linked: boolean;
+  alreadyLinked: boolean;
+  projectNumberMatchesJob: boolean;
+}
+
 export interface QuickbooksConnectionResponse {
   connected: boolean;
   realmId: string | null;

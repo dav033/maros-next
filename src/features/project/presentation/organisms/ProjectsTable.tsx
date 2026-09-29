@@ -6,7 +6,6 @@ import Link from "next/link";
 import { CreditCard, FolderX } from "lucide-react";
 
 import {
-  DefaultTableLoading,
   EntityTable,
   NotesButton,
   type EntityContextMenuItem,
@@ -335,7 +334,6 @@ export function ProjectsTable({
       groupBy={buildGroupBy(groupBy)}
       paginated={pagination?.enabled}
       defaultSort={{ key: "leadNumber", dir: "desc" }}
-      loadingState={<DefaultTableLoading label="Loading projects…" />}
       className={DENSE_ROW_CLASS}
       emptyState={
         <div className="flex flex-col items-center justify-center rounded-lg border border-border bg-elev-2 p-8 text-center">

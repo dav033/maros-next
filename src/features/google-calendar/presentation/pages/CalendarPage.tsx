@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { addDays, addMonths, format, isSameDay, isSameMonth, startOfMonth, startOfWeek } from "date-fns";
+import { addDays, addMonths, differenceInCalendarDays, endOfMonth, format, isSameDay, isSameMonth, startOfMonth, startOfWeek } from "date-fns";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CalendarDays, ChevronLeft, ChevronRight, Clock3, ExternalLink, List, LoaderCircle, Pencil, Search, Trash2, Video } from "lucide-react";
 import { toast } from "sonner";
@@ -10,19 +10,29 @@ import { PageHeaderCard } from "@/components/shared";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 import { useUserDirectory } from "@/features/users/presentation/hooks/data/useUserDirectory";
 import { optimizedApiClient } from "@/shared/infra/http/OptimizedApiClient";
 import { connectGoogleCalendar } from "../../connectGoogleCalendar";
 import { googleCalendarConnectionKey, googleCalendarMeetingsKey, type GoogleCalendarConnection, type GoogleCalendarMeeting } from "../../types";
 import { MeetingEditDialog } from "../MeetingEditDialog";
 import { GoogleCalendarPrivacyNotice } from "../GoogleCalendarPrivacyNotice";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type CalendarMode = "month" | "agenda";
 type AgendaPeriod = "upcoming" | "past";
 
 const WEEKDAYS = Array.from({ length: 7 }, (_, index) =>
+  format(addDays(startOfWeek(new Date(2024, 0, 7)), index), "EEEEE"),
+);
+
+const WEEKDAY_LABELS = Array.from({ length: 7 }, (_, index) =>
   format(addDays(startOfWeek(new Date(2024, 0, 7)), index), "EEE"),
 );
+
+const SEGMENT_BASE = "h-7 rounded-md px-2.5 text-xs";
+const SEGMENT_ON = `${SEGMENT_BASE} bg-elev-5 text-foreground shadow-sm hover:bg-elev-5`;
+const SEGMENT_OFF = `${SEGMENT_BASE} text-muted-foreground hover:text-foreground`;
 
 function formatDate(value: string, includeDate: boolean): string {
   return new Intl.DateTimeFormat(undefined, {
@@ -75,9 +85,12 @@ export function CalendarPage() {
     }
     return grouped;
   }, [matchingMeetings]);
+  // Only render the weeks the month actually spans (5 or 6) instead of a fixed
+  // 42-cell block, so short months do not leave a dead trailing row.
   const monthDays = useMemo(() => {
     const firstDay = startOfWeek(startOfMonth(month));
-    return Array.from({ length: 42 }, (_, index) => addDays(firstDay, index));
+    const weeks = Math.ceil((differenceInCalendarDays(endOfMonth(month), firstDay) + 1) / 7);
+    return Array.from({ length: weeks * 7 }, (_, index) => addDays(firstDay, index));
   }, [month]);
   const visibleMeetings = matchingMeetings
     .filter((meeting) => period === "upcoming"
@@ -89,6 +102,11 @@ export function CalendarPage() {
   const selectedDayMeetings = [...(meetingsByDay.get(format(selectedDate, "yyyy-MM-dd")) ?? [])]
     .sort((a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime());
   const monthMeetingCount = matchingMeetings.filter((meeting) => isSameMonth(new Date(meeting.startsAt), month)).length;
+
+  const attendeeNames = (meeting: GoogleCalendarMeeting) =>
+    meeting.attendees.length
+      ? meeting.attendees.map((email) => users.find((person) => person.email.toLowerCase() === email.toLowerCase())?.name ?? email).join(", ")
+      : "No participants invited";
 
   const renderMeeting = (meeting: GoogleCalendarMeeting) => (
     <article key={meeting.id} className="flex flex-col gap-3 px-4 py-3 transition-colors hover:bg-elev-3 sm:flex-row sm:items-center sm:justify-between">
@@ -106,9 +124,7 @@ export function CalendarPage() {
             <Clock3 className="size-3.5" />{formatDate(meeting.startsAt, true)} · {formatDate(meeting.endsAt, false)} end
             {meeting.entityKind && meeting.entityId ? <span>· Linked to {meeting.entityKind} #{meeting.entityId}</span> : null}
           </p>
-          <p className="mt-1 truncate text-xs text-muted-foreground">
-            {meeting.attendees.length ? meeting.attendees.map((email) => users.find((person) => person.email.toLowerCase() === email.toLowerCase())?.name ?? email).join(", ") : "No participants invited"}
-          </p>
+          <p className="mt-1 truncate text-xs text-muted-foreground">{attendeeNames(meeting)}</p>
         </div>
       </div>
       <div className="flex flex-wrap gap-2 sm:shrink-0">
@@ -124,6 +140,34 @@ export function CalendarPage() {
     </article>
   );
 
+  // Narrow variant used by the day panel that sits next to the month grid.
+  const renderDayMeeting = (meeting: GoogleCalendarMeeting) => (
+    <article key={meeting.id} className="rounded-lg border border-line bg-elev-2 p-2.5 shadow-sm transition-colors hover:bg-elev-3">
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <p className="font-mono text-[11px] font-medium tabular-nums text-primary">
+            {formatDate(meeting.startsAt, false)} – {formatDate(meeting.endsAt, false)}
+          </p>
+          <h4 className="truncate text-sm font-medium">{meeting.title}</h4>
+          <p className="mt-0.5 truncate text-xs text-muted-foreground">{attendeeNames(meeting)}</p>
+        </div>
+        <span className="shrink-0 rounded-full bg-elev-4 px-2 py-0.5 text-[10px] font-medium text-muted-foreground">{meeting.isOrganizer ? "You" : "Invited"}</span>
+      </div>
+      <div className="mt-2 flex flex-wrap items-center gap-1.5">
+        {meeting.meetUrl ? <Button asChild size="sm" className="h-7 px-2.5"><a href={meeting.meetUrl} target="_blank" rel="noopener noreferrer"><Video className="mr-1 size-3.5" />Join</a></Button> : null}
+        {meeting.calendarUrl ? <Button asChild size="sm" variant="outline" className="h-7 w-7 p-0" aria-label="Open event in Google Calendar"><a href={meeting.calendarUrl} target="_blank" rel="noopener noreferrer"><ExternalLink className="size-3.5" /></a></Button> : null}
+        {meeting.isOrganizer && new Date(meeting.startsAt).getTime() >= now ? (
+          <>
+            <Button type="button" size="sm" variant="outline" className="h-7 px-2.5" onClick={() => setMeetingToEdit(meeting)}><Pencil className="mr-1 size-3.5" />Edit</Button>
+            <Button type="button" size="sm" variant="ghost" className="h-7 w-7 p-0 text-destructive hover:text-destructive" onClick={() => setMeetingToCancel(meeting)} aria-label={`Cancel ${meeting.title}`}><Trash2 className="size-3.5" /></Button>
+          </>
+        ) : null}
+      </div>
+    </article>
+  );
+
+  const connected = connection.data?.connected === true;
+
   return (
     <div className="flex w-full flex-1 flex-col gap-4">
       <PageHeaderCard
@@ -131,20 +175,26 @@ export function CalendarPage() {
         title="Calendar"
         description="Schedule events, manage meetings, and join invitations from your Maros teammates."
         rightSlot={<Button asChild><Link href="/meet"><CalendarDays className="mr-2 size-4" />Add event</Link></Button>}
+        metaSlot={connection.isPending ? (
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-elev-3 px-2.5 py-1 text-xs text-muted-foreground" role="status">
+            <LoaderCircle className="size-3 animate-spin" />Checking Google Calendar…
+          </span>
+        ) : connected ? (
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-primary-container px-2.5 py-1 text-xs font-medium text-primary-on-container">
+            <span className="size-1.5 rounded-full bg-primary" aria-hidden="true" />
+            Google Calendar · {connection.data?.email}
+          </span>
+        ) : undefined}
       />
 
-      {connection.isPending ? (
-        <div className="flex items-center gap-2 text-sm text-muted-foreground" role="status"><LoaderCircle className="size-4 animate-spin" />Checking Google Calendar…</div>
-      ) : connection.isError ? (
+      {connection.isError ? (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm">
           <span className="text-destructive">Could not check the Google Calendar connection.</span>
           <Button type="button" variant="outline" size="sm" onClick={() => void connection.refetch()}>Try again</Button>
         </div>
       ) : connection.data?.configured === false ? (
         <p className="rounded-2xl border border-dashed border-line bg-elev-1 px-4 py-3 text-sm text-muted-foreground">Google Calendar must be configured by a system administrator before you can create or manage events.</p>
-      ) : connection.data?.connected ? (
-        <p className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-2xl border border-line bg-primary-container px-4 py-3 text-sm text-primary-on-container">Google Calendar connected <span aria-hidden="true">·</span><span className="font-medium">{connection.data.email}</span></p>
-      ) : (
+      ) : !connection.isPending && !connected ? (
         <section className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-dashed border-line bg-elev-1 px-4 py-4">
           <div>
             <h2 className="text-sm font-medium">Connect Google Calendar to create meetings</h2>
@@ -153,105 +203,151 @@ export function CalendarPage() {
           </div>
           <Button type="button" variant="outline" size="sm" onClick={() => connectGoogleCalendar("/calendar")}>Connect Calendar</Button>
         </section>
-      )}
+      ) : null}
 
-      <section className="overflow-hidden rounded-lg border border-line bg-card">
-        <div className="flex flex-col gap-3 border-b border-line px-4 py-3">
-          <div>
-            <h2 className="font-display text-sm font-semibold">Your calendar</h2>
-            <p className="mt-1 text-xs text-muted-foreground">See meetings by day or browse your agenda.</p>
-          </div>
-          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-            <div className="relative min-w-0 sm:w-64 sm:flex-1 lg:flex-none">
-              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-              <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search meetings or people" className="pl-9" aria-label="Search meetings or people" />
+      <section className="overflow-hidden rounded-2xl border border-line bg-elev-1 shadow-sm">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-line px-3 py-2">
+          {mode === "month" ? (
+            <div className="flex min-w-0 items-center gap-1">
+              <Button type="button" variant="ghost" size="icon" className="size-8 rounded-md" aria-label="Previous month" onClick={() => { const nextMonth = addMonths(month, -1); setMonth(nextMonth); setSelectedDate(nextMonth); }}><ChevronLeft className="size-4" /></Button>
+              <Button type="button" variant="ghost" size="icon" className="size-8 rounded-md" aria-label="Next month" onClick={() => { const nextMonth = addMonths(month, 1); setMonth(nextMonth); setSelectedDate(nextMonth); }}><ChevronRight className="size-4" /></Button>
+              <h2 className="ml-1 truncate font-display text-sm font-semibold tracking-tight">{format(month, "MMMM yyyy")}</h2>
+              <span className="hidden font-mono text-[11px] tabular-nums text-muted-foreground sm:inline">· {monthMeetingCount} {monthMeetingCount === 1 ? "meeting" : "meetings"}</span>
+              <Button type="button" variant="outline" size="sm" className="ml-2 h-7 px-2.5 text-xs" onClick={() => { const today = new Date(); setMonth(startOfMonth(today)); setSelectedDate(today); }}>Today</Button>
             </div>
-            <div className="flex w-fit rounded-lg bg-elev-4 p-1" aria-label="Calendar view">
-              <Button type="button" size="sm" variant="ghost" className={mode === "month" ? "h-7 rounded-md bg-elev-5 text-foreground hover:bg-elev-5" : "h-7 rounded-md text-muted-foreground"} aria-pressed={mode === "month"} onClick={() => setMode("month")}><CalendarDays className="mr-1.5 size-3.5" />Month</Button>
-              <Button type="button" size="sm" variant="ghost" className={mode === "agenda" ? "h-7 rounded-md bg-elev-5 text-foreground hover:bg-elev-5" : "h-7 rounded-md text-muted-foreground"} aria-pressed={mode === "agenda"} onClick={() => setMode("agenda")}><List className="mr-1.5 size-3.5" />Agenda</Button>
+          ) : (
+            <h2 className="font-display text-sm font-semibold tracking-tight">Agenda</h2>
+          )}
+
+          <div className="flex w-full flex-wrap items-center gap-2 sm:ml-auto sm:w-auto">
+            <div className="relative min-w-0 flex-1 sm:w-52 sm:flex-none">
+              <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+              <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search meetings or people" className="h-8 rounded-md pl-8 text-xs md:text-xs" aria-label="Search meetings or people" />
             </div>
             {mode === "agenda" ? (
-              <div className="flex w-fit rounded-lg bg-elev-4 p-1" aria-label="Meeting period">
-                <Button type="button" size="sm" variant="ghost" className={period === "upcoming" ? "h-7 rounded-md bg-elev-5 text-foreground hover:bg-elev-5" : "h-7 rounded-md text-muted-foreground"} aria-pressed={period === "upcoming"} onClick={() => setPeriod("upcoming")}>Upcoming</Button>
-                <Button type="button" size="sm" variant="ghost" className={period === "past" ? "h-7 rounded-md bg-elev-5 text-foreground hover:bg-elev-5" : "h-7 rounded-md text-muted-foreground"} aria-pressed={period === "past"} onClick={() => setPeriod("past")}>Past</Button>
+              <div className="flex shrink-0 rounded-lg bg-elev-3 p-0.5" aria-label="Meeting period">
+                <Button type="button" size="sm" variant="ghost" className={period === "upcoming" ? SEGMENT_ON : SEGMENT_OFF} aria-pressed={period === "upcoming"} onClick={() => setPeriod("upcoming")}>Upcoming</Button>
+                <Button type="button" size="sm" variant="ghost" className={period === "past" ? SEGMENT_ON : SEGMENT_OFF} aria-pressed={period === "past"} onClick={() => setPeriod("past")}>Past</Button>
               </div>
             ) : null}
+            <div className="flex shrink-0 rounded-lg bg-elev-3 p-0.5" aria-label="Calendar view">
+              <Button type="button" size="sm" variant="ghost" className={mode === "month" ? SEGMENT_ON : SEGMENT_OFF} aria-pressed={mode === "month"} onClick={() => setMode("month")}><CalendarDays className="mr-1 size-3.5" />Month</Button>
+              <Button type="button" size="sm" variant="ghost" className={mode === "agenda" ? SEGMENT_ON : SEGMENT_OFF} aria-pressed={mode === "agenda"} onClick={() => setMode("agenda")}><List className="mr-1 size-3.5" />Agenda</Button>
+            </div>
           </div>
         </div>
 
         {mode === "month" ? (
-          <>
-            <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
-              <div>
-                <h3 className="font-display text-sm font-semibold">{format(month, "MMMM yyyy")}</h3>
-                <p className="text-xs text-muted-foreground">{monthMeetingCount} {monthMeetingCount === 1 ? "meeting" : "meetings"}{search ? " match your search" : " this month"}</p>
-              </div>
-              <div className="flex items-center gap-1">
-                <Button type="button" variant="ghost" size="icon" className="size-8 rounded-md" aria-label="Previous month" onClick={() => { const nextMonth = addMonths(month, -1); setMonth(nextMonth); setSelectedDate(nextMonth); }}><ChevronLeft className="size-4" /></Button>
-                <Button type="button" variant="ghost" size="sm" className="h-8 rounded-md" onClick={() => { const today = new Date(); setMonth(startOfMonth(today)); setSelectedDate(today); }}>Today</Button>
-                <Button type="button" variant="ghost" size="icon" className="size-8 rounded-md" aria-label="Next month" onClick={() => { const nextMonth = addMonths(month, 1); setMonth(nextMonth); setSelectedDate(nextMonth); }}><ChevronRight className="size-4" /></Button>
-              </div>
-            </div>
-            {meetings.isError ? (
-              <div className="mx-4 mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm sm:mx-6">
-                <span className="text-destructive">Could not load your meetings.</span>
-                <Button type="button" variant="outline" size="sm" onClick={() => void meetings.refetch()}>Try again</Button>
-              </div>
-            ) : meetings.isPending ? (
-              <p className="px-4 pb-3 text-sm text-muted-foreground" role="status">Loading meetings…</p>
-            ) : null}
-            <div className="grid grid-cols-7 gap-1 px-4 pb-4" aria-label={`${format(month, "MMMM yyyy")} calendar`}>
-              {WEEKDAYS.map((weekday) => <div key={weekday} className="pb-1 text-center font-display text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{weekday}</div>)}
-              {monthDays.map((day) => {
-                const dayMeetings = meetingsByDay.get(format(day, "yyyy-MM-dd")) ?? [];
-                const selected = isSameDay(day, selectedDate);
-                const currentMonth = isSameMonth(day, month);
-                const today = isSameDay(day, new Date());
-                return (
-                  <button
-                    key={format(day, "yyyy-MM-dd")}
-                    type="button"
-                    aria-label={`${format(day, "EEEE, MMMM d, yyyy")}: ${dayMeetings.length} ${dayMeetings.length === 1 ? "meeting" : "meetings"}`}
-                    aria-pressed={selected}
-                    aria-current={today ? "date" : undefined}
-                    onClick={() => { setSelectedDate(day); if (!currentMonth) setMonth(startOfMonth(day)); }}
-                    className={`min-h-14 min-w-0 rounded-md p-1 text-left transition-colors hover:bg-elev-3 focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:min-h-20 ${currentMonth ? "text-foreground" : "text-fg-faint"} ${selected ? "bg-primary-container" : ""}`}
-                  >
-                    <span className="mb-1 flex items-center justify-between gap-1">
-                      <span className={`flex size-5 items-center justify-center rounded-full font-mono text-[11px] tabular-nums ${selected ? "bg-primary font-semibold text-primary-foreground" : today ? "bg-primary-container font-semibold text-primary-on-container" : currentMonth ? "text-foreground" : "text-fg-faint"}`}>{format(day, "d")}</span>
-                      {dayMeetings.length ? <span className="flex items-center gap-1 font-mono text-[11px] tabular-nums text-primary sm:hidden"><span className="size-1.5 rounded-full bg-primary" />{dayMeetings.length}</span> : null}
-                    </span>
-                    <span className="hidden space-y-1 md:block">
-                      {dayMeetings.slice(0, 2).map((meeting) => (
-                        <span key={meeting.id} className="flex min-w-0 items-center gap-1 text-[11px] leading-tight">
-                          <span className="size-1 shrink-0 rounded-full bg-primary" />
-                          <span className="shrink-0 font-mono tabular-nums text-fg-dim">{format(new Date(meeting.startsAt), "h:mm a")}</span>
-                          <span className="truncate">{meeting.title}</span>
+          <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_20rem]">
+            <div className="min-w-0 p-3">
+              {meetings.isError ? (
+                <div className="mb-3 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs">
+                  <span className="text-destructive">Could not load your meetings.</span>
+                  <Button type="button" variant="outline" size="sm" className="h-7 px-2.5 text-xs" onClick={() => void meetings.refetch()}>Try again</Button>
+                </div>
+              ) : meetings.isPending ? (
+                <p className="mb-2 flex items-center gap-1.5 text-xs text-muted-foreground" role="status"><LoaderCircle className="size-3 animate-spin" />Loading meetings…</p>
+              ) : null}
+
+              <div className="grid grid-cols-7 gap-1" aria-label={`${format(month, "MMMM yyyy")} calendar`}>
+                {WEEKDAYS.map((weekday, index) => (
+                  <div key={WEEKDAY_LABELS[index]} aria-hidden="true" className="pb-0.5 text-center font-display text-[10px] font-semibold uppercase tracking-widest text-fg-faint">
+                    <span className="sm:hidden">{weekday}</span>
+                    <span className="hidden sm:inline">{WEEKDAY_LABELS[index]}</span>
+                  </div>
+                ))}
+                {monthDays.map((day) => {
+                  const dayMeetings = meetingsByDay.get(format(day, "yyyy-MM-dd")) ?? [];
+                  const selected = isSameDay(day, selectedDate);
+                  const currentMonth = isSameMonth(day, month);
+                  const today = isSameDay(day, new Date());
+                  return (
+                    <button
+                      key={format(day, "yyyy-MM-dd")}
+                      type="button"
+                      aria-label={`${format(day, "EEEE, MMMM d, yyyy")}: ${dayMeetings.length} ${dayMeetings.length === 1 ? "meeting" : "meetings"}`}
+                      aria-pressed={selected}
+                      aria-current={today ? "date" : undefined}
+                      onClick={() => { setSelectedDate(day); if (!currentMonth) setMonth(startOfMonth(day)); }}
+                      className={cn(
+                        "flex min-h-11 min-w-0 flex-col gap-0.5 rounded-md border p-1 text-left transition-colors focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:min-h-[3.25rem]",
+                        selected
+                          ? "border-primary/60 bg-primary-container text-primary-on-container"
+                          : currentMonth
+                            ? "border-transparent bg-elev-2 text-foreground hover:bg-elev-4"
+                            : "border-transparent bg-elev-1 text-fg-faint hover:bg-elev-3",
+                      )}
+                    >
+                      <span className="flex items-center justify-between gap-1">
+                        <span
+                          className={cn(
+                            "flex size-[18px] items-center justify-center rounded-full font-mono text-[11px] leading-none tabular-nums",
+                            selected
+                              ? "bg-primary font-semibold text-primary-foreground"
+                              : today
+                                ? "font-semibold text-primary ring-1 ring-inset ring-primary"
+                                : currentMonth
+                                  ? "text-foreground"
+                                  : "text-fg-faint",
+                          )}
+                        >
+                          {format(day, "d")}
                         </span>
-                      ))}
-                      {dayMeetings.length > 2 ? <span className="block truncate text-[11px] text-muted-foreground">+{dayMeetings.length - 2} more</span> : null}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-            <div className="border-t border-line py-3">
-              <div className="flex flex-wrap items-center justify-between gap-2 px-4">
-                <h3 className="font-display text-sm font-semibold">{format(selectedDate, "EEEE, MMMM d")}</h3>
-                <span className="font-mono text-xs tabular-nums text-muted-foreground">{selectedDayMeetings.length} {selectedDayMeetings.length === 1 ? "meeting" : "meetings"}</span>
+                        {dayMeetings.length ? (
+                          <span className={cn("font-mono text-[10px] tabular-nums md:hidden", selected ? "text-primary-on-container" : "text-primary")}>{dayMeetings.length}</span>
+                        ) : null}
+                      </span>
+
+                      {dayMeetings.length ? (
+                        <>
+                          <span className="flex items-center gap-0.5 md:hidden">
+                            {dayMeetings.slice(0, 3).map((meeting) => (
+                              <span key={meeting.id} className={cn("size-1 rounded-full", selected ? "bg-primary-on-container" : "bg-primary")} />
+                            ))}
+                          </span>
+                          <span className="hidden min-w-0 flex-col gap-px md:flex">
+                            {dayMeetings.slice(0, 2).map((meeting) => (
+                              <span
+                                key={meeting.id}
+                                className={cn(
+                                  "flex min-w-0 items-center gap-1 rounded-[3px] px-1 text-[10px] leading-[15px]",
+                                  selected ? "bg-primary/20 text-primary-on-container" : "bg-elev-4 text-foreground",
+                                )}
+                              >
+                                <span className={cn("size-1 shrink-0 rounded-full", selected ? "bg-primary-on-container" : "bg-primary")} />
+                                <span className="hidden shrink-0 font-mono tabular-nums opacity-70 xl:inline">{format(new Date(meeting.startsAt), "h:mm")}</span>
+                                <span className="truncate">{meeting.title}</span>
+                              </span>
+                            ))}
+                            {dayMeetings.length > 2 ? <span className="truncate px-1 text-[10px] leading-[14px] text-muted-foreground">+{dayMeetings.length - 2} more</span> : null}
+                          </span>
+                        </>
+                      ) : null}
+                    </button>
+                  );
+                })}
               </div>
-              {selectedDayMeetings.length ? <div className="mt-2 divide-y">{selectedDayMeetings.map(renderMeeting)}</div> : (
-                <div className="px-6 py-8 text-center">
-                  <p className="text-sm font-medium">No meetings this day</p>
-                  <p className="mt-1 text-sm text-muted-foreground">Choose another date or add an event.</p>
-                  {connection.data?.connected ? <Button asChild variant="secondary" className="mt-3"><Link href="/meet"><CalendarDays className="mr-2 size-4" />Add event</Link></Button> : null}
+            </div>
+
+            <aside className="min-w-0 border-t border-line bg-elev-2 p-3 lg:border-l lg:border-t-0">
+              <div className="flex items-baseline justify-between gap-2">
+                <h3 className="truncate font-display text-sm font-semibold tracking-tight">{format(selectedDate, "EEEE, MMM d")}</h3>
+                <span className="shrink-0 font-mono text-[11px] tabular-nums text-muted-foreground">{selectedDayMeetings.length} {selectedDayMeetings.length === 1 ? "meeting" : "meetings"}</span>
+              </div>
+              {selectedDayMeetings.length ? (
+                <div className="mt-2.5 flex flex-col gap-2">{selectedDayMeetings.map(renderDayMeeting)}</div>
+              ) : (
+                <div className="mt-2.5 rounded-lg border border-dashed border-line px-3 py-6 text-center">
+                  <p className="text-xs font-medium">No meetings this day</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">Pick another date or add an event.</p>
+                  {connected ? <Button asChild size="sm" variant="secondary" className="mt-3 h-7 px-2.5 text-xs"><Link href="/meet"><CalendarDays className="mr-1 size-3.5" />Add event</Link></Button> : null}
                 </div>
               )}
-            </div>
-          </>
+            </aside>
+          </div>
         ) : meetings.isPending ? (
           <div className="space-y-3 p-4 sm:p-6" role="status" aria-label="Loading meetings">
-            {Array.from({ length: 3 }, (_, index) => <div key={index} className="h-24 animate-pulse rounded-xl bg-muted" />)}
+            {Array.from({ length: 3 }, (_, index) => <Skeleton key={index} className="h-24 rounded-xl" />)}
           </div>
         ) : meetings.isError ? (
           <div className="p-6 text-sm">
@@ -263,7 +359,7 @@ export function CalendarPage() {
             <CalendarDays className="mx-auto size-8 text-fg-faint" />
             <h3 className="mt-3 text-sm font-medium">{search ? "No matching meetings" : period === "upcoming" ? "Nothing scheduled yet" : "No past meetings"}</h3>
             <p className="mt-1 text-sm text-muted-foreground">{search ? "Try a different title or participant email." : period === "upcoming" ? "Add an event for any day and invite teammates or guests." : "Completed meetings will appear here."}</p>
-            {!search && period === "upcoming" && connection.data?.connected ? <Button asChild className="mt-4"><Link href="/meet"><CalendarDays className="mr-2 size-4" />Schedule a meeting</Link></Button> : null}
+            {!search && period === "upcoming" && connected ? <Button asChild className="mt-4"><Link href="/meet"><CalendarDays className="mr-2 size-4" />Schedule a meeting</Link></Button> : null}
           </div>
         ) : (
           <div className="divide-y">{visibleMeetings.map(renderMeeting)}</div>

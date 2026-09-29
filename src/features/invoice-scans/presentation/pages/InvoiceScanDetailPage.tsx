@@ -35,6 +35,7 @@ import {
   useRetryInvoiceScan,
   useUpdateInvoiceScan,
 } from "../hooks/useInvoiceScans";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function BackLink() {
   return (
@@ -42,7 +43,7 @@ function BackLink() {
       href="/finance/invoices"
       className="inline-flex w-fit items-center gap-2 text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
-      <ArrowLeft className="h-4 w-4" aria-hidden="true" /> All invoice scans
+      <ArrowLeft className="h-4 w-4" aria-hidden="true" /> All document scans
     </Link>
   );
 }
@@ -144,10 +145,10 @@ export function InvoiceScanDetailPage({ id }: { id: string }) {
   if (query.isLoading) {
     return (
       <div className="space-y-4" role="status" aria-label="Loading invoice">
-        <div className="h-8 w-56 animate-pulse rounded bg-muted" />
+        <Skeleton className="h-8 w-56" />
         <div className="grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(19rem,0.85fr)]">
-          <div className="min-h-80 animate-pulse rounded-xl border bg-card" />
-          <div className="min-h-56 animate-pulse rounded-xl border bg-card" />
+          <Skeleton className="min-h-80 rounded-xl" />
+          <Skeleton className="min-h-56 rounded-xl" />
         </div>
       </div>
     );
@@ -159,7 +160,7 @@ export function InvoiceScanDetailPage({ id }: { id: string }) {
         <BackLink />
         <Alert variant="destructive">
           <AlertCircle aria-hidden="true" />
-          <AlertDescription>This invoice scan could not be loaded.</AlertDescription>
+          <AlertDescription>This document scan could not be loaded.</AlertDescription>
         </Alert>
       </div>
     );

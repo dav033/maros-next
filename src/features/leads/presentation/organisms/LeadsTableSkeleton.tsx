@@ -1,80 +1,46 @@
 "use client";
 
-import { Skeleton } from "@/components/ui/skeleton";
+import { useMemo } from "react";
+import { SkeletonTable, type SkeletonTableColumn } from "@/components/shared";
 import { useLeadsTableColumns } from "../hooks";
 
+/** Columns the real table renders as a pill rather than a line of text. */
+const BADGE_KEYS = new Set(["projectType", "status"]);
+
+/**
+ * Built from the real column definitions, so the headers and widths cannot
+ * drift. What it was missing is the furniture around them: LeadsTable renders a
+ * selection checkbox and a row-actions cell (40px each) and floors the table at
+ * minWidth 1280, none of which the skeleton reserved — the 1200px of columns it
+ * drew were 120px short of the table that replaced them.
+ */
 export function LeadsTableSkeleton() {
   const columns = useLeadsTableColumns({
     onOpenContactModal: () => {},
     onOpenNotesModal: () => {},
   });
 
-  const getSkeletonWidth = (col: any) => {
-    if (col.key === "notes") return "w-12";
-    if (col.key === "leadNumber") return "w-20";
-    if (col.key === "name") return "w-3/4";
-    if (col.key === "contact") return "w-2/3";
-    if (col.key === "projectType") return "w-3/5";
-    if (col.key === "location") return "w-4/5";
-    if (col.key === "status") return "w-24";
-    return "w-3/4";
-  };
-
-  const getWidth = (col: any) => {
-    const widthMatch = col.className?.match(/w-\[(\d+)px\]/);
-    return widthMatch 
-      ? `w-[${widthMatch[1]}px]` 
-      : col.className?.split(" ").find((c: string) => c.startsWith("w-")) || "w-[100px]";
-  };
+  const skeletonColumns = useMemo<SkeletonTableColumn[]>(
+    () =>
+      columns.map((column) => {
+        const key = String(column.key);
+        if (key === "notes") return { header: column.header, className: column.className, variant: "icon" };
+        if (BADGE_KEYS.has(key))
+          return { header: column.header, className: column.className, variant: "badge" };
+        if (column.className?.includes("text-right"))
+          return { header: column.header, className: column.className, variant: "number" };
+        return { header: column.header, className: column.className, variant: "text", cellWidth: "w-3/4" };
+      }),
+    [columns],
+  );
 
   return (
-    <div className="w-full overflow-auto rounded-2xl bg-elev-2">
-      <table className="w-full border-collapse">
-        <thead className="bg-elev-3">
-          <tr className="h-12 border-b border-line">
-            {columns.map((col, idx) => (
-              <th
-                key={idx}
-                className={`
-                  ${getWidth(col)} px-4 py-3 font-display text-xs uppercase tracking-wide text-muted-foreground
-                  ${col.className?.includes("text-center") ? "text-center" : "text-left"}
-                  ${col.className?.includes("text-right") ? "text-right" : ""}
-                `}
-              >
-                {col.header || ""}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {Array.from({ length: 13 }).map((_, rowIdx) => (
-            <tr key={rowIdx} className="border-b border-line">
-              {columns.map((col, colIdx) => {
-                const isBadge = col.key === "status" || col.key === "projectType";
-                const skeletonWidth = getSkeletonWidth(col);
-                const align = col.className?.includes("text-center") ? "center" : col.className?.includes("text-right") ? "right" : "left";
-
-                return (
-                  <td
-                    key={colIdx}
-                    className={`
-                      ${getWidth(col)} px-4 py-3
-                      ${align === "center" ? "text-center" : align === "right" ? "text-right" : ""}
-                    `}
-                  >
-                    {isBadge ? (
-                      <Skeleton className={`h-6 rounded-full ${skeletonWidth}`} />
-                    ) : (
-                      <Skeleton className={`h-4 ${skeletonWidth}`} />
-                    )}
-                  </td>
-                );
-              })}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <SkeletonTable
+      columns={skeletonColumns}
+      rows={13}
+      minWidth={1280}
+      hasSelection
+      hasRowActions
+    />
   );
 }
-

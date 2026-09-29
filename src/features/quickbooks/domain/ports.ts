@@ -2,6 +2,7 @@ import type {
   QboAttachment,
   QboAttachmentDownloadUrl,
   QboProjectAttachments,
+  QboProjectLinkAssignment,
   QboProjectLinkRemoval,
   QuickbooksConnection,
 } from "./models";
@@ -21,6 +22,16 @@ export interface QuickbooksRepositoryPort {
   }): Promise<QboAttachmentDownloadUrl>;
 
   getConnectionStatus(): Promise<QuickbooksConnection>;
+
+  /**
+   * Enlaza el proyecto con un job de QuickBooks. Es el contrario de
+   * `unlinkProject`: el backend no exige que el nombre del job lleve el número
+   * de proyecto, sólo lo informa en `projectNumberMatchesJob`.
+   */
+  linkProject(params: {
+    projectId: number;
+    qboCustomerId: string;
+  }): Promise<QboProjectLinkAssignment>;
 
   /** Rompe el vínculo del proyecto con QuickBooks. No borra el proyecto ni el lead. */
   unlinkProject(projectId: number): Promise<QboProjectLinkRemoval>;

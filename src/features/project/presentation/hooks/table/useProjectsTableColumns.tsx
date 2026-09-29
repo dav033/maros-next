@@ -221,16 +221,20 @@ export function useProjectsTableColumns(
         sortValue: (project: Project) => getPaymentSummary(project)?.totalAmount ?? 0,
       } satisfies SimpleTableColumn<Project>] : []),
       {
-        // One axis instead of five bars: the track is the contract, and collected
-        // and spent are drawn against it. Backlog has no lane here — the row only
-        // fits two, and the card and the ficha show the third — but it does get a
-        // figure column: the number still matters even when the bar does not fit.
-        // The axis is pinned so the contract marker lands on the same x in every row.
+        // Vuelve la disposicion que tenia la lista en main: dos columnas de barras
+        // etiquetadas, cinco barras en total, cada una con su cifra a la derecha.
+        // Lo que NO vuelve es su aritmetica. Aquellas barras hacian
+        // Math.min(100, Math.abs(value) / estimate * 100) y cada columna se escalaba
+        // sola; aqui las cinco se miden contra el mismo eje (el contrato) y con el
+        // mismo eje en todas las filas, asi que un sobrecosto cruza el borde del
+        // contrato y una perdida cae a la izquierda del cero. Donde el aspecto de main
+        // y esa regla chocaban, gana la regla.
         key: "contractVsCash",
         header: "Contract / Collected / Spent",
-        className: "w-[240px]",
+        className: "w-[232px]",
         render: (project: Project) => (
           <MoneyLine
+            layout="rows"
             estimate={toAmount(project.financial?.estimatedAmount)}
             showContract
             collected={getCollected(project)}
@@ -250,39 +254,27 @@ export function useProjectsTableColumns(
         },
       },
       {
-        // Sobre el mismo eje que la columna del contrato, así que una pérdida cruza el
-        // cero hacia la izquierda y se pinta en rojo sola. La leyenda sigue imprimiendo
-        // la cifra, que es lo que se ordena.
-        key: "cashProfit",
-        header: "Profit",
-        className: "w-[150px]",
+        // La segunda columna de main: Profit y Backlog juntos. Main pintaba el backlog
+        // en ambar o verde segun fuera o no cero; aqui el color lo fija la via de
+        // dinero (--money-hold) y el estado lo dice la longitud contra el mismo eje del
+        // contrato, que es lo unico comparable entre filas. La perdida, que main
+        // dibujaba identica a una ganancia por el Math.abs, ahora cae a la izquierda
+        // del cero y se pinta con --money-over.
+        key: "profitVsBacklog",
+        header: "Profit vs Backlog",
+        className: "w-[210px]",
         render: (project: Project) => (
           <MoneyLine
+            layout="rows"
             estimate={toAmount(project.financial?.estimatedAmount)}
             profit={getCashProfit(project)}
+            backlog={computeBacklog(project)}
             axisMaxPercent={LIST_AXIS_MAX_PERCENT}
-            label={`${project.lead.name} profit`}
+            label={`${project.lead.name} profit and backlog`}
           />
         ),
         sortable: true,
         sortValue: (project: Project) => getCashProfit(project) ?? 0,
-      },
-      {
-        // Trabajo contratado y todavía sin facturar, contra el mismo eje: se ve de un
-        // vistazo qué parte del contrato queda por delante.
-        key: "backlog",
-        header: "Backlog",
-        className: "w-[150px]",
-        render: (project: Project) => (
-          <MoneyLine
-            estimate={toAmount(project.financial?.estimatedAmount)}
-            backlog={computeBacklog(project)}
-            axisMaxPercent={LIST_AXIS_MAX_PERCENT}
-            label={`${project.lead.name} backlog`}
-          />
-        ),
-        sortable: true,
-        sortValue: (project: Project) => computeBacklog(project) ?? 0,
       },
     ];
   }, [onOpenNotesModal, onOpenPayments, canReadFinance]);

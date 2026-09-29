@@ -27,7 +27,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Skeleton } from "@/components/ui/skeleton";
+import { TaskBoardSkeleton } from "./TaskBoardSkeleton";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -357,20 +357,6 @@ function AssigneeSwimlane({
         </div>
       </SortableContext>
       <QuickAddTask onAdd={onQuickAdd} />
-    </div>
-  );
-}
-
-function BoardSkeleton() {
-  return (
-    <div className="flex gap-3 overflow-x-auto pb-2">
-      {BOARD_STATUSES.map((status) => (
-        <div key={status} className="w-72 shrink-0 space-y-2">
-          <Skeleton className="h-9 w-full" />
-          <Skeleton className="h-20 w-full" />
-          <Skeleton className="h-20 w-full" />
-        </div>
-      ))}
     </div>
   );
 }
@@ -845,7 +831,7 @@ export function TaskBoard({
   };
 
   if (showSkeleton) {
-    return <BoardSkeleton />;
+    return <TaskBoardSkeleton />;
   }
 
   return (

@@ -97,3 +97,107 @@ describe("MoneyLine", () => {
     );
   });
 });
+
+describe('MoneyLine layout="rows"', () => {
+  it("prints every lane with its own label and figure, like the list used to", () => {
+    render(
+      <MoneyLine
+        layout="rows"
+        estimate={100_000}
+        showContract
+        collected={60_000}
+        spent={20_000}
+        axisMaxPercent={LIST_AXIS_MAX_PERCENT}
+      />
+    );
+
+    for (const lane of ["Contract", "Collected", "Spent"]) {
+      expect(screen.getByText(lane)).toBeInTheDocument();
+    }
+    expect(screen.getByText("$100,000.00")).toBeInTheDocument();
+    expect(screen.getByText("$60,000.00")).toBeInTheDocument();
+    expect(screen.getByText("$20,000.00")).toBeInTheDocument();
+  });
+
+  it("keeps the overrun reading instead of clamping it at the contract", () => {
+    render(
+      <MoneyLine
+        layout="rows"
+        estimate={100_000}
+        showContract
+        collected={100_000}
+        spent={128_000}
+        axisMaxPercent={LIST_AXIS_MAX_PERCENT}
+      />
+    );
+
+    const spent = screen.getByRole("progressbar", { name: /spent/i });
+    expect(spent).toHaveAttribute("aria-valuenow", "128");
+    expect(spent.style.backgroundColor).toBe("var(--money-over)");
+    // A 128% cost must not draw like a 100% one.
+    const collected = screen.getByRole("progressbar", { name: /collected/i });
+    expect(parseFloat(spent.style.width)).toBeGreaterThan(parseFloat(collected.style.width));
+    // Only the lane that broke the contract prints its share.
+    expect(screen.getByText("128%")).toBeInTheDocument();
+  });
+
+  it("draws a loss to the left of zero and never like the same gain", () => {
+    const { container: loss } = render(
+      <MoneyLine layout="rows" estimate={100_000} profit={-40_000} backlog={0} />
+    );
+    const lossBar = screen.getByRole("progressbar", { name: /profit/i });
+    const zero = (loss.querySelector("[data-zero-marker]") as HTMLElement).style.left;
+    expect(lossBar.style.backgroundColor).toBe("var(--money-over)");
+    // The bar ends exactly at the zero gridline and grows away from it, leftwards.
+    const lossEnd = parseFloat(lossBar.style.left) + parseFloat(lossBar.style.width);
+    expect(lossEnd).toBeCloseTo(parseFloat(zero), 1);
+    expect(parseFloat(zero)).toBeGreaterThan(0);
+
+    cleanup();
+
+    const { container: gain } = render(
+      <MoneyLine layout="rows" estimate={100_000} profit={40_000} backlog={0} />
+    );
+    const gainBar = screen.getByRole("progressbar", { name: /profit/i });
+    expect(gainBar.style.backgroundColor).toBe("var(--money-in)");
+    // No zero gridline is needed when nothing is negative: zero is the left edge, and
+    // the gain grows rightwards from it — the opposite direction to the loss above.
+    expect(gain.querySelector("[data-zero-marker]")).toBeNull();
+    expect(parseFloat(gainBar.style.left)).toBe(0);
+  });
+
+  it("marks the contract edge on the same x in every row of the list", () => {
+    const { container: small } = render(
+      <MoneyLine
+        layout="rows"
+        estimate={50_000}
+        showContract
+        collected={10_000}
+        spent={5_000}
+        axisMaxPercent={LIST_AXIS_MAX_PERCENT}
+      />
+    );
+    const { container: big } = render(
+      <MoneyLine
+        layout="rows"
+        estimate={900_000}
+        showContract
+        collected={800_000}
+        spent={700_000}
+        axisMaxPercent={LIST_AXIS_MAX_PERCENT}
+      />
+    );
+
+    const marker = (root: HTMLElement) =>
+      (root.querySelector("[data-contract-marker]") as HTMLElement).style.left;
+    expect(marker(small)).toBe(marker(big));
+  });
+
+  it("still says why the track is empty when there is no contract", () => {
+    render(<MoneyLine layout="rows" estimate={null} collected={60_000} backlog={null} />);
+
+    expect(screen.queryAllByRole("progressbar")).toHaveLength(0);
+    expect(screen.getByText(/no contract amount/i)).toBeInTheDocument();
+    expect(screen.getByText("—")).toBeInTheDocument();
+  });
+});

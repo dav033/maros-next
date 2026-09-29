@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { NotePageSummary } from "@/notes/domain";
 import { NotesHomeView } from "./NotesHomeView";
 import { NoteFolderView } from "./NoteFolderView";
+import { onNoteContentSearch } from "../organisms/noteSearchBus";
 
 afterEach(cleanup);
 
@@ -97,6 +98,52 @@ describe("Notes home", () => {
       screen.getByRole("button", { name: "Add Zoning decisions to favorites" }),
     );
     expect(onSetFavorite).toHaveBeenCalledWith(1, true);
+  });
+
+  it("hands an unmatched query to the full-text search instead of dead-ending", async () => {
+    const user = userEvent.setup();
+    const seen: string[] = [];
+    const stop = onNoteContentSearch((query) => seen.push(query));
+    render(
+      <NotesHomeView pages={pages} onCreate={vi.fn()} onSetFavorite={vi.fn()} />,
+    );
+    await user.type(
+      screen.getByRole("textbox", { name: "Filter pages by title or label" }),
+      "scaffolding",
+    );
+    expect(screen.getByText("No matching pages")).toBeVisible();
+    await user.click(
+      screen.getByRole("button", { name: "Search inside notes" }),
+    );
+    expect(seen).toEqual(["scaffolding"]);
+    stop();
+  });
+
+  it("marks a page with no title as a placeholder rather than a name", () => {
+    render(
+      <NotesHomeView
+        pages={[{ ...base, id: 9, title: "", tags: [] }]}
+        onCreate={vi.fn()}
+        onSetFavorite={vi.fn()}
+      />,
+    );
+    expect(screen.getByText("Untitled")).toHaveClass("italic");
+  });
+
+  it("offers no content search when nothing was typed", async () => {
+    const user = userEvent.setup();
+    render(
+      <NotesHomeView pages={pages} onCreate={vi.fn()} onSetFavorite={vi.fn()} />,
+    );
+    await user.click(screen.getByRole("button", { name: "Folders" }));
+    await user.click(screen.getByRole("button", { name: "Pages" }));
+    await user.type(
+      screen.getByRole("textbox", { name: "Filter pages by title or label" }),
+      "   ",
+    );
+    expect(
+      screen.queryByRole("button", { name: "Search inside notes" }),
+    ).not.toBeInTheDocument();
   });
 
   it("disables creation while a page is being created", () => {

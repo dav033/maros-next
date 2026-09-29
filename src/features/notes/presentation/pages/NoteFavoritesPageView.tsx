@@ -1,13 +1,14 @@
 "use client";
 
-import Link from "next/link";
-import { FileText, Star } from "lucide-react";
+import { Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useInstantFavoriteNotes } from "../hooks/data/useInstantFavoriteNotes";
 import { useInstantNoteTree } from "../hooks/data/useInstantNoteTree";
 import { useNoteMutations } from "../hooks/mutations/useNoteMutations";
 import { formatRelativeTime } from "../atoms/formatRelativeTime";
-import { noteTagColor } from "../atoms/noteVisualTokens";
+import { NoteCollectionShell } from "./NoteCollectionShell";
+import { NoteListRow } from "../molecules/NoteListRow";
 import { resolveNoteAncestors } from "@/notes/domain";
 
 export function NoteFavoritesPageView() {
@@ -16,72 +17,53 @@ export function NoteFavoritesPageView() {
   const { favoriteMutation } = useNoteMutations();
 
   return (
-    <main className="notes-scrollbar flex-1 overflow-y-auto">
-      <div className="mx-auto max-w-2xl px-4 py-6 sm:px-8 sm:py-10">
-        <div className="mb-1 flex items-center gap-2.5">
-          <Star className="size-6 fill-amber-400 text-amber-400" />
-          <h1 className="font-display text-2xl font-semibold">Favorites</h1>
-        </div>
-        <p className="mb-6 text-[13.5px] text-muted-foreground">
-          Pages you&apos;ve starred for quick access.
-        </p>
-
-        {!isLoading && pages.length === 0 && (
-          <p className="text-sm text-muted-foreground">
-            No favorites yet — star a page to pin it here.
-          </p>
-        )}
-
-        <div className="flex flex-col">
-          {pages.map((page) => {
+    <NoteCollectionShell
+      icon={<Star className="size-4 fill-amber-400 text-amber-400" />}
+      title="Favorites"
+      description="Pages you've starred for quick access."
+      count={isLoading ? null : pages.length}
+      isEmpty={!isLoading && pages.length === 0}
+      emptyTitle="Nothing starred yet"
+      emptyBody="Star a page from the tree or from any list and it gets pinned here."
+    >
+      {isLoading
+        ? [1, 2, 3].map((row) => (
+            <li key={row} className="px-2.5 py-2">
+              <Skeleton className="h-5 w-full" />
+            </li>
+          ))
+        : pages.map((page) => {
             const ancestors = resolveNoteAncestors(allPages, page.id);
-            const parentLabel = ancestors[0]?.title || "General";
             return (
-              <div
+              <NoteListRow
                 key={page.id}
-                className="flex min-w-0 items-center gap-3 border-b border-line py-3 px-2 last:border-b-0 hover:rounded-lg hover:bg-elev-3 sm:gap-3.5"
-              >
-                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-elev-4 text-muted-foreground">
-                  {page.icon ?? <FileText className="h-4 w-4" />}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <Link
-                    href={`/notes/${page.id}`}
-                    className="block truncate text-[14.5px] font-medium hover:underline"
+                href={`/notes/${page.id}`}
+                kind={page.kind}
+                icon={page.icon || undefined}
+                title={page.title}
+                context={ancestors[0]?.title || "Workspace"}
+                tags={page.tags}
+                timestamp={formatRelativeTime(page.updatedAt)}
+                actions={
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-7 shrink-0"
+                    title="Remove from favorites"
+                    aria-label={`Remove ${page.title || "Untitled"} from favorites`}
+                    onClick={() =>
+                      favoriteMutation.mutate({ id: page.id, isFavorite: false })
+                    }
                   >
-                    {page.title || "Untitled"}
-                  </Link>
-                  <div className="flex items-center gap-2.5 text-xs text-muted-foreground">
-                    <span>{parentLabel}</span>
-                    {page.tags.map((tag) => (
-                      <span key={tag.id} className="inline-flex items-center gap-1.5">
-                        <span
-                          className="h-1.5 w-1.5 shrink-0 rounded-full"
-                          style={{ backgroundColor: noteTagColor(tag.color) }}
-                        />
-                        {tag.name}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                <span className="shrink-0 text-xs text-muted-foreground">
-                  {formatRelativeTime(page.updatedAt)}
-                </span>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="shrink-0"
-                  title="Remove from favorites"
-                  aria-label="Remove from favorites"
-                  onClick={() => favoriteMutation.mutate({ id: page.id, isFavorite: false })}
-                >
-                  <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-                </Button>
-              </div>
+                    <Star
+                      className="size-3.5 fill-amber-400 text-amber-400"
+                      aria-hidden="true"
+                    />
+                  </Button>
+                }
+              />
             );
           })}
-        </div>
-      </div>
-    </main>
+    </NoteCollectionShell>
   );
 }

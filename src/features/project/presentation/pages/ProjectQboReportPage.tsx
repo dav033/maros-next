@@ -52,20 +52,40 @@ function toDateString(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
-function ReportError({ error, onRetry }: { error: AppError; onRetry: () => void }) {
+function ReportError({
+  error,
+  onRetry,
+  projectId,
+}: {
+  error: AppError;
+  onRetry: () => void;
+  projectId: number;
+}) {
   if (error.code === "PROJECT_NOT_LINKED_TO_QBO") {
     return (
       <Alert>
         <Link2Off className="size-4" />
-        <AlertTitle>Este proyecto no está enlazado a un cliente de QuickBooks</AlertTitle>
+        <AlertTitle>
+          No hay ningún cliente de QuickBooks para este proyecto
+        </AlertTitle>
         <AlertDescription className="space-y-3">
+          {/* El backend ya intentó las dos vías antes de llegar aquí: el vínculo
+              guardado y, si no lo hay, el job cuyo nombre lleva el número del
+              proyecto. Este aviso ya no significa "falta importarlo", significa
+              que ninguna de las dos encontró nada — por eso manda a enlazarlo a
+              mano desde la ficha, que es lo único que resuelve el caso. */}
           <p>
             {error.serverMessage ??
-              "Vincúlalo con un cliente de QuickBooks para poder consultar sus reportes."}
+              "Ni hay un job de QuickBooks enlazado a este proyecto ni ninguno cuyo nombre lleve su número de proyecto."}
           </p>
-          <Button asChild variant="outline" size="sm">
-            <Link href="/projects/import-from-quickbooks">Ir a la importación de QuickBooks</Link>
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button asChild variant="outline" size="sm">
+              <Link href={`/project/${projectId}`}>Enlazarlo desde la ficha del proyecto</Link>
+            </Button>
+            <Button asChild variant="ghost" size="sm">
+              <Link href="/projects/import-from-quickbooks">Ir a la importación de QuickBooks</Link>
+            </Button>
+          </div>
         </AlertDescription>
       </Alert>
     );
@@ -246,7 +266,11 @@ export function ProjectQboReportPage({ projectId }: { projectId: number }) {
           </AlertDescription>
         </Alert>
       ) : error ? (
-        <ReportError error={error} onRetry={() => void query.refetch()} />
+        <ReportError
+          error={error}
+          onRetry={() => void query.refetch()}
+          projectId={projectId}
+        />
       ) : query.isPending ? (
         <Card>
           <CardContent className="space-y-3 p-6">
@@ -262,6 +286,21 @@ export function ProjectQboReportPage({ projectId }: { projectId: number }) {
             {data.startDate ? `${data.startDate} → ${data.endDate}` : `al ${data.endDate}`} · cliente
             de QuickBooks {data.qboCustomerId}
           </p>
+          {data.linkSource === "project-number" ? (
+            <Alert>
+              <Link2Off className="size-4" />
+              <AlertTitle>
+                Este reporte se resolvió por número de proyecto, no por un vínculo guardado
+              </AlertTitle>
+              <AlertDescription>
+                El proyecto no tiene guardado su cliente de QuickBooks, así que se usó el job{" "}
+                <span className="font-mono">{data.qboCustomerId}</span>, cuyo nombre lleva el
+                número {data.leadNumber ?? `#${data.projectId}`} — exactamente lo que ya hace el
+                resto de la ficha. Funciona, pero es una coincidencia por nombre: enlázalo desde
+                la ficha del proyecto para dejarlo fijo.
+              </AlertDescription>
+            </Alert>
+          ) : null}
           {data.scope === "company" ? (
             <Alert>
               <AlertCircle className="size-4" />

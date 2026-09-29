@@ -18,6 +18,7 @@ export * from "./NotesEditorModal";
 export * from "./PageHeaderCard";
 export * from "./PageToolbarCard";
 export * from "./SearchableSelect";
+export * from "./SkeletonTable";
 export * from "./TablePagination";
 export * from "./Typography";
 export * from "./YesNoBadge";

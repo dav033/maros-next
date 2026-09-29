@@ -5,6 +5,7 @@ import { addDays, format } from "date-fns";
 import { ArrowRight, Ban, CalendarClock, Users } from "lucide-react";
 import { useInstantTasksBoard } from "@/features/tasks/presentation/hooks/data/useInstantTasksBoard";
 import { todayInBusinessTimezone } from "@/shared/lib/businessDate";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const OPEN_STATUSES = ["backlog", "todo", "in_progress", "blocked"] as const;
 
@@ -26,7 +27,7 @@ export function TaskDashboardWidget() {
   }
   const loadRows = [...load.values()].sort((a, b) => b.count - a.count).slice(0, 5);
 
-  if (showSkeleton) return <div className="h-48 animate-pulse rounded-xl border border-line bg-card" />;
+  if (showSkeleton) return <TaskDashboardWidgetSkeleton />;
   if (error) return <div className="rounded-xl border border-line bg-card p-4 text-sm text-muted-foreground">Could not load task signals.</div>;
 
   return (
@@ -85,5 +86,55 @@ function SignalLink({ href, label, value, tone }: { href: string; label: string;
       <span className="flex items-center gap-1 text-xs text-muted-foreground"><Ban className="h-3 w-3" aria-hidden="true" />{label}</span>
       <span className={`font-mono text-xl font-semibold tabular-nums ${tone}`}>{value}</span>
     </Link>
+  );
+}
+
+/**
+ * The widget is two cards side by side from `lg` up: a 3-up signal row on the
+ * left and a list of people on the right. The loading state used to be a single
+ * full-width 192px block, so the section split in two and changed height the
+ * moment the counts arrived.
+ */
+function TaskDashboardWidgetSkeleton() {
+  return (
+    <div className="skeleton-deferred grid gap-4 lg:grid-cols-2">
+      <div className="rounded-xl border border-line bg-card p-4">
+        <div className="mb-3 flex items-start justify-between gap-3">
+          <div className="space-y-1.5">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-3 w-40" />
+          </div>
+          <Skeleton className="size-4 rounded-sm" />
+        </div>
+        <div className="grid grid-cols-3 gap-2">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <div key={index} className="rounded-lg border border-line-strong p-2">
+              <Skeleton className="h-3 w-14" />
+              <Skeleton className="mt-1.5 h-6 w-10" />
+            </div>
+          ))}
+        </div>
+        <Skeleton className="mt-3 h-4 w-28" />
+      </div>
+
+      <div className="rounded-xl border border-line bg-card p-4">
+        <div className="mb-3 flex items-start justify-between gap-3">
+          <div className="space-y-1.5">
+            <Skeleton className="h-4 w-28" />
+            <Skeleton className="h-3 w-44" />
+          </div>
+          <Skeleton className="size-4 rounded-sm" />
+        </div>
+        <div className="space-y-2">
+          {Array.from({ length: 5 }).map((_, index) => (
+            <div key={index} className="flex items-center justify-between gap-3">
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-5 w-8 rounded-full" />
+            </div>
+          ))}
+        </div>
+        <Skeleton className="mt-3 h-4 w-24" />
+      </div>
+    </div>
   );
 }

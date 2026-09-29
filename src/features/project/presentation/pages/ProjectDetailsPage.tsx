@@ -3,11 +3,13 @@
 import { useRouter } from "next/navigation";
 import { useState, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, FolderTree, User, Phone, Mail, MapPin, Building, Receipt, StickyNote, DollarSign, Edit, Plus, Save, X, FileText, FileBarChart, Trash2, Undo2 } from "lucide-react";
+import { ArrowLeft, FolderTree, User, Phone, Mail, MapPin, Building, Receipt, StickyNote, DollarSign, Edit, Plus, Save, X, FileText, FileBarChart, Trash2, Undo2, LayoutDashboard, ListTodo, NotebookPen, Paperclip } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { DetailTabsBar, useUrlTabState, type DetailTabDef } from "@/components/shared/DetailTabs";
 import Link from "next/link";
 import { useProjectsNotesLogic } from "../hooks/notes/useProjectsNotesLogic";
 import { useProjectsNotesModalController } from "../hooks/modals/useProjectsNotesModalController";
@@ -34,6 +36,7 @@ import type { Contact as DomainContact } from "@/contact/domain";
 import { EntityAttachmentsSection } from "@/features/attachments/presentation/EntityAttachmentsSection";
 import { QuickbooksProjectAttachments } from "@/features/quickbooks/presentation/components/QuickbooksProjectAttachments";
 import { QuickbooksUnlinkProjectButton } from "@/features/quickbooks/presentation/components/QuickbooksUnlinkProjectButton";
+import { QuickbooksLinkProjectButton } from "../organisms/QuickbooksLinkProjectButton";
 import { Can } from "@/shared/auth/Can";
 import { EntityNotesSection } from "@/features/notes/presentation/organisms/EntityNotesSection";
 import { EntityTasksSection } from "@/features/tasks/presentation/organisms/EntityTasksSection";
@@ -117,6 +120,25 @@ type ProjectFormData = {
 
 type Payment = NonNullable<NonNullable<ProjectDetails["financial"]>["payments"]>[number];
 type Contact = NonNullable<NonNullable<ProjectDetails["lead"]>["contact"]>;
+
+/**
+ * La ficha se agrupa por lo que se viene a buscar, no por lo que hay:
+ * «Resumen» es la ficha de siempre (qué es el proyecto, de quién y cuánto dinero
+ * mueve); todo lo que viene de QuickBooks —la lista de pagos y sus adjuntos— se
+ * va junto a «QuickBooks», que es además lo caro de traer; y tareas, notas y
+ * archivos quedan cada uno en el suyo porque son trabajos distintos, no lectura
+ * de la ficha.
+ */
+const PROJECT_TABS = [
+  { value: "resumen", label: "Resumen", icon: LayoutDashboard },
+  { value: "quickbooks", label: "QuickBooks", icon: Receipt },
+  { value: "tareas", label: "Tareas", icon: ListTodo },
+  { value: "notas", label: "Notas", icon: NotebookPen },
+  { value: "archivos", label: "Archivos", icon: Paperclip },
+] as const satisfies readonly DetailTabDef[];
+
+const PROJECT_TAB_VALUES = PROJECT_TABS.map((tab) => tab.value);
+const DEFAULT_PROJECT_TAB = "resumen";
 
 function ProjectEditFormWithLeads({
   form,
@@ -377,6 +399,8 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
   const { companies } = useInstantCompanies();
   const { updateContactMutation } = useContactMutations();
 
+  const { activeTab, setActiveTab } = useUrlTabState(PROJECT_TAB_VALUES, DEFAULT_PROJECT_TAB);
+
   const [isEditingProject, setIsEditingProject] = useState(false);
   const [editingProject, setEditingProject] = useState<ProjectFormData>({});
   const [isSavingProject, setIsSavingProject] = useState(false);
@@ -428,6 +452,9 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
     void queryClient.invalidateQueries({ queryKey: projectsKeys.all });
     router.refresh();
   }, [queryClient, router]);
+
+  // Enlazar mueve exactamente lo mismo que desenlazar, en el otro sentido.
+  const handleQboLinked = handleQboUnlinked;
 
   const [isEditingName, setIsEditingName] = useState(false);
   const [editingName, setEditingName] = useState("");
@@ -718,33 +745,37 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
           {projectDetails.invoiceStatus && (
             <Badge variant="outline">{projectDetails.invoiceStatus}</Badge>
           )}
-          {projectDetails.qboCustomerId ? (
-            <>
-              <Button asChild variant="outline" size="sm">
-                <Link href={`/project/${projectId}/report`}>
-                  <FileBarChart className="size-4 mr-2" />
-                  Llévame al reporte
-                </Link>
-              </Button>
-              <Can permission="projects:write">
-                <QuickbooksUnlinkProjectButton
-                  projectId={projectId}
-                  qboCustomerId={projectDetails.qboCustomerId}
-                  onUnlinked={handleQboUnlinked}
-                  disabled={isReverting || isDeleting}
-                />
-              </Can>
-            </>
-          ) : (
-            <div className="flex flex-col items-end gap-1">
-              <Button variant="outline" size="sm" disabled>
-                <FileBarChart className="size-4 mr-2" />
-                Llévame al reporte
-              </Button>
-              <span className="max-w-[220px] text-right text-xs text-muted-foreground">
-                Este proyecto no está enlazado a un cliente de QuickBooks
-              </span>
-            </div>
+          {/* El reporte ya no depende de que haya un vínculo guardado: cuando
+              no lo hay, el backend resuelve el cliente de QuickBooks por número
+              de proyecto, igual que el resto de esta ficha. Por eso el botón va
+              siempre habilitado y sin la advertencia que antes avisaba de un
+              "no enlazado" que el propio dueño desmentía viendo aquí mismo sus
+              facturas de QuickBooks. Si no hay ni vínculo ni coincidencia por
+              número, la pantalla del reporte lo explica con el 409. */}
+          <Button asChild variant="outline" size="sm">
+            <Link href={`/project/${projectId}/report`}>
+              <FileBarChart className="size-4 mr-2" />
+              Llévame al reporte
+            </Link>
+          </Button>
+          <Can permission="projects:write">
+            <QuickbooksLinkProjectButton
+              projectId={projectId}
+              projectNumber={lead?.leadNumber ?? null}
+              qboCustomerId={projectDetails.qboCustomerId ?? null}
+              onLinked={handleQboLinked}
+              disabled={isReverting || isDeleting}
+            />
+          </Can>
+          {projectDetails.qboCustomerId && (
+            <Can permission="projects:write">
+              <QuickbooksUnlinkProjectButton
+                projectId={projectId}
+                qboCustomerId={projectDetails.qboCustomerId}
+                onUnlinked={handleQboUnlinked}
+                disabled={isReverting || isDeleting}
+              />
+            </Can>
           )}
           <Button
             variant="outline"
@@ -767,253 +798,289 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Project Information */}
-        <div className="lg:col-span-2 space-y-6">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <FolderTree className="size-5" />
-                Project Information
-              </CardTitle>
-              {isEditingProject ? (
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleCancelEditingProject}
-                    disabled={isSavingProject}
-                    className="text-muted-foreground hover:text-foreground"
-                  >
-                    <X className="size-4 mr-2" />
-                    Cancel
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleSaveProjectInline}
-                    disabled={isSavingProject}
-                    className="text-muted-foreground hover:text-foreground"
-                  >
-                    <Save className="size-4 mr-2" />
-                    {isSavingProject ? "Saving..." : "Save"}
-                  </Button>
-                </div>
-              ) : (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleStartEditingProject}
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  <Edit className="size-4 mr-2" />
-                  Edit
-                </Button>
-              )}
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {isEditingProject ? (
-                <ProjectEditFormWithLeads
-                  form={editingProject}
-                  onChange={(key, value) => setEditingProject((prev) => ({ ...prev, [key]: value }))}
-                  disabled={isSavingProject}
+      {/* La cabecera de arriba queda fuera de <Tabs>: el título, el estado y las
+          acciones (reporte, enlazar/desvincular QuickBooks, revertir, borrar)
+          siguen a la vista en todas las pestañas. */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+        <DetailTabsBar tabs={PROJECT_TABS} />
+
+        <TabsContent value="resumen" className="mt-0 space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Project Information */}
+            <div className="lg:col-span-2 space-y-6">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <FolderTree className="size-5" />
+                    Project Information
+                  </CardTitle>
+                  {isEditingProject ? (
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleCancelEditingProject}
+                        disabled={isSavingProject}
+                        className="text-muted-foreground hover:text-foreground"
+                      >
+                        <X className="size-4 mr-2" />
+                        Cancel
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleSaveProjectInline}
+                        disabled={isSavingProject}
+                        className="text-muted-foreground hover:text-foreground"
+                      >
+                        <Save className="size-4 mr-2" />
+                        {isSavingProject ? "Saving..." : "Save"}
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleStartEditingProject}
+                      className="text-muted-foreground hover:text-foreground"
+                    >
+                      <Edit className="size-4 mr-2" />
+                      Edit
+                    </Button>
+                  )}
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {isEditingProject ? (
+                    <ProjectEditFormWithLeads
+                      form={editingProject}
+                      onChange={(key, value) => setEditingProject((prev) => ({ ...prev, [key]: value }))}
+                      disabled={isSavingProject}
+                    />
+                  ) : (
+                    <>
+                      <div className="grid grid-cols-2 gap-4">
+                        <DetailField
+                          icon={Receipt}
+                          label="Estimate Amount"
+                        >
+                          {isEditingEstimate ? (
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <Input
+                                  type="number"
+                                  min={0}
+                                  step="0.01"
+                                  autoFocus
+                                  value={editingEstimate}
+                                  onChange={(e) => setEditingEstimate(e.target.value)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Enter") {
+                                      e.preventDefault();
+                                      void handleSaveEstimate();
+                                    } else if (e.key === "Escape") {
+                                      e.preventDefault();
+                                      handleCancelEditingEstimate();
+                                    }
+                                  }}
+                                  disabled={isSavingEstimate}
+                                  className="h-8 w-32"
+                                  placeholder="0.00"
+                                />
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="size-8 text-green-600 hover:text-green-700"
+                                  onClick={handleSaveEstimate}
+                                  disabled={isSavingEstimate}
+                                  aria-label="Save estimate"
+                                >
+                                  <Save className="size-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="size-8 text-muted-foreground"
+                                  onClick={handleCancelEditingEstimate}
+                                  disabled={isSavingEstimate}
+                                  aria-label="Cancel"
+                                >
+                                  <X className="size-4" />
+                                </Button>
+                              </div>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                This is the project&apos;s total estimate. Saving updates it in QuickBooks.
+                              </p>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              <p className="font-semibold text-lg">
+                                {typeof projectDetails.financial?.estimatedAmount === "number"
+                                  ? formatCurrency(projectDetails.financial.estimatedAmount)
+                                  : "—"}
+                              </p>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="size-7 text-muted-foreground hover:text-foreground"
+                                onClick={handleStartEditingEstimate}
+                                aria-label="Edit estimate"
+                              >
+                                <Edit className="size-3.5" />
+                              </Button>
+                            </div>
+                          )}
+                        </DetailField>
+
+                        <DetailField
+                          icon={DollarSign}
+                          label="Payments"
+                          value={projectDetails.financial?.paidAmount}
+                        >
+                          {typeof projectDetails.financial?.paidAmount === "number" ? (
+                            <p className="font-semibold text-lg">
+                              {formatCurrency(projectDetails.financial.paidAmount)}
+                            </p>
+                          ) : null}
+                        </DetailField>
+                      </div>
+
+                      <Separator />
+                      <ProjectMoneySummary
+                        name={lead?.name}
+                        estimate={toAmount(projectDetails.financial?.estimatedAmount)}
+                        invoiced={toAmount(projectDetails.financial?.invoicedAmount)}
+                        collected={toAmount(projectDetails.financial?.paidAmount)}
+                        outstanding={toAmount(projectDetails.financial?.outstandingAmount)}
+                        backlog={computeBacklog(projectDetails.financial)}
+                      />
+
+                      <Separator />
+                      <DetailField
+                        icon={FileText}
+                        label="Project Overview"
+                        value={projectDetails.overview}
+                        onAdd={handleStartEditingProject}
+                      />
+
+                      <Separator />
+                      <DetailField
+                        icon={StickyNote}
+                        label="Quick notes"
+                        value={projectDetails.notes && projectDetails.notes.length > 0 ? "has-notes" : undefined}
+                        onAdd={handleOpenNotesModal}
+                      >
+                        {projectDetails.notes && projectDetails.notes.length > 0 ? (
+                          <ul className="space-y-1 mt-1">
+                            {projectDetails.notes.map((note, index) => (
+                              <li key={index} className="text-sm text-foreground">
+                                • {note}
+                              </li>
+                            ))}
+                          </ul>
+                        ) : null}
+                      </DetailField>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Contact Information */}
+            <div className="lg:col-span-1 space-y-6">
+              {lead?.contact ? (
+                <ProjectContactCard
+                  contact={lead.contact}
+                  onEdit={handleOpenEditContact}
                 />
               ) : (
-                <>
-                  <div className="grid grid-cols-2 gap-4">
-                    <DetailField
-                      icon={Receipt}
-                      label="Estimate Amount"
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <User className="size-5" />
+                      Contact
+                    </CardTitle>
+                    <CardDescription>
+                      This project has no associated contact
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Button
+                      variant="outline"
+                      onClick={() => router.push(`/contacts?create`)}
+                      className="w-full"
                     >
-                      {isEditingEstimate ? (
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <Input
-                              type="number"
-                              min={0}
-                              step="0.01"
-                              autoFocus
-                              value={editingEstimate}
-                              onChange={(e) => setEditingEstimate(e.target.value)}
-                              onKeyDown={(e) => {
-                                if (e.key === "Enter") {
-                                  e.preventDefault();
-                                  void handleSaveEstimate();
-                                } else if (e.key === "Escape") {
-                                  e.preventDefault();
-                                  handleCancelEditingEstimate();
-                                }
-                              }}
-                              disabled={isSavingEstimate}
-                              className="h-8 w-32"
-                              placeholder="0.00"
-                            />
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="size-8 text-green-600 hover:text-green-700"
-                              onClick={handleSaveEstimate}
-                              disabled={isSavingEstimate}
-                              aria-label="Save estimate"
-                            >
-                              <Save className="size-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="size-8 text-muted-foreground"
-                              onClick={handleCancelEditingEstimate}
-                              disabled={isSavingEstimate}
-                              aria-label="Cancel"
-                            >
-                              <X className="size-4" />
-                            </Button>
-                          </div>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            This is the project&apos;s total estimate. Saving updates it in QuickBooks.
-                          </p>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2">
-                          <p className="font-semibold text-lg">
-                            {typeof projectDetails.financial?.estimatedAmount === "number"
-                              ? formatCurrency(projectDetails.financial.estimatedAmount)
-                              : "—"}
-                          </p>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="size-7 text-muted-foreground hover:text-foreground"
-                            onClick={handleStartEditingEstimate}
-                            aria-label="Edit estimate"
-                          >
-                            <Edit className="size-3.5" />
-                          </Button>
-                        </div>
-                      )}
-                    </DetailField>
-
-                    <DetailField
-                      icon={DollarSign}
-                      label="Payments"
-                      value={projectDetails.financial?.paidAmount}
-                    >
-                      {typeof projectDetails.financial?.paidAmount === "number" ? (
-                        <p className="font-semibold text-lg">
-                          {formatCurrency(projectDetails.financial.paidAmount)}
-                        </p>
-                      ) : null}
-                    </DetailField>
-                  </div>
-
-                  <Separator />
-                  <ProjectMoneySummary
-                    name={lead?.name}
-                    estimate={toAmount(projectDetails.financial?.estimatedAmount)}
-                    invoiced={toAmount(projectDetails.financial?.invoicedAmount)}
-                    collected={toAmount(projectDetails.financial?.paidAmount)}
-                    outstanding={toAmount(projectDetails.financial?.outstandingAmount)}
-                    backlog={computeBacklog(projectDetails.financial)}
-                  />
-
-                  <Separator />
-                  <div>
-                    <p className="text-muted-foreground text-sm mb-2 flex items-center gap-1">
-                      <DollarSign className="size-3" />
-                      Payments List (QuickBooks)
-                    </p>
-                    <PaymentsTable payments={paymentRows} />
-                  </div>
-
-                  <Separator />
-                  <DetailField
-                    icon={FileText}
-                    label="Project Overview"
-                    value={projectDetails.overview}
-                    onAdd={handleStartEditingProject}
-                  />
-
-                  <Separator />
-                  <DetailField
-                    icon={StickyNote}
-                    label="Quick notes"
-                    value={projectDetails.notes && projectDetails.notes.length > 0 ? "has-notes" : undefined}
-                    onAdd={handleOpenNotesModal}
-                  >
-                    {projectDetails.notes && projectDetails.notes.length > 0 ? (
-                      <ul className="space-y-1 mt-1">
-                        {projectDetails.notes.map((note, index) => (
-                          <li key={index} className="text-sm text-foreground">
-                            • {note}
-                          </li>
-                        ))}
-                      </ul>
-                    ) : null}
-                  </DetailField>
-                </>
+                      <Plus className="size-4 mr-2" />
+                      Create Contact
+                    </Button>
+                  </CardContent>
+                </Card>
               )}
+            </div>
+          </div>
+        </TabsContent>
+
+        {/* Todo lo que llega de QuickBooks, junto. Radix desmonta el panel
+            inactivo, así que ni la lista de pagos ni los adjuntos (la consulta
+            lenta de la ficha) se piden hasta que se abre esta pestaña. */}
+        <TabsContent value="quickbooks" className="mt-0 space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <DollarSign className="size-4" />
+                Payments list
+              </CardTitle>
+              <CardDescription>Pagos registrados en QuickBooks para este proyecto.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <PaymentsTable payments={paymentRows} />
             </CardContent>
           </Card>
-        </div>
 
-        {/* Contact Information */}
-        <div className="lg:col-span-1 space-y-6">
-          {lead?.contact ? (
-            <ProjectContactCard
-              contact={lead.contact}
-              onEdit={handleOpenEditContact}
-            />
+          {lead?.leadNumber ? (
+            <QuickbooksProjectAttachments projectNumber={lead.leadNumber} />
           ) : (
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <User className="size-5" />
-                  Contact
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Paperclip className="size-4" />
+                  QuickBooks attachments
                 </CardTitle>
                 <CardDescription>
-                  This project has no associated contact
+                  Este proyecto no tiene número, así que no hay nada que buscar en QuickBooks.
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <Button
-                  variant="outline"
-                  onClick={() => router.push(`/contacts?create`)}
-                  className="w-full"
-                >
-                  <Plus className="size-4 mr-2" />
-                  Create Contact
-                </Button>
-              </CardContent>
             </Card>
           )}
-        </div>
-      </div>
+        </TabsContent>
 
-      <EntityAttachmentsSection
-        entityKind="project"
-        entityId={projectDetails.id}
-        attachments={projectDetails.attachments ?? []}
-        onAttachmentsChange={async (newAttachments) => {
-          await updateProject(app, projectDetails.id, { attachments: newAttachments });
-          router.refresh();
-        }}
-      />
+        <TabsContent value="tareas" className="mt-0">
+          <EntityTasksSection
+            entityKind="project"
+            entityId={projectDetails.id}
+            entityLabel={projectDetails.lead?.name}
+          />
+        </TabsContent>
 
-      <EntityNotesSection
-        entityKind="project"
-        entityId={projectDetails.id}
-        defaultTitle={projectDetails.lead?.name || undefined}
-      />
+        <TabsContent value="notas" className="mt-0">
+          <EntityNotesSection
+            entityKind="project"
+            entityId={projectDetails.id}
+            defaultTitle={projectDetails.lead?.name || undefined}
+          />
+        </TabsContent>
 
-      <EntityTasksSection
-        entityKind="project"
-        entityId={projectDetails.id}
-        entityLabel={projectDetails.lead?.name}
-      />
-
-      {lead?.leadNumber ? (
-        <QuickbooksProjectAttachments projectNumber={lead.leadNumber} />
-      ) : null}
+        <TabsContent value="archivos" className="mt-0">
+          <EntityAttachmentsSection
+            entityKind="project"
+            entityId={projectDetails.id}
+            attachments={projectDetails.attachments ?? []}
+            onAttachmentsChange={async (newAttachments) => {
+              await updateProject(app, projectDetails.id, { attachments: newAttachments });
+              router.refresh();
+            }}
+          />
+        </TabsContent>
+      </Tabs>
 
       <NotesEditorModal controller={notesModalController} />
 

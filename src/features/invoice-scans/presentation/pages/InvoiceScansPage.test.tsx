@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, render, screen, within } from "@testing-library/react";
+import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -15,10 +15,17 @@ vi.mock("../../infra/invoiceScansApi", () => ({
   getInvoiceScan: vi.fn(),
   retryInvoiceScan: vi.fn(),
   listProjectsForPicker: vi.fn().mockResolvedValue([]),
+  createManualInvoiceTransaction: vi.fn(),
+  uploadAndScanInvoice: vi.fn(),
 }));
 vi.mock("@/shared/presentation/toast", () => ({
   notifyError: vi.fn(),
   notifySuccess: vi.fn(),
+}));
+
+const routerPush = vi.hoisted(() => vi.fn());
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: routerPush, replace: vi.fn(), refresh: vi.fn(), back: vi.fn() }),
 }));
 
 vi.mock("@/features/users/presentation/hooks/data/useUserDirectory", () => ({
@@ -147,5 +154,41 @@ describe("InvoiceScansPage", () => {
     renderPage();
     const box = (await screen.findAllByRole("checkbox", { name: "Entered in QuickBooks" }))[0];
     expect(box).toBeDisabled();
+  });
+
+  it("titles the screen 'Document scans'", async () => {
+    api.listInvoiceScans.mockResolvedValue([]);
+    renderPage();
+    expect(await screen.findByRole("heading", { name: "Document scans" })).toBeInTheDocument();
+  });
+
+  it("opens the add-transaction form in a dialog and closes it again", async () => {
+    api.listInvoiceScans.mockResolvedValue([]);
+    renderPage();
+
+    const user = userEvent.setup();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+
+    await user.click(await screen.findByRole("button", { name: /add transaction/i }));
+    const dialog = await screen.findByRole("dialog");
+    expect(within(dialog).getByRole("heading", { name: "Add a transaction" })).toBeInTheDocument();
+    expect(within(dialog).getByLabelText("What was the payment for?")).toBeInTheDocument();
+
+    await user.click(within(dialog).getByRole("button", { name: "Cancel" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+  });
+
+  it("opens the scanner in a dialog and closes it again", async () => {
+    api.listInvoiceScans.mockResolvedValue([]);
+    renderPage();
+
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole("button", { name: /scan invoice/i }));
+    const dialog = await screen.findByRole("dialog");
+    expect(within(dialog).getByRole("heading", { name: "Scan a document" })).toBeInTheDocument();
+    expect(within(dialog).getByRole("button", { name: /take photo/i })).toBeInTheDocument();
+
+    await user.click(within(dialog).getByRole("button", { name: "Close" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
   });
 });

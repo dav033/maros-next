@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { FileText } from "lucide-react";
 
 import {
-  DefaultTableLoading,
   EntityTable,
   type EntityContextMenuItem,
   type EntityTableGroupBy,
@@ -106,7 +105,6 @@ export function LeadsTable({
       minWidth={1280}
       paginated={pagination?.enabled}
       defaultSort={{ key: "leadNumber", dir: "desc" }}
-      loadingState={<DefaultTableLoading label="Loading leads…" />}
       emptyState={
         <div className="flex flex-col items-center justify-center rounded-lg border border-line bg-elev-2 p-8 text-center">
           <FileText className="size-12 text-muted-foreground/50 mb-4" />

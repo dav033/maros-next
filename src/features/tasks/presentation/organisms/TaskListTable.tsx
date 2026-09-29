@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { ListTodo } from "lucide-react";
 import {
-  DefaultTableLoading,
   EntityTable,
   type EntityTableGroupBy,
   type EntityTableSelection,
@@ -164,7 +163,6 @@ export function TaskListTable({
       selection={selection}
       groupBy={groupByStatus}
       defaultSort={{ key: "id", dir: "desc" }}
-      loadingState={<DefaultTableLoading label="Loading tasks…" />}
       emptyState={
         <TaskEmptyState
           icon={ListTodo}

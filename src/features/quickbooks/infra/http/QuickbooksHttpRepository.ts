@@ -1,6 +1,7 @@
 import type {
   QboAttachmentDownloadUrl,
   QboProjectAttachments,
+  QboProjectLinkAssignment,
   QboProjectLinkRemoval,
   QuickbooksConnection,
 } from "../../domain/models";
@@ -11,12 +12,14 @@ import { quickbooksEndpoints } from "./endpoints";
 import {
   mapAttachmentDownloadUrl,
   mapProjectAttachments,
+  mapProjectLinkAssignment,
   mapProjectLinkRemoval,
   mapQuickbooksConnection,
 } from "./mappers";
 import type {
   QboAttachmentDownloadUrlResponse,
   QboProjectAttachmentsResponse,
+  QboProjectLinkAssignmentResponse,
   QboProjectLinkRemovalResponse,
   QuickbooksConnectionResponse,
 } from "./responses";
@@ -61,6 +64,17 @@ export class QuickbooksHttpRepository implements QuickbooksRepositoryPort {
       quickbooksEndpoints.connectionStatus(),
     );
     return mapQuickbooksConnection(data);
+  }
+
+  async linkProject(params: {
+    projectId: number;
+    qboCustomerId: string;
+  }): Promise<QboProjectLinkAssignment> {
+    const { data } = await this.api.put<QboProjectLinkAssignmentResponse>(
+      quickbooksEndpoints.projectQboLink(params.projectId),
+      { qboCustomerId: params.qboCustomerId },
+    );
+    return mapProjectLinkAssignment(data);
   }
 
   async unlinkProject(projectId: number): Promise<QboProjectLinkRemoval> {

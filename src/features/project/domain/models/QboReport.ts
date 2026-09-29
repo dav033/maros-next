@@ -77,10 +77,22 @@ export interface QboRawReport {
  */
 export type QboReportScope = "project" | "company";
 
+/**
+ * De dónde salió el cliente de QuickBooks con el que se pidió el reporte:
+ * `stored` es el vínculo guardado en el proyecto (`qboCustomerId`);
+ * `project-number` es el job que el backend resolvió por número de proyecto
+ * porque no había vínculo guardado — el mismo camino que usa el resto de la
+ * ficha. El backend no persiste esa coincidencia: enlazarla es un acto
+ * explícito desde la ficha del proyecto.
+ */
+export type QboReportLinkSource = "stored" | "project-number";
+
 export interface ProjectQboReport {
   projectId: number;
   leadNumber: string | null;
   qboCustomerId: string;
+  /** Opcional por compatibilidad con respuestas anteriores del backend. */
+  linkSource?: QboReportLinkSource;
   report: QboReportName;
   accountingMethod: QboAccountingMethod;
   scope?: QboReportScope;

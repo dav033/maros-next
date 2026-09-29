@@ -63,8 +63,10 @@ export function NoteEditor({
         "aria-label": "Note content",
         "aria-multiline": "true",
         "aria-readonly": String(!editable),
+        // max-w-none, not a prose measure: the measure is set by the page column
+        // so the text, the toolbar and a full-width table all share one edge.
         class:
-          "note-editor prose prose-invert prose-sm sm:prose-base max-w-[75ch] focus:outline-none min-h-[45vh] break-words",
+          "note-editor prose prose-invert prose-sm max-w-none focus:outline-none min-h-[50vh] break-words",
       },
       handlePaste: (view, event) => {
         const files = Array.from(event.clipboardData?.files ?? []).filter((f) =>
@@ -118,7 +120,7 @@ export function NoteEditor({
       {editable && editor && <NoteEditorToolbar editor={editor} />}
       <EditorContent editor={editor} />
       {editable && (
-        <p className="mt-8 border-t border-line pt-3 text-xs text-muted-foreground">
+        <p className="mt-6 border-t border-line pt-2.5 text-[11px] text-muted-foreground">
           Type / for blocks · Paste or drop images into your note
         </p>
       )}

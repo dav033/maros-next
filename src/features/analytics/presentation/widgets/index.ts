@@ -22,5 +22,6 @@ export {
   FinancialSnapshotSkeleton,
   CostsBreakdownSkeleton,
   TopClientsSkeleton,
+  OutstandingBalancesSkeleton,
   ProjectHealthSkeleton,
 } from "./WidgetStates";

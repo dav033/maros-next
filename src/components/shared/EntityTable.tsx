@@ -2,7 +2,7 @@
 
 import { memo, type ReactNode, useCallback, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, ChevronDown, ChevronUp, ChevronsUpDown, Loader, MoreVertical } from "lucide-react";
+import { Check, ChevronDown, ChevronUp, ChevronsUpDown, MoreVertical } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -525,7 +525,21 @@ function EntityTableInner<T>({
               </div>
             </div>
           ) : null}
-          {isGrouped
+          {/* Below xl the table is replaced by cards, so the loading state has to
+              be replaced too — otherwise a phone got an empty page for the whole
+              wait while the desktop got a skeleton. */}
+          {showSkeleton
+            ? Array.from({ length: Math.min(skeletonRows, 5) }).map((_, i) => (
+                <article
+                  key={`skeleton-card-${i}`}
+                  className="skeleton-deferred space-y-2 rounded-xl border border-line bg-elev-2 p-4 shadow-sm"
+                >
+                  <Skeleton className="h-3 w-24" />
+                  <Skeleton className="h-5 w-3/4" />
+                  <Skeleton className="h-3 w-1/2" />
+                </article>
+              ))
+            : isGrouped
             ? groups.map((group) => (
                 <section key={group.key} aria-label={group.label}>
                   <h3 className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
@@ -626,14 +640,22 @@ function EntityTableInner<T>({
           <TableBody className="divide-y divide-border">
             {showSkeleton
               ? Array.from({ length: skeletonRows }).map((_, i) => (
-                  <TableRow key={`skeleton-${i}`}>
+                  // `skeleton-deferred`: the rows take their space at once, so the
+                  // table never resizes under the user, but the placeholders stay
+                  // invisible for 200ms. A filter change the local API answers in
+                  // 50ms therefore never flashes a skeleton, while a QuickBooks
+                  // screen (8-30s) shows one immediately for all practical purposes.
+                  <TableRow key={`skeleton-${i}`} className="skeleton-deferred">
                     {selection ? (
                       <TableCell className="w-10 px-4 py-3">
                         <Skeleton className="h-4 w-4 rounded-sm" />
                       </TableCell>
                     ) : null}
                     {columns.map((col) => (
-                      <TableCell key={String(col.key)} className="px-4 py-3">
+                      // The cell inherits the real column's width class, so the
+                      // skeleton's geometry is the loaded table's by construction
+                      // and cannot drift away from it.
+                      <TableCell key={String(col.key)} className={cn("px-4 py-3", col.className)}>
                         <Skeleton className="h-4 w-full" />
                       </TableCell>
                     ))}
@@ -728,11 +750,14 @@ const GroupRows = memo(GroupRowsInner) as typeof GroupRowsInner;
 
 export const EntityTable = memo(EntityTableInner) as typeof EntityTableInner;
 
-export function DefaultTableLoading({ label }: { label?: string }) {
-  return (
-    <div className="flex flex-col items-center justify-center rounded-lg border border-line bg-elev-2 p-8 text-center">
-      <Loader className="size-12 text-fg-faint mb-4 animate-spin" />
-      <h3 className="text-lg font-medium text-foreground">{label ?? "Loading…"}</h3>
-    </div>
-  );
-}
+/**
+ * There is deliberately no `DefaultTableLoading` any more. Every list used to
+ * pass one as `loadingState`, and because `loadingState` short-circuits the
+ * render it replaced the whole table -- columns and all -- with a centred
+ * spinner in a box. That is what made the wait look broken: the spinner has
+ * none of the table's geometry, so the moment the rows arrived the page jumped
+ * from a 150px box to a full-height table. Leaving `loadingState` unset lets
+ * the skeleton below run instead, and it is built from the real `columns`, so
+ * it matches by construction. `loadingState` itself stays for the rare screen
+ * whose loading state genuinely is not a table.
+ */
