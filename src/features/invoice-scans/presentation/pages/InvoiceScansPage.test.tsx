@@ -8,14 +8,21 @@ import type { InvoiceScan } from "../../domain/models";
 const api = vi.hoisted(() => ({
   listInvoiceScans: vi.fn(),
   updateInvoiceScan: vi.fn(),
+  deleteInvoiceScan: vi.fn(),
+  createManualInvoiceTransaction: vi.fn(),
+  attachInvoiceScanFile: vi.fn(),
+  getInvoiceScanDownloadUrl: vi.fn(),
 }));
 vi.mock("../../infra/invoiceScansApi", () => ({
   listInvoiceScans: api.listInvoiceScans,
   updateInvoiceScan: api.updateInvoiceScan,
+  deleteInvoiceScan: api.deleteInvoiceScan,
+  attachInvoiceScanFile: api.attachInvoiceScanFile,
+  getInvoiceScanDownloadUrl: api.getInvoiceScanDownloadUrl,
   getInvoiceScan: vi.fn(),
   retryInvoiceScan: vi.fn(),
   listProjectsForPicker: vi.fn().mockResolvedValue([]),
-  createManualInvoiceTransaction: vi.fn(),
+  createManualInvoiceTransaction: api.createManualInvoiceTransaction,
   uploadAndScanInvoice: vi.fn(),
 }));
 vi.mock("@/shared/presentation/toast", () => ({
@@ -162,33 +169,123 @@ describe("InvoiceScansPage", () => {
     expect(await screen.findByRole("heading", { name: "Document scans" })).toBeInTheDocument();
   });
 
-  it("opens the add-transaction form in a dialog and closes it again", async () => {
+  it("offers both ways to add a transaction inside one dialog", async () => {
     api.listInvoiceScans.mockResolvedValue([]);
     renderPage();
 
     const user = userEvent.setup();
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
 
-    await user.click(await screen.findByRole("button", { name: /add transaction/i }));
+    await user.click(await screen.findByRole("button", { name: /new transaction/i }));
     const dialog = await screen.findByRole("dialog");
-    expect(within(dialog).getByRole("heading", { name: "Add a transaction" })).toBeInTheDocument();
+    expect(within(dialog).getByRole("heading", { name: "New transaction" })).toBeInTheDocument();
     expect(within(dialog).getByLabelText("What was the payment for?")).toBeInTheDocument();
+    // El adjunto está en la misma ventana y no es obligatorio.
+    expect(
+      within(dialog).getByRole("button", { name: /attach invoice or receipt/i }),
+    ).toBeInTheDocument();
 
+    await user.click(within(dialog).getByRole("tab", { name: /scan document/i }));
+    expect(within(dialog).getByRole("button", { name: /take photo/i })).toBeInTheDocument();
+
+    await user.click(within(dialog).getByRole("tab", { name: /add transaction/i }));
     await user.click(within(dialog).getByRole("button", { name: "Cancel" }));
     await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
   });
 
-  it("opens the scanner in a dialog and closes it again", async () => {
+  it("saves a transaction with no document attached", async () => {
+    api.listInvoiceScans.mockResolvedValue([]);
+    api.createManualInvoiceTransaction.mockResolvedValue(scan({ id: "created" }));
+    renderPage();
+
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole("button", { name: /new transaction/i }));
+    const dialog = await screen.findByRole("dialog");
+
+    await user.type(within(dialog).getByLabelText("What was the payment for?"), "Materials");
+    await user.type(within(dialog).getByLabelText("Amount"), "69.60");
+    await user.click(within(dialog).getByRole("radio", { name: /payment made/i }));
+    await user.click(within(dialog).getByRole("button", { name: "Add transaction" }));
+
+    await waitFor(() => expect(api.createManualInvoiceTransaction).toHaveBeenCalled());
+    expect(api.createManualInvoiceTransaction.mock.calls[0][0]).toMatchObject({
+      description: "Materials",
+      direction: "payment_made",
+      amount: 69.6,
+      currency: "USD",
+      projectNumber: null,
+    });
+    expect(api.attachInvoiceScanFile).not.toHaveBeenCalled();
+  });
+
+  it("asks for a payment direction instead of doing nothing", async () => {
+    api.createManualInvoiceTransaction.mockClear();
     api.listInvoiceScans.mockResolvedValue([]);
     renderPage();
 
     const user = userEvent.setup();
-    await user.click(await screen.findByRole("button", { name: /scan invoice/i }));
+    await user.click(await screen.findByRole("button", { name: /new transaction/i }));
     const dialog = await screen.findByRole("dialog");
-    expect(within(dialog).getByRole("heading", { name: "Scan a document" })).toBeInTheDocument();
-    expect(within(dialog).getByRole("button", { name: /take photo/i })).toBeInTheDocument();
 
-    await user.click(within(dialog).getByRole("button", { name: "Close" }));
-    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    await user.type(within(dialog).getByLabelText("What was the payment for?"), "Materials");
+    await user.type(within(dialog).getByLabelText("Amount"), "10");
+    await user.click(within(dialog).getByRole("button", { name: "Add transaction" }));
+
+    expect(
+      await within(dialog).findByText(/choose whether the money went out or came in/i),
+    ).toBeInTheDocument();
+    expect(api.createManualInvoiceTransaction).not.toHaveBeenCalled();
+  });
+
+  it("corrects the amount of a row in place", async () => {
+    const pending = scan({
+      id: "pending",
+      recordType: "transaction",
+      extractedData: {
+        direction: "unknown",
+        classification: "other",
+        counterpartyName: "Lion Plumbing",
+        invoiceNumber: null,
+        issueDate: "2026-09-28",
+        dueDate: null,
+        currency: "USD",
+        subtotal: 69.6,
+        taxTotal: null,
+        total: 69.6,
+        paymentStatus: "paid",
+        description: "Materials",
+        transactionDirection: "payment_made",
+        confidence: 1,
+        lineItems: [],
+      },
+    });
+    api.updateInvoiceScan.mockResolvedValue(pending);
+    api.listInvoiceScans.mockResolvedValue([pending]);
+    renderPage();
+
+    const user = userEvent.setup();
+    const amount = (await screen.findAllByLabelText("Amount of s.pdf"))[0];
+    expect(amount).toHaveValue("69.6");
+    await user.clear(amount);
+    await user.type(amount, "870.40");
+    await user.tab();
+
+    expect(api.updateInvoiceScan).toHaveBeenCalledWith("pending", {
+      total: 870.4,
+      subtotal: 870.4,
+    });
+  });
+
+  it("deletes a transaction after confirming", async () => {
+    api.listInvoiceScans.mockResolvedValue([scan({ id: "pending" })]);
+    api.deleteInvoiceScan.mockResolvedValue(undefined);
+    renderPage();
+
+    const user = userEvent.setup();
+    await user.click((await screen.findAllByRole("button", { name: /^delete /i }))[0]);
+    const confirm = await screen.findByRole("alertdialog");
+    await user.click(within(confirm).getByRole("button", { name: "Delete" }));
+
+    await waitFor(() => expect(api.deleteInvoiceScan).toHaveBeenCalledWith("pending"));
   });
 });

@@ -1,6 +1,6 @@
 "use client";
 
-import { ExternalLink, FileText, Maximize2 } from "lucide-react";
+import { Download, ExternalLink, FileText, LoaderCircle, Maximize2 } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 
@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 
 import type { InvoiceScan } from "../../domain/models";
+import { useDownloadInvoiceScanFile } from "../hooks/useInvoiceScans";
 
 function Document({
   scan,
@@ -52,9 +53,10 @@ function Document({
 export function InvoiceDocumentPreview({
   scan,
 }: {
-  scan: Pick<InvoiceScan, "imageUrl" | "contentType" | "fileName">;
+  scan: Pick<InvoiceScan, "id" | "imageUrl" | "contentType" | "fileName">;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const download = useDownloadInvoiceScanFile();
 
   if (!scan.imageUrl) {
     return (
@@ -90,6 +92,23 @@ export function InvoiceDocumentPreview({
               <ExternalLink aria-hidden="true" />
               Open
             </a>
+          </Button>
+          {/* La URL de la vista previa abre el archivo en el navegador; la de
+              descarga viene firmada como `attachment`, así que se guarda. */}
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="h-7 px-2"
+            disabled={download.isPending}
+            onClick={() => download.mutate(scan.id)}
+          >
+            {download.isPending ? (
+              <LoaderCircle className="animate-spin" aria-hidden="true" />
+            ) : (
+              <Download aria-hidden="true" />
+            )}
+            Download
           </Button>
         </span>
       </figcaption>

@@ -80,6 +80,21 @@ export function LeadInfoSection({
         onCancel={cancelEdit}
       />
       <CardContent className="space-y-4">
+        {/* El nombre ya viajaba en el patch del inline edit, pero no había campo
+            donde escribirlo: una vez creado el lead no se podía corregir. */}
+        {isEditing ? (
+          <div>
+            <p className="text-sm text-muted-foreground mb-2">Lead Name</p>
+            <Input
+              value={editingValue.name ?? ""}
+              onChange={(e) => setField("name", e.target.value)}
+              placeholder="Enter lead name"
+              maxLength={140}
+              className="border-line-strong"
+            />
+          </div>
+        ) : null}
+
         <div className="grid grid-cols-2 gap-4">
           <div>
             <p className="text-sm text-muted-foreground">Lead Number</p>

@@ -1,14 +1,8 @@
 "use client";
 
-import {
-  AlertCircle,
-  ArrowDownLeft,
-  ArrowLeft,
-  ArrowUpRight,
-  LoaderCircle,
-  RotateCcw,
-} from "lucide-react";
+import { AlertCircle, ArrowLeft, LoaderCircle, RotateCcw } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -19,17 +13,19 @@ import { notifyError, notifySuccess } from "@/shared/presentation/toast";
 import {
   CLASSIFICATION_LABELS,
   formatDate,
-  formatMoney,
   invoiceTitle,
   STATUS_LABELS,
   TRANSACTION_DIRECTION_LABELS,
 } from "../../domain/labels";
 import type { InvoiceScan, InvoiceScanPatch } from "../../domain/models";
+import { AttachDocumentPanel } from "../components/AttachDocumentPanel";
+import { DeleteInvoiceScanButton } from "../components/DeleteInvoiceScanButton";
 import { EnteredCheckbox } from "../components/EnteredCheckbox";
 import { InvoiceDetailsForm } from "../components/InvoiceDetailsForm";
 import { InvoiceDocumentPreview } from "../components/InvoiceDocumentPreview";
 import { InvoiceScanWarnings } from "../components/InvoiceScanWarnings";
 import { ProjectNumberSelect } from "../components/ProjectNumberSelect";
+import { TransactionDetailsForm } from "../components/TransactionDetailsForm";
 import {
   useInvoiceScanDetail,
   useRetryInvoiceScan,
@@ -113,6 +109,7 @@ function QboSuggestions({ scan }: { scan: InvoiceScan }) {
 }
 
 export function InvoiceScanDetailPage({ id }: { id: string }) {
+  const router = useRouter();
   const query = useInvoiceScanDetail(id);
   const update = useUpdateInvoiceScan(id);
   const retry = useRetryInvoiceScan(id);
@@ -212,6 +209,11 @@ export function InvoiceScanDetailPage({ id }: { id: string }) {
               {scan.status === "failed" ? "Scan again" : "Scan file"}
             </Button>
           )}
+          <DeleteInvoiceScanButton
+            scan={scan}
+            withLabel
+            onDeleted={() => router.push("/finance/invoices")}
+          />
         </div>
       </header>
 
@@ -256,48 +258,30 @@ export function InvoiceScanDetailPage({ id }: { id: string }) {
           <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden="true" /> Scanning invoice…
         </div>
       ) : isManualTransaction ? (
-        <section className="rounded-2xl border bg-card p-4 shadow-sm sm:p-6" aria-labelledby="transaction-details-title">
-          <div className="flex items-start gap-3">
-            {transactionDirection === "payment_received" ? (
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-300"><ArrowDownLeft className="size-5" aria-hidden="true" /></span>
-            ) : (
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-rose-500/10 text-rose-300"><ArrowUpRight className="size-5" aria-hidden="true" /></span>
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(20rem,0.85fr)]">
+          <section className="min-w-0 rounded-2xl border bg-card p-4 shadow-sm sm:p-6">
+            <TransactionDetailsForm
+              data={invoice}
+              onSave={save}
+              saving={update.isPending && update.variables?.projectNumber === undefined}
+              disabled={!!scan.enteredAt}
+            />
+            {scan.enteredAt && (
+              <p className="mt-3 text-xs text-muted-foreground">
+                This transaction is marked as entered in QuickBooks. Untick "Entered"
+                above to edit it.
+              </p>
             )}
-            <div>
-              <h2 id="transaction-details-title" className="font-display font-semibold">Manual transaction</h2>
-              <p className="mt-1 text-sm text-muted-foreground">{invoice?.description || "Payment"}</p>
-            </div>
+          </section>
+
+          <div className="flex min-w-0 flex-col gap-4 xl:sticky xl:top-4 xl:self-start">
+            {scan.hasFile ? (
+              <InvoiceDocumentPreview scan={scan} />
+            ) : (
+              <AttachDocumentPanel scanId={scan.id} />
+            )}
           </div>
-          <dl className="mt-6 grid gap-x-8 gap-y-4 border-t pt-4 sm:grid-cols-2">
-            <div>
-              <dt className="text-xs font-medium text-muted-foreground">Direction</dt>
-              <dd className="mt-1 text-sm font-medium">
-                {transactionDirection ? TRANSACTION_DIRECTION_LABELS[transactionDirection] : "Unclassified"}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-xs font-medium text-muted-foreground">Amount</dt>
-              <dd className="mt-1 font-mono text-lg font-semibold tabular-nums text-primary">
-                {formatMoney(invoice?.total, invoice?.currency)}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-xs font-medium text-muted-foreground">Date</dt>
-              <dd className="mt-1 text-sm">{formatDate(invoice?.issueDate)}</dd>
-            </div>
-            <div>
-              <dt className="text-xs font-medium text-muted-foreground">
-                {transactionDirection === "payment_received" ? "Received from" : "Paid to"}
-              </dt>
-              <dd className="mt-1 text-sm">{invoice?.counterpartyName || "Not specified"}</dd>
-            </div>
-          </dl>
-          {scan.enteredAt && (
-            <p className="mt-4 border-t pt-4 text-xs text-muted-foreground">
-              This transaction is marked as entered in QuickBooks. Untick above to return it to the queue.
-            </p>
-          )}
-        </section>
+        </div>
       ) : (
         <div className="grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(20rem,0.85fr)]">
           <section className="min-w-0 rounded-2xl border bg-card p-4 shadow-sm sm:p-6">

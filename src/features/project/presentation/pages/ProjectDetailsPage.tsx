@@ -49,6 +49,8 @@ interface ProjectDetails {
   qboCustomerId?: string | null;
   attachments?: string[];
   financial?: {
+    /** false cuando QuickBooks no conoce este número de proyecto. */
+    found?: boolean;
     estimatedAmount?: number;
     invoicedAmount?: number;
     paidAmount?: number;
@@ -74,6 +76,8 @@ interface ProjectDetails {
     status?: string;
     notes?: string[];
     inReview: boolean;
+    /** Estimado guardado en la plataforma (independiente de QuickBooks). */
+    estimate?: number | null;
     contact?: {
       id: number;
       name: string;
@@ -160,13 +164,32 @@ function ProjectEditFormWithLeads({
   );
 }
 
-function toAmount(value: number | undefined): number | null {
+function toAmount(value: number | undefined | null): number | null {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
 
+/**
+ * El estimate que manda es el guardado en la plataforma; el de QuickBooks solo
+ * se usa mientras no haya uno propio. Antes se leía solo QuickBooks, así que un
+ * monto guardado sin sincronizar no se veía y parecía que no se había guardado.
+ * `found: false` significa que QuickBooks no conoce el proyecto: sus ceros no
+ * son una cifra, son la ausencia de dato.
+ */
+function resolveEstimate(
+  lead: ProjectDetails["lead"],
+  financial: ProjectDetails["financial"],
+): number | null {
+  const crm = toAmount(lead?.estimate);
+  if (crm !== null) return crm;
+  if (financial?.found === false) return null;
+  return toAmount(financial?.estimatedAmount);
+}
+
 /** Contracted work still to invoice. */
-function computeBacklog(financial: ProjectDetails["financial"]): number | null {
-  const estimate = toAmount(financial?.estimatedAmount);
+function computeBacklog(
+  financial: ProjectDetails["financial"],
+  estimate: number | null,
+): number | null {
   const invoiced = toAmount(financial?.invoicedAmount);
   return estimate !== null && invoiced !== null ? estimate - invoiced : null;
 }
@@ -465,8 +488,8 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
   const [isSavingEstimate, setIsSavingEstimate] = useState(false);
 
   const handleStartEditingEstimate = useCallback(() => {
-    const current = projectDetails?.financial?.estimatedAmount;
-    setEditingEstimate(typeof current === "number" ? String(current) : "");
+    const current = resolveEstimate(projectDetails?.lead, projectDetails?.financial);
+    setEditingEstimate(current === null ? "" : String(current));
     setIsEditingEstimate(true);
   }, [projectDetails]);
 
@@ -487,7 +510,17 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
       const result = await updateProjectEstimateAction(projectDetails.id, amount);
       if (!result.success) throw new Error(result.error);
       setIsEditingEstimate(false);
-      toast.success("Estimate updated and synced to QuickBooks.");
+      if (result.data.synced) {
+        toast.success("Estimate saved and synced to QuickBooks.");
+      } else {
+        // El monto quedó guardado: decirlo, y por qué QuickBooks no lo tomó.
+        toast.warning(
+          result.data.syncError
+            ? `Estimate saved. QuickBooks was not updated: ${result.data.syncError}`
+            : "Estimate saved. QuickBooks was not updated.",
+          { duration: 8000 },
+        );
+      }
       router.refresh();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to update estimate");
@@ -687,6 +720,7 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
   }
 
   const lead = projectDetails.lead;
+  const resolvedEstimate = resolveEstimate(lead, projectDetails.financial);
   const paymentRows = toPaymentRows(projectDetails.financial?.payments);
 
   return (
@@ -908,15 +942,16 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
                                 </Button>
                               </div>
                               <p className="text-xs text-muted-foreground mt-1">
-                                This is the project&apos;s total estimate. Saving updates it in QuickBooks.
+                                This is the project&apos;s total estimate. It is saved here and
+                                synced to QuickBooks when the project is linked to a job.
                               </p>
                             </div>
                           ) : (
                             <div className="flex items-center gap-2">
                               <p className="font-semibold text-lg">
-                                {typeof projectDetails.financial?.estimatedAmount === "number"
-                                  ? formatCurrency(projectDetails.financial.estimatedAmount)
-                                  : "—"}
+                                {resolvedEstimate === null
+                                  ? "—"
+                                  : formatCurrency(resolvedEstimate)}
                               </p>
                               <Button
                                 variant="ghost"
@@ -947,11 +982,11 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
                       <Separator />
                       <ProjectMoneySummary
                         name={lead?.name}
-                        estimate={toAmount(projectDetails.financial?.estimatedAmount)}
+                        estimate={resolvedEstimate}
                         invoiced={toAmount(projectDetails.financial?.invoicedAmount)}
                         collected={toAmount(projectDetails.financial?.paidAmount)}
                         outstanding={toAmount(projectDetails.financial?.outstandingAmount)}
-                        backlog={computeBacklog(projectDetails.financial)}
+                        backlog={computeBacklog(projectDetails.financial, resolvedEstimate)}
                       />
 
                       <Separator />

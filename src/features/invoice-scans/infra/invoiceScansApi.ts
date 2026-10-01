@@ -75,6 +75,47 @@ export async function createManualInvoiceTransaction(
   return data;
 }
 
+/**
+ * Adjunta un documento a un registro que ya existe (la transacción manual se
+ * guarda primero y el archivo es opcional). Sube el archivo a la URL firmada y
+ * devuelve el registro ya con el documento.
+ */
+export async function attachInvoiceScanFile(
+  id: string,
+  file: File,
+): Promise<InvoiceScan> {
+  const contentType =
+    file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")
+      ? "application/pdf"
+      : file.type;
+  const { data } = await optimizedApiClient.post<InvoiceScan & { uploadUrl: string }>(
+    `/invoice-scans/${id}/attachment`,
+    { fileName: file.name, contentType, sizeBytes: file.size },
+  );
+  const response = await fetch(data.uploadUrl, {
+    method: "PUT",
+    headers: { "Content-Type": contentType },
+    body: file,
+  });
+  if (!response.ok) throw new Error("The file could not be uploaded. Try again.");
+  const { uploadUrl: _uploadUrl, ...scan } = data;
+  return scan;
+}
+
+/** URL firmada que descarga el documento original en vez de abrirlo. */
+export async function getInvoiceScanDownloadUrl(
+  id: string,
+): Promise<{ url: string; fileName: string }> {
+  const { data } = await optimizedApiClient.get<{ url: string; fileName: string }>(
+    `/invoice-scans/${id}/download`,
+  );
+  return data;
+}
+
+export async function deleteInvoiceScan(id: string): Promise<void> {
+  await optimizedApiClient.delete(`/invoice-scans/${id}`);
+}
+
 export async function updateInvoiceScan(
   id: string,
   patch: InvoiceScanPatch,

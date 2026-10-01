@@ -56,6 +56,8 @@ export interface InvoiceScan {
   id: string;
   recordType?: InvoiceScanRecordType;
   fileName: string;
+  /** Si el registro tiene documento original guardado, así que se puede descargar. */
+  hasFile?: boolean;
   contentType: string;
   status: InvoiceScanStatus;
   extractedData: ExtractedInvoiceData | null;
@@ -92,6 +94,10 @@ export interface InvoiceScanPatch {
   taxTotal?: number | null;
   total?: number | null;
   paymentStatus?: InvoicePaymentStatus;
+  /** Transacciones manuales: para qué fue el pago. */
+  description?: string | null;
+  /** Transacciones manuales: si el dinero salió o entró. */
+  transactionDirection?: InvoiceTransactionDirection;
   lineItems?: Array<{
     description: string;
     quantity?: number | null;

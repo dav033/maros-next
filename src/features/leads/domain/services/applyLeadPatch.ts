@@ -70,7 +70,13 @@ const PATCH_HANDLERS: {
     acc: Lead
   ) => Lead;
 } = {
-  name: (v, _ctx, acc) => ({ ...acc, name: validateLeadName(String(v)) }),
+  // Vaciar el nombre no es un cambio: `String(null)` guardaría el texto "null"
+  // como nombre del lead, y un lead sin nombre no se puede distinguir en las
+  // listas. Se queda el que tenía.
+  name: (v, _ctx, acc) =>
+    v === null || v === undefined || String(v).trim() === ""
+      ? acc
+      : { ...acc, name: validateLeadName(String(v)) },
 
   location: (v, _ctx, acc) => {
     const val = normalizeText(String(v));

@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertCircle, Camera, CheckCircle2, FileText, Plus, ScanLine } from "lucide-react";
+import { AlertCircle, Camera, CheckCircle2, FileText, Plus } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { PageHeaderCard } from "@/components/shared";
@@ -8,9 +8,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 
 import { partitionInvoiceScans } from "../../domain/partition";
-import { AddTransactionDialog } from "../components/AddTransactionDialog";
 import { InvoiceScansTable } from "../components/InvoiceScansTable";
-import { ScanInvoiceDialog } from "../components/ScanInvoiceDialog";
+import { NewTransactionDialog } from "../components/NewTransactionDialog";
 import { useInvoiceScansList } from "../hooks/useInvoiceScans";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -32,7 +31,6 @@ function LoadingRows() {
 export function InvoiceScansPage() {
   const query = useInvoiceScansList();
   const [transactionOpen, setTransactionOpen] = useState(false);
-  const [scanOpen, setScanOpen] = useState(false);
   const { pending, completed } = useMemo(
     () => partitionInvoiceScans(query.data ?? []),
     [query.data],
@@ -45,32 +43,19 @@ export function InvoiceScansPage() {
         title="Document scans"
         description="Scanned documents and manual transactions waiting to be entered in QuickBooks."
         rightSlot={
-          <div className="flex flex-wrap gap-2">
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              className="rounded-lg"
-              onClick={() => setTransactionOpen(true)}
-            >
-              <Plus aria-hidden="true" />
-              Add transaction
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              className="rounded-lg"
-              onClick={() => setScanOpen(true)}
-            >
-              <ScanLine aria-hidden="true" />
-              Scan invoice
-            </Button>
-          </div>
+          <Button
+            type="button"
+            size="sm"
+            className="rounded-lg"
+            onClick={() => setTransactionOpen(true)}
+          >
+            <Plus aria-hidden="true" />
+            New transaction
+          </Button>
         }
       />
 
-      <AddTransactionDialog open={transactionOpen} onOpenChange={setTransactionOpen} />
-      <ScanInvoiceDialog open={scanOpen} onOpenChange={setScanOpen} />
+      <NewTransactionDialog open={transactionOpen} onOpenChange={setTransactionOpen} />
 
       {query.isError && (
         <Alert variant="destructive">

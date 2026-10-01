@@ -7,8 +7,11 @@ import { notifyError, notifySuccess } from "@/shared/presentation/toast";
 
 import type { InvoiceScan, InvoiceScanPatch } from "../../domain/models";
 import {
+  attachInvoiceScanFile,
   createManualInvoiceTransaction,
+  deleteInvoiceScan,
   getInvoiceScan,
+  getInvoiceScanDownloadUrl,
   listInvoiceScans,
   listProjectsForPicker,
   retryInvoiceScan,
@@ -121,6 +124,59 @@ export function useUpdateInvoiceScanInline() {
       );
     },
     onError: (error) => notifyError(error, "The invoice could not be updated."),
+  });
+}
+
+/** Adjunta un documento a un registro ya guardado; el archivo es opcional. */
+export function useAttachInvoiceScanFile() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, file }: { id: string; file: File }) => attachInvoiceScanFile(id, file),
+    onSuccess: (updated) => {
+      queryClient.setQueryData<InvoiceScan>(invoiceScanKeys.detail(updated.id), (current) =>
+        current ? { ...current, ...updated } : updated,
+      );
+      // La respuesta del adjunto no trae `imageUrl` (la URL firmada la da el
+      // detalle), así que hay que volver a pedirlo para poder ver el documento.
+      void queryClient.invalidateQueries({ queryKey: invoiceScanKeys.detail(updated.id) });
+      void queryClient.invalidateQueries({ queryKey: invoiceScanKeys.list() });
+      notifySuccess("Document attached");
+    },
+    onError: (error) => notifyError(error, "The document could not be attached."),
+  });
+}
+
+/**
+ * Borra el registro. Quita la fila de la lista en el momento; la lista se vuelve
+ * a pedir igual para no quedar desfasada con lo que haya hecho otro usuario.
+ */
+export function useDeleteInvoiceScan() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => deleteInvoiceScan(id),
+    onSuccess: (_result, id) => {
+      queryClient.setQueryData<InvoiceScan[]>(invoiceScanKeys.list(), (current) =>
+        current?.filter((scan) => scan.id !== id),
+      );
+      queryClient.removeQueries({ queryKey: invoiceScanKeys.detail(id) });
+      void queryClient.invalidateQueries({ queryKey: invoiceScanKeys.list() });
+      notifySuccess("Transaction deleted");
+    },
+    onError: (error) => notifyError(error, "The transaction could not be deleted."),
+  });
+}
+
+/**
+ * Pide la URL firmada de descarga y la abre. La URL fuerza `attachment`, así que
+ * el navegador guarda el archivo en vez de abrir el PDF en una pestaña.
+ */
+export function useDownloadInvoiceScanFile() {
+  return useMutation({
+    mutationFn: (id: string) => getInvoiceScanDownloadUrl(id),
+    onSuccess: ({ url }) => {
+      window.open(url, "_blank", "noopener,noreferrer");
+    },
+    onError: (error) => notifyError(error, "The document could not be downloaded."),
   });
 }
 

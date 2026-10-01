@@ -23,8 +23,16 @@ import {
   TRANSACTION_DIRECTION_LABELS,
 } from "../../domain/labels";
 import type { InvoiceScan } from "../../domain/models";
+import { DeleteInvoiceScanButton } from "./DeleteInvoiceScanButton";
 import { EnteredCheckbox } from "./EnteredCheckbox";
-import { CategoryCell, CommentsCell, LastEditorCell, ProjectCell } from "./InvoiceRowEditors";
+import {
+  AmountCell,
+  CategoryCell,
+  CommentsCell,
+  DownloadFileButton,
+  LastEditorCell,
+  ProjectCell,
+} from "./InvoiceRowEditors";
 
 interface Props {
   scans: InvoiceScan[];
@@ -86,6 +94,9 @@ export function InvoiceScansTable({ scans, variant }: Props) {
               <TableHead className="text-right">Total</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="whitespace-nowrap">{dateHeader}</TableHead>
+              <TableHead className="w-24 text-right">
+                <span className="sr-only">Actions</span>
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -122,13 +133,19 @@ export function InvoiceScansTable({ scans, variant }: Props) {
                   <TableCell>
                     <LastEditorCell scan={scan} users={users} />
                   </TableCell>
-                  <TableCell className="text-right font-mono tabular-nums">
-                    {formatMoney(invoice?.total, invoice?.currency)}
+                  <TableCell className="text-right">
+                    <AmountCell scan={scan} />
                   </TableCell>
                   <TableCell>
                     <StatusBadge scan={scan} />
                   </TableCell>
                   <TableCell className="whitespace-nowrap text-muted-foreground">{dateOf(scan)}</TableCell>
+                  <TableCell className="text-right">
+                    <span className="inline-flex items-center justify-end gap-0.5">
+                      <DownloadFileButton scan={scan} />
+                      <DeleteInvoiceScanButton scan={scan} />
+                    </span>
+                  </TableCell>
                 </TableRow>
               );
             })}
@@ -140,7 +157,7 @@ export function InvoiceScansTable({ scans, variant }: Props) {
         {scans.map((scan) => {
           const invoice = scan.extractedData;
           return (
-            <li key={scan.id} className="flex gap-3 p-4 transition-colors hover:bg-elev-3">
+            <li key={scan.id} className="flex gap-2 p-4 transition-colors hover:bg-elev-3">
               <EnteredCheckbox scan={scan} className="pt-1" />
               <Link
                 href={`/finance/invoices/${scan.id}`}
@@ -165,6 +182,10 @@ export function InvoiceScansTable({ scans, variant }: Props) {
                 </div>
                 {scan.comments && <p className="line-clamp-2 text-xs text-muted-foreground">{scan.comments}</p>}
               </Link>
+              <span className="flex shrink-0 flex-col items-center gap-0.5">
+                <DownloadFileButton scan={scan} />
+                <DeleteInvoiceScanButton scan={scan} />
+              </span>
             </li>
           );
         })}

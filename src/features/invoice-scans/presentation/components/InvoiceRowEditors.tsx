@@ -1,8 +1,9 @@
 "use client";
 
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, Download, LoaderCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandEmpty,
@@ -25,7 +26,11 @@ import { cn } from "@/lib/utils";
 
 import { CLASSIFICATION_LABELS } from "../../domain/labels";
 import type { InvoiceClassification, InvoiceScan, InvoiceScanPatch } from "../../domain/models";
-import { useProjectPickerOptions, useUpdateInvoiceScanInline } from "../hooks/useInvoiceScans";
+import {
+  useDownloadInvoiceScanFile,
+  useProjectPickerOptions,
+  useUpdateInvoiceScanInline,
+} from "../hooks/useInvoiceScans";
 
 /** Saves one field of a row; every editor below is a thin control over this. */
 function useRowSave(scan: Pick<InvoiceScan, "id">) {
@@ -133,6 +138,88 @@ export function CategoryCell({ scan }: { scan: InvoiceScan }) {
         ))}
       </SelectContent>
     </Select>
+  );
+}
+
+/**
+ * El monto, editable desde la fila: el escaneo a veces lee un número que no es
+ * el del documento y corregirlo no debería obligar a abrir el detalle. En una
+ * transacción manual el subtotal acompaña al total, que es un solo importe.
+ */
+export function AmountCell({ scan }: { scan: InvoiceScan }) {
+  const { save, saving } = useRowSave(scan);
+  const invoice = scan.extractedData;
+  const stored = invoice?.total ?? null;
+  const [draft, setDraft] = useState(stored === null ? "" : String(stored));
+
+  useEffect(() => setDraft(stored === null ? "" : String(stored)), [stored]);
+
+  // Sin datos leídos no hay dónde guardar el importe; eso se resuelve en el
+  // detalle, que es donde se escriben todos los campos del documento.
+  if (!invoice) return <span className="px-2 text-muted-foreground">—</span>;
+
+  const commit = () => {
+    const trimmed = draft.trim();
+    if (trimmed === "") {
+      if (stored === null) return;
+      save(scan.recordType === "transaction" ? { total: null, subtotal: null } : { total: null });
+      return;
+    }
+    const next = Number(trimmed);
+    if (!Number.isFinite(next) || next < 0) {
+      setDraft(stored === null ? "" : String(stored));
+      return;
+    }
+    if (next === stored) return;
+    save(scan.recordType === "transaction" ? { total: next, subtotal: next } : { total: next });
+  };
+
+  return (
+    <Input
+      value={draft}
+      inputMode="decimal"
+      disabled={saving}
+      placeholder="0.00"
+      aria-label={`Amount of ${scan.fileName}`}
+      className="h-8 w-28 border-line-strong bg-transparent px-2 text-right font-mono tabular-nums shadow-none hover:bg-elev-3"
+      onChange={(event) => setDraft(event.target.value)}
+      onBlur={commit}
+      onKeyDown={(event) => {
+        if (event.key === "Enter") event.currentTarget.blur();
+        if (event.key === "Escape") setDraft(stored === null ? "" : String(stored));
+      }}
+    />
+  );
+}
+
+/** Descarga el documento original; solo aparece cuando hay archivo guardado. */
+export function DownloadFileButton({
+  scan,
+  className,
+}: {
+  scan: Pick<InvoiceScan, "id" | "fileName" | "hasFile">;
+  className?: string;
+}) {
+  const download = useDownloadInvoiceScanFile();
+  if (!scan.hasFile) return null;
+  const busy = download.isPending && download.variables === scan.id;
+
+  return (
+    <Button
+      type="button"
+      variant="ghost"
+      size="icon"
+      className={cn("size-8 text-muted-foreground hover:text-foreground", className)}
+      aria-label={`Download ${scan.fileName}`}
+      disabled={busy}
+      onClick={() => download.mutate(scan.id)}
+    >
+      {busy ? (
+        <LoaderCircle className="animate-spin" aria-hidden="true" />
+      ) : (
+        <Download aria-hidden="true" />
+      )}
+    </Button>
   );
 }
 

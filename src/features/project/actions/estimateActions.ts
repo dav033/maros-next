@@ -48,14 +48,20 @@ export async function getProjectEstimateFileAction(
 }
 
 export interface UpdateEstimateResult {
+  /** Monto guardado en la plataforma; es el que queda, sincronice o no QuickBooks. */
+  savedAmount: number;
+  synced: boolean;
+  syncError: string | null;
   estimate: unknown;
   financial: { estimatedAmount?: number } | null;
 }
 
 /**
- * Actualiza el valor del estimate del proyecto desde la plataforma. El backend
- * lo sincroniza con QuickBooks (reescribe el estimate más reciente a una única
- * línea con ese total, o crea uno si no existe).
+ * Actualiza el valor del estimate del proyecto. El backend lo guarda en el CRM y
+ * después intenta sincronizarlo con QuickBooks (reescribe el estimate más
+ * reciente a una única línea con ese total, o crea uno si no existe). Si esa
+ * sincronización falla, el monto queda guardado igual y la respuesta lo dice en
+ * `synced` / `syncError`.
  */
 export async function updateProjectEstimateAction(
   projectId: number,
