@@ -211,7 +211,6 @@ export function InvoiceScanDetailPage({ id }: { id: string }) {
           )}
           <DeleteInvoiceScanButton
             scan={scan}
-            withLabel
             onDeleted={() => router.push("/finance/invoices")}
           />
         </div>

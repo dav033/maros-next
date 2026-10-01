@@ -23,16 +23,15 @@ import {
   TRANSACTION_DIRECTION_LABELS,
 } from "../../domain/labels";
 import type { InvoiceScan } from "../../domain/models";
-import { DeleteInvoiceScanButton } from "./DeleteInvoiceScanButton";
 import { EnteredCheckbox } from "./EnteredCheckbox";
 import {
   AmountCell,
   CategoryCell,
   CommentsCell,
-  DownloadFileButton,
-  LastEditorCell,
+  lastEditorLabel,
   ProjectCell,
 } from "./InvoiceRowEditors";
+import { InvoiceScanRowActions } from "./InvoiceScanRowActions";
 
 interface Props {
   scans: InvoiceScan[];
@@ -75,6 +74,7 @@ export function InvoiceScansTable({ scans, variant }: Props) {
     if (variant === "completed") return formatDate(scan.enteredAt);
     return formatDate(scan.recordType === "transaction" ? scan.extractedData?.issueDate : scan.createdAt);
   };
+  const editorOf = (scan: InvoiceScan) => lastEditorLabel(scan, users);
 
   return (
     <>
@@ -82,19 +82,16 @@ export function InvoiceScansTable({ scans, variant }: Props) {
         <Table>
           <TableHeader className="bg-elev-2">
             <TableRow>
-              <TableHead className="w-12">
+              <TableHead className="w-10 px-2">
                 <span className="sr-only">Entered in QuickBooks</span>
               </TableHead>
-              <TableHead>Invoice / transaction</TableHead>
-              <TableHead>Counterparty</TableHead>
-              <TableHead>Project</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead>Comments</TableHead>
-              <TableHead>Last edited by</TableHead>
-              <TableHead className="text-right">Total</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="whitespace-nowrap">{dateHeader}</TableHead>
-              <TableHead className="w-24 text-right">
+              <TableHead className="px-2">Document</TableHead>
+              <TableHead className="w-28 px-2">Project</TableHead>
+              <TableHead className="w-36 px-2">Category</TableHead>
+              <TableHead className="w-44 px-2">Comments</TableHead>
+              <TableHead className="w-24 px-2 text-right">Total</TableHead>
+              <TableHead className="w-32 px-2">{variant === "completed" ? dateHeader : "Status"}</TableHead>
+              <TableHead className="w-10 px-2">
                 <span className="sr-only">Actions</span>
               </TableHead>
             </TableRow>
@@ -104,10 +101,12 @@ export function InvoiceScansTable({ scans, variant }: Props) {
               const invoice = scan.extractedData;
               return (
                 <TableRow key={scan.id} className={scan.enteredAt ? "text-muted-foreground" : "transition-colors hover:bg-elev-3"}>
-                  <TableCell>
+                  <TableCell className="px-2">
                     <EnteredCheckbox scan={scan} />
                   </TableCell>
-                  <TableCell className="max-w-52">
+                  {/* Documento, contraparte y tipo en una sola celda: eran tres
+                      columnas de texto que se leen como una sola cosa. */}
+                  <TableCell className="max-w-64 px-2">
                     <Link
                       href={`/finance/invoices/${scan.id}`}
                       className="block truncate font-medium text-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -115,36 +114,34 @@ export function InvoiceScansTable({ scans, variant }: Props) {
                       {invoiceTitle(scan)}
                     </Link>
                     <span className="block truncate text-xs text-muted-foreground">
-                      {recordDirection(scan)}
+                      {invoice?.counterpartyName
+                        ? `${invoice.counterpartyName} · ${recordDirection(scan)}`
+                        : recordDirection(scan)}
                     </span>
                   </TableCell>
-                  <TableCell className="max-w-48 truncate">
-                    {invoice?.counterpartyName || <span className="text-muted-foreground">Not identified</span>}
-                  </TableCell>
-                  <TableCell className="whitespace-nowrap">
+                  <TableCell className="px-2">
                     <ProjectCell scan={scan} />
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="px-2">
                     <CategoryCell scan={scan} />
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="px-2">
                     <CommentsCell scan={scan} />
                   </TableCell>
-                  <TableCell>
-                    <LastEditorCell scan={scan} users={users} />
-                  </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="px-2 text-right">
                     <AmountCell scan={scan} />
                   </TableCell>
-                  <TableCell>
+                  {/* Estado, fecha y último editor apilados: tres datos cortos que
+                      no necesitan una columna cada uno. */}
+                  <TableCell className="px-2">
                     <StatusBadge scan={scan} />
-                  </TableCell>
-                  <TableCell className="whitespace-nowrap text-muted-foreground">{dateOf(scan)}</TableCell>
-                  <TableCell className="text-right">
-                    <span className="inline-flex items-center justify-end gap-0.5">
-                      <DownloadFileButton scan={scan} />
-                      <DeleteInvoiceScanButton scan={scan} />
+                    <span className="mt-0.5 block truncate text-xs text-muted-foreground">
+                      {dateOf(scan)}
+                      {editorOf(scan) ? ` · ${editorOf(scan)}` : ""}
                     </span>
+                  </TableCell>
+                  <TableCell className="px-2">
+                    <InvoiceScanRowActions scan={scan} />
                   </TableCell>
                 </TableRow>
               );
@@ -182,9 +179,8 @@ export function InvoiceScansTable({ scans, variant }: Props) {
                 </div>
                 {scan.comments && <p className="line-clamp-2 text-xs text-muted-foreground">{scan.comments}</p>}
               </Link>
-              <span className="flex shrink-0 flex-col items-center gap-0.5">
-                <DownloadFileButton scan={scan} />
-                <DeleteInvoiceScanButton scan={scan} />
+              <span className="shrink-0">
+                <InvoiceScanRowActions scan={scan} />
               </span>
             </li>
           );

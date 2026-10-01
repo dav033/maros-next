@@ -153,7 +153,8 @@ describe("InvoiceScansPage", () => {
     renderPage();
 
     expect((await screen.findAllByRole("button", { name: "Project of s.pdf" }))[0]).toHaveTextContent("050P-0826");
-    expect(screen.getAllByText("Ana Perez").length).toBeGreaterThan(0);
+    // El último editor ya no tiene columna propia: acompaña a la fecha.
+    expect(screen.getAllByText(/Ana Perez/).length).toBeGreaterThan(0);
   });
 
   it("disables the checkbox for scans without details", async () => {
@@ -282,7 +283,8 @@ describe("InvoiceScansPage", () => {
     renderPage();
 
     const user = userEvent.setup();
-    await user.click((await screen.findAllByRole("button", { name: /^delete /i }))[0]);
+    await user.click((await screen.findAllByRole("button", { name: /^actions for /i }))[0]);
+    await user.click(await screen.findByRole("menuitem", { name: "Delete" }));
     const confirm = await screen.findByRole("alertdialog");
     await user.click(within(confirm).getByRole("button", { name: "Delete" }));
 

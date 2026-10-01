@@ -1,9 +1,8 @@
 "use client";
 
-import { Check, ChevronsUpDown, Download, LoaderCircle } from "lucide-react";
+import { Check, ChevronsUpDown } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandEmpty,
@@ -26,11 +25,7 @@ import { cn } from "@/lib/utils";
 
 import { CLASSIFICATION_LABELS } from "../../domain/labels";
 import type { InvoiceClassification, InvoiceScan, InvoiceScanPatch } from "../../domain/models";
-import {
-  useDownloadInvoiceScanFile,
-  useProjectPickerOptions,
-  useUpdateInvoiceScanInline,
-} from "../hooks/useInvoiceScans";
+import { useProjectPickerOptions, useUpdateInvoiceScanInline } from "../hooks/useInvoiceScans";
 
 /** Saves one field of a row; every editor below is a thin control over this. */
 function useRowSave(scan: Pick<InvoiceScan, "id">) {
@@ -64,12 +59,14 @@ export function ProjectCell({ scan }: { scan: InvoiceScan }) {
           disabled={saving}
           aria-label={`Project of ${scan.fileName}`}
           className={cn(
-            "inline-flex h-8 min-w-24 items-center justify-between gap-2 rounded-md border border-line-strong px-2 font-mono text-sm tabular-nums hover:bg-elev-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60",
+            // Sin borde ni ancho mínimo: se lee como texto y se nota control al
+            // pasar por encima o enfocarlo. La tabla tenía demasiadas cajas.
+            "inline-flex h-7 max-w-full items-center gap-1 rounded-md px-1.5 font-mono text-sm tabular-nums hover:bg-elev-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60",
             !current && "text-muted-foreground",
           )}
         >
-          <span className="truncate">{current || "Add project"}</span>
-          <ChevronsUpDown className="h-3.5 w-3.5 shrink-0 opacity-50" aria-hidden="true" />
+          <span className="truncate">{current || "—"}</span>
+          <ChevronsUpDown className="h-3 w-3 shrink-0 opacity-40" aria-hidden="true" />
         </button>
       </PopoverTrigger>
       <PopoverContent align="start" className="w-80 p-0">
@@ -126,7 +123,7 @@ export function CategoryCell({ scan }: { scan: InvoiceScan }) {
     >
       <SelectTrigger
         aria-label={`Category of ${scan.fileName}`}
-        className="h-8 min-w-36 border-line-strong bg-transparent px-2 shadow-none hover:bg-elev-3"
+        className="h-7 w-full border-none bg-transparent px-1.5 text-sm shadow-none hover:bg-elev-4 focus:ring-2 focus:ring-ring [&>svg]:size-3 [&>svg]:opacity-40"
       >
         <SelectValue />
       </SelectTrigger>
@@ -181,7 +178,7 @@ export function AmountCell({ scan }: { scan: InvoiceScan }) {
       disabled={saving}
       placeholder="0.00"
       aria-label={`Amount of ${scan.fileName}`}
-      className="h-8 w-28 border-line-strong bg-transparent px-2 text-right font-mono tabular-nums shadow-none hover:bg-elev-3"
+      className="h-7 w-20 border-none bg-transparent px-1.5 text-right font-mono tabular-nums shadow-none hover:bg-elev-4 focus-visible:ring-2 focus-visible:ring-ring"
       onChange={(event) => setDraft(event.target.value)}
       onBlur={commit}
       onKeyDown={(event) => {
@@ -189,37 +186,6 @@ export function AmountCell({ scan }: { scan: InvoiceScan }) {
         if (event.key === "Escape") setDraft(stored === null ? "" : String(stored));
       }}
     />
-  );
-}
-
-/** Descarga el documento original; solo aparece cuando hay archivo guardado. */
-export function DownloadFileButton({
-  scan,
-  className,
-}: {
-  scan: Pick<InvoiceScan, "id" | "fileName" | "hasFile">;
-  className?: string;
-}) {
-  const download = useDownloadInvoiceScanFile();
-  if (!scan.hasFile) return null;
-  const busy = download.isPending && download.variables === scan.id;
-
-  return (
-    <Button
-      type="button"
-      variant="ghost"
-      size="icon"
-      className={cn("size-8 text-muted-foreground hover:text-foreground", className)}
-      aria-label={`Download ${scan.fileName}`}
-      disabled={busy}
-      onClick={() => download.mutate(scan.id)}
-    >
-      {busy ? (
-        <LoaderCircle className="animate-spin" aria-hidden="true" />
-      ) : (
-        <Download aria-hidden="true" />
-      )}
-    </Button>
   );
 }
 
@@ -245,9 +211,9 @@ export function CommentsCell({ scan }: { scan: InvoiceScan }) {
       value={draft}
       maxLength={2000}
       disabled={saving}
-      placeholder="Add a comment"
+      placeholder="—"
       aria-label={`Comments on ${scan.fileName}`}
-      className="h-8 min-w-44 border-line-strong bg-transparent px-2 shadow-none hover:bg-elev-3"
+      className="h-7 w-full border-none bg-transparent px-1.5 shadow-none hover:bg-elev-4 focus-visible:ring-2 focus-visible:ring-ring"
       onChange={(event) => setDraft(event.target.value)}
       onBlur={commit}
       onKeyDown={(event) => {
@@ -258,13 +224,12 @@ export function CommentsCell({ scan }: { scan: InvoiceScan }) {
   );
 }
 
-/** Read-only: the server records whoever last saved a change to the row. */
-export function LastEditorCell({ scan, users }: { scan: InvoiceScan; users: DirectoryUser[] }) {
-  if (scan.updatedBy === null) return <span className="px-2 text-muted-foreground">—</span>;
+/** El nombre de quien guardó el último cambio, o null si nadie lo ha tocado. */
+export function lastEditorLabel(
+  scan: Pick<InvoiceScan, "updatedBy">,
+  users: DirectoryUser[],
+): string | null {
+  if (scan.updatedBy === null) return null;
   const editor = users.find((user) => user.id === scan.updatedBy);
-  return (
-    <span className="block max-w-40 truncate px-2 text-sm">
-      {editor ? userLabel(editor) : `User #${scan.updatedBy}`}
-    </span>
-  );
+  return editor ? userLabel(editor) : `User #${scan.updatedBy}`;
 }
