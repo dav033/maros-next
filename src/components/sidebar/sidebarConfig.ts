@@ -19,6 +19,8 @@ import {
   Video,
   ArrowDownToLine,
   Plug,
+  Wallet,
+  Hourglass,
 } from "lucide-react";
 import type { Permission } from "@/shared/auth/permissions";
 
@@ -176,6 +178,18 @@ const analyticsSection: SidebarSection = {
       icon: LayoutDashboard,
       permission: "dashboard:read",
     },
+    {
+      title: "Client scorecard",
+      href: "/reports/clients",
+      icon: Users,
+      permission: "dashboard:read",
+    },
+    {
+      title: "Stale leads",
+      href: "/reports/stale-leads",
+      icon: Hourglass,
+      permission: "dashboard:read",
+    },
   ],
 };
 
@@ -230,6 +244,14 @@ const settingsSection: SidebarSection = {
 const financeSection: SidebarSection = {
   section: "Finance",
   items: [
+    // Before the two capture screens on purpose: this is the one that says what is owed,
+    // and the reason to open Finance at all.
+    {
+      title: "Receivables",
+      href: "/finance/receivables",
+      icon: Wallet,
+      permission: "finance:read",
+    },
     {
       title: "Document scans",
       href: "/finance/invoices",
