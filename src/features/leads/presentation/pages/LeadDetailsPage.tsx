@@ -31,6 +31,7 @@ import type { CompanyFormValue } from "@/features/company/presentation/molecules
 import { createProject, projectsKeys } from "@/project/application";
 import { useInlineEdit } from "@/common/hooks";
 import { useHasPermission } from "@/shared/auth/useHasPermission";
+import { AppError } from "@/shared/errors";
 import { ScheduleMeetingDialog } from "@/features/google-calendar/presentation/ScheduleMeetingDialog";
 
 import { LeadInfoSection } from "./sections/LeadInfoSection";
@@ -57,6 +58,18 @@ const LEAD_TABS = [
 
 const LEAD_TAB_VALUES = LEAD_TABS.map((tab) => tab.value);
 const DEFAULT_LEAD_TAB = "resumen";
+
+/**
+ * El 422 por pasar a LOST sin motivo viaja en `code`, y su mensaje genérico no dice
+ * qué hacer. El diálogo de motivo lo evita de entrada; esto cubre que llegue por
+ * otra vía (datos recargados en otra pestaña, por ejemplo).
+ */
+function describeLeadSaveError(error: unknown): Error {
+  const appError = AppError.from(error);
+  return appError.code === "LEAD_LOST_REASON_REQUIRED"
+    ? new Error("Pick a lost reason before marking this lead as lost.")
+    : appError;
+}
 
 interface LeadDetailsPageProps {
   leadId: number;
@@ -136,10 +149,21 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
       projectTypeId: leadDetails?.projectType?.id,
       contactId: leadDetails?.contact?.id,
       estimate: leadDetails?.estimate ?? undefined,
+      ownerId: leadDetails?.ownerId ?? null,
+      source: leadDetails?.source ?? null,
+      lostReason: leadDetails?.lostReason ?? null,
+      nextFollowUpAt: leadDetails?.nextFollowUpAt ?? null,
     },
     onSave: async (patch) => {
       if (leadDetails && typeof leadDetails.id === "number") {
-        const updated = await patchLead(ctx, leadDetails.id, patch as unknown as LeadPatch, {});
+        const updated = await patchLead(
+          ctx,
+          leadDetails.id,
+          patch as unknown as LeadPatch,
+          {},
+        ).catch((error: unknown) => {
+          throw describeLeadSaveError(error);
+        });
         
         queryClient.setQueryData<Lead[]>(leadsKeys.byType(leadType), (oldLeads) => {
           if (!oldLeads) return oldLeads;
@@ -159,6 +183,11 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
           contact: updated.contact as LeadDetails["contact"],
           project: updated.project ?? leadDetails.project,
           estimate: updated.estimate,
+          ownerId: updated.ownerId,
+          source: updated.source,
+          lostReason: updated.lostReason,
+          nextFollowUpAt: updated.nextFollowUpAt,
+          statusChangedAt: updated.statusChangedAt,
         });
 
         const conversionProjectId = updated.conversion?.converted

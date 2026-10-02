@@ -37,6 +37,10 @@ export function diffToPatch(current: Lead, updated: Lead): LeadPatch {
     leadNumber: updated.leadNumber ?? "",
     notes: updated.notes,
     estimate: updated.estimate,
+    ownerId: updated.ownerId,
+    source: updated.source,
+    lostReason: updated.lostReason,
+    nextFollowUpAt: updated.nextFollowUpAt,
   };
 
 
@@ -51,6 +55,10 @@ export function diffToPatch(current: Lead, updated: Lead): LeadPatch {
     leadNumber: current.leadNumber ?? "",
     notes: current.notes,
     estimate: current.estimate,
+    ownerId: current.ownerId,
+    source: current.source,
+    lostReason: current.lostReason,
+    nextFollowUpAt: current.nextFollowUpAt,
   };
 
   

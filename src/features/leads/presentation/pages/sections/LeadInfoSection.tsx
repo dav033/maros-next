@@ -1,6 +1,21 @@
 "use client";
 
-import { Briefcase, Calendar, DollarSign, FolderTree, MapPin, StickyNote, Edit } from "lucide-react";
+import { useState } from "react";
+import { format, isValid, parseISO } from "date-fns";
+import {
+  Briefcase,
+  Calendar,
+  CalendarClock,
+  DollarSign,
+  FolderTree,
+  History,
+  MapPin,
+  Megaphone,
+  StickyNote,
+  Edit,
+  UserRound,
+  XCircle,
+} from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -9,6 +24,19 @@ import { DetailField, InlineEditCardHeader, LocationField } from "@/components/s
 import type { UseInlineEditReturn } from "@/common/hooks";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
+import { AssigneePicker } from "@/features/tasks/presentation/molecules/AssigneePicker";
+import { TaskDatePicker } from "@/features/tasks/presentation/molecules/TaskDatePicker";
+import { useUserDirectory } from "@/features/users/presentation/hooks/data/useUserDirectory";
+import { LEAD_SOURCES, LeadStatus, type LeadLostReason, type LeadSource } from "@/leads/domain";
+import { LEAD_LOST_REASON_LABELS, LEAD_SOURCE_LABELS } from "../../atoms/leadVisualTokens";
+import { LeadLostReasonDialog } from "../../molecules/LeadLostReasonDialog";
+
+/** Una fecha inválida se trata como ausente: "Invalid Date" no informa de nada. */
+function formatDay(value: string | null | undefined): string | undefined {
+  if (!value) return undefined;
+  const parsed = parseISO(value);
+  return isValid(parsed) ? format(parsed, "MMM d, yyyy") : undefined;
+}
 
 export interface LeadInfoSectionProps {
   lead: {
@@ -24,6 +52,11 @@ export interface LeadInfoSectionProps {
     estimate?: number | null;
     /** Monto del Estimate real en QuickBooks (solo lectura, informativo). */
     financial?: { estimatedAmount?: number | null; found?: boolean } | null;
+    ownerId?: number | null;
+    source?: LeadSource | null;
+    lostReason?: LeadLostReason | null;
+    nextFollowUpAt?: string | null;
+    statusChangedAt?: string | null;
   };
   projectTypes: Array<{ id: number; name: string }>;
   inlineEdit: UseInlineEditReturn<{
@@ -35,6 +68,10 @@ export interface LeadInfoSectionProps {
     projectTypeId: number | undefined;
     contactId: number | undefined;
     estimate: number | undefined;
+    ownerId: number | null;
+    source: LeadSource | null;
+    lostReason: LeadLostReason | null;
+    nextFollowUpAt: string | null;
   }>;
   onOpenNotesModal: () => void;
 }
@@ -55,6 +92,18 @@ export function LeadInfoSection({
     setField,
     setFields,
   } = inlineEdit;
+
+  const [lostReasonDialogOpen, setLostReasonDialogOpen] = useState(false);
+  // El backend sólo devuelve `ownerId`; el nombre del comercial sale del directorio.
+  const { users } = useUserDirectory(true);
+  const ownerId = isEditing ? editingValue.ownerId ?? null : lead.ownerId ?? null;
+  const owner = users.find((user) => user.id === ownerId) ?? null;
+  // Con el directorio aún cargando hay id pero no nombre, y "Unassigned" sería falso.
+  const ownerLabel = owner
+    ? owner.name ?? owner.email
+    : ownerId != null
+      ? `User #${ownerId}`
+      : undefined;
 
   const formatMoney = (amount: number) =>
     `$${amount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -152,7 +201,14 @@ export function LeadInfoSection({
               <p className="text-sm text-muted-foreground mb-2">Status</p>
               <Select
                 value={editingValue.status || EMPTY_SELECT_VALUE}
-                onValueChange={(val) => setField("status", val === EMPTY_SELECT_VALUE ? "" : val)}
+                onValueChange={(val) => {
+                  // LOST no se aplica aquí: primero el motivo, en el mismo gesto.
+                  if (val === LeadStatus.LOST) {
+                    setLostReasonDialogOpen(true);
+                    return;
+                  }
+                  setField("status", val === EMPTY_SELECT_VALUE ? "" : val);
+                }}
               >
                 <SelectTrigger className="border-line-strong">
                   <SelectValue placeholder="Select Status" />
@@ -215,7 +271,116 @@ export function LeadInfoSection({
               <p className="font-mono tabular-nums text-foreground">{qboEstimateText}</p>
             ) : undefined}
           </DetailField>
+
+          {isEditing ? (
+            <div>
+              <p className="text-sm text-muted-foreground mb-2">Owner</p>
+              <AssigneePicker
+                onSelect={(user) => setField("ownerId", user ? user.id : null)}
+                trigger={
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="h-9 w-full justify-start border-line-strong px-3 font-normal"
+                  >
+                    {ownerLabel ?? <span className="text-muted-foreground">Unassigned</span>}
+                  </Button>
+                }
+              />
+            </div>
+          ) : (
+            <DetailField icon={UserRound} label="Owner" value={ownerLabel} />
+          )}
+
+          {isEditing ? (
+            <div>
+              <p className="text-sm text-muted-foreground mb-2">Source</p>
+              <Select
+                value={editingValue.source ?? EMPTY_SELECT_VALUE}
+                onValueChange={(val) =>
+                  setField("source", val === EMPTY_SELECT_VALUE ? null : (val as LeadSource))
+                }
+              >
+                <SelectTrigger className="border-line-strong">
+                  <SelectValue placeholder="Select Source" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={EMPTY_SELECT_VALUE}>Unknown</SelectItem>
+                  {LEAD_SOURCES.map((source) => (
+                    <SelectItem key={source} value={source}>
+                      {LEAD_SOURCE_LABELS[source]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          ) : (
+            <DetailField
+              icon={Megaphone}
+              label="Source"
+              value={lead.source ? LEAD_SOURCE_LABELS[lead.source] : undefined}
+            />
+          )}
+
+          {isEditing ? (
+            <div>
+              <p className="text-sm text-muted-foreground mb-2">Next Follow-up</p>
+              <TaskDatePicker
+                value={editingValue.nextFollowUpAt ?? null}
+                onChange={(value) => setField("nextFollowUpAt", value)}
+                placeholder="No follow-up set"
+              />
+            </div>
+          ) : (
+            <DetailField
+              icon={CalendarClock}
+              label="Next Follow-up"
+              value={formatDay(lead.nextFollowUpAt)}
+            />
+          )}
+
+          {/* Null en casi todo el histórico, y eso es "no se sabe": DetailField lo
+              dice con "Not available" en vez de inventar una antigüedad. */}
+          <DetailField
+            icon={History}
+            label="In this stage since"
+            value={formatDay(lead.statusChangedAt)}
+          />
+
+          {isEditing && editingValue.status === LeadStatus.LOST ? (
+            <div>
+              <p className="text-sm text-muted-foreground mb-2">Lost Reason</p>
+              <Button
+                type="button"
+                variant="outline"
+                className="h-9 w-full justify-start border-line-strong px-3 font-normal"
+                onClick={() => setLostReasonDialogOpen(true)}
+              >
+                {editingValue.lostReason ? (
+                  LEAD_LOST_REASON_LABELS[editingValue.lostReason]
+                ) : (
+                  <span className="text-muted-foreground">Choose a reason</span>
+                )}
+              </Button>
+            </div>
+          ) : !isEditing && lead.status === LeadStatus.LOST ? (
+            <DetailField
+              icon={XCircle}
+              label="Lost Reason"
+              value={lead.lostReason ? LEAD_LOST_REASON_LABELS[lead.lostReason] : undefined}
+            />
+          ) : null}
         </div>
+
+        <LeadLostReasonDialog
+          open={lostReasonDialogOpen}
+          initialReason={editingValue.lostReason ?? lead.lostReason ?? null}
+          onCancel={() => setLostReasonDialogOpen(false)}
+          onConfirm={(reason) => {
+            setFields({ status: LeadStatus.LOST, lostReason: reason });
+            setLostReasonDialogOpen(false);
+          }}
+        />
 
         <Separator />
         

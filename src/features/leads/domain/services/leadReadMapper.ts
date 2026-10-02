@@ -1,5 +1,6 @@
-import type { Lead, LeadStatus } from "../models";
-import { coerceIsoLocalDate, normalizeText } from "@/shared/validation";
+import type { Lead, LeadLostReason, LeadSource, LeadStatus } from "../models";
+import { LEAD_LOST_REASONS, LEAD_SOURCES } from "../models";
+import { coerceIsoLocalDate, isIsoLocalDate, normalizeText } from "@/shared/validation";
 
 export type ApiProjectTypeDTO = {
   id?: number | string | null;
@@ -45,7 +46,31 @@ export type ApiLeadDTO = {
   financial?: {
     estimatedAmount?: number | null;
   } | null;
+  ownerId?: number | null;
+  source?: string | null;
+  lostReason?: string | null;
+  nextFollowUpAt?: string | null;
+  statusChangedAt?: string | null;
 } | null;
+
+/**
+ * Un valor fuera del catálogo del backend no se pinta: el select sólo ofrece los
+ * ocho válidos, así que mostrarlo crudo sólo confundiría.
+ */
+function resolveEnum<T extends string>(
+  allowed: readonly T[],
+  value: unknown
+): T | null {
+  const raw = normalizeText(value ?? "");
+  return (allowed as readonly string[]).includes(raw) ? (raw as T) : null;
+}
+
+function resolveLocalDate(value: unknown): string | null {
+  const raw = normalizeText(value ?? "");
+  if (!raw) return null;
+  const date = raw.slice(0, 10);
+  return isIsoLocalDate(date) ? date : null;
+}
 
 function resolveStatus(status: string | null | undefined): LeadStatus {
   if (!status) {
@@ -141,6 +166,14 @@ export function mapLeadFromDTO(dto: ApiLeadDTO): Lead {
     dto?.financial?.estimatedAmount != null
       ? Number(dto.financial.estimatedAmount)
       : null;
+  const ownerId =
+    typeof dto?.ownerId === "number" && Number.isFinite(dto.ownerId)
+      ? dto.ownerId
+      : null;
+  const source = resolveEnum<LeadSource>(LEAD_SOURCES, dto?.source);
+  const lostReason = resolveEnum<LeadLostReason>(LEAD_LOST_REASONS, dto?.lostReason);
+  const nextFollowUpAt = resolveLocalDate(dto?.nextFollowUpAt);
+  const statusChangedAt = normalizeText(dto?.statusChangedAt ?? "") || null;
 
   return {
     id,
@@ -153,6 +186,11 @@ export function mapLeadFromDTO(dto: ApiLeadDTO): Lead {
     inReview,
     estimate,
     qboEstimate,
+    ownerId,
+    source,
+    lostReason,
+    nextFollowUpAt,
+    statusChangedAt,
     contact: {
       id: contactId,
       name: contactName,

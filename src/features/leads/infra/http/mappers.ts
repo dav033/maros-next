@@ -1,5 +1,5 @@
 import type { ISODate } from "@/shared/domain";
-import type { Lead, LeadDraft, LeadPatch } from "@/leads/domain";
+import type { Lead, LeadDraft, LeadLostReason, LeadPatch, LeadSource } from "@/leads/domain";
 export type ApiLeadDTO = {
   id: number;
   leadNumber: string;
@@ -22,6 +22,11 @@ export type ApiLeadDTO = {
   financial?: {
     estimatedAmount?: number | null;
   } | null;
+  ownerId?: number | null;
+  source?: string | null;
+  lostReason?: string | null;
+  nextFollowUpAt?: string | null;
+  statusChangedAt?: string | null;
 };
 import type { LeadStatus } from "@/leads/domain";
 import { mapLeadFromDTO, mapLeadsFromDTO } from "@/leads/domain";
@@ -70,6 +75,10 @@ export type UpdateLeadPayload = {
   attachments?: string[];
   estimate?: number | null;
   inReview?: boolean;
+  ownerId?: number | null;
+  source?: LeadSource | null;
+  lostReason?: LeadLostReason | null;
+  nextFollowUpAt?: string | null;
 };
 
 export function mapLeadFromApi(dto: ApiLeadDTO): Lead {
@@ -141,5 +150,10 @@ export function mapLeadPatchToUpdatePayload(
     attachments: patch.attachments,
     estimate: patch.estimate === undefined ? undefined : patch.estimate ?? null,
     inReview: patch.inReview,
+    ownerId: patch.ownerId === undefined ? undefined : patch.ownerId ?? null,
+    source: patch.source === undefined ? undefined : patch.source ?? null,
+    lostReason: patch.lostReason === undefined ? undefined : patch.lostReason ?? null,
+    nextFollowUpAt:
+      patch.nextFollowUpAt === undefined ? undefined : patch.nextFollowUpAt ?? null,
   };
 }

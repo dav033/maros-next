@@ -1,8 +1,10 @@
 import type {
   ApplyLeadPatchResult,
   Lead,
+  LeadLostReason,
   LeadPatch,
   LeadPolicies,
+  LeadSource,
   LeadStatus,
 } from "../models";
 import type { Clock, ISODate } from "@/shared/domain";
@@ -180,6 +182,36 @@ const PATCH_HANDLERS: {
     ...acc,
     inReview: Boolean(v),
   }),
+
+  // Los cuatro campos de venta aceptan null como "limpiar": ese null tiene que
+  // llegar al backend tal cual, porque omitirlo deja el valor anterior puesto.
+  ownerId: (v, _ctx, acc) => ({
+    ...acc,
+    ownerId: v === null ? null : Number(v),
+  }),
+
+  source: (v, _ctx, acc) => ({
+    ...acc,
+    source: v === null ? null : (v as LeadSource),
+  }),
+
+  lostReason: (v, _ctx, acc) => ({
+    ...acc,
+    lostReason: v === null ? null : (v as LeadLostReason),
+  }),
+
+  nextFollowUpAt: (v, _ctx, acc) => {
+    const d = normalizeText(v ?? "");
+    if (!d) return { ...acc, nextFollowUpAt: null };
+    if (!isIsoLocalDate(d)) {
+      throw new BusinessRuleError(
+        "FORMAT_ERROR",
+        "nextFollowUpAt must be in YYYY-MM-DD format",
+        { details: { field: "nextFollowUpAt", value: v } }
+      );
+    }
+    return { ...acc, nextFollowUpAt: d };
+  },
 };
 
 export function applyLeadPatch(

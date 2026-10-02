@@ -4,6 +4,7 @@ import type { Clock, ISODate } from "@/shared/domain";
 
 import { LeadStatus, type Lead } from "../models";
 import { applyLeadPatch } from "./applyLeadPatch";
+import { diffToPatch } from "./diffToPatch";
 
 const clock: Clock = {
   now: () => Date.parse("2026-09-30T12:00:00Z"),
@@ -24,6 +25,11 @@ function lead(overrides: Partial<Lead> = {}): Lead {
     inReview: false,
     estimate: null,
     qboEstimate: null,
+    ownerId: null,
+    source: null,
+    lostReason: null,
+    nextFollowUpAt: null,
+    statusChangedAt: null,
     ...overrides,
   } as Lead;
 }
@@ -50,5 +56,45 @@ describe("applyLeadPatch name", () => {
 
   it("refuses a name longer than 140 characters", () => {
     expect(() => applyLeadPatch(clock, lead(), { name: "x".repeat(141) })).toThrow();
+  });
+});
+
+describe("applyLeadPatch sales fields", () => {
+  it("carries the lost reason together with the move to LOST", () => {
+    const current = lead({ status: LeadStatus.PROPOSAL_SENT });
+    const { lead: updated } = applyLeadPatch(clock, current, {
+      status: LeadStatus.LOST,
+      lostReason: "price",
+    });
+    expect(diffToPatch(current, updated)).toMatchObject({
+      status: LeadStatus.LOST,
+      lostReason: "price",
+    });
+  });
+
+  it("keeps the null that clears the owner instead of dropping the field", () => {
+    // Omitir el campo deja el valor anterior puesto en el backend: desasignar
+    // sólo funciona si el null sobrevive al round trip del patch.
+    const current = lead({ ownerId: 7, nextFollowUpAt: "2026-10-15" });
+    const { lead: updated } = applyLeadPatch(clock, current, {
+      ownerId: null,
+      nextFollowUpAt: null,
+    });
+    const patch = diffToPatch(current, updated);
+    expect(patch.ownerId).toBeNull();
+    expect(patch.nextFollowUpAt).toBeNull();
+  });
+
+  it("leaves untouched sales fields out of the patch", () => {
+    const current = lead({ ownerId: 7, source: "referral" });
+    const { lead: updated } = applyLeadPatch(clock, current, { source: "google" });
+    const patch = diffToPatch(current, updated);
+    expect(patch).toEqual({ source: "google" });
+  });
+
+  it("refuses a follow-up date that is not YYYY-MM-DD", () => {
+    expect(() =>
+      applyLeadPatch(clock, lead(), { nextFollowUpAt: "15/10/2026" })
+    ).toThrow();
   });
 });

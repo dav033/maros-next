@@ -20,6 +20,34 @@ export enum LeadType {
   ROOFING = "ROOFING",
 }
 
+/** Canales de origen que acepta el backend (LEAD_SOURCES). */
+export const LEAD_SOURCES = [
+  "referral",
+  "repeat_client",
+  "website",
+  "google",
+  "social",
+  "walk_in",
+  "partner",
+  "other",
+] as const;
+
+export type LeadSource = (typeof LEAD_SOURCES)[number];
+
+/** Motivos de pérdida que acepta el backend (LEAD_LOST_REASONS). */
+export const LEAD_LOST_REASONS = [
+  "price",
+  "timeline",
+  "scope",
+  "no_response",
+  "competitor",
+  "client_cancelled",
+  "not_qualified",
+  "other",
+] as const;
+
+export type LeadLostReason = (typeof LEAD_LOST_REASONS)[number];
+
 export interface Lead {
   id: number;
   leadNumber: string;
@@ -41,6 +69,21 @@ export interface Lead {
   estimate: number | null;
   /** Monto del Estimate real en QuickBooks (solo lectura, informativo). */
   qboEstimate: number | null;
+  /**
+   * Comercial responsable. El backend sólo devuelve el id: el nombre se resuelve
+   * contra el directorio de usuarios.
+   */
+  ownerId: number | null;
+  source: LeadSource | null;
+  /** El backend lo exige para entrar en LOST (HTTP 422 si falta). */
+  lostReason: LeadLostReason | null;
+  /** "YYYY-MM-DD". */
+  nextFollowUpAt: string | null;
+  /**
+   * Null en los leads que nunca registraron un cambio de estado, que es la mayoría
+   * del histórico: significa "no se sabe", no "desde el principio de los tiempos".
+   */
+  statusChangedAt: string | null;
 }
 
 export type LeadConversion = Readonly<{
@@ -101,6 +144,10 @@ export type LeadPatch = Readonly<{
   attachments?: string[];
   estimate?: number | null;
   inReview?: boolean;
+  ownerId?: number | null;
+  source?: LeadSource | null;
+  lostReason?: LeadLostReason | null;
+  nextFollowUpAt?: string | null;
 }>;
 
 export type ApplyLeadPatchResult = Readonly<{
@@ -150,6 +197,11 @@ export interface LeadDetails {
   financial?: {
     estimatedAmount?: number | null;
   } | null;
+  ownerId?: number | null;
+  source?: LeadSource | null;
+  lostReason?: LeadLostReason | null;
+  nextFollowUpAt?: string | null;
+  statusChangedAt?: string | null;
   contact?: {
     id: number;
     name: string;
