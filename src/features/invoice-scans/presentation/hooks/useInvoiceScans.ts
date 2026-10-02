@@ -14,6 +14,7 @@ import {
   getInvoiceScanDownloadUrl,
   listInvoiceScans,
   listProjectsForPicker,
+  listQboCounterparties,
   retryInvoiceScan,
   updateInvoiceScan,
 } from "../../infra/invoiceScansApi";
@@ -23,6 +24,7 @@ export const invoiceScanKeys = {
   list: () => ["invoice-scans", "list"] as const,
   detail: (id: string) => ["invoice-scans", "detail", id] as const,
   projects: () => ["invoice-scans", "projects"] as const,
+  counterparties: () => ["invoice-scans", "counterparties"] as const,
 };
 
 export function useInvoiceScansList() {
@@ -54,6 +56,20 @@ export function useProjectPickerOptions(enabled = true) {
           value: record.leadNumber as string,
           label: `${record.leadNumber} · ${record.name}`,
         })),
+  });
+}
+
+/**
+ * QuickBooks vendors and customers for the counterparty picker. No toast on
+ * failure: the field keeps working as free text, so an unreachable QuickBooks
+ * is a missing shortcut, not an error the person has to act on.
+ */
+export function useQboCounterparties(enabled = true) {
+  return useQuery({
+    queryKey: invoiceScanKeys.counterparties(),
+    queryFn: listQboCounterparties,
+    enabled,
+    staleTime: STALE_TIMES.lists,
   });
 }
 

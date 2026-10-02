@@ -12,6 +12,7 @@ const api = vi.hoisted(() => ({
   createManualInvoiceTransaction: vi.fn(),
   attachInvoiceScanFile: vi.fn(),
   getInvoiceScanDownloadUrl: vi.fn(),
+  listQboCounterparties: vi.fn().mockResolvedValue([]),
 }));
 vi.mock("../../infra/invoiceScansApi", () => ({
   listInvoiceScans: api.listInvoiceScans,
@@ -22,6 +23,7 @@ vi.mock("../../infra/invoiceScansApi", () => ({
   getInvoiceScan: vi.fn(),
   retryInvoiceScan: vi.fn(),
   listProjectsForPicker: vi.fn().mockResolvedValue([]),
+  listQboCounterparties: api.listQboCounterparties,
   createManualInvoiceTransaction: api.createManualInvoiceTransaction,
   uploadAndScanInvoice: vi.fn(),
 }));
@@ -219,6 +221,41 @@ describe("InvoiceScansPage", () => {
     expect(api.attachInvoiceScanFile).not.toHaveBeenCalled();
   });
 
+  it("sends the QuickBooks id of a counterparty picked from the list", async () => {
+    // cmdk mide su lista y jsdom no trae ResizeObserver.
+    globalThis.ResizeObserver = class {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    } as unknown as typeof ResizeObserver;
+    api.createManualInvoiceTransaction.mockClear();
+    api.listInvoiceScans.mockResolvedValue([]);
+    api.listQboCounterparties.mockResolvedValue([
+      { id: "58", name: "Home Depot", type: "Vendor" },
+    ]);
+    api.createManualInvoiceTransaction.mockResolvedValue(scan({ id: "created" }));
+    renderPage();
+
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole("button", { name: /new transaction/i }));
+    const dialog = await screen.findByRole("dialog");
+
+    await user.type(within(dialog).getByLabelText("What was the payment for?"), "Materials");
+    await user.type(within(dialog).getByLabelText("Amount"), "69.60");
+    await user.click(within(dialog).getByRole("radio", { name: /payment made/i }));
+    await user.click(within(dialog).getByLabelText("Paid to / received from"));
+    await user.click(await within(dialog).findByText("Home Depot"));
+    await user.click(within(dialog).getByRole("button", { name: "Add transaction" }));
+
+    await waitFor(() => expect(api.createManualInvoiceTransaction).toHaveBeenCalled());
+    expect(api.createManualInvoiceTransaction.mock.calls[0][0]).toMatchObject({
+      counterpartyName: "Home Depot",
+      counterpartyId: "58",
+      counterpartyType: "Vendor",
+    });
+    api.listQboCounterparties.mockResolvedValue([]);
+  });
+
   it("asks for a payment direction instead of doing nothing", async () => {
     api.createManualInvoiceTransaction.mockClear();
     api.listInvoiceScans.mockResolvedValue([]);
@@ -274,6 +311,101 @@ describe("InvoiceScansPage", () => {
     expect(api.updateInvoiceScan).toHaveBeenCalledWith("pending", {
       total: 870.4,
       subtotal: 870.4,
+    });
+  });
+
+  describe("the counterparty column", () => {
+    function withCounterparty(
+      overrides: Partial<InvoiceScan["extractedData"] & object>,
+    ): InvoiceScan {
+      return scan({
+        id: "pending",
+        recordType: "transaction",
+        extractedData: {
+          direction: "unknown",
+          classification: "other",
+          counterpartyName: "Home Depot",
+          invoiceNumber: null,
+          issueDate: "2026-09-28",
+          dueDate: null,
+          currency: "USD",
+          subtotal: 69.6,
+          taxTotal: null,
+          total: 69.6,
+          paymentStatus: "paid",
+          description: "Materials",
+          transactionDirection: "payment_made",
+          confidence: 1,
+          lineItems: [],
+          ...overrides,
+        },
+      });
+    }
+
+    it("says 'Paid to' when the money went out", async () => {
+      api.listInvoiceScans.mockResolvedValue([withCounterparty({})]);
+      renderPage();
+
+      expect((await screen.findAllByTitle("Paid to: Home Depot")).length).toBeGreaterThan(0);
+    });
+
+    it("says 'Received from' when the money came in", async () => {
+      api.listInvoiceScans.mockResolvedValue([
+        withCounterparty({
+          transactionDirection: "payment_received",
+          counterpartyName: "Anderson Family",
+        }),
+      ]);
+      renderPage();
+
+      expect(
+        (await screen.findAllByTitle("Received from: Anderson Family")).length,
+      ).toBeGreaterThan(0);
+    });
+
+    // Un documento escaneado no tiene `transactionDirection`: la factura de un
+    // proveedor (`incoming`) es dinero que sale.
+    it("reads the direction off a scanned supplier bill", async () => {
+      api.listInvoiceScans.mockResolvedValue([
+        withCounterparty({ direction: "incoming", transactionDirection: undefined }),
+      ]);
+      renderPage();
+
+      expect((await screen.findAllByTitle("Paid to: Home Depot")).length).toBeGreaterThan(0);
+    });
+
+    it("reads the direction off a scanned customer invoice", async () => {
+      api.listInvoiceScans.mockResolvedValue([
+        withCounterparty({
+          direction: "outgoing",
+          transactionDirection: undefined,
+          counterpartyName: "Anderson Family",
+        }),
+      ]);
+      renderPage();
+
+      expect(
+        (await screen.findAllByTitle("Received from: Anderson Family")).length,
+      ).toBeGreaterThan(0);
+    });
+
+    it("truncates a very long name but keeps it whole in the tooltip", async () => {
+      const long =
+        "Southern Atlantic Industrial Roofing & Waterproofing Contractors of Greater Miami, LLC";
+      api.listInvoiceScans.mockResolvedValue([withCounterparty({ counterpartyName: long })]);
+      renderPage();
+
+      const cell = (await screen.findAllByTitle(`Paid to: ${long}`))[0];
+      expect(within(cell).getByText(long)).toHaveClass("truncate");
+    });
+
+    it("shows a dash for a row with no counterparty", async () => {
+      api.listInvoiceScans.mockResolvedValue([withCounterparty({ counterpartyName: null })]);
+      renderPage();
+
+      await screen.findAllByRole("checkbox", { name: "Entered in QuickBooks" });
+      expect(screen.queryByTitle(/^Paid to:/)).not.toBeInTheDocument();
+      expect(screen.getAllByText("—").length).toBeGreaterThan(0);
     });
   });
 

@@ -13,6 +13,11 @@ import {
   useAttachInvoiceScanFile,
   useCreateManualInvoiceTransaction,
 } from "../hooks/useInvoiceScans";
+import {
+  CounterpartySelect,
+  EMPTY_COUNTERPARTY,
+  type CounterpartyValue,
+} from "./CounterpartySelect";
 import { ProjectNumberSelect } from "./ProjectNumberSelect";
 
 const ATTACHMENT_TYPES = new Set([
@@ -61,6 +66,7 @@ export function ManualTransactionForm({
   const fileInput = useRef<HTMLInputElement>(null);
   const [direction, setDirection] = useState<InvoiceTransactionDirection | "">("");
   const [projectNumber, setProjectNumber] = useState<string | null>(null);
+  const [counterparty, setCounterparty] = useState<CounterpartyValue>(EMPTY_COUNTERPARTY);
   const [file, setFile] = useState<File | null>(null);
   // El radio de dirección está visualmente oculto: con `required` el navegador
   // abortaba el envío en silencio por no poder enfocarlo ("no pasa nada"), así
@@ -98,7 +104,7 @@ export function ManualTransactionForm({
     setDirectionError(null);
 
     const values = new FormData(event.currentTarget);
-    const counterpartyName = String(values.get("counterpartyName") ?? "").trim();
+    const counterpartyName = counterparty.name.trim();
     const transaction = await create
       .mutateAsync({
         description: String(values.get("description") ?? "").trim(),
@@ -109,6 +115,14 @@ export function ManualTransactionForm({
           .trim()
           .toUpperCase(),
         ...(counterpartyName && { counterpartyName }),
+        // Solo viaja cuando se eligió de la lista; el nombre escrito a mano no
+        // tiene id que mandar.
+        ...(counterpartyName &&
+          counterparty.id &&
+          counterparty.type && {
+            counterpartyId: counterparty.id,
+            counterpartyType: counterparty.type,
+          }),
         projectNumber,
       })
       .catch(() => null);
@@ -207,12 +221,14 @@ export function ManualTransactionForm({
           />
         </div>
         <div className="space-y-1">
-          <Label htmlFor={field("counterpartyName")}>Paid to / received from</Label>
-          <Input
-            id={field("counterpartyName")}
-            name="counterpartyName"
-            maxLength={255}
-            className="h-9 border-line-strong"
+          {/* Un <p>, no un <Label>: cmdk pone su propio id en el input, así que
+              un htmlFor apuntaría al vacío. El nombre accesible lo da `label`. */}
+          <p className="text-sm font-medium">Paid to / received from</p>
+          <CounterpartySelect
+            label="Paid to / received from"
+            value={counterparty}
+            onChange={setCounterparty}
+            disabled={busy}
           />
         </div>
         <div className="space-y-1">

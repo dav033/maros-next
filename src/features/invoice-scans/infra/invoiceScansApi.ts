@@ -1,5 +1,11 @@
 import { optimizedApiClient } from "@/shared/infra/http/OptimizedApiClient";
-import type { InvoiceScan, InvoiceScanPatch, InvoiceTransactionDirection } from "../domain/models";
+import type {
+  InvoiceScan,
+  InvoiceScanPatch,
+  InvoiceTransactionDirection,
+  QboCounterparty,
+  QboCounterpartyType,
+} from "../domain/models";
 
 interface CreateInvoiceScanResponse {
   id: string;
@@ -19,6 +25,8 @@ export interface CreateManualInvoiceTransactionInput {
   amount: number;
   currency: string;
   counterpartyName?: string;
+  counterpartyId?: string;
+  counterpartyType?: QboCounterpartyType;
   projectNumber?: string | null;
 }
 
@@ -132,6 +140,19 @@ export async function retryInvoiceScan(id: string): Promise<InvoiceScan> {
     `/invoice-scans/${id}/scan`,
   );
   return data;
+}
+
+/**
+ * Vendors and customers of QuickBooks for the counterparty picker. A server
+ * that answers `connected: false` (no connection, Intuit failing) still answers
+ * 200 with no rows, so the caller gets an empty list instead of an error.
+ */
+export async function listQboCounterparties(): Promise<QboCounterparty[]> {
+  const { data } = await optimizedApiClient.get<{
+    connected: boolean;
+    counterparties: QboCounterparty[];
+  }>("/invoice-scans/counterparties");
+  return Array.isArray(data?.counterparties) ? data.counterparties : [];
 }
 
 /** Lightweight project list (no QuickBooks) for the project picker. */

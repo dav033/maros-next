@@ -39,6 +39,34 @@ export const STATUS_LABELS: Record<InvoiceScanStatus, string> = {
   failed: "Scan failed",
 };
 
+export type MoneyFlow = "out" | "in" | "unknown";
+
+/**
+ * Qué lado del dinero es la contraparte. La transacción manual lo dice sin
+ * ambigüedad en `transactionDirection`. Un documento escaneado solo trae
+ * `direction`, que es un tipo de documento y no un flujo: `incoming` es la
+ * factura de un proveedor (Maros paga) y `outgoing` una factura a un cliente
+ * (Maros cobra). Ese signo puede llegar mal en un comprobante de pago; está
+ * documentado en resolveQboLookupSides del backend.
+ */
+export function moneyFlow(scan: Pick<InvoiceScan, "extractedData">): MoneyFlow {
+  const data = scan.extractedData;
+  if (!data) return "unknown";
+  if (data.transactionDirection) {
+    return data.transactionDirection === "payment_made" ? "out" : "in";
+  }
+  if (data.direction === "incoming") return "out";
+  if (data.direction === "outgoing") return "in";
+  return "unknown";
+}
+
+/** Un rótulo por fila, para no gastar dos columnas en las dos direcciones. */
+export const COUNTERPARTY_PREFIX: Record<MoneyFlow, string> = {
+  out: "Paid to",
+  in: "Received from",
+  unknown: "Counterparty",
+};
+
 export function invoiceTitle(scan: Pick<InvoiceScan, "recordType" | "extractedData" | "fileName">): string {
   if (scan.recordType === "transaction") {
     return scan.extractedData?.description || "Manual transaction";

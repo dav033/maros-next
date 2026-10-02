@@ -16,6 +16,14 @@ export type InvoiceClassification =
 export type InvoicePaymentStatus = "paid" | "unpaid" | "unknown";
 export type InvoiceScanRecordType = "invoice" | "transaction";
 export type InvoiceTransactionDirection = "payment_made" | "payment_received";
+export type QboCounterpartyType = "Vendor" | "Customer";
+
+/** One vendor or customer of QuickBooks, as the counterparty picker lists them. */
+export interface QboCounterparty {
+  id: string;
+  name: string;
+  type: QboCounterpartyType;
+}
 
 export interface InvoiceLineItem {
   description: string;
@@ -28,6 +36,9 @@ export interface ExtractedInvoiceData {
   direction: InvoiceDirection;
   classification: InvoiceClassification;
   counterpartyName: string | null;
+  /** Set only when the name was picked from QuickBooks; free text leaves it null. */
+  counterpartyId?: string | null;
+  counterpartyType?: QboCounterpartyType | null;
   invoiceNumber: string | null;
   issueDate: string | null;
   dueDate: string | null;
@@ -86,6 +97,8 @@ export interface InvoiceScanPatch {
   direction?: InvoiceDirection;
   classification?: InvoiceClassification;
   counterpartyName?: string | null;
+  counterpartyId?: string | null;
+  counterpartyType?: QboCounterpartyType | null;
   invoiceNumber?: string | null;
   issueDate?: string | null;
   dueDate?: string | null;

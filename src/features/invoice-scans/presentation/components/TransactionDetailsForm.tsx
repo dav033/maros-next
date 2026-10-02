@@ -19,7 +19,9 @@ import type {
   ExtractedInvoiceData,
   InvoiceScanPatch,
   InvoiceTransactionDirection,
+  QboCounterpartyType,
 } from "../../domain/models";
+import { CounterpartySelect } from "./CounterpartySelect";
 
 interface Props {
   data: ExtractedInvoiceData | null;
@@ -32,6 +34,9 @@ interface Values {
   description: string;
   transactionDirection: InvoiceTransactionDirection;
   counterpartyName: string;
+  /** Empty while the name is free text; the dirty check compares plain strings. */
+  counterpartyId: string;
+  counterpartyType: "" | QboCounterpartyType;
   issueDate: string;
   amount: string;
   currency: string;
@@ -42,6 +47,8 @@ function toValues(data: ExtractedInvoiceData | null): Values {
     description: data?.description ?? "",
     transactionDirection: data?.transactionDirection ?? "payment_made",
     counterpartyName: data?.counterpartyName ?? "",
+    counterpartyId: data?.counterpartyId ?? "",
+    counterpartyType: data?.counterpartyType ?? "",
     issueDate: data?.issueDate ?? "",
     amount: data?.total === null || data?.total === undefined ? "" : String(data.total),
     currency: data?.currency ?? "USD",
@@ -67,6 +74,8 @@ export function TransactionDetailsForm({ data, onSave, saving, disabled }: Props
     (key) => stored[key] !== values[key],
   );
   const locked = disabled || saving;
+  const counterpartyLabel =
+    values.transactionDirection === "payment_received" ? "Received from" : "Paid to";
 
   const set = <K extends keyof Values>(key: K, value: Values[K]) =>
     setValues((current) => ({ ...current, [key]: value }));
@@ -87,6 +96,8 @@ export function TransactionDetailsForm({ data, onSave, saving, disabled }: Props
       description: values.description.trim(),
       transactionDirection: values.transactionDirection,
       counterpartyName: values.counterpartyName.trim() || null,
+      counterpartyId: values.counterpartyId || null,
+      counterpartyType: values.counterpartyType || null,
       issueDate: values.issueDate || null,
       // Un pago manual es un solo importe: el subtotal acompaña al total para que
       // las dos cifras no se contradigan.
@@ -155,15 +166,27 @@ export function TransactionDetailsForm({ data, onSave, saving, disabled }: Props
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="transaction-counterparty" className="text-xs font-medium text-muted-foreground">
-            {values.transactionDirection === "payment_received" ? "Received from" : "Paid to"}
-          </Label>
-          <Input
-            id="transaction-counterparty"
-            value={values.counterpartyName}
-            maxLength={255}
+          {/* Un <p>, no un <Label>: cmdk pone su propio id en el input, así que
+              un htmlFor apuntaría al vacío. El nombre accesible lo da `label`. */}
+          <p className="text-xs font-medium text-muted-foreground">
+            {counterpartyLabel}
+          </p>
+          <CounterpartySelect
+            label={counterpartyLabel}
+            value={{
+              name: values.counterpartyName,
+              id: values.counterpartyId || null,
+              type: values.counterpartyType || null,
+            }}
             disabled={locked}
-            onChange={(event) => set("counterpartyName", event.target.value)}
+            onChange={(next) =>
+              setValues((current) => ({
+                ...current,
+                counterpartyName: next.name,
+                counterpartyId: next.id ?? "",
+                counterpartyType: next.type ?? "",
+              }))
+            }
           />
         </div>
 

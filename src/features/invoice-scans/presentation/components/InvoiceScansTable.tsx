@@ -1,6 +1,6 @@
 "use client";
 
-import { TriangleAlert } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, TriangleAlert } from "lucide-react";
 import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
@@ -15,10 +15,12 @@ import {
 import { useUserDirectory } from "@/features/users/presentation/hooks/data/useUserDirectory";
 
 import {
+  COUNTERPARTY_PREFIX,
   DIRECTION_LABELS,
   formatDate,
   formatMoney,
   invoiceTitle,
+  moneyFlow,
   STATUS_LABELS,
   TRANSACTION_DIRECTION_LABELS,
 } from "../../domain/labels";
@@ -58,6 +60,28 @@ function StatusBadge({ scan }: { scan: InvoiceScan }) {
   );
 }
 
+/**
+ * Quién cobró o pagó. La flecha y el `title` dicen de qué lado está, para que
+ * una sola columna estrecha sirva a los dos sentidos.
+ */
+function CounterpartyCell({ scan }: { scan: InvoiceScan }) {
+  const name = scan.extractedData?.counterpartyName?.trim();
+  if (!name) return <span className="text-muted-foreground">—</span>;
+
+  const flow = moneyFlow(scan);
+  const prefix = COUNTERPARTY_PREFIX[flow];
+  const Arrow = flow === "in" ? ArrowDownLeft : flow === "out" ? ArrowUpRight : null;
+  return (
+    <span className="flex items-center gap-1" title={`${prefix}: ${name}`}>
+      {Arrow && (
+        <Arrow className="size-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
+      )}
+      <span className="sr-only">{prefix}:</span>
+      <span className="truncate">{name}</span>
+    </span>
+  );
+}
+
 function recordDirection(scan: InvoiceScan): string {
   if (scan.recordType === "transaction") {
     const direction = scan.extractedData?.transactionDirection;
@@ -86,6 +110,7 @@ export function InvoiceScansTable({ scans, variant }: Props) {
                 <span className="sr-only">Entered in QuickBooks</span>
               </TableHead>
               <TableHead className="px-2">Document</TableHead>
+              <TableHead className="w-40 px-2">Paid to / from</TableHead>
               <TableHead className="w-28 px-2">Project</TableHead>
               <TableHead className="w-36 px-2">Category</TableHead>
               <TableHead className="w-44 px-2">Comments</TableHead>
@@ -98,14 +123,14 @@ export function InvoiceScansTable({ scans, variant }: Props) {
           </TableHeader>
           <TableBody>
             {scans.map((scan) => {
-              const invoice = scan.extractedData;
               return (
                 <TableRow key={scan.id} className={scan.enteredAt ? "text-muted-foreground" : "transition-colors hover:bg-elev-3"}>
                   <TableCell className="px-2">
                     <EnteredCheckbox scan={scan} />
                   </TableCell>
-                  {/* Documento, contraparte y tipo en una sola celda: eran tres
-                      columnas de texto que se leen como una sola cosa. */}
+                  {/* La contraparte salió de aquí a su propia columna: como
+                      subtítulo truncado del documento era justo el dato que no
+                      se encontraba. */}
                   <TableCell className="max-w-64 px-2">
                     <Link
                       href={`/finance/invoices/${scan.id}`}
@@ -114,10 +139,11 @@ export function InvoiceScansTable({ scans, variant }: Props) {
                       {invoiceTitle(scan)}
                     </Link>
                     <span className="block truncate text-xs text-muted-foreground">
-                      {invoice?.counterpartyName
-                        ? `${invoice.counterpartyName} · ${recordDirection(scan)}`
-                        : recordDirection(scan)}
+                      {recordDirection(scan)}
                     </span>
+                  </TableCell>
+                  <TableCell className="max-w-40 px-2 text-sm">
+                    <CounterpartyCell scan={scan} />
                   </TableCell>
                   <TableCell className="px-2">
                     <ProjectCell scan={scan} />
