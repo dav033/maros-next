@@ -12,6 +12,9 @@ export { listNotesByEntity } from "./usecases/queries/listNotesByEntity";
 export { listSharedWithMe } from "./usecases/queries/listSharedWithMe";
 export { getNoteAccess } from "./usecases/queries/getNoteAccess";
 export { listNoteLinkViews } from "./usecases/queries/listNoteLinkViews";
+export { listNoteReferences } from "./usecases/queries/listNoteReferences";
+export { listNoteBacklinks } from "./usecases/queries/listNoteBacklinks";
+export { listNotesReferencingTarget } from "./usecases/queries/listNotesReferencingTarget";
 
 export { createNotePage } from "./usecases/commands/createNotePage";
 export { updateNotePageMeta } from "./usecases/commands/updateNotePageMeta";
@@ -26,3 +29,5 @@ export { publishNoteLink } from "./usecases/commands/publishNoteLink";
 export { updateNoteLink } from "./usecases/commands/updateNoteLink";
 export { rotateNoteLink } from "./usecases/commands/rotateNoteLink";
 export { unpublishNoteLink } from "./usecases/commands/unpublishNoteLink";
+export { addNoteRelation } from "./usecases/commands/addNoteRelation";
+export { removeNoteRelation } from "./usecases/commands/removeNoteRelation";

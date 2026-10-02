@@ -260,3 +260,93 @@ export interface NoteSearchHit {
 export function emptyNoteDoc(): Record<string, unknown> {
   return { type: "doc", content: [] };
 }
+
+// ---------------------------------------------------------------------------
+// References
+//
+// A note is a node in the CRM graph, not a leaf: it can point at leads, projects,
+// contacts, companies, tasks, colleagues and other notes, and every one of those can
+// ask the reverse question — "which notes point at me".
+// ---------------------------------------------------------------------------
+
+export const NOTE_REFERENCE_KINDS = [
+  "lead",
+  "project",
+  "contact",
+  "company",
+  "task",
+  "user",
+  "note",
+] as const;
+
+export type NoteReferenceKind = (typeof NOTE_REFERENCE_KINDS)[number];
+
+/**
+ * How the reference came about, which decides how it is removed.
+ *
+ * `inline` is derived from the document — an @mention or [[wikilink]] in the body — so it
+ * is deleted by deleting the chip. `relation` is pinned in the note header and removed
+ * from there; it survives content edits.
+ */
+export type NoteReferenceOrigin = "inline" | "relation";
+
+/** A referenceable record, as the picker lists it and the chip renders it. */
+export interface NoteReferenceTarget {
+  kind: NoteReferenceKind;
+  id: number;
+  /** Never empty: falls back to "Lead #42" so a chip is never a blank pill. */
+  label: string;
+  /** Lead number, email, task status — whatever tells two same-named records apart. */
+  sublabel: string | null;
+  /** False once the record is gone; the label is then the snapshot taken when linked. */
+  exists: boolean;
+}
+
+export interface NoteReference extends NoteReferenceTarget {
+  origin: NoteReferenceOrigin;
+}
+
+/** One note pointing at something, with the lines it points from. */
+export interface NoteBacklink {
+  page: { id: number; title: string; icon: string | null; updatedAt: string };
+  /** Both when a note pins a record *and* mentions it in the body. */
+  origins: NoteReferenceOrigin[];
+  /** Text of the blocks holding the mention. Empty for a relation pinned in the header. */
+  contexts: string[];
+}
+
+/**
+ * Where a referenced record lives in the app, or null for a kind with no page of its own.
+ *
+ * Colleagues have no profile route here, so a @user chip is a label rather than a link —
+ * deliberately not pointed at /settings/users, which most members cannot open.
+ */
+export function noteReferenceHref(kind: NoteReferenceKind, id: number): string | null {
+  switch (kind) {
+    case "lead":
+      return `/lead/${id}`;
+    case "project":
+      return `/project/${id}`;
+    case "contact":
+      return `/contact/${id}`;
+    case "company":
+      return `/company/${id}`;
+    case "task":
+      return `/tasks/${id}`;
+    case "note":
+      return `/notes/${id}`;
+    case "user":
+      return null;
+  }
+}
+
+/** Singular noun for a kind, for "Link a lead" and the picker's group headers. */
+export const NOTE_REFERENCE_KIND_LABELS: Record<NoteReferenceKind, string> = {
+  lead: "Lead",
+  project: "Project",
+  contact: "Contact",
+  company: "Company",
+  task: "Task",
+  user: "Person",
+  note: "Note",
+};

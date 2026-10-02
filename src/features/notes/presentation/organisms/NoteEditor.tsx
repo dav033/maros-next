@@ -10,6 +10,10 @@ import { emptyNoteDoc } from "@/notes/domain";
 import { SlashCommand } from "@/features/notes/config/slashCommandExtension";
 import { NoteImage } from "@/features/notes/config/noteImageExtension";
 import { Callout } from "@/features/notes/config/calloutExtension";
+import {
+  noteReferenceExtensions,
+  type LinkedNoteCreator,
+} from "@/features/notes/config/noteReferenceExtensions";
 import { useNoteImageUpload } from "../hooks/editor/useNoteImageUpload";
 import { NoteBlockHandle } from "./NoteBlockHandle";
 import { NoteTableMenu } from "./NoteTableMenu";
@@ -20,6 +24,11 @@ export interface NoteEditorProps {
   initialContent: Record<string, unknown>;
   onChange: (content: Record<string, unknown>) => void;
   editable?: boolean;
+  /**
+   * Creates the note behind a `[[title]]` that matched nothing. Omitted means `[[` only
+   * links to notes that already exist — which is what a read-only editor wants.
+   */
+  onCreateLinkedNote?: LinkedNoteCreator;
 }
 
 /**
@@ -33,6 +42,7 @@ export function NoteEditor({
   initialContent,
   onChange,
   editable = true,
+  onCreateLinkedNote,
 }: NoteEditorProps) {
   const uploadImage = useNoteImageUpload(pageId);
 
@@ -56,6 +66,7 @@ export function NoteEditor({
         placeholder: "Write something, or press '/' for commands…",
       }),
       SlashCommand,
+      ...noteReferenceExtensions({ createNote: onCreateLinkedNote }),
     ],
     editorProps: {
       attributes: {
@@ -121,7 +132,8 @@ export function NoteEditor({
       <EditorContent editor={editor} />
       {editable && (
         <p className="mt-6 border-t border-line pt-2.5 text-[11px] text-muted-foreground">
-          Type / for blocks · Paste or drop images into your note
+          Type / for blocks · @ to reference a record · [[ to link a note · Paste or drop
+          images into your note
         </p>
       )}
     </>

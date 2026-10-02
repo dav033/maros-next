@@ -1,5 +1,6 @@
 import type {
   NoteAccessPanel,
+  NoteBacklink,
   NoteEntityKind,
   NoteEntityLink,
   NoteLinkDraft,
@@ -11,6 +12,10 @@ import type {
   NotePageId,
   NotePagePatch,
   NotePageSummary,
+  NoteReference,
+  NoteReferenceKind,
+  NoteReferenceOrigin,
+  NoteReferenceTarget,
   NoteSearchHit,
   NoteShareAccess,
   NoteShareLink,
@@ -84,4 +89,37 @@ export interface NoteTagRepositoryPort {
   create(name: string, color?: string): Promise<NoteTag>;
   update(id: number, patch: { name?: string; color?: string }): Promise<NoteTag>;
   delete(id: number): Promise<void>;
+}
+
+/**
+ * A note's edges in both directions.
+ *
+ * Separate from NotePageRepositoryPort because half of it is not about a note: a lead
+ * page asks `listNotesReferencing` without having a note in hand, and the editor's
+ * mention menu asks `searchTargets` before any reference exists. That split is why the
+ * backend gives it its own base path too.
+ */
+export interface NoteReferenceRepositoryPort {
+  /** Everything this note points at — pinned relations first, then body mentions. */
+  listForPage(id: NotePageId): Promise<NoteReference[]>;
+  /** Notes that point at this note. */
+  listBacklinks(id: NotePageId): Promise<NoteBacklink[]>;
+  /** Notes that point at a CRM record. `origins` empty means both. */
+  listNotesReferencing(
+    kind: NoteReferenceKind,
+    targetId: number,
+    origins?: NoteReferenceOrigin[]
+  ): Promise<NoteBacklink[]>;
+  /** Records matching `query`, capped per kind. Empty `kinds` means every kind. */
+  searchTargets(
+    query: string,
+    kinds?: NoteReferenceKind[],
+    perKind?: number
+  ): Promise<NoteReferenceTarget[]>;
+  addRelation(
+    id: NotePageId,
+    kind: NoteReferenceKind,
+    targetId: number
+  ): Promise<NoteReference[]>;
+  removeRelation(id: NotePageId, kind: NoteReferenceKind, targetId: number): Promise<void>;
 }

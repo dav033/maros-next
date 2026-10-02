@@ -8,12 +8,7 @@ import { useInstantNotePage } from "../hooks/data/useInstantNotePage";
 import { useNoteMutations } from "../hooks/mutations/useNoteMutations";
 import { useNoteAutosave } from "../hooks/mutations/useNoteAutosave";
 import { hasNoteAccess } from "@/notes/domain";
-import type {
-  NoteEntityLink,
-  NoteKind,
-  NotePage,
-  NotePageSummary,
-} from "@/notes/domain";
+import type { NoteKind, NotePage, NotePageSummary } from "@/notes/domain";
 
 export interface UseNotesWorkspaceLogicOptions {
   activePageId: number | null;
@@ -36,7 +31,6 @@ export function useNotesWorkspaceLogic({
     moveMutation,
     favoriteMutation,
     setTagsMutation,
-    setEntityLinkMutation,
   } = useNoteMutations();
   const autosave = useNoteAutosave(activePageId ?? -1);
 
@@ -132,9 +126,25 @@ export function useNotesWorkspaceLogic({
     setTagsMutation.mutate({ id: activePageId, tagIds });
   };
 
-  const handleEntityLinkChange = (link: NoteEntityLink) => {
-    if (activePageId == null) return;
-    setEntityLinkMutation.mutate({ id: activePageId, link });
+  /**
+   * Creates the note behind a `[[title]]` that matched nothing.
+   *
+   * At the root of the tree, not as a child of the note it was linked from: a wikilink is a
+   * reference, not a containment, and burying every mentioned page inside whichever note
+   * happened to mention it first is how an Obsidian-style vault becomes unnavigable. The
+   * user can drag it where it belongs.
+   *
+   * Resolves to null on failure — useEntityMutation has already told the user, and the
+   * editor simply leaves the text it deleted un-replaced rather than inserting a chip
+   * pointing at a note that was never created.
+   */
+  const handleCreateLinkedNote = async (noteTitle: string) => {
+    try {
+      const page = await createMutation.mutateAsync({ title: noteTitle });
+      return { id: page.id, title: page.title };
+    } catch {
+      return null;
+    }
   };
 
   const handleMove = (
@@ -190,7 +200,7 @@ export function useNotesWorkspaceLogic({
     onMove: handleMove,
     onToggleFavorite: handleToggleFavorite,
     onTagsChange: handleTagsChange,
-    onEntityLinkChange: handleEntityLinkChange,
+    onCreateLinkedNote: handleCreateLinkedNote,
     myAccess,
     canEdit,
     canManage: hasNoteAccess(myAccess, "owner"),

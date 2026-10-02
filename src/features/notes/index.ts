@@ -5,4 +5,5 @@ export {
   NotePageHttpRepository,
   NoteTagHttpRepository,
   NoteSharingHttpRepository,
+  NoteReferenceHttpRepository,
 } from "./infra/index";

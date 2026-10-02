@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useInstantNotesByEntity } from "../hooks/data/useInstantNotesByEntity";
 import { useNoteMutations } from "../hooks/mutations/useNoteMutations";
+import { NoteMentionsSection } from "./NoteMentionsSection";
 import type { NoteEntityKind } from "@/notes/domain";
 
 export function EntityNotesSection({
@@ -66,6 +67,14 @@ export function EntityNotesSection({
             </Link>
           ))}
         </div>
+
+        {/* Below the linked notes, not mixed in: a note that merely mentions this record
+            is a citation, not one of its notes. It appears only when there is one. */}
+        <NoteMentionsSection
+          entityKind={entityKind}
+          entityId={entityId}
+          className="mt-4 border-t border-line pt-3"
+        />
       </CardContent>
     </Card>
   );

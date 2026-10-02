@@ -1,6 +1,13 @@
 import { api, buildCrudEndpoints } from "@/shared/infra";
 
 const BASE = api.resource("notes");
+/**
+ * References sit on their own resource, not under /notes: `/note-references/targets` is
+ * asked by the editor before any note is involved, and `by-target` by a lead page. It
+ * also keeps them clear of the backend's ':id' route, which swallows static segments
+ * declared after it.
+ */
+const REFERENCES = api.resource("note-references");
 
 export const endpoints = {
   ...buildCrudEndpoints<number>(BASE),
@@ -30,4 +37,13 @@ export const endpoints = {
   link: (id: number, linkId: number) => `${BASE}/${id}/links/${linkId}`,
   rotateLink: (id: number, linkId: number) => `${BASE}/${id}/links/${linkId}/rotate`,
   linkViews: (id: number, linkId: number) => `${BASE}/${id}/links/${linkId}/views`,
+
+  // References.
+  referenceTargets: () => `${REFERENCES}/targets`,
+  referencesByTarget: () => `${REFERENCES}/by-target`,
+  pageReferences: (id: number) => `${REFERENCES}/page/${id}`,
+  pageBacklinks: (id: number) => `${REFERENCES}/page/${id}/backlinks`,
+  pageRelations: (id: number) => `${REFERENCES}/page/${id}/relations`,
+  pageRelation: (id: number, kind: string, targetId: number) =>
+    `${REFERENCES}/page/${id}/relations/${kind}/${targetId}`,
 } as const;

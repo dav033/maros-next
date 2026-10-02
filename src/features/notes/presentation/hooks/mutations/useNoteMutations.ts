@@ -4,7 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useEntityMutation } from "@/shared/presentation/hooks/useEntityMutation";
 import { notesKeys } from "@/notes/application";
 import { noteSubtreeIds } from "@/notes/domain";
-import type { NoteEntityLink, NotePageDraft, NotePagePatch, NotePageSummary } from "@/notes/domain";
+import type { NotePageDraft, NotePagePatch, NotePageSummary } from "@/notes/domain";
 import {
   createNotePageAction,
   updateNotePageMetaAction,
@@ -13,7 +13,6 @@ import {
   restoreNotePageAction,
   purgeNotePageAction,
   setNoteFavoriteAction,
-  setNoteEntityLinkAction,
   setNotePageTagsAction,
 } from "@/notes/actions/noteActions";
 
@@ -119,26 +118,6 @@ export function useNoteMutations() {
     },
   });
 
-  const setEntityLinkMutation = useEntityMutation({
-    entityLabel: "Note",
-    action: "updated",
-    successMessage: "Note assignment updated",
-    mutationFn: ({ id, link }: { id: number; link: NoteEntityLink }) =>
-      setNoteEntityLinkAction(id, link),
-    invalidate: (qc, data) => {
-      void qc.invalidateQueries({ queryKey: notesKeys.tree() });
-      // Invalidated by prefix: the list the note just left has to refetch too, and
-      // that one isn't in the response — otherwise the old lead's detail card keeps
-      // showing a note that moved away.
-      void qc.invalidateQueries({ queryKey: notesKeys.byEntityAll() });
-      queryClient.setQueryData(notesKeys.detail(data.id), (old: unknown) =>
-        old && typeof old === "object"
-          ? { ...old, entityKind: data.entityKind, entityId: data.entityId }
-          : old
-      );
-    },
-  });
-
   const setTagsMutation = useEntityMutation({
     entityLabel: "Note",
     action: "updated",
@@ -162,6 +141,5 @@ export function useNoteMutations() {
     purgeMutation,
     favoriteMutation,
     setTagsMutation,
-    setEntityLinkMutation,
   };
 }

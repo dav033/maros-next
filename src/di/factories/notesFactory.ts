@@ -2,6 +2,7 @@ import type { NotesAppContext } from "@/notes";
 import {
   makeNotesAppContext,
   NotePageHttpRepository,
+  NoteReferenceHttpRepository,
   NoteSharingHttpRepository,
   NoteTagHttpRepository,
 } from "@/notes";
@@ -14,6 +15,7 @@ export function createNotesAppContext(): NotesAppContext {
       notePage: new NotePageHttpRepository(),
       noteTag: new NoteTagHttpRepository(),
       noteSharing: new NoteSharingHttpRepository(),
+      noteReference: new NoteReferenceHttpRepository(),
     },
   });
 }

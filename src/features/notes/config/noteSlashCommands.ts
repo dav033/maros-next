@@ -15,6 +15,8 @@ import {
   Type,
   AlertTriangle,
   BellRing,
+  AtSign,
+  Link2,
 } from "lucide-react";
 
 export interface NoteSlashCommandItem {
@@ -140,6 +142,28 @@ export const NOTE_SLASH_COMMANDS: NoteSlashCommandItem[] = [
         .deleteRange(range)
         .setNode("callout", { variant: "reminder", dueDate: null })
         .run(),
+  },
+  /**
+   * These two insert the trigger character instead of doing the work themselves: typing it
+   * is what opens the suggestion menu, so the slash command is purely a way to discover
+   * that `@` and `[[` exist. Reimplementing the menu here would be a second code path to
+   * the same picker.
+   */
+  {
+    id: "mentionRecord",
+    title: "Mention a record",
+    description: "Link a lead, project, contact, company, task or person",
+    icon: AtSign,
+    keywords: ["mention", "reference", "lead", "project", "contact", "company", "task", "person", "@"],
+    run: (editor, range) => editor.chain().focus().deleteRange(range).insertContent("@").run(),
+  },
+  {
+    id: "linkNote",
+    title: "Link a note",
+    description: "Point at another note, or create it",
+    icon: Link2,
+    keywords: ["link", "note", "wikilink", "backlink", "[["],
+    run: (editor, range) => editor.chain().focus().deleteRange(range).insertContent("[[").run(),
   },
   {
     id: "blockquote",

@@ -1,5 +1,6 @@
 import type {
   NotePageRepositoryPort,
+  NoteReferenceRepositoryPort,
   NoteSharingRepositoryPort,
   NoteTagRepositoryPort,
 } from "@/features/notes/domain";
@@ -11,6 +12,7 @@ export type NotesAppContext = Readonly<{
     notePage: NotePageRepositoryPort;
     noteTag: NoteTagRepositoryPort;
     noteSharing: NoteSharingRepositoryPort;
+    noteReference: NoteReferenceRepositoryPort;
   };
 }>;
 

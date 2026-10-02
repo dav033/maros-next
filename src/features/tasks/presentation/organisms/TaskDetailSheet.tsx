@@ -37,6 +37,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { EntityAttachmentsSection } from "@/features/attachments/presentation/EntityAttachmentsSection";
+import { NoteMentionsSection } from "@/features/notes/presentation/organisms/NoteMentionsSection";
 import { useCurrentUser } from "@/shared/auth/CurrentUserProvider";
 import { useTasksApp } from "@/di";
 import { useDraftField } from "@/shared/presentation/hooks/useDraftField";
@@ -612,6 +613,10 @@ export function TaskDetailDialog({
                     </div>
                   ) : null}
                   <TaskWorkSection task={task} onSavePatch={saveTaskPatch} />
+                  {/* Read-only on purpose: notes are written in the notes workspace, and a
+                      task is referenced from there with @. This is the other end of that
+                      link, so the meeting note that produced the task is one click away. */}
+                  <NoteMentionsSection entityKind="task" entityId={task.id} />
                   <TaskTimeline taskId={task.id} activity={task.activity} comments={task.comments} />
                 </TabsContent>
 

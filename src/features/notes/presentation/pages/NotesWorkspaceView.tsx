@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import {
-  Briefcase,
   Check,
   ChevronRight,
   Eye,
@@ -16,7 +15,6 @@ import {
   Star,
   Trash2,
   TriangleAlert,
-  X,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -34,8 +32,8 @@ import { ShareNoteDialog } from "../organisms/ShareNoteDialog";
 import { NoteFolderView } from "./NoteFolderView";
 import { NotesHomeView } from "./NotesHomeView";
 import { TagPicker } from "../molecules/TagPicker";
-import { NoteEntityPicker } from "../molecules/NoteEntityPicker";
-import { useNoteEntityLabel } from "../hooks/data/useNoteEntityLabel";
+import { NoteRelationsBar } from "../organisms/NoteRelationsBar";
+import { NoteBacklinksPanel } from "../organisms/NoteBacklinksPanel";
 import { formatRelativeTime } from "../atoms/formatRelativeTime";
 import {
   noteAuthorInitials,
@@ -65,10 +63,6 @@ export function NotesWorkspaceView({
       : [];
   const editor = logic.activePage?.lastEditedBy ?? null;
   const isFolder = logic.activePage?.kind === "folder";
-  const entity = useNoteEntityLabel(
-    logic.activePage?.entityKind ?? null,
-    logic.activePage?.entityId ?? null,
-  );
 
   if (
     (logic.activePageId == null && logic.treeLoading) ||
@@ -338,56 +332,14 @@ export function NotesWorkspaceView({
               linked record, was a 40px empty box hiding two empty things. The chips
               are smaller than the bar they replace and say what they are. */}
           <div className="mb-3 flex flex-wrap items-center gap-1.5">
-            {logic.activePage?.entityKind &&
-            logic.activePage.entityId != null ? (
-              <span className="inline-flex items-center gap-1.5 rounded-md bg-elev-4 py-0.5 pl-2 pr-1 text-[11px]">
-                <Briefcase
-                  className="size-3 text-muted-foreground"
-                  aria-hidden="true"
-                />
-                {entity.href ? (
-                  <Link
-                    href={entity.href}
-                    className="max-w-[16rem] truncate hover:underline"
-                  >
-                    {entity.label ?? "Loading…"}
-                  </Link>
-                ) : (
-                  <span className="max-w-[16rem] truncate">
-                    {entity.label ?? "Loading…"}
-                  </span>
-                )}
-                {logic.canEdit && (
-                  <button
-                    type="button"
-                    onClick={() =>
-                      logic.onEntityLinkChange({
-                        entityKind: null,
-                        entityId: null,
-                      })
-                    }
-                    title="Unassign"
-                    aria-label="Unassign from lead or project"
-                    className="rounded p-0.5 text-muted-foreground hover:bg-elev-5 hover:text-foreground"
-                  >
-                    <X className="size-3" aria-hidden="true" />
-                  </button>
-                )}
-              </span>
-            ) : logic.canEdit ? (
-              <NoteEntityPicker
-                onSelect={logic.onEntityLinkChange}
-                trigger={
-                  <button
-                    type="button"
-                    className="inline-flex items-center gap-1 rounded-md border border-dashed border-line-strong px-2 py-0.5 text-[11px] text-muted-foreground transition-colors hover:border-solid hover:bg-elev-4 hover:text-foreground"
-                  >
-                    <Briefcase className="size-3" aria-hidden="true" />
-                    Link a record
-                  </button>
-                }
+            {/* Folders included: a relation is a property of the page, not of its
+                document, so a folder can be the thing a lead's notes live under. */}
+            {logic.activePageId != null && (
+              <NoteRelationsBar
+                pageId={logic.activePageId}
+                canEdit={logic.canEdit}
               />
-            ) : null}
+            )}
 
             {(logic.activePage?.tags ?? []).map((tag) => (
               <span
@@ -428,13 +380,17 @@ export function NotesWorkspaceView({
                 canEdit={logic.canEdit}
               />
             ) : (
-              <NoteEditor
-                key={logic.activePageId}
-                pageId={logic.activePageId}
-                initialContent={logic.activePage?.content ?? emptyNoteDoc()}
-                onChange={logic.onContentChange}
-                editable={logic.canEdit}
-              />
+              <>
+                <NoteEditor
+                  key={logic.activePageId}
+                  pageId={logic.activePageId}
+                  initialContent={logic.activePage?.content ?? emptyNoteDoc()}
+                  onChange={logic.onContentChange}
+                  editable={logic.canEdit}
+                  onCreateLinkedNote={logic.onCreateLinkedNote}
+                />
+                <NoteBacklinksPanel pageId={logic.activePageId} />
+              </>
             ))}
 
           {logic.activePageId != null && (

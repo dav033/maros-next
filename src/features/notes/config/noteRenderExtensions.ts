@@ -4,6 +4,7 @@ import { TaskItem } from "@tiptap/extension-task-item";
 import { TableKit } from "@tiptap/extension-table";
 import { NoteImage } from "./noteImageExtension";
 import { Callout } from "./calloutExtension";
+import { noteReferenceRenderExtensions } from "./noteReferenceExtensions";
 
 /**
  * The node schema a note document is written in — everything needed to *render* one,
@@ -27,5 +28,8 @@ export function noteRenderExtensions() {
     TableKit.configure({ table: { resizable: true } }),
     NoteImage,
     Callout,
+    // Without these two nodes a published note renders every @mention and [[wikilink]] as
+    // an unknown node, and the page that breaks is the one customers see.
+    ...noteReferenceRenderExtensions(),
   ];
 }

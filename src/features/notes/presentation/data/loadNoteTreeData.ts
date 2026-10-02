@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { createServerApiClient } from "@/shared/infra/http";
 import {
   NotePageHttpRepository,
+  NoteReferenceHttpRepository,
   NoteSharingHttpRepository,
   NoteTagHttpRepository,
   makeNotesAppContext,
@@ -18,6 +19,7 @@ export async function loadNoteTreeData(): Promise<NotePageSummary[]> {
       notePage: new NotePageHttpRepository(api),
       noteTag: new NoteTagHttpRepository(api),
       noteSharing: new NoteSharingHttpRepository(api),
+      noteReference: new NoteReferenceHttpRepository(api),
     },
   });
 
