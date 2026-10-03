@@ -13,7 +13,7 @@ import React from "react";
 import { Check, FileBarChart, Link2 } from "lucide-react";
 
 import type { Project } from "@/project/domain";
-import { ProjectProgressStatus, InvoiceStatus } from "@/project/domain";
+import { DEFAULT_PROJECT_REPORT, ProjectProgressStatus, InvoiceStatus } from "@/project/domain";
 import { PROGRESS_LABELS } from "../../organisms/projectVisualTokens";
 
 export type ProjectGroupBy = "none" | "progressStatus" | "invoiceStatus" | "projectType" | "leadType";
@@ -132,10 +132,13 @@ export function useProjectsTableLogic({
         });
       }
 
+      // El reporte viaja en la URL para que esta opción lleve al P&L porque lo
+      // pide, y no porque coincida con el valor por defecto de la pantalla.
       items.push({
-        label: "Llévame al reporte",
+        label: "Ir al Profit and Loss",
         icon: React.createElement(FileBarChart, { className: "size-4" }),
-        onClick: () => router.push(`/project/${project.id}/report`),
+        onClick: () =>
+          router.push(`/project/${project.id}/report?report=${DEFAULT_PROJECT_REPORT}`),
       });
 
       if (onLinkQuickbooks) {

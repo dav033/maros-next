@@ -40,6 +40,21 @@ const report: ProjectQboReport = {
 };
 
 describe("ProjectQboReportPage", () => {
+  /** El select arranca en el P&L de resumen, no en el detalle de 165 filas. */
+  it("opens on the Profit and Loss summary, not the detail", () => {
+    useProjectQboReport.mockReturnValue({
+      data: report,
+      error: null,
+      isPending: false,
+      refetch: vi.fn(),
+    });
+    render(<ProjectQboReportPage projectId={12} />);
+
+    const trigger = screen.getByRole("combobox", { name: "Report" });
+    expect(trigger).toHaveTextContent("Profit and Loss");
+    expect(trigger).not.toHaveTextContent("Detail");
+  });
+
   it("renders the figures and the report provenance once the data arrives", () => {
     useProjectQboReport.mockReturnValue({ data: report, error: null, isPending: false, refetch: vi.fn() });
 

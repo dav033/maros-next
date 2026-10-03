@@ -21,7 +21,10 @@ export type {
   QboReportRow,
 } from "./models/QboReport";
 export {
+  DEFAULT_PROJECT_REPORT,
   isPointInTimeReport,
+  parseProjectReport,
+  PROJECT_REPORT_NAMES,
   QBO_ACCOUNTING_METHODS,
   QBO_REPORT_NAMES,
 } from "./models/QboReport";

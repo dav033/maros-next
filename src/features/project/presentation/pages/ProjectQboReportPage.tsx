@@ -20,7 +20,8 @@ import { AppError } from "@/shared/errors";
 import {
   isPointInTimeReport,
   QBO_ACCOUNTING_METHODS,
-  QBO_REPORT_NAMES,
+  DEFAULT_PROJECT_REPORT,
+  PROJECT_REPORT_NAMES,
   type QboAccountingMethod,
   type QboReportName,
   type QboReportParams,
@@ -125,8 +126,15 @@ function ReportError({
   );
 }
 
-export function ProjectQboReportPage({ projectId }: { projectId: number }) {
-  const [report, setReport] = useState<QboReportName>("ProfitAndLossDetail");
+export function ProjectQboReportPage({
+  projectId,
+  initialReport,
+}: {
+  projectId: number;
+  /** El reporte con que abre, cuando la URL lo pide (`?report=`). */
+  initialReport?: QboReportName;
+}) {
+  const [report, setReport] = useState<QboReportName>(initialReport ?? DEFAULT_PROJECT_REPORT);
   const [accountingMethod, setAccountingMethod] = useState<QboAccountingMethod>("Accrual");
   const [startDate, setStartDate] = useState(() => `${new Date().getFullYear()}-01-01`);
   const [endDate, setEndDate] = useState(() => toDateString(new Date()));
@@ -173,7 +181,7 @@ export function ProjectQboReportPage({ projectId }: { projectId: number }) {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {QBO_REPORT_NAMES.map((name) => (
+              {PROJECT_REPORT_NAMES.map((name) => (
                 <SelectItem key={name} value={name}>
                   {REPORT_LABELS[name]}
                 </SelectItem>

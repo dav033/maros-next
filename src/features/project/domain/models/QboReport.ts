@@ -16,6 +16,49 @@ export const QBO_REPORT_NAMES = [
 
 export type QboReportName = (typeof QBO_REPORT_NAMES)[number];
 
+/**
+ * Los que se ofrecen en la pantalla de un proyecto. El contrato HTTP sigue
+ * aceptando los ocho de arriba —las herramientas de MCP piden varios de ellos—,
+ * pero cuatro no tienen sentido en la ficha de un proyecto:
+ *
+ *   * AgedPayables y VendorBalanceDetail devuelven las cifras de toda la
+ *     empresa. QuickBooks ignora el filtro de cliente: piden el reporte para
+ *     dos proyectos con jobs distintos y responde lo mismo, el mismo TOTAL de
+ *     231.520,10 y los mismos 15 proveedores.
+ *   * BalanceSheet sale descuadrado, porque un balance por cliente no es una
+ *     cosa coherente: 145.143,00 de activo contra -45.443,43 de pasivo más
+ *     patrimonio.
+ *   * CashFlow devuelve el Net Income repetido tres veces, y llama "caja al
+ *     final del periodo" a lo que no es la caja del proyecto.
+ *
+ * Los cuatro siguen disponibles por API para quien sepa lo que está pidiendo.
+ */
+export const PROJECT_REPORT_NAMES: readonly QboReportName[] = [
+  "ProfitAndLoss",
+  "ProfitAndLossDetail",
+  "GeneralLedgerDetail",
+  "VendorExpenses",
+];
+
+/**
+ * El reporte con que abre la pantalla cuando llega en la URL
+ * (`/project/7/report?report=ProfitAndLoss`), que es lo que usa el "Ir al
+ * Profit and Loss" del clic derecho en la lista de proyectos.
+ *
+ * Va en la URL en vez de confiar en el valor por defecto de la pantalla: así el
+ * menú lleva al P&L porque lo pide, no porque coincida con el defecto de hoy.
+ * Un nombre que no se ofrezca en esta pantalla cae al P&L en lugar de fallar —
+ * una URL a mano o un enlace viejo no debe dejar la pantalla en blanco.
+ */
+export const DEFAULT_PROJECT_REPORT: QboReportName = "ProfitAndLoss";
+
+export function parseProjectReport(value: unknown): QboReportName {
+  const first = Array.isArray(value) ? value[0] : value;
+  if (typeof first !== "string") return DEFAULT_PROJECT_REPORT;
+  const match = PROJECT_REPORT_NAMES.find((name) => name === first);
+  return match ?? DEFAULT_PROJECT_REPORT;
+}
+
 export const QBO_ACCOUNTING_METHODS = ["Accrual", "Cash"] as const;
 
 export type QboAccountingMethod = (typeof QBO_ACCOUNTING_METHODS)[number];
