@@ -1,8 +1,20 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { optimizedApiClient } from "@/shared/infra";
+// Ruta directa y no el barrel de `@/leads/presentation`: ese arrastra las páginas
+// del módulo, que sí usan `@/di`, y este reporte vive deliberadamente fuera del DI.
+import {
+  useLeadsMutations,
+  type UpdateLeadStatusInput,
+} from "@/features/leads/presentation/hooks/mutations/useLeadsMutations";
 import { analyticsQueryDefaults } from "../../application/queries/cacheConfig";
+
+/**
+ * Sin el umbral: los tres (30/60/90) quedan cacheados a la vez, y un lead que
+ * deja de estar estancado desaparece de todos, no sólo del que se está mirando.
+ */
+const STALE_LEADS_KEY = ["analytics", "leads", "stale"] as const;
 
 export type StaleLeadStatus =
   | "NEW_LEAD"
@@ -47,7 +59,7 @@ export function useStaleLeads(days: number) {
     // keepPreviousData comes with these defaults: switching 30/60/90 keeps the last
     // table on screen instead of collapsing the page into a skeleton each time.
     ...analyticsQueryDefaults,
-    queryKey: ["analytics", "leads", "stale", days],
+    queryKey: [...STALE_LEADS_KEY, days],
     queryFn: async () => {
       const response = await optimizedApiClient.get<StaleLeadsReport>("/analytics/leads/stale", {
         params: { days },
@@ -55,4 +67,29 @@ export function useStaleLeads(days: number) {
       return response.data;
     },
   });
+}
+
+/**
+ * Decidir un lead desde el reporte: una vez en WON o LOST ya no está estancado, así
+ * que el reporte se invalida además de las queries de leads que trae la mutación.
+ */
+export function useCloseStaleLead() {
+  const queryClient = useQueryClient();
+  const { updateStatusMutation } = useLeadsMutations();
+
+  const close = async (input: UpdateLeadStatusInput) => {
+    try {
+      await updateStatusMutation.mutateAsync(input);
+      void queryClient.invalidateQueries({ queryKey: STALE_LEADS_KEY });
+    } catch {
+      // Error ya notificado por useEntityMutation
+    }
+  };
+
+  return {
+    close,
+    pendingLeadId: updateStatusMutation.isPending
+      ? updateStatusMutation.variables?.id ?? null
+      : null,
+  };
 }

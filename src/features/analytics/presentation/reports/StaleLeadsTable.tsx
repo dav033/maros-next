@@ -1,5 +1,13 @@
 import Link from "next/link";
+import { ChevronDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -8,8 +16,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { LeadStatus, type LeadLostReason } from "@/leads/domain";
 import { money } from "../widgets/formatters";
 import type { StaleLead, StaleLeadStatus } from "./useStaleLeads";
+
+export type StaleLeadDecision = (
+  lead: StaleLead,
+  status: LeadStatus.WON | LeadStatus.LOST,
+  /** Omitirlo deja que el control pida el motivo; pasarlo cierra el lead de un clic. */
+  lostReason?: LeadLostReason,
+) => void;
 
 const STATUS_LABELS: Record<NonNullable<StaleLeadStatus>, string> = {
   NEW_LEAD: "New lead",
@@ -29,7 +45,19 @@ function statusStyle(status: StaleLeadStatus): string {
   return "bg-elev-4 text-muted-foreground border border-line-strong";
 }
 
-export function StaleLeadsTable({ leads }: { leads: StaleLead[] }) {
+/**
+ * `onDecide` ausente significa sin permiso de escritura: la columna entera
+ * desaparece en vez de ofrecer botones que volverían con un 403.
+ */
+export function StaleLeadsTable({
+  leads,
+  onDecide,
+  pendingLeadId = null,
+}: {
+  leads: StaleLead[];
+  onDecide?: StaleLeadDecision;
+  pendingLeadId?: number | null;
+}) {
   return (
     <div className="space-y-2">
       <Table>
@@ -50,6 +78,11 @@ export function StaleLeadsTable({ leads }: { leads: StaleLead[] }) {
             <TableHead className="font-display text-right text-xs uppercase tracking-wide text-muted-foreground">
               Bucket
             </TableHead>
+            {onDecide ? (
+              <TableHead className="font-display text-right text-xs uppercase tracking-wide text-muted-foreground">
+                Decide
+              </TableHead>
+            ) : null}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -84,6 +117,15 @@ export function StaleLeadsTable({ leads }: { leads: StaleLead[] }) {
               <TableCell className="text-right font-mono text-xs tabular-nums text-muted-foreground">
                 {lead.ageBucket}
               </TableCell>
+              {onDecide ? (
+                <TableCell className="text-right">
+                  <StaleLeadDecideCell
+                    lead={lead}
+                    onDecide={onDecide}
+                    isPending={pendingLeadId === lead.id}
+                  />
+                </TableCell>
+              ) : null}
             </TableRow>
           ))}
         </TableBody>
@@ -95,6 +137,60 @@ export function StaleLeadsTable({ leads }: { leads: StaleLead[] }) {
         Age is counted from the lead&apos;s start date — there is no last-activity record, so
         each figure is a minimum: at least this old.
       </p>
+    </div>
+  );
+}
+
+/**
+ * Un lead que cuesta tres clics y una navegación no se cierra nunca, y de ahí
+ * salen los 27 sin estado: el motivo dominante ("no contestó") es un clic en la
+ * propia fila, y el resto de desenlaces quedan a un paso detrás del menú.
+ */
+function StaleLeadDecideCell({
+  lead,
+  onDecide,
+  isPending,
+}: {
+  lead: StaleLead;
+  onDecide: StaleLeadDecision;
+  isPending: boolean;
+}) {
+  const leadLabel = lead.name ?? `Lead #${lead.id}`;
+
+  return (
+    <div className="flex items-center justify-end gap-1">
+      <Button
+        type="button"
+        size="sm"
+        variant="secondary"
+        className="h-7 px-2 text-xs"
+        disabled={isPending}
+        onClick={() => onDecide(lead, LeadStatus.LOST, "no_response")}
+      >
+        Lost: no response
+      </Button>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            className="h-7 w-7 p-0"
+            disabled={isPending}
+            aria-label={`Other outcomes for ${leadLabel}`}
+          >
+            <ChevronDown className="h-3.5 w-3.5" aria-hidden="true" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={() => onDecide(lead, LeadStatus.LOST)}>
+            Lost for another reason...
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onDecide(lead, LeadStatus.WON)}>
+            Mark as won
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 }

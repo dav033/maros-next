@@ -5,10 +5,13 @@ import { Hourglass } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useHasPermission } from "@/shared/auth/useHasPermission";
+import { LeadLostReasonDialog } from "@/features/leads/presentation/molecules/LeadLostReasonDialog";
+import { useLeadStatusChange } from "@/features/leads/presentation/hooks/mutations/useLeadStatusChange";
 import { ReportEmpty, ReportError } from "./ReportStates";
 import { StaleLeadsSummary } from "./StaleLeadsSummary";
-import { StaleLeadsTable } from "./StaleLeadsTable";
-import { useStaleLeads } from "./useStaleLeads";
+import { StaleLeadsTable, type StaleLeadDecision } from "./StaleLeadsTable";
+import { useCloseStaleLead, useStaleLeads } from "./useStaleLeads";
 
 const DAY_OPTIONS = [30, 60, 90] as const;
 
@@ -18,6 +21,25 @@ export function StaleLeadsReport() {
   const [days, setDays] = useState<number>(60);
   const query = useStaleLeads(days);
   const report = query.data;
+
+  // El reporte se ve con dashboard:read, pero mover un lead exige leads:write: sin
+  // permiso no se ofrece el control en vez de dejar que el servidor conteste 403.
+  const canWriteLeads = useHasPermission("leads:write");
+  const { close, pendingLeadId } = useCloseStaleLead();
+  const { requestStatusChange, lostReasonDialogProps } = useLeadStatusChange();
+
+  const decide: StaleLeadDecision = (lead, status, lostReason) => {
+    if (lostReason) {
+      void close({ id: lead.id, status, lostReason });
+      return;
+    }
+    void requestStatusChange({
+      status,
+      // El motivo dominante aquí es "no contestó", así que llega preseleccionado.
+      initialReason: "no_response",
+      commit: (reason) => close({ id: lead.id, status, lostReason: reason }),
+    });
+  };
 
   return (
     <section className="space-y-4">
@@ -72,12 +94,18 @@ export function StaleLeadsReport() {
                   hint="Any undecided lead without a start date is still listed above."
                 />
               ) : (
-                <StaleLeadsTable leads={report.leads} />
+                <StaleLeadsTable
+                  leads={report.leads}
+                  onDecide={canWriteLeads ? decide : undefined}
+                  pendingLeadId={pendingLeadId}
+                />
               )}
             </CardContent>
           </Card>
         </div>
       ) : null}
+
+      <LeadLostReasonDialog {...lostReasonDialogProps} />
     </section>
   );
 }
