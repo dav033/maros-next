@@ -1,5 +1,5 @@
 import type { ApiProjectDTO } from "@/project/domain/services/projectReadMapper";
-import type { Project, ProjectDraft, ProjectPatch, ProjectPaymentsResponse, ProjectFinancialsEntry, ProjectQboReport, QboReportParams, QuickbooksImportBatchReport, QuickbooksImportDecision, QuickbooksImportJob } from "@/project/domain/models";
+import type { Project, ProjectDraft, ProjectPatch, ProjectPaymentsResponse, ProjectFinancialsEntry, ProjectQboReport, QboReportParams, QuickbooksImportBatchReport, QuickbooksImportDecision, QuickbooksImportJob, QuickbooksJobDeactivation } from "@/project/domain/models";
 import type { ProjectRepositoryPort } from "@/project/domain/ports";
 import { optimizedApiClient } from "@/shared/infra/http";
 import { makeHttpResourceRepository } from "@/shared/infra/rest";
@@ -111,6 +111,19 @@ export class ProjectHttpRepository implements ProjectRepositoryPort {
       { decisions },
     );
     if (!data) throw new Error("Empty response importing QuickBooks jobs");
+    return data;
+  };
+
+  deactivateQuickbooksJob = async (
+    qboCustomerId: string,
+  ): Promise<QuickbooksJobDeactivation> => {
+    // `confirm` lo exige el servidor en el cuerpo: es la guarda que impide que
+    // una escritura en la contabilidad salga de una llamada mal interpretada.
+    const { data } = await this.api.post<QuickbooksJobDeactivation>(
+      projectEndpoints.quickbooksImportDeactivateJob(),
+      { qboCustomerId, confirm: true },
+    );
+    if (!data) throw new Error("Empty response deactivating QuickBooks job");
     return data;
   };
 }

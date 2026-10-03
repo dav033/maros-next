@@ -2,9 +2,12 @@
 
 import { useCallback, useMemo, useState } from "react";
 
+import { toast } from "sonner";
+
 import type {
   QuickbooksImportBatchReport,
   QuickbooksImportDecisionResult,
+  QuickbooksImportJob,
 } from "@/project/domain";
 import {
   buildImportDecisions,
@@ -14,8 +17,37 @@ import {
   type QuickbooksImportRowPlan,
 } from "@/project/domain";
 
+import { useUnlinkProjectQboLink } from "@/features/quickbooks/presentation/hooks/useUnlinkProjectQboLink";
+import { AppError } from "@/shared/errors";
+
 import { useQuickbooksImportJobs } from "../hooks/data/useQuickbooksImportJobs";
 import { useQuickbooksImportBatch } from "../hooks/mutations/useQuickbooksImportBatch";
+import { useQuickbooksJobDeactivation } from "../hooks/mutations/useQuickbooksJobDeactivation";
+
+/**
+ * Las dos acciones que deshacen trabajo, siempre detrás de una confirmación.
+ *
+ * `desvincular` toca sólo el CRM y es reversible; `desactivar` escribe en la
+ * contabilidad. Comparten el mismo estado porque sólo puede haber una
+ * confirmación abierta a la vez.
+ */
+export type QuickbooksJobAction = "desvincular" | "desactivar";
+
+export type QuickbooksJobPendingAction = {
+  action: QuickbooksJobAction;
+  job: QuickbooksImportJob;
+};
+
+/**
+ * El mensaje del servidor antes que la copia genérica por estado: un 409 de
+ * estas rutas trae el importe del saldo abierto o el proyecto que hay que
+ * desvincular, y `userMessage` lo cambiaría por «Ya existe un registro con esos
+ * datos». Lo mismo con un error que viene literal de QuickBooks.
+ */
+function describeActionError(error: unknown): string {
+  const appError = AppError.from(error);
+  return appError.serverMessage?.trim() || appError.userMessage;
+}
 
 export type QuickbooksImportPageLogic = {
   rows: QuickbooksImportRowPlan[];
@@ -53,6 +85,14 @@ export type QuickbooksImportPageLogic = {
   report: QuickbooksImportBatchReport | null;
   resultsByJob: ReadonlyMap<string, QuickbooksImportDecisionResult>;
   dismissReport: () => void;
+
+  /** Acción esperando confirmación; `null` deja el diálogo cerrado. */
+  pendingAction: QuickbooksJobPendingAction | null;
+  requestAction: (action: QuickbooksJobAction, job: QuickbooksImportJob) => void;
+  cancelAction: () => void;
+  confirmAction: () => void;
+  /** Job sobre el que hay una acción en vuelo, para desactivar su fila. */
+  actingJobId: string | null;
 };
 
 function matchesQuery(plan: QuickbooksImportRowPlan, term: string): boolean {
@@ -66,6 +106,9 @@ function matchesQuery(plan: QuickbooksImportRowPlan, term: string): boolean {
 export function useQuickbooksImportPageLogic(): QuickbooksImportPageLogic {
   const jobsQuery = useQuickbooksImportJobs();
   const importBatch = useQuickbooksImportBatch();
+  const unlink = useUnlinkProjectQboLink();
+  const deactivate = useQuickbooksJobDeactivation();
+  const refetchJobs = jobsQuery.refetch;
 
   const [query, setQuery] = useState("");
   const [showImported, setShowImported] = useState(false);
@@ -77,6 +120,8 @@ export function useQuickbooksImportPageLogic(): QuickbooksImportPageLogic {
   // destino: sin esta elección la fila decidiría sola.
   const [chosenLeadIds, setChosenLeadIds] = useState<Record<string, number>>({});
   const [report, setReport] = useState<QuickbooksImportBatchReport | null>(null);
+  const [pendingAction, setPendingAction] = useState<QuickbooksJobPendingAction | null>(null);
+  const [actingJobId, setActingJobId] = useState<string | null>(null);
 
   const jobs = jobsQuery.data ?? [];
   const rows = useMemo(
@@ -164,6 +209,64 @@ export function useQuickbooksImportPageLogic(): QuickbooksImportPageLogic {
     });
   }, [rows, selectedIds, importBatch]);
 
+  const requestAction = useCallback(
+    (action: QuickbooksJobAction, job: QuickbooksImportJob) =>
+      setPendingAction({ action, job }),
+    [],
+  );
+  const cancelAction = useCallback(() => setPendingAction(null), []);
+
+  const confirmAction = useCallback(() => {
+    if (!pendingAction) return;
+    const { action, job } = pendingAction;
+    setPendingAction(null);
+    setActingJobId(job.qboCustomerId);
+    const settle = () => setActingJobId(null);
+
+    if (action === "desvincular") {
+      // El botón sólo existe en una fila importada, pero entre que se pinta y se
+      // confirma la lista pudo refrescarse: sin id de proyecto no hay nada que
+      // desvincular.
+      if (job.importedProjectId == null) {
+        settle();
+        return;
+      }
+      unlink.mutate(job.importedProjectId, {
+        onSuccess: (result) => {
+          toast.success(
+            result.unlinked
+              ? `Job ${job.displayName} desvinculado. El proyecto #${result.projectId} y su lead se conservan, y el job vuelve a ser importable.`
+              : "Ese proyecto ya no tenía vínculo con QuickBooks.",
+          );
+          // El vínculo es lo que marcaba la fila como «ya importado», así que la
+          // lista tiene que volver a diagnosticarse para ofrecerla importable.
+          void refetchJobs();
+          settle();
+        },
+        onError: (error) => {
+          toast.error(describeActionError(error));
+          settle();
+        },
+      });
+      return;
+    }
+
+    deactivate.mutate(job.qboCustomerId, {
+      onSuccess: (result) => {
+        toast.success(
+          result.alreadyInactive
+            ? `El job ${result.displayName} ya estaba inactivo en QuickBooks.`
+            : `Job ${result.displayName} desactivado en QuickBooks. Sus transacciones y su histórico se conservan.`,
+        );
+        settle();
+      },
+      onError: (error) => {
+        toast.error(describeActionError(error));
+        settle();
+      },
+    });
+  }, [pendingAction, unlink, deactivate, refetchJobs]);
+
   const resultsByJob = useMemo(
     () =>
       new Map((report?.results ?? []).map((result) => [result.qboCustomerId, result] as const)),
@@ -202,5 +305,11 @@ export function useQuickbooksImportPageLogic(): QuickbooksImportPageLogic {
     report,
     resultsByJob,
     dismissReport: () => setReport(null),
+
+    pendingAction,
+    requestAction,
+    cancelAction,
+    confirmAction,
+    actingJobId,
   };
 }

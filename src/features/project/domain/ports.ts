@@ -1,4 +1,4 @@
-import type { Project, ProjectDraft, ProjectId, ProjectPatch, ProjectPaymentsResponse, ProjectFinancialsEntry, ProjectQboReport, QboReportParams, QuickbooksImportBatchReport, QuickbooksImportDecision, QuickbooksImportJob } from "./models";
+import type { Project, ProjectDraft, ProjectId, ProjectPatch, ProjectPaymentsResponse, ProjectFinancialsEntry, ProjectQboReport, QboReportParams, QuickbooksImportBatchReport, QuickbooksImportDecision, QuickbooksImportJob, QuickbooksJobDeactivation } from "./models";
 
 export interface ProjectRepositoryPort {
   getById(id: ProjectId): Promise<Project | null>;
@@ -21,6 +21,13 @@ export interface ProjectRepositoryPort {
   importQuickbooksJobsBatch(
     decisions: readonly QuickbooksImportDecision[],
   ): Promise<QuickbooksImportBatchReport>;
+  /**
+   * Pone `Active: false` en el Customer del job. QuickBooks no borra un
+   * Customer, asi que esto es lo mas parecido que existe; el servidor exige
+   * `confirm: true` y rechaza el job con saldo abierto o con un proyecto del CRM
+   * todavia vinculado.
+   */
+  deactivateQuickbooksJob(qboCustomerId: string): Promise<QuickbooksJobDeactivation>;
 }
 
 

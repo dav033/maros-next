@@ -3,3 +3,4 @@ export * from "./updateProject";
 export * from "./deleteProject";
 export * from "./revertProjectToLead";
 export * from "./importQuickbooksJobsBatch";
+export * from "./deactivateQuickbooksJob";

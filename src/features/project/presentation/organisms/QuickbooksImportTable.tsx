@@ -1,7 +1,7 @@
 "use client";
 
 import { Fragment } from "react";
-import { Loader2, RotateCcw } from "lucide-react";
+import { Loader2, PowerOff, RotateCcw, Unlink } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -24,11 +24,13 @@ import {
 import {
   QUICKBOOKS_IMPORT_PROJECT_NUMBER_MAX_LENGTH,
   type QuickbooksImportDecisionResult,
+  type QuickbooksImportJob,
   type QuickbooksImportMatch,
   type QuickbooksImportRowPlan,
 } from "@/project/domain";
 import { formatCurrency } from "@/shared/utils";
 
+import type { QuickbooksJobAction } from "../pages/useQuickbooksImportPageLogic";
 import { QuickbooksImportCollisionPanel } from "../molecules/QuickbooksImportCollisionPanel";
 import {
   describeImportStatus,
@@ -53,6 +55,11 @@ export type QuickbooksImportTableProps = {
   isLoading: boolean;
   emptyMessage: string;
   canWrite: boolean;
+  /** Desactivar escribe en la contabilidad, así que pide su propio permiso. */
+  canDeactivate: boolean;
+  onRequestAction: (action: QuickbooksJobAction, job: QuickbooksImportJob) => void;
+  /** Job con una acción en vuelo: sus botones quedan fuera de alcance. */
+  actingJobId: string | null;
 };
 
 export function QuickbooksImportTable({
@@ -70,8 +77,11 @@ export function QuickbooksImportTable({
   isLoading,
   emptyMessage,
   canWrite,
+  canDeactivate,
+  onRequestAction,
+  actingJobId,
 }: QuickbooksImportTableProps) {
-  const columnCount = showResults ? 6 : 5;
+  const columnCount = showResults ? 7 : 6;
 
   return (
     <div
@@ -80,7 +90,7 @@ export function QuickbooksImportTable({
       tabIndex={0}
       className="overflow-x-auto overscroll-x-contain rounded-2xl border border-line bg-elev-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
-      <Table className="min-w-[68rem]">
+      <Table className="min-w-[79rem]">
         <TableHeader>
           <TableRow>
             <TableHead className="w-10">
@@ -95,6 +105,7 @@ export function QuickbooksImportTable({
             <TableHead className="w-56">Estado</TableHead>
             <TableHead className="w-72">Número del proyecto</TableHead>
             <TableHead className="w-32 text-right">Saldo</TableHead>
+            <TableHead className="w-44">Acciones</TableHead>
             {showResults ? <TableHead className="w-56">Resultado</TableHead> : null}
           </TableRow>
         </TableHeader>
@@ -207,6 +218,35 @@ export function QuickbooksImportTable({
 
                     <TableCell className="w-32 text-right tabular-nums">
                       {formatCurrency(job.balance, 0)}
+                    </TableCell>
+
+                    <TableCell className="w-44 space-y-1.5">
+                      {job.importedProjectId != null ? (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="w-full justify-start"
+                          disabled={!canWrite || actingJobId === job.qboCustomerId}
+                          onClick={() => onRequestAction("desvincular", job)}
+                        >
+                          <Unlink className="mr-2 size-3.5" aria-hidden />
+                          Desvincular
+                        </Button>
+                      ) : null}
+                      {job.active ? (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="w-full justify-start text-fg-dim"
+                          disabled={!canDeactivate || actingJobId === job.qboCustomerId}
+                          onClick={() => onRequestAction("desactivar", job)}
+                        >
+                          <PowerOff className="mr-2 size-3.5" aria-hidden />
+                          Desactivar en QuickBooks
+                        </Button>
+                      ) : (
+                        <p className="text-xs text-fg-faint">Inactivo en QuickBooks</p>
+                      )}
                     </TableCell>
 
                     {showResults ? (

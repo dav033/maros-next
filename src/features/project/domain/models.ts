@@ -36,6 +36,7 @@ export type {
   QuickbooksImportJobStatus,
   QuickbooksImportMatch,
   QuickbooksImportOutcome,
+  QuickbooksJobDeactivation,
 } from "./models/QuickbooksImportJob";
 export {
   QUICKBOOKS_IMPORT_BATCH_LIMIT,

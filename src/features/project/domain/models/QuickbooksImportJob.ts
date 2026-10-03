@@ -110,6 +110,24 @@ export type QuickbooksImportBatchReport = {
 };
 
 /**
+ * Resultado de POST /projects/quickbooks-import/deactivate-job.
+ *
+ * La API de QuickBooks no tiene borrado para un Customer: lo unico que existe es
+ * `Active: false` (el «Make inactive» de su interfaz), y las transacciones y el
+ * historico del job se conservan. De ahi que esto no se llame eliminar en ningun
+ * sitio.
+ */
+export type QuickbooksJobDeactivation = {
+  qboCustomerId: string;
+  displayName: string;
+  /** Estado en que quedó el Customer en QuickBooks. */
+  active: boolean;
+  deactivated: boolean;
+  /** QuickBooks ya lo tenía inactivo: no se escribió nada. */
+  alreadyInactive: boolean;
+};
+
+/**
  * Tope real del servidor (`MAX_BATCH_DECISIONS` en
  * `quickbooks-project-import.service.ts`): un lote más grande se rechaza entero
  * con 400, así que la UI trocea la selección antes de mandarla.

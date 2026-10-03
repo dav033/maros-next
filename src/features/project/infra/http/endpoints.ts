@@ -16,5 +16,6 @@ export const endpoints = {
   qboReport: (id: number | string) => `${BASE}/${id}/qbo-report`,
   quickbooksImportJobs: () => `${BASE}/quickbooks-import/jobs`,
   quickbooksImportBatch: () => `${BASE}/quickbooks-import/import-batch`,
+  quickbooksImportDeactivateJob: () => `${BASE}/quickbooks-import/deactivate-job`,
 } as const;
 

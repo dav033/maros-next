@@ -21,6 +21,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { AppError } from "@/shared/errors";
 
+import { QuickbooksJobActionDialog } from "../molecules/QuickbooksJobActionDialog";
 import { QuickbooksImportSummaryCard } from "../organisms/QuickbooksImportSummaryCard";
 import { QuickbooksImportTable } from "../organisms/QuickbooksImportTable";
 import { useQuickbooksImportPageLogic } from "./useQuickbooksImportPageLogic";
@@ -38,6 +39,11 @@ export function QuickbooksImportPage() {
 function QuickbooksImportScreen() {
   const pathname = usePathname();
   const canWrite = useHasPermission("projects:write");
+  // Desactivar un job escribe en la contabilidad, no en el CRM: el permiso que
+  // exige la ruta es finance:write, y el botón no puede ofrecer lo que el
+  // servidor va a rechazar con un 403.
+  const canWriteFinance = useHasPermission("finance:write");
+  const canDeactivate = canWrite && canWriteFinance;
   const logic = useQuickbooksImportPageLogic();
 
   const emptyMessage =
@@ -199,6 +205,15 @@ function QuickbooksImportScreen() {
           isLoading={logic.isPending}
           emptyMessage={emptyMessage}
           canWrite={canWrite}
+          canDeactivate={canDeactivate}
+          onRequestAction={logic.requestAction}
+          actingJobId={logic.actingJobId}
+        />
+
+        <QuickbooksJobActionDialog
+          pending={logic.pendingAction}
+          onCancel={logic.cancelAction}
+          onConfirm={logic.confirmAction}
         />
 
         <p className="text-sm text-fg-dim">
