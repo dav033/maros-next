@@ -1,4 +1,5 @@
 import type { Permission } from "@/shared/auth/permissions";
+import type { LeadType } from "@/leads/domain";
 
 /** 'internal' is staff; 'external' is an outside guest scoped to a company/contact. */
 export type UserType = "internal" | "external";
@@ -16,6 +17,13 @@ export interface AppUser {
   status: UserStatus;
   scopedCompanyId: number | null;
   scopedContactId: number | null;
+  /**
+   * Los tipos de lead que puede ver. `null` es todos.
+   *
+   * A diferencia de `scopedCompanyId` y `scopedContactId`, este sí filtra: se
+   * aplica en las lecturas de leads y de proyectos del backend.
+   */
+  scopedLeadTypes: LeadType[] | null;
   /** Non-null only while `status === "invited"`. */
   invitationExpiresAt: string | null;
   lastLoginAt: string | null;
@@ -45,6 +53,8 @@ export interface PermissionCatalog {
 export type UserPatch = Readonly<{
   roleId?: number;
   isActive?: boolean;
+  /** `null` quita la restricción y le devuelve todos los tipos. */
+  scopedLeadTypes?: LeadType[] | null;
 }>;
 
 export type UserInvite = Readonly<{

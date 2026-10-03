@@ -36,6 +36,7 @@ import { useInstantUsersList } from "../hooks/data/useInstantUsersList";
 import { useInstantRolesList } from "../hooks/data/useInstantRolesList";
 import { useUserMutations } from "../hooks/mutations/useUserMutations";
 import { InviteUserDialog } from "./InviteUserDialog";
+import { LeadTypeScopeControl } from "./LeadTypeScopeControl";
 
 const STATUS_LABEL: Record<UserStatus, string> = {
   invited: "Invited",
@@ -92,6 +93,7 @@ export function UsersTable() {
           <TableRow>
             <TableHead>User</TableHead>
             <TableHead>Role</TableHead>
+            <TableHead>Tipos de lead</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Active</TableHead>
             <TableHead>Last login</TableHead>
@@ -132,6 +134,22 @@ export function UsersTable() {
                       ))}
                     </SelectContent>
                   </Select>
+                </TableCell>
+                <TableCell>
+                  {/* Un externo ya esta acotado a su empresa o contacto; anadirle
+                      un ambito por tipo encima mezclaria dos restricciones
+                      distintas sin que se vea cual manda. */}
+                  {user.userType === "external" ? (
+                    <span className="text-xs text-muted-foreground">—</span>
+                  ) : (
+                    <LeadTypeScopeControl
+                      value={user.scopedLeadTypes}
+                      disabled={isSelf || updateMutation.isPending}
+                      onChange={(scopedLeadTypes) =>
+                        updateMutation.mutate({ id: user.id, patch: { scopedLeadTypes } })
+                      }
+                    />
+                  )}
                 </TableCell>
                 <TableCell>
                   <Badge variant={STATUS_VARIANT[user.status]}>
