@@ -150,106 +150,97 @@ export function ProjectQboReportPage({ projectId }: { projectId: number }) {
   const error = query.error ? AppError.from(query.error) : null;
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center gap-4">
+    <div className="container mx-auto space-y-3 p-4 sm:p-6">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
         <Button asChild variant="ghost" size="icon" aria-label="Back to the project">
           <Link href={`/project/${projectId}`}>
             <ArrowLeft className="size-4" />
           </Link>
         </Button>
-        <div>
-          <h1 className="font-display text-3xl font-bold text-foreground">QuickBooks report</h1>
-          <p className="text-muted-foreground">
-            Project {data?.leadNumber ? `#${data.leadNumber}` : `#${projectId}`}
-          </p>
-        </div>
+        <h1 className="font-display text-2xl font-bold text-foreground">QuickBooks report</h1>
+        <p className="text-sm text-muted-foreground">
+          Project {data?.leadNumber ? `#${data.leadNumber}` : `#${projectId}`}
+        </p>
       </div>
 
       <Card>
-        <CardContent className="flex flex-wrap items-end gap-4 p-6">
-          <div className="space-y-2">
-            <p className="font-display text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Report
-            </p>
-            <Select value={report} onValueChange={(value) => setReport(value as QboReportName)}>
-              <SelectTrigger className="h-10 w-[280px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {QBO_REPORT_NAMES.map((name) => (
-                  <SelectItem key={name} value={name}>
-                    {REPORT_LABELS[name]}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <p className="font-display text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Accounting method
-            </p>
-            <div
-              role="group"
-              aria-label="Accounting method"
-              className="flex h-10 items-center gap-1 rounded-lg border border-line bg-elev-3 p-1"
-            >
-              {QBO_ACCOUNTING_METHODS.map((method) => (
-                <Button
-                  key={method}
-                  type="button"
-                  variant={method === accountingMethod ? "default" : "ghost"}
-                  size="sm"
-                  aria-pressed={method === accountingMethod}
-                  className="h-8 rounded-md px-3 text-xs"
-                  onClick={() => setAccountingMethod(method)}
-                >
-                  {METHOD_LABELS[method]}
-                </Button>
+        {/* Los rótulos "Report" y "Accounting method" repetían lo que el propio
+            control ya dice en su valor, así que sólo viven como nombre accesible;
+            las fechas sí lo necesitan, y lo llevan al lado en vez de encima. */}
+        <CardContent className="flex flex-wrap items-center gap-x-3 gap-y-2 p-3">
+          <Select value={report} onValueChange={(value) => setReport(value as QboReportName)}>
+            <SelectTrigger aria-label="Report" className="h-8 w-[240px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {QBO_REPORT_NAMES.map((name) => (
+                <SelectItem key={name} value={name}>
+                  {REPORT_LABELS[name]}
+                </SelectItem>
               ))}
-            </div>
+            </SelectContent>
+          </Select>
+
+          <div
+            role="group"
+            aria-label="Accounting method"
+            className="flex h-8 items-center gap-1 rounded-lg border border-line bg-elev-3 p-0.5"
+          >
+            {QBO_ACCOUNTING_METHODS.map((method) => (
+              <Button
+                key={method}
+                type="button"
+                variant={method === accountingMethod ? "default" : "ghost"}
+                size="sm"
+                aria-pressed={method === accountingMethod}
+                className="h-7 rounded-md px-2.5 text-xs"
+                onClick={() => setAccountingMethod(method)}
+              >
+                {METHOD_LABELS[method]}
+              </Button>
+            ))}
           </div>
 
           {pointInTime ? (
-            <div className="space-y-2">
-              <p className="font-display text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            <label className="flex items-center gap-2">
+              <span className="font-display text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 As of
-              </p>
+              </span>
               <Input
                 type="date"
                 value={endDate}
                 onChange={(event) => setEndDate(event.target.value)}
-                className="h-10 w-[170px]"
+                className="h-8 w-[150px]"
               />
-            </div>
+            </label>
           ) : (
             <>
-              <div className="space-y-2">
-                <p className="font-display text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              <label className="flex items-center gap-2">
+                <span className="font-display text-xs font-medium uppercase tracking-wide text-muted-foreground">
                   From
-                </p>
+                </span>
                 <Input
                   type="date"
                   value={startDate}
                   max={endDate || undefined}
                   onChange={(event) => setStartDate(event.target.value)}
                   aria-invalid={invertedDates}
-                  className="h-10 w-[170px]"
+                  className="h-8 w-[150px]"
                 />
-              </div>
-              <div className="space-y-2">
-                <p className="font-display text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              </label>
+              <label className="flex items-center gap-2">
+                <span className="font-display text-xs font-medium uppercase tracking-wide text-muted-foreground">
                   To
-                </p>
+                </span>
                 <Input
                   type="date"
                   value={endDate}
                   min={startDate || undefined}
                   onChange={(event) => setEndDate(event.target.value)}
                   aria-invalid={invertedDates}
-                  className="h-10 w-[170px]"
+                  className="h-8 w-[150px]"
                 />
-              </div>
+              </label>
             </>
           )}
         </CardContent>
@@ -273,19 +264,14 @@ export function ProjectQboReportPage({ projectId }: { projectId: number }) {
         />
       ) : query.isPending ? (
         <Card>
-          <CardContent className="space-y-3 p-6">
+          <CardContent className="space-y-2 p-3">
             {[0, 1, 2, 3, 4, 5, 6, 7].map((row) => (
-              <Skeleton key={row} className="h-6 w-full" />
+              <Skeleton key={row} className="h-5 w-full" />
             ))}
           </CardContent>
         </Card>
       ) : data ? (
         <>
-          <p className="text-sm text-muted-foreground">
-            {REPORT_LABELS[data.report]} · {METHOD_LABELS[data.accountingMethod]} ·{" "}
-            {data.startDate ? `${data.startDate} → ${data.endDate}` : `as of ${data.endDate}`} ·
-            QuickBooks customer {data.qboCustomerId}
-          </p>
           {data.linkSource === "project-number" ? (
             <Alert>
               <Link2Off className="size-4" />
@@ -314,6 +300,13 @@ export function ProjectQboReportPage({ projectId }: { projectId: number }) {
           ) : null}
           <Card>
             <CardContent className="p-0">
+              {/* La procedencia del reporte deja de ser un párrafo suelto y pasa a
+                  encabezar la tabla a la que describe. */}
+              <p className="border-b border-line px-2 py-1.5 text-xs text-muted-foreground">
+                {REPORT_LABELS[data.report]} · {METHOD_LABELS[data.accountingMethod]} ·{" "}
+                {data.startDate ? `${data.startDate} → ${data.endDate}` : `as of ${data.endDate}`} ·
+                QuickBooks customer {data.qboCustomerId}
+              </p>
               <QboReportTable raw={data.raw} />
             </CardContent>
           </Card>
