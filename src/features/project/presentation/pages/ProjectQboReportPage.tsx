@@ -28,6 +28,7 @@ import {
 } from "@/project/domain";
 
 import { useProjectQboReport } from "../hooks/data/useProjectQboReport";
+import { ProjectCostBreakdownCard } from "../organisms/ProjectCostBreakdownCard";
 import { QboReportTable } from "../organisms/QboReportTable";
 
 const REPORT_LABELS: Record<QboReportName, string> = {
@@ -306,6 +307,10 @@ export function ProjectQboReportPage({
               </AlertDescription>
             </Alert>
           ) : null}
+          {/* El mismo desglose que la ficha: desde el reporte se puede abrir
+              material y subcontratistas sin volver atrás. */}
+          <ProjectCostBreakdownCard projectId={projectId} />
+
           <Card>
             <CardContent className="p-0">
               {/* La procedencia del reporte deja de ser un párrafo suelto y pasa a

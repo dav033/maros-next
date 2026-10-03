@@ -36,6 +36,7 @@ import type { Contact as DomainContact } from "@/contact/domain";
 import { EntityAttachmentsSection } from "@/features/attachments/presentation/EntityAttachmentsSection";
 import { QuickbooksProjectAttachments } from "@/features/quickbooks/presentation/components/QuickbooksProjectAttachments";
 import { QuickbooksUnlinkProjectButton } from "@/features/quickbooks/presentation/components/QuickbooksUnlinkProjectButton";
+import { ProjectCostBreakdownCard } from "../organisms/ProjectCostBreakdownCard";
 import { QuickbooksLinkProjectButton } from "../organisms/QuickbooksLinkProjectButton";
 import { Can } from "@/shared/auth/Can";
 import { EntityNotesSection } from "@/features/notes/presentation/organisms/EntityNotesSection";
@@ -839,6 +840,11 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
         <DetailTabsBar tabs={PROJECT_TABS} />
 
         <TabsContent value="resumen" className="mt-0 space-y-6">
+          {/* Lo primero de la ficha: cuanto ha costado y cuanto se espera que
+              cueste. Va a ancho completo y encima de la informacion del
+              proyecto porque es la cifra por la que se abre esta pantalla. */}
+          <ProjectCostBreakdownCard projectId={projectId} />
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Project Information */}
             <div className="lg:col-span-2 space-y-6">

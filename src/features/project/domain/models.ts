@@ -137,5 +137,21 @@ export type ProjectPatch = Readonly<{
   leadId?: LeadId;
   leadName?: string;
   leadNumber?: string;
+  /**
+   * Lo que se espera que el proyecto acabe costando. `null` borra el
+   * pronóstico, que no es lo mismo que ponerlo a 0.
+   *
+   * Tiene que estar aquí para que llegue al backend: `billed_amount` se quedó
+   * sin esta línea y acabó siendo una columna legible que nadie podía escribir.
+   */
+  forecastMaterialCost?: number | null;
+  forecastSubcontractorCost?: number | null;
 }>;
 
+export type {
+  ProjectCostBreakdown,
+  ProjectCostCategory,
+  ProjectCostCategoryKey,
+  ProjectCostVendor,
+} from "./models/ProjectCostBreakdown";
+export { COST_CATEGORY_LABELS } from "./models/ProjectCostBreakdown";

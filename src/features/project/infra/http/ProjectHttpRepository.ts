@@ -1,5 +1,5 @@
 import type { ApiProjectDTO } from "@/project/domain/services/projectReadMapper";
-import type { Project, ProjectDraft, ProjectPatch, ProjectPaymentsResponse, ProjectFinancialsEntry, ProjectQboReport, QboReportParams, QuickbooksImportBatchReport, QuickbooksImportDecision, QuickbooksImportJob, QuickbooksJobDeactivation } from "@/project/domain/models";
+import type { ProjectCostBreakdown, ProjectId, Project, ProjectDraft, ProjectPatch, ProjectPaymentsResponse, ProjectFinancialsEntry, ProjectQboReport, QboReportParams, QuickbooksImportBatchReport, QuickbooksImportDecision, QuickbooksImportJob, QuickbooksJobDeactivation } from "@/project/domain/models";
 import type { ProjectRepositoryPort } from "@/project/domain/ports";
 import { optimizedApiClient } from "@/shared/infra/http";
 import { makeHttpResourceRepository } from "@/shared/infra/rest";
@@ -93,6 +93,14 @@ export class ProjectHttpRepository implements ProjectRepositoryPort {
       params: query,
     });
     if (!data) throw new Error("Empty response loading project QuickBooks report");
+    return data;
+  };
+
+  getCostBreakdown = async (id: ProjectId): Promise<ProjectCostBreakdown> => {
+    const { data } = await this.api.get<ProjectCostBreakdown>(
+      projectEndpoints.costBreakdown(id),
+    );
+    if (!data) throw new Error("Empty response loading project cost breakdown");
     return data;
   };
 

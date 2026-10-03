@@ -1,4 +1,4 @@
-import type { Project, ProjectDraft, ProjectId, ProjectPatch, ProjectPaymentsResponse, ProjectFinancialsEntry, ProjectQboReport, QboReportParams, QuickbooksImportBatchReport, QuickbooksImportDecision, QuickbooksImportJob, QuickbooksJobDeactivation } from "./models";
+import type { ProjectCostBreakdown, Project, ProjectDraft, ProjectId, ProjectPatch, ProjectPaymentsResponse, ProjectFinancialsEntry, ProjectQboReport, QboReportParams, QuickbooksImportBatchReport, QuickbooksImportDecision, QuickbooksImportJob, QuickbooksJobDeactivation } from "./models";
 
 export interface ProjectRepositoryPort {
   getById(id: ProjectId): Promise<Project | null>;
@@ -12,6 +12,7 @@ export interface ProjectRepositoryPort {
   getPaymentDetails(id: ProjectId): Promise<ProjectPaymentsResponse>;
   /** Reporte de QuickBooks acotado al cliente del proyecto, devuelto verbatim. */
   getQboReport(id: ProjectId, params: QboReportParams): Promise<ProjectQboReport>;
+  getCostBreakdown(id: ProjectId): Promise<ProjectCostBreakdown>;
   /** Jobs activos de QuickBooks, ya diagnosticados (estado, papel y colisiones). */
   listQuickbooksImportJobs(): Promise<QuickbooksImportJob[]>;
   /**

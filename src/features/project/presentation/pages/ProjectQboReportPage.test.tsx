@@ -5,6 +5,11 @@ import type { ProjectQboReport } from "@/project/domain";
 
 const useProjectQboReport = vi.hoisted(() => vi.fn());
 vi.mock("../hooks/data/useProjectQboReport", () => ({ useProjectQboReport }));
+// La tarjeta de coste tiene su propia suite y sus propias llamadas; aquí sólo
+// estorbaría al asunto de estas pruebas, que es el reporte.
+vi.mock("../organisms/ProjectCostBreakdownCard", () => ({
+  ProjectCostBreakdownCard: () => null,
+}));
 
 import { ProjectQboReportPage } from "./ProjectQboReportPage";
 

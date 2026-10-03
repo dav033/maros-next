@@ -19,6 +19,9 @@ export type UpdateProjectPayload = {
   leadNumber?: string;
   notes?: string[];
   attachments?: string[];
+  /** `null` borra el pronóstico; `undefined` no lo toca y no viaja. */
+  forecastMaterialCost?: number | null;
+  forecastSubcontractorCost?: number | null;
 };
 
 function mapClient(input: unknown): ProjectClientSummary {
@@ -141,5 +144,11 @@ export function mapProjectPatchToUpdatePayload(
     leadNumber: patch.leadNumber,
     notes: patch.notes,
     attachments: patch.attachments,
+    // Sin estas dos líneas el pronóstico no llega al backend. Es literalmente
+    // lo que le pasó a `billed_amount`: columna en la base de datos, campo en
+    // el DTO, y una pantalla que no podía escribirlo porque el mapeo campo a
+    // campo de aquí lo dejaba fuera.
+    forecastMaterialCost: patch.forecastMaterialCost,
+    forecastSubcontractorCost: patch.forecastSubcontractorCost,
   };
 }
