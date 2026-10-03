@@ -5,7 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useEntityMutation } from "@/shared/presentation";
 import { leadsKeys } from "@/leads/application";
 import { projectsKeys } from "@/project/application";
-import { LeadStatus } from "@/leads/domain";
+import { LeadStatus, type LeadLostReason } from "@/leads/domain";
 
 import {
   acceptLeadAction,
@@ -18,6 +18,13 @@ export interface DeleteLeadOptions {
   id: number;
   deleteContact?: boolean;
   deleteCompany?: boolean;
+}
+
+export interface UpdateLeadStatusInput {
+  id: number;
+  status: LeadStatus;
+  /** Obligatorio cuando `status` es LOST: sin él el backend responde 422. */
+  lostReason?: LeadLostReason;
 }
 
 /**
@@ -64,11 +71,11 @@ export function useLeadsMutations() {
     },
   });
 
-  const updateStatusMutation = useEntityMutation<{ id: number; status: LeadStatus }, void>({
+  const updateStatusMutation = useEntityMutation<UpdateLeadStatusInput, void>({
     entityLabel: "Lead",
     action: "updated",
     successMessage: "Lead status updated successfully!",
-    mutationFn: ({ id, status }) => updateLeadStatusAction(id, status),
+    mutationFn: ({ id, status, lostReason }) => updateLeadStatusAction(id, status, lostReason),
     invalidate: (qc, _, { status }) => {
       void qc.invalidateQueries({ queryKey: leadsKeys.all });
       if (status === LeadStatus.WON) {

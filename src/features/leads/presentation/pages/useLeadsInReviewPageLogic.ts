@@ -9,9 +9,11 @@ import {
   useLeadsInReviewData,
   useLeadsMutations,
   useLeadsTableLogic,
+  useLeadStatusChange,
   useLeadsInReviewNotesLogic,
   type UseLeadsInReviewDataReturn,
   type UseLeadsTableLogicReturn,
+  type UseLeadStatusChangeReturn,
 } from "../hooks";
 import type { Lead } from "@/leads/domain";
 import { LeadStatus, LeadType, getLeadTypeFromNumber } from "@/leads/domain";
@@ -40,6 +42,8 @@ export interface UseLeadsInReviewPageLogicReturn {
     updateController: ReturnType<typeof useLeadEditModal>["updateController"];
   };
   table: UseLeadsTableLogicReturn;
+  /** Diálogo de motivo que exige el paso a LOST desde el menú de la fila. */
+  lostReasonDialogProps: UseLeadStatusChangeReturn["lostReasonDialogProps"];
   notesModal: {
     isOpen: boolean;
     title: string;
@@ -176,16 +180,22 @@ export function useLeadsInReviewPageLogic(): UseLeadsInReviewPageLogicReturn {
   // 3) Negocio
   const { deleteMutation, acceptMutation, updateStatusMutation, updateProjectTypeMutation } =
     useLeadsMutations();
+  const { requestStatusChange, lostReasonDialogProps } = useLeadStatusChange();
   const notesLogic = useLeadsInReviewNotesLogic();
   const viewContactModal = useLeadViewContactModal();
 
-  const handleUpdateStatus = async (lead: Lead, status: LeadStatus) => {
-    try {
-      await updateStatusMutation.mutateAsync({ id: lead.id, status });
-    } catch {
-      // Error ya manejado por useEntityMutation
-    }
-  };
+  const handleUpdateStatus = (lead: Lead, status: LeadStatus) =>
+    requestStatusChange({
+      status,
+      initialReason: lead.lostReason,
+      commit: async (lostReason) => {
+        try {
+          await updateStatusMutation.mutateAsync({ id: lead.id, status, lostReason });
+        } catch {
+          // Error ya manejado por useEntityMutation
+        }
+      },
+    });
 
   const handleUpdateProjectType = async (lead: Lead, projectTypeId: number) => {
     try {
@@ -268,6 +278,7 @@ export function useLeadsInReviewPageLogic(): UseLeadsInReviewPageLogicReturn {
       updateController: editModal.updateController,
     },
     table,
+    lostReasonDialogProps,
     notesModal: notesLogic.modalProps,
     viewContactModal: {
       isOpen: viewContactModal.isOpen,

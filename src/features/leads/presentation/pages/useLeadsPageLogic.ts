@@ -16,9 +16,11 @@ import {
   useLeadsMutations,
   useLeadsNotesLogic,
   useLeadsTableLogic,
+  useLeadStatusChange,
   type UseLeadsBulkActionsReturn,
   type UseLeadsDataReturn,
   type UseLeadsTableLogicReturn,
+  type UseLeadStatusChangeReturn,
 } from "../hooks";
 import type { Lead } from "@/leads/domain";
 import { LeadStatus } from "@/leads/domain";
@@ -42,6 +44,8 @@ export interface UseLeadsPageLogicReturn {
   };
   table: UseLeadsTableLogicReturn;
   bulkActions: UseLeadsBulkActionsReturn;
+  /** Diálogo de motivo del cambio de estado por fila (el del lote vive en bulkActions). */
+  lostReasonDialogProps: UseLeadStatusChangeReturn["lostReasonDialogProps"];
   notesModal: {
     isOpen: boolean;
     title: string;
@@ -119,6 +123,7 @@ export function useLeadsPageLogic({
 
   // 3) Negocio
   const { deleteMutation, updateStatusMutation, updateProjectTypeMutation } = useLeadsMutations();
+  const { requestStatusChange, lostReasonDialogProps } = useLeadStatusChange();
   const notesLogic = useLeadsNotesLogic({ leadType });
   const viewContactModal = useLeadViewContactModal();
   const [leadToConvert, setLeadToConvert] = useState<Lead | null>(null);
@@ -165,13 +170,18 @@ export function useLeadsPageLogic({
     }
   };
 
-  const handleUpdateStatus = async (lead: Lead, status: LeadStatus) => {
-    try {
-      await updateStatusMutation.mutateAsync({ id: lead.id, status });
-    } catch {
-      // Error ya manejado por useEntityMutation
-    }
-  };
+  const handleUpdateStatus = (lead: Lead, status: LeadStatus) =>
+    requestStatusChange({
+      status,
+      initialReason: lead.lostReason,
+      commit: async (lostReason) => {
+        try {
+          await updateStatusMutation.mutateAsync({ id: lead.id, status, lostReason });
+        } catch {
+          // Error ya manejado por useEntityMutation
+        }
+      },
+    });
 
   const handleUpdateProjectType = async (lead: Lead, projectTypeId: number) => {
     try {
@@ -223,6 +233,7 @@ export function useLeadsPageLogic({
     },
     table,
     bulkActions,
+    lostReasonDialogProps,
     notesModal: notesLogic.modalProps,
     viewContactModal: {
       isOpen: viewContactModal.isOpen,

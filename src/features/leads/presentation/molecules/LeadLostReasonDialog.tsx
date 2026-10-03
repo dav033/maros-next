@@ -22,15 +22,19 @@ import { LEAD_LOST_REASON_LABELS } from "../atoms/leadVisualTokens";
 export function LeadLostReasonDialog({
   open,
   initialReason,
+  appliesToCount = 1,
   onCancel,
   onConfirm,
 }: {
   open: boolean;
   initialReason?: LeadLostReason | null;
+  /** Número de leads que reciben este motivo; >1 lo dice el diálogo. */
+  appliesToCount?: number;
   onCancel: () => void;
   onConfirm: (reason: LeadLostReason) => void;
 }) {
   const [reason, setReason] = useState<LeadLostReason | null>(initialReason ?? null);
+  const isBulk = appliesToCount > 1;
 
   useEffect(() => {
     if (open) setReason(initialReason ?? null);
@@ -40,9 +44,13 @@ export function LeadLostReasonDialog({
     <Dialog open={open} onOpenChange={(next) => !next && onCancel()}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Why was this lead lost?</DialogTitle>
+          <DialogTitle>
+            {isBulk ? `Why were these ${appliesToCount} leads lost?` : "Why was this lead lost?"}
+          </DialogTitle>
           <DialogDescription>
-            The lost pipeline is only worth reading if every loss says why.
+            {isBulk
+              ? `The same reason will be saved on all ${appliesToCount} selected leads. The lost pipeline is only worth reading if every loss says why.`
+              : "The lost pipeline is only worth reading if every loss says why."}
           </DialogDescription>
         </DialogHeader>
         <div className="grid grid-cols-2 gap-2">
@@ -68,7 +76,7 @@ export function LeadLostReasonDialog({
             disabled={reason === null}
             onClick={() => reason && onConfirm(reason)}
           >
-            Mark as lost
+            {isBulk ? `Mark ${appliesToCount} leads as lost` : "Mark as lost"}
           </Button>
         </DialogFooter>
       </DialogContent>

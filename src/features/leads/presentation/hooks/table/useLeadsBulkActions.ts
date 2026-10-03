@@ -2,8 +2,9 @@
 
 import { useMemo, useState } from "react";
 import { LeadStatus, canTransition } from "@/leads/domain";
-import type { Lead } from "@/leads/domain";
+import type { Lead, LeadLostReason } from "@/leads/domain";
 import type { useLeadsMutations } from "../mutations/useLeadsMutations";
+import { useLeadStatusChange, type UseLeadStatusChangeReturn } from "../mutations/useLeadStatusChange";
 
 export interface UseLeadsBulkActionsProps {
   leads: Lead[];
@@ -20,6 +21,7 @@ export interface UseLeadsBulkActionsReturn {
   availableStatuses: LeadStatus[];
   changeStatus: (status: LeadStatus) => Promise<void>;
   isChangingStatus: boolean;
+  lostReasonDialogProps: UseLeadStatusChangeReturn["lostReasonDialogProps"];
   deleteModal: {
     isOpen: boolean;
     open: () => void;
@@ -53,14 +55,16 @@ export function useLeadsBulkActions({
     );
   }, [selectedLeads]);
 
+  const { requestStatusChange, lostReasonDialogProps } = useLeadStatusChange();
+
   const clearSelection = () => setSelectedIds(new Set());
 
-  const changeStatus = async (status: LeadStatus) => {
+  const applyStatus = async (status: LeadStatus, lostReason?: LeadLostReason) => {
     setIsChangingStatus(true);
     try {
       await Promise.allSettled(
         selectedLeads.map((lead) =>
-          updateStatusMutation.mutateAsync({ id: lead.id as number, status }),
+          updateStatusMutation.mutateAsync({ id: lead.id as number, status, lostReason }),
         ),
       );
       clearSelection();
@@ -68,6 +72,15 @@ export function useLeadsBulkActions({
       setIsChangingStatus(false);
     }
   };
+
+  // Un motivo por lead volvería inusable el lote, así que se pide uno solo y el
+  // diálogo dice a cuántos leads se va a aplicar.
+  const changeStatus = (status: LeadStatus) =>
+    requestStatusChange({
+      status,
+      appliesToCount: selectedLeads.length,
+      commit: (lostReason) => applyStatus(status, lostReason),
+    });
 
   const confirmDelete = async () => {
     setIsDeleting(true);
@@ -90,6 +103,7 @@ export function useLeadsBulkActions({
     availableStatuses,
     changeStatus,
     isChangingStatus,
+    lostReasonDialogProps,
     deleteModal: {
       isOpen: isDeleteModalOpen,
       open: () => setIsDeleteModalOpen(true),

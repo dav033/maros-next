@@ -10,6 +10,7 @@ export * from "./data/useLeadsInReviewData";
 export * from "./data/useLostLeadsData";
 
 export * from "./mutations/useLeadsMutations";
+export * from "./mutations/useLeadStatusChange";
 
 export * from "./notes/useLeadsNotesLogic";
 export * from "./notes/useLeadsInReviewNotesLogic";

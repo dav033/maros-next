@@ -9,7 +9,7 @@ import { SystemClock } from "@/shared/domain";
 import type { ActionResult } from "@/shared/actions/types";
 import { success, handleActionError } from "@/shared/actions/utils";
 import { endpoints } from "@/leads/infra/http/endpoints";
-import { LeadStatus, canTransition } from "@/leads/domain";
+import { LeadStatus, LEAD_LOST_REASONS, canTransition, type LeadLostReason } from "@/leads/domain";
 
 // The plain `serverApiClient` singleton carries no request context and forwards no
 // cookie — every call through it comes back 401 ("Tu sesión expiró") no matter what
@@ -95,11 +95,14 @@ export async function acceptLeadAction(id: number): Promise<ActionResult<void>> 
  *
  * @param id - ID numérico del lead.
  * @param status - Nuevo estado (LeadStatus).
+ * @param lostReason - Motivo de pérdida. El backend lo exige para entrar en LOST
+ *   (422 LEAD_LOST_REASON_REQUIRED), así que viaja en el mismo patch que el estado.
  * @returns ActionResult vacío si la operación fue exitosa, o un error en caso contrario.
  */
 export async function updateLeadStatusAction(
   id: number,
-  status: LeadStatus
+  status: LeadStatus,
+  lostReason?: LeadLostReason
 ): Promise<ActionResult<void>> {
   try {
     if (!Number.isFinite(id) || id <= 0 || !Number.isInteger(id)) {
@@ -107,6 +110,9 @@ export async function updateLeadStatusAction(
     }
     if (!Object.values(LeadStatus).includes(status)) {
       return { success: false, error: "Invalid lead status" };
+    }
+    if (lostReason !== undefined && !LEAD_LOST_REASONS.includes(lostReason)) {
+      return { success: false, error: "Invalid lost reason" };
     }
     const ctx = await createServerLeadsAppContext();
     const lead = await ctx.repos.lead.getById(id);
@@ -116,7 +122,7 @@ export async function updateLeadStatusAction(
     if (!canTransition(lead.status, status)) {
       return { success: false, error: "Invalid status transition" };
     }
-    await ctx.repos.lead.update(id, { status });
+    await ctx.repos.lead.update(id, lostReason ? { status, lostReason } : { status });
     return success(undefined);
   } catch (error) {
     return handleActionError(error);

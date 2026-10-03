@@ -15,6 +15,7 @@ import { LeadsTable } from "@/leads/presentation";
 import { LEAD_STATUS_COLORS } from "../atoms/leadVisualTokens";
 import { ContactViewModal } from "@/contact";
 import { LeadModal } from "../organisms/LeadModal";
+import { LeadLostReasonDialog } from "../molecules/LeadLostReasonDialog";
 import { PostConversionEstimateModal } from "../organisms/PostConversionEstimateModal";
 import {
   X,
@@ -77,6 +78,7 @@ export function LeadsPageView({ logic, leadType }: LeadsPageViewProps) {
     crud,
     table,
     bulkActions,
+    lostReasonDialogProps,
     notesModal,
     viewContactModal,
     convertProjectModal,
@@ -275,6 +277,9 @@ export function LeadsPageView({ logic, leadType }: LeadsPageViewProps) {
       }
       modals={
         <>
+          <LeadLostReasonDialog {...lostReasonDialogProps} />
+          <LeadLostReasonDialog {...bulkActions.lostReasonDialogProps} />
+
           <DeleteFeedbackModal
             isOpen={bulkActions.deleteModal.isOpen}
             title="Delete Leads"

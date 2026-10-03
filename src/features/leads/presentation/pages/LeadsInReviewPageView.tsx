@@ -35,6 +35,7 @@ import {
 
 import { ContactViewModal } from "@/contact";
 import { LeadModal } from "../organisms/LeadModal";
+import { LeadLostReasonDialog } from "../molecules/LeadLostReasonDialog";
 import { PostConversionEstimateModal } from "../organisms/PostConversionEstimateModal";
 import { LeadsTableSkeleton } from "../organisms/LeadsTableSkeleton";
 import type { UseLeadsInReviewPageLogicReturn } from "./useLeadsInReviewPageLogic";
@@ -54,6 +55,7 @@ export function LeadsInReviewPageView({ logic }: LeadsInReviewPageViewProps) {
     data,
     crud,
     table,
+    lostReasonDialogProps,
     notesModal,
     viewContactModal,
     reviewActions,
@@ -183,6 +185,8 @@ export function LeadsInReviewPageView({ logic }: LeadsInReviewPageViewProps) {
       }
       modals={
         <>
+          <LeadLostReasonDialog {...lostReasonDialogProps} />
+
           <DeleteFeedbackModal
             isOpen={deleteModalProps.isOpen}
             title="Delete Lead"
