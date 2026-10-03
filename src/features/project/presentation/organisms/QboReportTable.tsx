@@ -20,6 +20,58 @@ const MAX_INDENT_LEVEL = 6;
 /** El padding horizontal que ya trae la celda (`px-2`), para no perderlo al sangrar. */
 const CELL_PADDING_PX = 8;
 
+/**
+ * Columnas de importe, por el `ColType` que manda QuickBooks.
+ *
+ * Los reportes de resumen (ProfitAndLoss, BalanceSheet) usan el literal `Money`;
+ * los de detalle (ProfitAndLossDetail, GeneralLedger) no lo usan nunca y mandan
+ * el tipo del campo: `subt_nat_amount` para el importe, `rbal_nat_amount` para
+ * el saldo acumulado, `credit_amt` y `debt_amt` en el libro mayor. Comprobar
+ * sólo `Money` dejaba los reportes de detalle —los que más cifras traen— sin
+ * alinear a la derecha y sin formato.
+ */
+function isMoneyColType(colType: string | undefined): boolean {
+  if (!colType) return false;
+  if (colType === "Money") return true;
+  const type = colType.toLowerCase();
+  return type.includes("amount") || type.includes("amt") || type.endsWith("bal");
+}
+
+/**
+ * La descripción: ancha, repetitiva y casi nunca lo que se viene a mirar, así
+ * que arranca oculta detrás del interruptor. `memo` es el `ColType` de
+ * "Memo/Description" en los reportes de detalle.
+ */
+const DESCRIPTION_COL_TYPES = new Set(["memo"]);
+
+/**
+ * Columnas de texto que llegan con el nombre completo de QuickBooks — el `Name`
+ * de un reporte filtrado por job trae "JFB Construction and Development,
+ * Inc:032P-0825, ITB Divine Savior Worship WPB 5133 Tylerlakes Blvd" en cada
+ * fila. Se recortan con el valor completo en el `title`: es lo que estiraba la
+ * tabla a lo ancho y partía cada fila en tres renglones.
+ */
+const WIDE_TEXT_COL_TYPES = new Set(["name", "memo", "split_acc", "dept_name", "klass_name"]);
+
+const moneyFormat = new Intl.NumberFormat("en-US", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
+/**
+ * QuickBooks manda los importes como cadena sin separar los miles ("145143.00"),
+ * así que el formato es nuestro. Lo que no sea un número se devuelve tal cual:
+ * una celda de importe puede traer vacío o un texto, y reemplazarlo por "0.00"
+ * sería inventar una cifra.
+ */
+export function formatQboMoney(value: string): string {
+  const trimmed = value.trim();
+  if (!trimmed) return value;
+  const parsed = Number(trimmed.replace(/,/g, ""));
+  if (!Number.isFinite(parsed)) return value;
+  return moneyFormat.format(parsed);
+}
+
 type FlatRowKind = "header" | "data" | "summary";
 
 type FlatRow = {
@@ -104,6 +156,7 @@ const ROW_CLASSES: Record<FlatRowKind, string> = {
 
 export function QboReportTable({ raw }: { raw: QboRawReport }) {
   const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(() => new Set<string>());
+  const [showDescription, setShowDescription] = useState(false);
 
   const columns = raw.Columns?.Column ?? [];
   const flatRows = flattenRows(raw.Rows?.Row, 0, "", null);
@@ -113,20 +166,23 @@ export function QboReportTable({ raw }: { raw: QboRawReport }) {
    * filtrado por un job varias llegan vacías de punta a punta. Se quitan: no
    * llevan ninguna cifra y el ancho que ocupan es el que falta en móvil.
    */
-  const columnIndexes = Array.from({ length: columnCount }, (_, index) => index).filter((index) =>
+  const filledIndexes = Array.from({ length: columnCount }, (_, index) => index).filter((index) =>
     flatRows.some((row) => (row.cells[index]?.value ?? "") !== ""),
   );
 
-  if (columnIndexes.length === 0 || flatRows.length === 0) {
-    return (
-      <p className="p-6 text-sm text-muted-foreground">
-        QuickBooks no devolvió filas para este reporte con los filtros seleccionados.
-      </p>
-    );
-  }
+  const isMoneyColumn = (index: number) => isMoneyColType(columns[index]?.ColType);
+  const isWideTextColumn = (index: number) =>
+    WIDE_TEXT_COL_TYPES.has(String(columns[index]?.ColType ?? ""));
+  const isDescriptionColumn = (index: number) =>
+    DESCRIPTION_COL_TYPES.has(String(columns[index]?.ColType ?? ""));
 
-  // La alineación sale del ColType que manda QuickBooks, no del nombre de la columna.
-  const isMoneyColumn = (index: number) => columns[index]?.ColType === "Money";
+  /** Sólo hay interruptor si el reporte trae descripción y además viene con algo escrito. */
+  const hasDescription = filledIndexes.some(isDescriptionColumn);
+  const columnIndexes =
+    showDescription || !hasDescription
+      ? filledIndexes
+      : filledIndexes.filter((index) => !isDescriptionColumn(index));
+
   const visibleRows = flatRows.filter((row) => !row.section || !collapsed.has(row.section));
 
   function toggleSection(section: string) {
@@ -137,68 +193,103 @@ export function QboReportTable({ raw }: { raw: QboRawReport }) {
     });
   }
 
+  if (filledIndexes.length === 0 || flatRows.length === 0) {
+    return (
+      <p className="p-6 text-sm text-muted-foreground">
+        QuickBooks no devolvió filas para este reporte con los filtros seleccionados.
+      </p>
+    );
+  }
+
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          {columnIndexes.map((index) => (
-            <TableHead
-              key={index}
-              className={cn("h-8 px-2", isMoneyColumn(index) && "text-right")}
-            >
-              {columns[index]?.ColTitle ?? ""}
-            </TableHead>
-          ))}
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {visibleRows.map((row) => {
-          const toggles = row.toggles;
-          const expanded = toggles !== null && !collapsed.has(toggles);
+    <>
+      {hasDescription ? (
+        <div className="flex justify-end border-b border-line px-2 py-1">
+          <button
+            type="button"
+            aria-pressed={showDescription}
+            onClick={() => setShowDescription((current) => !current)}
+            className="rounded-sm text-xs text-muted-foreground underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            {showDescription ? "Ocultar descripción" : "Mostrar descripción"}
+          </button>
+        </div>
+      ) : null}
+      <Table>
+        <TableHeader>
+          <TableRow>
+            {columnIndexes.map((index) => (
+              <TableHead
+                key={index}
+                className={cn("h-8 px-2", isMoneyColumn(index) && "text-right")}
+              >
+                {columns[index]?.ColTitle ?? ""}
+              </TableHead>
+            ))}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {visibleRows.map((row) => {
+            const toggles = row.toggles;
+            const expanded = toggles !== null && !collapsed.has(toggles);
 
-          return (
-            <TableRow key={row.key} className={ROW_CLASSES[row.kind]}>
-              {columnIndexes.map((index, position) => {
-                const value = row.cells[index]?.value ?? "";
-                const money = isMoneyColumn(index);
-                const first = position === 0;
+            return (
+              <TableRow key={row.key} className={ROW_CLASSES[row.kind]}>
+                {columnIndexes.map((index, position) => {
+                  const cell = row.cells[index]?.value ?? "";
+                  const money = isMoneyColumn(index);
+                  const value = money ? formatQboMoney(cell) : cell;
+                  const first = position === 0;
+                  /**
+                   * La primera columna lleva el árbol de cuentas y el plegado:
+                   * recortarla escondería de qué cuenta es la cifra.
+                   */
+                  const clamp = !first && !money && isWideTextColumn(index);
 
-                return (
-                  <TableCell
-                    key={index}
-                    className={cn("px-2 py-1", money && "text-right font-mono tabular-nums")}
-                    style={
-                      first
-                        ? {
-                            paddingLeft:
-                              CELL_PADDING_PX + Math.min(row.depth, MAX_INDENT_LEVEL) * INDENT_PX,
-                          }
-                        : undefined
-                    }
-                  >
-                    {first && toggles !== null ? (
-                      <button
-                        type="button"
-                        aria-expanded={expanded}
-                        onClick={() => toggleSection(toggles)}
-                        className="inline-flex items-center gap-1 rounded-sm text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                      >
-                        <ChevronRight
-                          aria-hidden="true"
-                          className={cn("size-3 shrink-0 opacity-60", expanded && "rotate-90")}
-                        />
-                        {value}
-                      </button>
-                    ) : (
-                      value
-                    )}
-                  </TableCell>
-                );
-              })}
-            </TableRow>
-          );
-        })}
-      </TableBody>
-    </Table>
+                  return (
+                    <TableCell
+                      key={index}
+                      className={cn(
+                        "px-2 py-1",
+                        money && "whitespace-nowrap text-right font-mono tabular-nums",
+                      )}
+                      style={
+                        first
+                          ? {
+                              paddingLeft:
+                                CELL_PADDING_PX + Math.min(row.depth, MAX_INDENT_LEVEL) * INDENT_PX,
+                            }
+                          : undefined
+                      }
+                    >
+                      {first && toggles !== null ? (
+                        <button
+                          type="button"
+                          aria-expanded={expanded}
+                          onClick={() => toggleSection(toggles)}
+                          className="inline-flex items-center gap-1 rounded-sm text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        >
+                          <ChevronRight
+                            aria-hidden="true"
+                            className={cn("size-3 shrink-0 opacity-60", expanded && "rotate-90")}
+                          />
+                          {value}
+                        </button>
+                      ) : clamp ? (
+                        <span className="block max-w-[22ch] truncate" title={value}>
+                          {value}
+                        </span>
+                      ) : (
+                        value
+                      )}
+                    </TableCell>
+                  );
+                })}
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
+    </>
   );
 }
