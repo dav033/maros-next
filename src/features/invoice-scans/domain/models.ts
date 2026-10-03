@@ -25,6 +25,15 @@ export interface QboCounterparty {
   type: QboCounterpartyType;
 }
 
+/** What came back from creating a counterparty in QuickBooks and in the CRM. */
+export interface CreatedQboCounterparty extends QboCounterparty {
+  /** QuickBooks already had this name: it was reused, not duplicated. */
+  existedInQuickbooks: boolean;
+  crmCompanyId: number;
+  existedInCrm: boolean;
+  linkedToQuickbooks: boolean;
+}
+
 export interface InvoiceLineItem {
   description: string;
   quantity: number | null;

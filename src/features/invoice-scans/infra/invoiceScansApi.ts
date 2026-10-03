@@ -1,5 +1,7 @@
 import { optimizedApiClient } from "@/shared/infra/http/OptimizedApiClient";
 import type {
+  CreatedQboCounterparty,
+  InvoiceDirection,
   InvoiceScan,
   InvoiceScanPatch,
   InvoiceTransactionDirection,
@@ -153,6 +155,27 @@ export async function listQboCounterparties(): Promise<QboCounterparty[]> {
     counterparties: QboCounterparty[];
   }>("/invoice-scans/counterparties");
   return Array.isArray(data?.counterparties) ? data.counterparties : [];
+}
+
+export interface CreateQboCounterpartyInput {
+  name: string;
+  /** Money out means a vendor, money in means a customer; the server decides. */
+  direction: InvoiceDirection;
+}
+
+/**
+ * Creates the counterparty in QuickBooks and the matching company in the CRM.
+ * Unlike the rest of this file, a failure here matters: QuickBooks cannot undo
+ * a create, so the caller has to see why it did not happen.
+ */
+export async function createQboCounterparty(
+  input: CreateQboCounterpartyInput,
+): Promise<CreatedQboCounterparty> {
+  const { data } = await optimizedApiClient.post<CreatedQboCounterparty>(
+    "/invoice-scans/counterparties",
+    input,
+  );
+  return data;
 }
 
 /** Lightweight project list (no QuickBooks) for the project picker. */

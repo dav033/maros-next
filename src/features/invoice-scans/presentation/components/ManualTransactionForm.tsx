@@ -229,6 +229,15 @@ export function ManualTransactionForm({
             value={counterparty}
             onChange={setCounterparty}
             disabled={busy}
+            // Sin dirección elegida todavía no se sabe si una contraparte nueva
+            // sería un vendor o un customer, así que no se ofrece crearla.
+            direction={
+              direction === "payment_received"
+                ? "incoming"
+                : direction === "payment_made"
+                  ? "outgoing"
+                  : undefined
+            }
           />
         </div>
         <div className="space-y-1">

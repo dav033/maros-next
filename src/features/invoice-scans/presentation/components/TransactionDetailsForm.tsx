@@ -179,6 +179,11 @@ export function TransactionDetailsForm({ data, onSave, saving, disabled }: Props
               type: values.counterpartyType || null,
             }}
             disabled={locked}
+            direction={
+              values.transactionDirection === "payment_received"
+                ? "incoming"
+                : "outgoing"
+            }
             onChange={(next) =>
               setValues((current) => ({
                 ...current,

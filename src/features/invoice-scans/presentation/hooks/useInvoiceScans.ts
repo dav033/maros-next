@@ -9,6 +9,7 @@ import type { InvoiceScan, InvoiceScanPatch } from "../../domain/models";
 import {
   attachInvoiceScanFile,
   createManualInvoiceTransaction,
+  createQboCounterparty,
   deleteInvoiceScan,
   getInvoiceScan,
   getInvoiceScanDownloadUrl,
@@ -70,6 +71,30 @@ export function useQboCounterparties(enabled = true) {
     queryFn: listQboCounterparties,
     enabled,
     staleTime: STALE_TIMES.lists,
+  });
+}
+
+/**
+ * Creates the counterparty in QuickBooks and in the CRM.
+ *
+ * Drops the cached list on the way out: the server caches it for ten minutes,
+ * so without this the name just created would not come back in the next search.
+ * The error is reported but not swallowed — the caller keeps the typed name.
+ */
+export function useCreateQboCounterparty() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: createQboCounterparty,
+    onSuccess: (created) => {
+      void queryClient.invalidateQueries({ queryKey: invoiceScanKeys.counterparties() });
+      notifySuccess(
+        created.existedInQuickbooks
+          ? `${created.name} was already in QuickBooks; it is now linked here.`
+          : `${created.name} created as a ${created.type.toLowerCase()} in QuickBooks and as a company in the CRM.`,
+      );
+    },
+    onError: (error) =>
+      notifyError(error, "The counterparty could not be created."),
   });
 }
 

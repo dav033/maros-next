@@ -1,6 +1,6 @@
 "use client";
 
-import { Check } from "lucide-react";
+import { Check, Plus } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import {
@@ -10,8 +10,13 @@ import {
   CommandList,
 } from "@/components/ui/command";
 
-import type { QboCounterparty, QboCounterpartyType } from "../../domain/models";
+import type {
+  InvoiceDirection,
+  QboCounterparty,
+  QboCounterpartyType,
+} from "../../domain/models";
 import { useQboCounterparties } from "../hooks/useInvoiceScans";
+import { CreateCounterpartyDialog } from "./CreateCounterpartyDialog";
 
 export interface CounterpartyValue {
   name: string;
@@ -44,6 +49,12 @@ interface Props {
   value: CounterpartyValue;
   onChange: (value: CounterpartyValue) => void;
   disabled?: boolean;
+  /**
+   * Direction of the money on the document. It is what decides whether a name
+   * that is not in QuickBooks yet would be created as a vendor or as a
+   * customer, so without it the field offers no creation at all.
+   */
+  direction?: InvoiceDirection;
 }
 
 /**
@@ -56,11 +67,19 @@ interface Props {
  * instead of portalled into a Popover: a portalled list cannot keep the typing
  * focus, and the typing is the point.
  */
-export function CounterpartySelect({ label, value, onChange, disabled }: Props) {
+export function CounterpartySelect({
+  label,
+  value,
+  onChange,
+  disabled,
+  direction,
+}: Props) {
   const [open, setOpen] = useState(false);
+  const [pendingName, setPendingName] = useState<string | null>(null);
   const { data, isLoading } = useQboCounterparties();
 
-  const needle = value.name.trim().toLowerCase();
+  const typed = value.name.trim();
+  const needle = typed.toLowerCase();
   const matches = useMemo(() => {
     const all = data ?? [];
     const found = needle
@@ -77,6 +96,17 @@ export function CounterpartySelect({ label, value, onChange, disabled }: Props) 
     });
     setOpen(false);
   };
+
+  /**
+   * Creation is offered only once a QuickBooks list has actually arrived: an
+   * empty list is how this field reports a QuickBooks it could not reach, and
+   * offering to create there would only produce a failure.
+   */
+  const canCreate =
+    !disabled &&
+    typed !== "" &&
+    (direction === "outgoing" || direction === "incoming") &&
+    (data ?? []).length > 0;
 
   const emptyNote = isLoading
     ? "Loading QuickBooks names…"
@@ -124,7 +154,21 @@ export function CounterpartySelect({ label, value, onChange, disabled }: Props) 
         >
           <CommandList className="max-h-56">
             {matches.length === 0 ? (
-              <p className="px-3 py-3 text-xs text-muted-foreground">{emptyNote}</p>
+              <>
+                <p className="px-3 py-3 text-xs text-muted-foreground">{emptyNote}</p>
+                {canCreate && (
+                  <CommandItem
+                    value="create-counterparty"
+                    onSelect={() => setPendingName(typed)}
+                    className="border-t border-line"
+                  >
+                    <Plus className="size-4 shrink-0" aria-hidden="true" />
+                    <span className="truncate">
+                      Create “{typed}” in QuickBooks and the CRM
+                    </span>
+                  </CommandItem>
+                )}
+              </>
             ) : (
               matches.map((counterparty) => (
                 <CommandItem
@@ -147,6 +191,17 @@ export function CounterpartySelect({ label, value, onChange, disabled }: Props) 
           <Check className="size-3 shrink-0" aria-hidden="true" />
           Linked to the QuickBooks {value.type?.toLowerCase() ?? "record"}
         </p>
+      )}
+      {direction && (
+        <CreateCounterpartyDialog
+          name={pendingName}
+          direction={direction}
+          onCancel={() => setPendingName(null)}
+          onCreated={(created) => {
+            setPendingName(null);
+            choose(created);
+          }}
+        />
       )}
     </Command>
   );

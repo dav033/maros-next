@@ -24,6 +24,7 @@ vi.mock("../../infra/invoiceScansApi", () => ({
   retryInvoiceScan: vi.fn(),
   listProjectsForPicker: vi.fn().mockResolvedValue([]),
   listQboCounterparties: api.listQboCounterparties,
+  createQboCounterparty: vi.fn(),
   createManualInvoiceTransaction: api.createManualInvoiceTransaction,
   uploadAndScanInvoice: vi.fn(),
 }));
