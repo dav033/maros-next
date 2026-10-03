@@ -1,11 +1,29 @@
 "use client";
 
-import { memo, type ReactNode, useCallback, useMemo, useRef, useState } from "react";
+import {
+  type ComponentType,
+  memo,
+  type ReactNode,
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useRouter } from "next/navigation";
 import { Check, ChevronDown, ChevronUp, ChevronsUpDown, MoreVertical } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuSub,
+  ContextMenuSubContent,
+  ContextMenuSubTrigger,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,6 +59,53 @@ import { TablePagination } from "./TablePagination";
 import { resolveContextIcon } from "./contextMenuIcons";
 
 /** Item del menú contextual de una fila de la tabla. */
+/**
+ * Los dos menús de una fila —el del clic derecho y el del botón de tres
+ * puntos— ofrecen los mismos ítems. Radix da un juego de piezas por primitivo,
+ * con la misma forma, así que el renderizador recibe el juego en vez de
+ * duplicarse: dos copias es como acaban diciendo cosas distintas.
+ */
+type MenuPartProps = {
+  disabled?: boolean;
+  className?: string;
+  children?: ReactNode;
+  onClick?: () => void;
+  collisionPadding?: number;
+};
+
+type MenuParts = {
+  Item: ComponentType<MenuPartProps>;
+  Separator: ComponentType<MenuPartProps>;
+  Sub: ComponentType<MenuPartProps>;
+  SubTrigger: ComponentType<MenuPartProps>;
+  SubContent: ComponentType<MenuPartProps>;
+};
+
+/** El menú del botón de tres puntos. */
+const DROPDOWN_PARTS: MenuParts = {
+  Item: DropdownMenuItem,
+  Separator: DropdownMenuSeparator,
+  Sub: DropdownMenuSub,
+  SubTrigger: DropdownMenuSubTrigger,
+  SubContent: DropdownMenuSubContent,
+};
+
+/**
+ * El menú del clic derecho. Antes era un DropdownMenu anclado a un `span`
+ * invisible colocado a mano en las coordenadas del cursor, y salía lejos de
+ * donde se había pulsado: un DropdownMenu de Radix es modal, así que mientras
+ * estaba abierto su capa se comía el siguiente clic derecho y el menú se
+ * reabría contra el ancla anterior. ContextMenu es el primitivo hecho para
+ * esto: rastrea el punto del clic él mismo y gestiona los bordes de la pantalla.
+ */
+const CONTEXT_PARTS: MenuParts = {
+  Item: ContextMenuItem,
+  Separator: ContextMenuSeparator,
+  Sub: ContextMenuSub,
+  SubTrigger: ContextMenuSubTrigger,
+  SubContent: ContextMenuSubContent,
+};
+
 export type EntityContextMenuItem = {
   /** Texto visible del item. */
   label: string;
@@ -239,9 +304,6 @@ function EntityTableInner<T>({
     [selection, rowKey],
   );
 
-  const [contextMenuOpen, setContextMenuOpen] = useState(false);
-  const [contextSelected, setContextSelected] = useState<T | null>(null);
-  const [contextPosition, setContextPosition] = useState({ x: 0, y: 0 });
 
   const handleSort = useCallback(
     (col: SimpleTableColumn<T>) => {
@@ -255,17 +317,6 @@ function EntityTableInner<T>({
       }
     },
     [sortKey],
-  );
-
-  const handleRowContextMenu = useCallback(
-    (event: React.MouseEvent<HTMLTableRowElement>, row: T) => {
-      if (!getContextMenuItems) return;
-      event.preventDefault();
-      setContextSelected(row);
-      setContextPosition({ x: event.clientX, y: event.clientY });
-      setContextMenuOpen(true);
-    },
-    [getContextMenuItems],
   );
 
   const handleRowMouseEnter = useCallback(
@@ -285,10 +336,9 @@ function EntityTableInner<T>({
       if (event.button === 2) return;
       const target = event.target as HTMLElement;
       if (target.closest('button, a, [role="button"], [role="menuitem"]')) return;
-      if (contextMenuOpen) return;
       onRowClick(row);
     },
-    [onRowClick, contextMenuOpen],
+    [onRowClick],
   );
 
   const handleRowKeyDown = useCallback(
@@ -303,20 +353,19 @@ function EntityTableInner<T>({
     [onRowClick],
   );
 
-  const menuItems = useMemo(() => {
-    if (!contextSelected || !getContextMenuItems) return [];
-    return getContextMenuItems(contextSelected);
-  }, [contextSelected, getContextMenuItems]);
-
-  const renderMenuItem = (item: EntityContextMenuItem, index: number): ReactNode => {
+  const renderMenuItem = (
+    item: EntityContextMenuItem,
+    index: number,
+    parts: MenuParts,
+  ): ReactNode => {
     if (item.separator) {
-      return <DropdownMenuSeparator key={`separator-${index}`} />;
+      return <parts.Separator key={`separator-${index}`} />;
     }
 
     if (item.subItems && item.subItems.length > 0) {
       return (
-        <DropdownMenuSub key={`${item.label}-${index}`}>
-          <DropdownMenuSubTrigger
+        <parts.Sub key={`${item.label}-${index}`}>
+          <parts.SubTrigger
             disabled={item.disabled}
             className={cn(
               "flex items-center gap-2 pr-2",
@@ -330,22 +379,23 @@ function EntityTableInner<T>({
             {/* Without this the label wraps rather than widening the menu, which is
                 how "Change Project Type" ended up stacked over three lines. */}
             <span className="whitespace-nowrap">{item.label}</span>
-          </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent collisionPadding={8}>
-            {item.subItems.map((subItem, subIndex) => renderMenuItem(subItem, subIndex))}
-          </DropdownMenuSubContent>
-        </DropdownMenuSub>
+          </parts.SubTrigger>
+          <parts.SubContent collisionPadding={8}>
+            {item.subItems.map((subItem, subIndex) =>
+              renderMenuItem(subItem, subIndex, parts),
+            )}
+          </parts.SubContent>
+        </parts.Sub>
       );
     }
 
     return (
-      <DropdownMenuItem
+      <parts.Item
         key={`${item.label}-${index}`}
         disabled={item.disabled}
         onClick={() => {
           if (item.disabled || !item.onClick) return;
           item.onClick();
-          setContextMenuOpen(false);
         }}
         className={cn(
           "flex items-center gap-2",
@@ -358,7 +408,7 @@ function EntityTableInner<T>({
         )}
         <span className="flex-1 whitespace-nowrap">{item.label}</span>
         {item.checked && <Check className="ml-2 h-4 w-4 shrink-0" />}
-      </DropdownMenuItem>
+      </parts.Item>
     );
   };
 
@@ -376,14 +426,11 @@ function EntityTableInner<T>({
   const renderRow = (row: T) => {
     const mutating = isMutating?.(row) ?? false;
     const rowMenuItems = getContextMenuItems ? getContextMenuItems(row) : [];
-    return (
+    const tableRow = (
       <TableRow
         key={rowKey(row)}
         data-mutating={mutating || undefined}
         tabIndex={onRowClick ? 0 : undefined}
-        onContextMenu={
-          getContextMenuItems ? (event) => handleRowContextMenu(event, row) : undefined
-        }
         onClick={onRowClick ? (event) => handleRowClick(event, row) : undefined}
         onKeyDown={onRowClick ? (event) => handleRowKeyDown(event, row) : undefined}
         onMouseEnter={getRowHref ? () => handleRowMouseEnter(row) : undefined}
@@ -429,12 +476,32 @@ function EntityTableInner<T>({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="min-w-[160px]">
-                {rowMenuItems.map((item, index) => renderMenuItem(item, index))}
+                {rowMenuItems.map((item, index) => renderMenuItem(item, index, DROPDOWN_PARTS))}
               </DropdownMenuContent>
             </DropdownMenu>
           </TableCell>
         ) : null}
       </TableRow>
+    );
+
+    if (!getContextMenuItems) return tableRow;
+
+    // El trigger es la propia fila (`asChild`), asi que Radix escucha el
+    // contextmenu donde se pulsa y mide contra el punto del cursor. El
+    // contenido sale por un portal, de modo que no se cuela un div dentro del
+    // tbody.
+    return (
+      // `modal={false}` a proposito: en modal Radix bloquea los punteros del
+      // resto de la pagina mientras el menu esta abierto, asi que el siguiente
+      // clic derecho sobre otra fila lo absorbe su capa y no llega a la fila.
+      // Sin modal el menu abierto se cierra solo y el nuevo se abre donde se
+      // pulso, que es lo que se espera de un menu contextual.
+      <ContextMenu key={rowKey(row)} modal={false}>
+        <ContextMenuTrigger asChild>{tableRow}</ContextMenuTrigger>
+        <ContextMenuContent collisionPadding={8}>
+          {rowMenuItems.map((item, index) => renderMenuItem(item, index, CONTEXT_PARTS))}
+        </ContextMenuContent>
+      </ContextMenu>
     );
   };
 
@@ -475,7 +542,7 @@ function EntityTableInner<T>({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="min-w-[160px]">
-                {rowMenuItems.map((item, index) => renderMenuItem(item, index))}
+                {rowMenuItems.map((item, index) => renderMenuItem(item, index, DROPDOWN_PARTS))}
               </DropdownMenuContent>
             </DropdownMenu>
           ) : null}
@@ -693,24 +760,6 @@ function EntityTableInner<T>({
         />
       )}
 
-      <DropdownMenu open={contextMenuOpen} onOpenChange={setContextMenuOpen}>
-        {/* An empty element parked at the cursor, used purely as the anchor Radix
-            measures against. The menu used to be placed by hand with `position:
-            fixed` + the raw click coordinates, which bypassed Radix's positioning
-            entirely: near the right or bottom edge — routine on a 14" screen — it
-            had nothing telling it to flip, so it opened off-screen or clipped.
-            Anchoring it instead gets collision handling back for free. */}
-        <DropdownMenuTrigger asChild>
-          <span
-            aria-hidden
-            className="pointer-events-none fixed h-0 w-0"
-            style={{ left: contextPosition.x, top: contextPosition.y }}
-          />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" collisionPadding={8}>
-          {menuItems.map((item, index) => renderMenuItem(item, index))}
-        </DropdownMenuContent>
-      </DropdownMenu>
     </>
   );
 }
