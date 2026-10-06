@@ -5,6 +5,10 @@
   command = "npm run build -- --webpack"
   publish = ".next"
 
+[build.environment]
+  S3_ENDPOINT = "https://files.marosconstruction.com"
+  S3_FORCE_PATH_STYLE = "true"
+
 # Environment variables for production
 [context.production.environment]
   NEXT_PUBLIC_API_BASE_URL = "https://api.marosconstruction.com/api"
