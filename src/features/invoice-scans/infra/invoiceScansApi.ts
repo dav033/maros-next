@@ -98,17 +98,30 @@ export async function attachInvoiceScanFile(
     file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")
       ? "application/pdf"
       : file.type;
-  const { data } = await optimizedApiClient.post<InvoiceScan & { uploadUrl: string }>(
+  const { data: prepared } = await optimizedApiClient.post<{
+    id: string;
+    key: string;
+    uploadUrl: string;
+  }>(
     `/invoice-scans/${id}/attachment`,
     { fileName: file.name, contentType, sizeBytes: file.size },
   );
-  const response = await fetch(data.uploadUrl, {
+  const response = await fetch(prepared.uploadUrl, {
     method: "PUT",
     headers: { "Content-Type": contentType },
     body: file,
   });
   if (!response.ok) throw new Error("The file could not be uploaded. Try again.");
-  const { uploadUrl: _uploadUrl, ...scan } = data;
+
+  const { data: scan } = await optimizedApiClient.post<InvoiceScan>(
+    `/invoice-scans/${id}/attachment/complete`,
+    {
+      key: prepared.key,
+      fileName: file.name,
+      contentType,
+      sizeBytes: file.size,
+    },
+  );
   return scan;
 }
 

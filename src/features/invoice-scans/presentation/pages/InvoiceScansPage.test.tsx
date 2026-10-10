@@ -12,6 +12,7 @@ const api = vi.hoisted(() => ({
   createManualInvoiceTransaction: vi.fn(),
   attachInvoiceScanFile: vi.fn(),
   getInvoiceScanDownloadUrl: vi.fn(),
+  notifyError: vi.fn(),
   listQboCounterparties: vi.fn().mockResolvedValue([]),
 }));
 vi.mock("../../infra/invoiceScansApi", () => ({
@@ -29,7 +30,7 @@ vi.mock("../../infra/invoiceScansApi", () => ({
   uploadAndScanInvoice: vi.fn(),
 }));
 vi.mock("@/shared/presentation/toast", () => ({
-  notifyError: vi.fn(),
+  notifyError: api.notifyError,
   notifySuccess: vi.fn(),
 }));
 
@@ -220,6 +221,29 @@ describe("InvoiceScansPage", () => {
       projectNumber: null,
     });
     expect(api.attachInvoiceScanFile).not.toHaveBeenCalled();
+  });
+
+  it("keeps the manual transaction form open and reports an API failure", async () => {
+    api.listInvoiceScans.mockResolvedValue([]);
+    api.createManualInvoiceTransaction.mockRejectedValue(new Error("network down"));
+    api.notifyError.mockClear();
+    renderPage();
+
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole("button", { name: /new transaction/i }));
+    const dialog = await screen.findByRole("dialog");
+    await user.type(within(dialog).getByLabelText("What was the payment for?"), "Materials");
+    await user.type(within(dialog).getByLabelText("Amount"), "69.60");
+    await user.click(within(dialog).getByRole("radio", { name: /payment made/i }));
+    await user.click(within(dialog).getByRole("button", { name: "Add transaction" }));
+
+    await waitFor(() => expect(api.createManualInvoiceTransaction).toHaveBeenCalled());
+    expect(await within(dialog).findByRole("button", { name: "Add transaction" })).toBeEnabled();
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(api.notifyError).toHaveBeenCalledWith(
+      expect.any(Error),
+      "The transaction could not be added.",
+    );
   });
 
   it("sends the QuickBooks id of a counterparty picked from the list", async () => {

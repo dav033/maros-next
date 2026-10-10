@@ -53,6 +53,7 @@ export function PostConversionEstimateModal({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [estimateFile, setEstimateFile] = useState<EstimateFileInfo | null>(null);
+  const [estimateFileError, setEstimateFileError] = useState<string | null>(null);
   const [to, setTo] = useState("");
   const [cc, setCc] = useState("");
   const [subject, setSubject] = useState("");
@@ -67,14 +68,30 @@ export function PostConversionEstimateModal({
     setSubject(leadName ? `Estimate - ${leadName}` : "Estimate");
     setMessage("");
     setEstimateFile(null);
+    setEstimateFileError(null);
     setIsLoadingFile(true);
-    (async () => {
-      const result = await getProjectEstimateFileAction(projectId);
-      setIsLoadingFile(false);
-      if (result.success) {
-        setEstimateFile(result.data);
+    let active = true;
+    void (async () => {
+      try {
+        const result = await getProjectEstimateFileAction(projectId);
+        if (!active) return;
+        if (result.success) {
+          setEstimateFile(result.data);
+        } else {
+          setEstimateFileError(result.error || "Could not check for an estimate file.");
+        }
+      } catch (error) {
+        if (!active) return;
+        setEstimateFileError(
+          error instanceof Error ? error.message : "Could not check for an estimate file.",
+        );
+      } finally {
+        if (active) setIsLoadingFile(false);
       }
     })();
+    return () => {
+      active = false;
+    };
   }, [open, projectId, leadName]);
 
   const send = useCallback(
@@ -85,28 +102,33 @@ export function PostConversionEstimateModal({
         return;
       }
       setIsSending(true);
-      const result = await sendProjectEstimateEmailAction(projectId, {
-        recipients: toList,
-        cc: cc.trim() ? parseRecipients(cc) : undefined,
-        subject: subject.trim() || undefined,
-        message: message.trim() || undefined,
-        includeAttachment,
-        attachmentKey: includeAttachment ? estimateFile?.key : undefined,
-      });
-      setIsSending(false);
-      if (result.success) {
-        if (!result.data.sent) {
-          toast.error("No estimate file was found. Upload one or send without attachment.");
-          setEstimateFile(null);
-          return;
-        }
+      try {
+        const result = await sendProjectEstimateEmailAction(projectId, {
+          recipients: toList,
+          cc: cc.trim() ? parseRecipients(cc) : undefined,
+          subject: subject.trim() || undefined,
+          message: message.trim() || undefined,
+          includeAttachment,
+          attachmentKey: includeAttachment ? estimateFile?.key : undefined,
+        });
+        if (result.success) {
+          if (!result.data.sent) {
+            toast.error("No estimate file was found. Upload one or send without attachment.");
+            setEstimateFile(null);
+            return;
+          }
 
-        toast.success(
-          result.data.attached ? "Estimate sent" : "Email sent without attachment",
-        );
-        onClose();
-      } else {
-        toast.error(result.error || "Could not send email");
+          toast.success(
+            result.data.attached ? "Estimate sent" : "Email sent without attachment",
+          );
+          onClose();
+        } else {
+          toast.error(result.error || "Could not send email");
+        }
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : "Could not send email");
+      } finally {
+        setIsSending(false);
       }
     },
     [projectId, to, cc, subject, message, estimateFile, onClose],
@@ -196,6 +218,12 @@ export function PostConversionEstimateModal({
                 <p className="truncate font-medium text-foreground">
                   {estimateFile.fileName}
                 </p>
+              </div>
+            ) : estimateFileError ? (
+              <div className="min-w-0 space-y-0.5 text-muted-foreground">
+                <p className="font-medium text-destructive">Could not check for an estimate file</p>
+                <p>{estimateFileError}</p>
+                <p>You can upload one here or send without an attachment.</p>
               </div>
             ) : (
               <div className="min-w-0 space-y-0.5 text-muted-foreground">

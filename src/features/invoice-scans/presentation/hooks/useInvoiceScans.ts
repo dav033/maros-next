@@ -1,6 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRef } from "react";
 
 import { STALE_TIMES } from "@/shared/lib/queryClient";
 import { notifyError, notifySuccess } from "@/shared/presentation/toast";
@@ -41,6 +42,11 @@ export function useInvoiceScanDetail(id: string) {
     queryKey: invoiceScanKeys.detail(id),
     queryFn: () => getInvoiceScan(id),
     staleTime: STALE_TIMES.volatile,
+    refetchOnWindowFocus: true,
+    // Detail responses include a 15-minute signed document URL. Refresh active
+    // document views before it expires; manual transactions have no file to renew.
+    refetchInterval: (query) =>
+      query.state.data?.hasFile ? 10 * 60 * 1000 : false,
   });
 }
 
@@ -212,13 +218,45 @@ export function useDeleteInvoiceScan() {
  * el navegador guarda el archivo en vez de abrir el PDF en una pestaña.
  */
 export function useDownloadInvoiceScanFile() {
-  return useMutation({
-    mutationFn: (id: string) => getInvoiceScanDownloadUrl(id),
-    onSuccess: ({ url }) => {
-      window.open(url, "_blank", "noopener,noreferrer");
+  const pendingTabs = useRef(new Map<number, Window>());
+  const nextRequestId = useRef(0);
+  const mutation = useMutation({
+    mutationFn: ({ id }: { id: string; requestId: number }) =>
+      getInvoiceScanDownloadUrl(id),
+    onSuccess: ({ url }, { requestId }) => {
+      const tab = pendingTabs.current.get(requestId);
+      pendingTabs.current.delete(requestId);
+      if (!tab || tab.closed) return;
+      tab.location.replace(url);
     },
-    onError: (error) => notifyError(error, "The document could not be downloaded."),
+    onError: (error, { requestId }) => {
+      pendingTabs.current.get(requestId)?.close();
+      pendingTabs.current.delete(requestId);
+      notifyError(error, "The document could not be downloaded.");
+    },
   });
+
+  return {
+    ...mutation,
+    variables: mutation.variables?.id,
+    mutate: (id: string) => {
+      const tab = window.open("about:blank", "_blank");
+      if (!tab) {
+        notifyError(
+          undefined,
+          "Allow pop-ups for this site to download the document.",
+        );
+        return;
+      }
+
+      tab.opener = null;
+      tab.document.title = "Preparing document download";
+      tab.document.body.textContent = "Preparing your document download…";
+      const requestId = ++nextRequestId.current;
+      pendingTabs.current.set(requestId, tab);
+      mutation.mutate({ id, requestId });
+    },
+  };
 }
 
 export function useRetryInvoiceScan(id: string) {
