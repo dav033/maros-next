@@ -8,6 +8,7 @@ export interface LeadRepositoryPort {
   update(id: LeadId, patch: LeadPatch): Promise<Lead>;
   delete(id: LeadId): Promise<void>;
   findByType(type: LeadType): Promise<Lead[]>;
+  findConvertedByType(type: LeadType): Promise<Lead[]>;
   findInReview(): Promise<Lead[]>;
   findLost(): Promise<Lead[]>;
   saveNew(draft: LeadDraft, leadTypeForGeneration?: LeadType): Promise<Lead>;

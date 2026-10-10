@@ -5,6 +5,7 @@ const BASE = api.resource("leads");
 export const endpoints = {
   ...buildCrudEndpoints<number>(BASE),
   listByType: () => `${BASE}/type`,
+  listConvertedByType: () => `${BASE}/converted`,
   listInReview: () => `${BASE}/review`,
   listLost: () => `${BASE}/lost`,
   validateLeadNumber: () => `${BASE}/validate/lead-number`,

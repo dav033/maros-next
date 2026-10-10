@@ -17,6 +17,7 @@ export type ApiLeadDTO = {
     converted?: boolean | null;
     projectId?: number | string | null;
   } | null;
+  project?: { id: number } | null;
   inReview?: boolean;
   estimate?: number | string | null;
   financial?: {

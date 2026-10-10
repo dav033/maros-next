@@ -9,9 +9,9 @@ import {
   PageToolbarCard,
   BulkActionsBar,
 } from "@/components/shared";
-import type { Lead } from "@/leads/domain";
 import { LeadStatus, STATUS_LABELS } from "@/leads/domain";
 import { LeadsTable } from "@/leads/presentation";
+import { ConvertedLeadsLoadError } from "../organisms/ConvertedLeadsLoadError";
 import { LEAD_STATUS_COLORS } from "../atoms/leadVisualTokens";
 import { ContactViewModal } from "@/contact";
 import { LeadModal } from "../organisms/LeadModal";
@@ -75,6 +75,7 @@ export function LeadsPageView({ logic, leadType }: LeadsPageViewProps) {
   const {
     config,
     data,
+    converted,
     crud,
     table,
     bulkActions,
@@ -85,9 +86,11 @@ export function LeadsPageView({ logic, leadType }: LeadsPageViewProps) {
     postConversionEstimateModal,
   } = logic;
 
-  const { title, description, createModalTitle } = config;
+  const { title, description } = config;
 
-  const { leads, contacts, projectTypes, showSkeleton } = data;
+  const { contacts, projectTypes, showSkeleton } = data;
+  const isConvertedView = converted.active;
+  const visibleSkeleton = isConvertedView ? converted.showSkeleton : showSkeleton;
 
   const {
     isCreateModalOpen,
@@ -150,13 +153,29 @@ export function LeadsPageView({ logic, leadType }: LeadsPageViewProps) {
           icon={Briefcase}
           title={title}
           description={description}
-          rightSlot={
+          rightSlot={!isConvertedView ? (
             <Button onClick={openCreateModal} aria-label="New Lead" className="h-9 gap-2">
               <Plus className="h-4 w-4" />
               New lead
             </Button>
+          ) : null}
+          belowSlot={
+            <div className="flex flex-wrap items-center gap-2">
+              <LeadTypeSwitcher currentType={leadType} basePath="/leads" />
+              <div className="flex gap-1 rounded-lg border border-line p-1">
+                <Button type="button" size="sm" variant={!isConvertedView ? "secondary" : "ghost"}
+                  aria-pressed={!isConvertedView}
+                  onClick={() => { converted.setActive(false); bulkActions.clearSelection(); }}>
+                  Pipeline
+                </Button>
+                <Button type="button" size="sm" variant={isConvertedView ? "secondary" : "ghost"}
+                  aria-pressed={isConvertedView}
+                  onClick={() => { converted.setActive(true); bulkActions.clearSelection(); }}>
+                  Converted
+                </Button>
+              </div>
+            </div>
           }
-          belowSlot={<LeadTypeSwitcher currentType={leadType} basePath="/leads" />}
         />
       }
       toolbar={
@@ -217,11 +236,17 @@ export function LeadsPageView({ logic, leadType }: LeadsPageViewProps) {
           </div>
         </PageToolbarCard>
       }
-      isLoading={showSkeleton}
+      isLoading={visibleSkeleton}
       loadingContent={<LeadsTableSkeleton />}
       tableContent={
         <div className="space-y-3">
-          <BulkActionsBar count={bulkActions.selectedCount} onClear={bulkActions.clearSelection}>
+          {isConvertedView && converted.error && (
+            <ConvertedLeadsLoadError
+              error={converted.error}
+              onRetry={() => void converted.refetch()}
+            />
+          )}
+          {!isConvertedView && <BulkActionsBar count={bulkActions.selectedCount} onClear={bulkActions.clearSelection}>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -256,19 +281,20 @@ export function LeadsPageView({ logic, leadType }: LeadsPageViewProps) {
               <Trash2 className="h-3.5 w-3.5" />
               Delete
             </Button>
-          </BulkActionsBar>
+          </BulkActionsBar>}
 
           <LeadsTable
             leads={rows}
-            isLoading={showSkeleton}
-            onEdit={openEditModal}
-            getContextMenuItems={getContextMenuItems}
-            onOpenNotesModal={table.onOpenNotesModal}
+            isLoading={visibleSkeleton}
+            onEdit={isConvertedView ? undefined : openEditModal}
+            getContextMenuItems={isConvertedView ? () => [] : getContextMenuItems}
+            onOpenNotesModal={isConvertedView ? undefined : table.onOpenNotesModal}
             onViewContact={table.onViewContact}
             groupBy={groupBy}
             pagination={{ enabled: true }}
             isMutating={table.isMutating}
-            selection={{
+            readOnly={isConvertedView}
+            selection={isConvertedView ? undefined : {
               selectedIds: bulkActions.selectedIds,
               onSelectionChange: bulkActions.onSelectionChange,
             }}

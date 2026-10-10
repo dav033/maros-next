@@ -21,6 +21,7 @@ import {
   type UseLeadsDataReturn,
   type UseLeadsTableLogicReturn,
   type UseLeadStatusChangeReturn,
+  useInstantConvertedLeadsByType,
 } from "../hooks";
 import type { Lead } from "@/leads/domain";
 import { LeadStatus } from "@/leads/domain";
@@ -31,6 +32,13 @@ import type { LeadsPageData } from "../data/loadLeadsData";
 export interface UseLeadsPageLogicReturn {
   config: typeof LEAD_TYPE_CONFIGS[LeadType];
   data: UseLeadsDataReturn;
+  converted: {
+    active: boolean;
+    setActive: (active: boolean) => void;
+    error: Error | null;
+    showSkeleton: boolean;
+    refetch: () => Promise<void>;
+  };
   crud: {
     isCreateModalOpen: boolean;
     openCreateModal: () => void;
@@ -91,6 +99,9 @@ export function useLeadsPageLogic({
 
   // 1) Datos
   const data = useLeadsData(leadType, initialData);
+  const [showConverted, setShowConverted] = useState(false);
+  const convertedQuery = useInstantConvertedLeadsByType(leadType, showConverted);
+  const visibleLeads = showConverted ? convertedQuery.leads ?? [] : data.leads;
   const [postConversionEstimate, setPostConversionEstimate] = useState<{
     projectId: number;
     leadName?: string;
@@ -193,7 +204,7 @@ export function useLeadsPageLogic({
 
   // 4) Tabla (búsqueda, filtrado e interacciones)
   const table = useLeadsTableLogic({
-    leads: data.leads,
+    leads: visibleLeads,
     onEdit: editModal.open,
     onDelete: async (id) => {
       await deleteMutation.mutateAsync(id);
@@ -220,6 +231,13 @@ export function useLeadsPageLogic({
   return {
     config,
     data,
+    converted: {
+      active: showConverted,
+      setActive: setShowConverted,
+      error: convertedQuery.error,
+      showSkeleton: convertedQuery.showSkeleton,
+      refetch: convertedQuery.refetch,
+    },
     crud: {
       isCreateModalOpen: createModal.isOpen,
       openCreateModal: createModal.open,

@@ -2,6 +2,7 @@ export * from "./controllers/useCreateLeadController";
 export * from "./controllers/useUpdateLeadController";
 
 export * from "./data/useInstantLeadsByType";
+export * from "./data/useInstantConvertedLeadsByType";
 export * from "./data/useInstantLeadsInReview";
 export * from "./data/useInstantLostLeads";
 export * from "./data/useLeadByNumber";
@@ -27,4 +28,3 @@ export * from "./table/useLeadsInReviewTableColumns";
 export * from "./table/useLeadsTableLogic";
 export * from "./table/useLeadsToolbarSearchController";
 export * from "./table/useLeadsBulkActions";
-

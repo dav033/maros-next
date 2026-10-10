@@ -45,7 +45,7 @@ export interface LeadsTableProps {
   leads: Lead[];
   isLoading?: boolean;
   onEdit?: (lead: Lead) => void;
-  getContextMenuItems: (row: Lead) => EntityContextMenuItem[];
+  getContextMenuItems?: (row: Lead) => EntityContextMenuItem[];
   onOpenNotesModal?: (lead: Lead) => void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onViewContact?: (contact: any) => void;
@@ -53,6 +53,7 @@ export interface LeadsTableProps {
   pagination?: { enabled?: boolean };
   isMutating?: (lead: Lead) => boolean;
   selection?: EntityTableSelection;
+  readOnly?: boolean;
 }
 
 export function LeadsTable({
@@ -65,16 +66,18 @@ export function LeadsTable({
   pagination,
   isMutating,
   selection,
+  readOnly = false,
 }: LeadsTableProps) {
   const router = useRouter();
   const columns = useLeadsTableColumns({
     onOpenContactModal: onViewContact ?? (() => {}),
     onOpenNotesModal: onOpenNotesModal ?? (() => {}),
+    readOnly,
   });
 
   const contextMenu = useMemo<(row: Lead) => EntityContextMenuItem[]>(
     () => (row: Lead) =>
-      getContextMenuItems(row).map((item) => ({
+      (getContextMenuItems?.(row) ?? []).map((item) => ({
         label: item.label,
         onClick: item.onClick,
         icon: item.icon,
@@ -95,9 +98,14 @@ export function LeadsTable({
       isLoading={isLoading}
       isMutating={isMutating}
       selection={selection}
-      getContextMenuItems={contextMenu}
-      onRowClick={(l) => l.id && router.push(`/lead/${l.id}`)}
-      getRowHref={(l) => (l.id ? `/lead/${l.id}` : undefined)}
+      getContextMenuItems={readOnly ? undefined : contextMenu}
+      onRowClick={(l) => {
+        if (readOnly && l.project?.id) router.push(`/project/${l.project.id}`);
+        else if (!readOnly && l.id) router.push(`/lead/${l.id}`);
+      }}
+      getRowHref={(l) => readOnly
+        ? (l.project?.id ? `/project/${l.project.id}` : undefined)
+        : (l.id ? `/lead/${l.id}` : undefined)}
       groupBy={buildGroupBy(groupBy)}
       // Roughly the sum of the column widths in useLeadsTableColumns, plus the
       // checkbox and actions cells. Below this the table scrolls sideways rather
@@ -108,9 +116,13 @@ export function LeadsTable({
       emptyState={
         <div className="flex flex-col items-center justify-center rounded-lg border border-line bg-elev-2 p-8 text-center">
           <FileText className="size-12 text-muted-foreground/50 mb-4" />
-          <h3 className="font-display text-lg font-medium text-foreground">No leads found.</h3>
+          <h3 className="font-display text-lg font-medium text-foreground">
+            {readOnly ? "No converted leads found." : "No leads found."}
+          </h3>
           <p className="text-sm text-muted-foreground mt-1">
-            Use the button above to create a new lead.
+            {readOnly
+              ? "No project-linked leads match this type."
+              : "Use the button above to create a new lead."}
           </p>
         </div>
       }

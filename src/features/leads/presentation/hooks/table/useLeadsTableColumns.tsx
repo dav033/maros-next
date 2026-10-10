@@ -10,11 +10,13 @@ import { ProjectTypeBadge } from "../../atoms/ProjectTypeBadge";
 interface UseLeadsTableColumnsProps {
   onOpenContactModal: (contact: any) => void;
   onOpenNotesModal: (lead: Lead) => void;
+  readOnly?: boolean;
 }
 
 export function useLeadsTableColumns({
   onOpenContactModal,
   onOpenNotesModal,
+  readOnly = false,
 }: UseLeadsTableColumnsProps): SimpleTableColumn<Lead>[] {
   return React.useMemo<SimpleTableColumn<Lead>[]>(() => {
     return [
@@ -24,6 +26,9 @@ export function useLeadsTableColumns({
         className: "w-[80px] text-center",
         render: (lead: Lead) => {
           const notesArray = Array.isArray(lead.notes) ? lead.notes : [];
+          if (readOnly) {
+            return <span className="text-muted-foreground">{notesArray.length || "—"}</span>;
+          }
           return (
             <NotesButton
               hasNotes={notesArray.length > 0}
@@ -120,5 +125,5 @@ export function useLeadsTableColumns({
         sortValue: (lead: Lead) => lead.status ?? "",
       },
     ];
-  }, [onOpenContactModal, onOpenNotesModal]);
+  }, [onOpenContactModal, onOpenNotesModal, readOnly]);
 }

@@ -13,6 +13,7 @@ export { getLeadById } from "./usecases/queries/getLeadById";
 export { getLeadByNumber } from "./usecases/queries/getLeadByNumber";
 export { listLeads } from "./usecases/queries/listLeads";
 export { listLeadsByType } from "./usecases/queries/listLeadsByType";
+export { listConvertedLeadsByType } from "./usecases/queries/listConvertedLeadsByType";
 export { listLeadsByTypeAndStatus } from "./usecases/queries/listLeadsByTypeAndStatus";
 export { listLeadsInReview } from "./usecases/queries/listLeadsInReview";
 export { listLostLeads } from "./usecases/queries/listLostLeads";

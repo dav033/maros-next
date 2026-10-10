@@ -60,6 +60,14 @@ export class LeadHttpRepository implements LeadRepositoryPort {
     return mapLeadsFromApi(Array.isArray(data) ? data : []);
   }
 
+  async findConvertedByType(type: LeadType): Promise<Lead[]> {
+    const { data } = await this.api.get<ApiLeadDTO[]>(
+      leadEndpoints.listConvertedByType(),
+      { params: { type: String(type) } },
+    );
+    return mapLeadsFromApi(Array.isArray(data) ? data : []);
+  }
+
   async findInReview(): Promise<Lead[]> {
     const url = leadEndpoints.listInReview();
     const { data } = await this.api.get<ApiLeadDTO[]>(url);
