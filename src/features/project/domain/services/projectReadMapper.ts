@@ -226,6 +226,9 @@ export function mapProjectFromDTO(dto: ApiProjectDTO, leadMapper: (dto: any) => 
         outstandingAmount: f.outstandingAmount,
         paidPercentage: f.paidPercentage,
         estimateVsInvoicedDelta: f.estimateVsInvoicedDelta,
+        ...(typeof f.cashJobCost === "number" && { cashJobCost: f.cashJobCost }),
+        ...(typeof f.cashProfit === "number" && { cashProfit: f.cashProfit }),
+        ...(typeof f.cashBacklog === "number" && { cashBacklog: f.cashBacklog }),
         ...(typeof f.totalJobCost === "number" && { totalJobCost: f.totalJobCost }),
         ...(typeof f.grossProfit === "number" && { grossProfit: f.grossProfit }),
         ...(typeof f.cashOutPaid === "number" && { cashOutPaid: f.cashOutPaid }),
@@ -282,4 +285,3 @@ export function mapProjectsFromDTO(list: ApiProjectDTO[], leadMapper: (dto: any)
   }
   return results;
 }
-

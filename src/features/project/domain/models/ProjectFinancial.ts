@@ -51,6 +51,12 @@ export interface ProjectFinancial {
   outstandingAmount: number;
   paidPercentage: number;
   estimateVsInvoicedDelta: number;
+  /** Cash-basis job cost: paid purchases and bill payments only. */
+  cashJobCost?: number;
+  /** Cash received minus cash job cost. */
+  cashProfit?: number;
+  /** Estimate reference minus cash received. */
+  cashBacklog?: number;
   totalJobCost?: number;
   grossProfit?: number;
   /** Cash basis: purchases and bill payments actually paid out. */
@@ -76,7 +82,6 @@ export interface ProjectFinancialsEntry {
   invoiceStatus?: InvoiceStatus;
   qboError?: { code: string; message: string };
 }
-
 
 
 

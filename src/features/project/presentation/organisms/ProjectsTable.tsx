@@ -60,9 +60,11 @@ function getProjectCashAlerts(project: Project): {
   exceedsContract: boolean;
 } {
   const collected = toProjectAmount(
-    project.paymentSummary?.totalAmount ?? project.financial?.paidAmount,
+    project.financial?.paidAmount ?? project.paymentSummary?.totalAmount,
   );
-  const spent = toProjectAmount(project.financial?.cashOutPaid);
+  const spent = toProjectAmount(
+    project.financial?.cashJobCost ?? project.financial?.cashOutPaid,
+  );
   const estimate = toProjectAmount(project.financial?.estimatedAmount);
   return {
     exceedsCollected: spent !== null && collected !== null && spent > collected,
@@ -82,13 +84,21 @@ function ProjectMobileCard({
   onOpenPayments?: (project: Project) => void;
 }) {
   const estimate = toProjectAmount(project.financial?.estimatedAmount);
-  const invoiced = toProjectAmount(project.financial?.invoicedAmount);
   const paymentAmount = project.paymentSummary?.totalAmount ?? project.financial?.paidAmount;
-  // Cash basis: collected from the client vs. actually paid out.
-  const collected = toProjectAmount(paymentAmount);
-  const costPaid = toProjectAmount(project.financial?.cashOutPaid);
-  const profit = collected !== null && costPaid !== null ? collected - costPaid : null;
-  const backlog = estimate !== null && invoiced !== null ? estimate - invoiced : null;
+  const collected = toProjectAmount(
+    project.financial?.paidAmount ?? project.paymentSummary?.totalAmount,
+  );
+  const costPaid = toProjectAmount(
+    project.financial?.cashJobCost ?? project.financial?.cashOutPaid,
+  );
+  const reportedProfit = toProjectAmount(project.financial?.cashProfit);
+  const profit = reportedProfit ?? (
+    collected !== null && costPaid !== null ? collected - costPaid : null
+  );
+  const reportedBacklog = toProjectAmount(project.financial?.cashBacklog);
+  const backlog = reportedBacklog ?? (
+    estimate !== null && collected !== null ? estimate - collected : null
+  );
   const { exceedsCollected, exceedsContract } = getProjectCashAlerts(project);
   const status = project.projectProgressStatus;
   const paymentSchedule = project.financial?.paymentSchedule;
@@ -150,7 +160,7 @@ function ProjectMobileCard({
           />
           <div className="flex items-baseline justify-between gap-2">
             <h3 className="font-display text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Profit
+              Cash Profit
             </h3>
             <span className="font-mono text-xs font-medium tabular-nums">
               {profit === null ? "—" : formatCurrency(profit)}
@@ -160,7 +170,7 @@ function ProjectMobileCard({
       ) : null}
 
       {exceedsCollected ? (
-        <p className="text-xs font-medium text-destructive">Cost paid exceeds collected</p>
+        <p className="text-xs font-medium text-destructive">Cash cost exceeds collected</p>
       ) : null}
       {exceedsContract ? (
         <p className="text-xs font-medium text-destructive">Cost paid exceeds the contract</p>

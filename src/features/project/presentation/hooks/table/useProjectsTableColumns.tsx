@@ -53,25 +53,30 @@ function getPaymentSummary(project: Project) {
 
 // Cash basis: money actually received from the client and actually paid out.
 function getCollected(project: Project): number | null {
-  return toAmount(getPaymentSummary(project)?.totalAmount);
+  return toAmount(
+    project.financial?.paidAmount ?? getPaymentSummary(project)?.totalAmount,
+  );
 }
 
-/**
- * Contratado que todavia no se ha facturado. Vivia en la tabla antes del rediseno
- * y se perdio al borrar la columna de barras que lo consumia: el dato dejo de
- * usarse porque desaparecio su unico consumidor, no porque dejara de importar.
- * Misma definicion que la tarjeta movil (ProjectsTable.tsx).
- */
+function getCashCost(project: Project): number | null {
+  return toAmount(project.financial?.cashJobCost ?? project.financial?.cashOutPaid);
+}
+
+/** Prefer the backend cash balance, with a fallback for older API responses. */
 function computeBacklog(project: Project): number | null {
+  const reportedBacklog = toAmount(project.financial?.cashBacklog);
+  if (reportedBacklog !== null) return reportedBacklog;
   const estimate = toAmount(project.financial?.estimatedAmount);
-  const invoiced = toAmount(project.financial?.invoicedAmount);
-  if (estimate === null || invoiced === null) return null;
-  return estimate - invoiced;
+  const collected = getCollected(project);
+  if (estimate === null || collected === null) return null;
+  return estimate - collected;
 }
 
 function getCashProfit(project: Project): number | null {
+  const reportedProfit = toAmount(project.financial?.cashProfit);
+  if (reportedProfit !== null) return reportedProfit;
   const collected = getCollected(project);
-  const costPaid = toAmount(project.financial?.cashOutPaid);
+  const costPaid = getCashCost(project);
   return collected !== null && costPaid !== null ? collected - costPaid : null;
 }
 
@@ -238,7 +243,7 @@ export function useProjectsTableColumns(
             estimate={toAmount(project.financial?.estimatedAmount)}
             showContract
             collected={getCollected(project)}
-            spent={toAmount(project.financial?.cashOutPaid)}
+            spent={getCashCost(project)}
             axisMaxPercent={LIST_AXIS_MAX_PERCENT}
             label={project.lead.name}
           />
@@ -254,14 +259,8 @@ export function useProjectsTableColumns(
         },
       },
       {
-        // La segunda columna de main: Profit y Backlog juntos. Main pintaba el backlog
-        // en ambar o verde segun fuera o no cero; aqui el color lo fija la via de
-        // dinero (--money-hold) y el estado lo dice la longitud contra el mismo eje del
-        // contrato, que es lo unico comparable entre filas. La perdida, que main
-        // dibujaba identica a una ganancia por el Math.abs, ahora cae a la izquierda
-        // del cero y se pinta con --money-over.
         key: "profitVsBacklog",
-        header: "Profit vs Backlog",
+        header: "Cash Profit vs Cash Backlog",
         className: "w-[210px]",
         render: (project: Project) => (
           <MoneyLine
