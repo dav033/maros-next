@@ -232,6 +232,20 @@ export function InvoiceScanDetailPage({ id }: { id: string }) {
       )}
       {!isManualTransaction && <InvoiceScanWarnings warnings={scan.warnings} />}
 
+      {scan.comments?.trim() && (
+        <section
+          aria-labelledby="review-comments-title"
+          className="rounded-2xl border border-primary/20 bg-primary/5 p-4 sm:p-6"
+        >
+          <h2 id="review-comments-title" className="font-display font-semibold">
+            Reviewer comments
+          </h2>
+          <p className="mt-2 whitespace-pre-wrap break-words text-sm text-foreground">
+            {scan.comments}
+          </p>
+        </section>
+      )}
+
       <section
         aria-label="Review"
         className="grid gap-4 rounded-2xl border bg-card p-4 shadow-sm sm:p-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end"
