@@ -7,6 +7,19 @@ import {
   type InvoiceScanFilters,
 } from "./filters";
 
+/** Query keys owned by the filters; every other key of the URL belongs to someone else. */
+const FILTER_PARAM_KEYS = [
+  "q",
+  "type",
+  "direction",
+  "status",
+  "classification",
+  "from",
+  "to",
+  "min",
+  "max",
+] as const;
+
 function parseAmount(value: string | null): number | undefined {
   if (!value || !/^-?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?$/i.test(value)) return undefined;
   const amount = Number(value);
@@ -57,5 +70,19 @@ export function serializeInvoiceScanFilters(filters: InvoiceScanFilters): string
   if (Number.isFinite(filters.amountMin)) params.set("min", String(filters.amountMin));
   if (Number.isFinite(filters.amountMax)) params.set("max", String(filters.amountMax));
 
+  return params.toString();
+}
+
+/**
+ * `currentQuery` with its filter keys replaced by `filters`. Params that are
+ * not filters (another feature's, tracking tags) are kept as they are, and a
+ * filter key with a malformed value is dropped along with the old ones.
+ */
+export function applyInvoiceScanFilters(currentQuery: string, filters: InvoiceScanFilters): string {
+  const params = new URLSearchParams(currentQuery);
+  for (const key of FILTER_PARAM_KEYS) params.delete(key);
+  for (const [key, value] of new URLSearchParams(serializeInvoiceScanFilters(filters))) {
+    params.append(key, value);
+  }
   return params.toString();
 }

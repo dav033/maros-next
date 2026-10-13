@@ -6,12 +6,15 @@ import { useMemo, useState } from "react";
 import { PageHeaderCard } from "@/components/shared";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 
+import { filterInvoiceScans } from "../../domain/filters";
 import { partitionInvoiceScans } from "../../domain/partition";
+import { InvoiceScanFilters } from "../components/InvoiceScanFilters";
 import { InvoiceScansTable } from "../components/InvoiceScansTable";
 import { NewTransactionDialog } from "../components/NewTransactionDialog";
+import { useInvoiceScanFilters } from "../hooks/useInvoiceScanFilters";
 import { useInvoiceScansList } from "../hooks/useInvoiceScans";
-import { Skeleton } from "@/components/ui/skeleton";
 
 function LoadingRows() {
   return (
@@ -28,12 +31,25 @@ function LoadingRows() {
   );
 }
 
+function FilteredEmptyState({ onClear }: { onClear: () => void }) {
+  return (
+    <div className="flex min-h-40 flex-col items-center justify-center gap-3 px-6 py-8 text-center">
+      <h3 className="font-display text-base font-semibold">No documents match these filters</h3>
+      <Button type="button" variant="outline" size="sm" onClick={onClear}>Clear filters</Button>
+    </div>
+  );
+}
+
 export function InvoiceScansPage() {
   const query = useInvoiceScansList();
+  const { filters, updateFilters, clearFilters, resetKey } = useInvoiceScanFilters();
   const [transactionOpen, setTransactionOpen] = useState(false);
+  const filtered = useMemo(() => filterInvoiceScans(query.data ?? [], filters), [query.data, filters]);
+  const hasActiveFilters = Object.values(filters).some((value) => value !== undefined);
+  const showFilteredEmptyState = hasActiveFilters && !query.isLoading && !query.isError;
   const { pending, completed } = useMemo(
-    () => partitionInvoiceScans(query.data ?? []),
-    [query.data],
+    () => partitionInvoiceScans(filtered),
+    [filtered],
   );
 
   return (
@@ -56,6 +72,17 @@ export function InvoiceScansPage() {
       />
 
       <NewTransactionDialog open={transactionOpen} onOpenChange={setTransactionOpen} />
+
+      <InvoiceScanFilters
+        filters={filters}
+        resultCount={filtered.length}
+        totalCount={query.data?.length ?? 0}
+        isLoading={query.isLoading}
+        isError={query.isError}
+        resetKey={resetKey}
+        onChange={updateFilters}
+        onClear={clearFilters}
+      />
 
       {query.isError && (
         <Alert variant="destructive">
@@ -85,6 +112,8 @@ export function InvoiceScansPage() {
         </header>
         {query.isLoading ? (
           <LoadingRows />
+        ) : pending.length === 0 && showFilteredEmptyState ? (
+          <FilteredEmptyState onClear={clearFilters} />
         ) : pending.length === 0 ? (
           <div className="flex min-h-40 flex-col items-center justify-center px-6 py-8 text-center">
             <div className="mb-3 grid h-10 w-10 place-items-center rounded-full bg-primary-container text-primary-on-container">
@@ -104,7 +133,7 @@ export function InvoiceScansPage() {
         )}
       </section>
 
-      {completed.length > 0 && (
+      {(completed.length > 0 || showFilteredEmptyState) && (
         <section aria-labelledby="completed-title" className="overflow-hidden rounded-xl border border-line bg-elev-1 shadow-sm">
           <header className="flex flex-wrap items-center gap-2 border-b border-line bg-elev-2 px-3 py-2 sm:px-4">
             <CheckCircle2 className="h-4 w-4 text-primary" aria-hidden="true" />
@@ -116,7 +145,11 @@ export function InvoiceScansPage() {
             </h2>
             <p className="ml-auto text-xs text-muted-foreground">Untick one to send it back.</p>
           </header>
-          <InvoiceScansTable scans={completed} variant="completed" />
+          {completed.length === 0 ? (
+            <FilteredEmptyState onClear={clearFilters} />
+          ) : (
+            <InvoiceScansTable scans={completed} variant="completed" />
+          )}
         </section>
       )}
     </div>

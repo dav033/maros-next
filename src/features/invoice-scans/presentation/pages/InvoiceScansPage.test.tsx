@@ -37,6 +37,7 @@ vi.mock("@/shared/presentation/toast", () => ({
 const routerPush = vi.hoisted(() => vi.fn());
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: routerPush, replace: vi.fn(), refresh: vi.fn(), back: vi.fn() }),
+  useSearchParams: () => new URLSearchParams(),
 }));
 
 vi.mock("@/features/users/presentation/hooks/data/useUserDirectory", () => ({
