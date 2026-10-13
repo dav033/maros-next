@@ -1,7 +1,9 @@
-import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+// The support module installs the API mocks and must be evaluated before anything imports the real API.
 import { filterFixtureScans, renderPage, scan } from "./InvoiceScansPage.filters.test-support";
+import { invoiceScanKeys } from "../hooks/useInvoiceScans";
 
 // These tests keep the real Motion presence machinery (the contract tests probe props instead).
 function recordSurfaces(): Element[] {
@@ -63,6 +65,23 @@ describe("InvoiceScansPage record presence", () => {
     // Leaving long enough must not drop records that came back.
     await new Promise((resolve) => setTimeout(resolve, 600));
     expect(recordSurfaces()).toHaveLength(4);
+  });
+
+  it("removes the leaving rows and cards when the same record enters the other section", async () => {
+    const page = renderPage([scan({ id: "mover" })]);
+    await screen.findByText("1 of 1");
+    const toEnter = screen.getByRole("region", { name: /to enter/i });
+    const leaving = within(toEnter).getAllByRole("link", { name: /^Lion plumbing\.pdf/ }).map((link) => link.closest("tr, li"));
+    expect(leaving).toHaveLength(2);
+    act(() => {
+      page.client.setQueryData(invoiceScanKeys.list(), [scan({ id: "mover", enteredAt: "2026-09-03T12:00:00Z" })]);
+    });
+    const entered = await screen.findByRole("region", { name: /entered in quickbooks/i });
+    expect(within(entered).getAllByRole("link", { name: /^Lion plumbing\.pdf/ })).toHaveLength(2);
+    // Both surfaces share the title layout id; jsdom measures zero boxes, like a hidden responsive variant.
+    await waitFor(() => leaving.forEach((item) => expect(item).not.toBeInTheDocument()));
+    expect(within(toEnter).queryAllByRole("link", { name: /^Lion plumbing\.pdf/ })).toHaveLength(0);
+    expect(document.querySelectorAll("tr[inert], li[inert]")).toHaveLength(0);
   });
 
   it("keeps only the matching records interactive while a changed filter animates", async () => {
