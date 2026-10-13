@@ -1,8 +1,8 @@
-import { fireEvent, screen, waitFor, within } from "@testing-library/react";
+import { act, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 
-import { FILTER_RECORD_TITLES, filterFixtureScans, renderPage, scan } from "./InvoiceScansPage.filters.test-support";
+import { chooseFilterOption, FILTER_RECORD_TITLES, filterFixtureScans, rejectNextListRequest, renderPage, scan } from "./InvoiceScansPage.filters.test-support";
 
 function expectSectionTitles(
   sectionName: "To enter" | "Entered in QuickBooks",
@@ -29,6 +29,33 @@ async function expectVisibleTitles(titles: string[]) {
 }
 
 describe("InvoiceScansPage filters", () => {
+  it("keeps the last desktop and mobile records mounted for exit when both sections become empty", async () => {
+    renderPage([scan({ id: "last-pending" }), scan({ id: "last-entered", enteredAt: "2026-09-03T12:00:00Z" })]);
+    await screen.findByText("2 of 2");
+    const items = screen.getAllByRole("link", { name: /^Lion plumbing\.pdf/ }).map((link) => link.closest("tr, li"));
+    expect(items).toHaveLength(4);
+    fireEvent.change(screen.getByRole("searchbox", { name: "Search documents" }), { target: { value: "unmatched" } });
+    expect(screen.getByText("0 of 2")).toBeInTheDocument();
+    for (const item of items) {
+      expect(item).toBeInTheDocument();
+      expect(item).toHaveAttribute("aria-hidden", "true");
+      expect(item).toHaveAttribute("inert");
+      expect(item).not.toHaveStyle({ position: "absolute" });
+    }
+    expect(screen.getAllByText("No documents match these filters")).toHaveLength(2);
+    await waitFor(() => items.forEach((item) => expect(item).not.toBeInTheDocument()));
+  });
+
+  it("announces a failed cached refetch without claiming the filtered sections are valid empty results", async () => {
+    const page = renderPage(filterFixtureScans(), "?q=unmatched");
+    await screen.findByText("0 of 10");
+    expect(screen.getAllByText("No documents match these filters")).toHaveLength(2);
+    rejectNextListRequest();
+    await act(async () => { await page.client.invalidateQueries({ queryKey: ["invoice-scans", "list"] }); });
+    expect(await screen.findByText("Results unavailable")).toBeInTheDocument();
+    expect(screen.queryByText("No documents match these filters")).not.toBeInTheDocument();
+  });
+
   it("filters both sections from the URL and clears only filter parameters", async () => {
     renderPage([
       scan({ id: "pending-lion" }),
@@ -61,7 +88,7 @@ describe("InvoiceScansPage filters", () => {
     expect(new URLSearchParams(window.location.search).get("q")).toBe("Lion plumbing");
     expect(screen.getByText("2 of 2")).toBeInTheDocument();
 
-    await user.selectOptions(screen.getByRole("combobox", { name: "Record type" }), "transaction");
+    await chooseFilterOption(user, "Record type", "Manual transaction");
     expect(await screen.findByText("0 of 2")).toBeInTheDocument();
     const pending = screen.getByRole("region", { name: /to enter/i });
     const completed = screen.getByRole("region", { name: /entered in quickbooks/i });
@@ -155,7 +182,7 @@ describe("InvoiceScansPage filters", () => {
     renderPage(filterFixtureScans());
     await screen.findByText("10 of 10");
     const control = screen.getByRole("combobox", { name: label });
-    await userEvent.setup().selectOptions(control, value);
+    await chooseFilterOption(userEvent.setup(), label, option);
     await expectVisibleTitles(titles);
     expect(control).toHaveValue(value);
     expect(new URLSearchParams(window.location.search).get(param)).toBe(value);
@@ -204,14 +231,15 @@ describe("InvoiceScansPage filters", () => {
     await screen.findByText("10 of 10");
     const user = userEvent.setup();
     await user.type(screen.getByRole("searchbox", { name: "Search documents" }), "CAFE");
-    await user.selectOptions(screen.getByRole("combobox", { name: "Record type" }), "invoice");
-    await user.selectOptions(screen.getByRole("combobox", { name: "Money direction" }), "in");
-    await user.selectOptions(screen.getByRole("combobox", { name: "Status" }), "needs_review");
-    await user.selectOptions(screen.getByRole("combobox", { name: "Category" }), "materials_expense");
+    await chooseFilterOption(user, "Record type", "Invoice file");
+    await chooseFilterOption(user, "Money direction", "Money in");
+    await chooseFilterOption(user, "Status", "Ready to enter");
+    await chooseFilterOption(user, "Category", "Materials");
     await user.type(screen.getByLabelText("Minimum amount"), "80");
     await user.type(screen.getByLabelText("Maximum amount"), "150");
     await expectVisibleTitles([]);
     await user.click(screen.getByRole("button", { name: "Remove filter Category: Materials" }));
+    await user.keyboard("{Escape}");
     await expectVisibleTitles(["Invoice INV-1042"]);
     expect(Object.fromEntries(new URLSearchParams(window.location.search))).toEqual({
       q: "CAFE", type: "invoice", direction: "in", status: "needs_review", min: "80", max: "150",

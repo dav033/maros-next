@@ -1,9 +1,13 @@
 "use client";
 
 import { X } from "lucide-react";
+import { LayoutGroup } from "motion/react";
+import { useId, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { usePrefersReducedMotion } from "@/shared/presentation/hooks/usePrefersReducedMotion";
+import { sharedEntityReturnTransition } from "@/shared/presentation/motionTransitions";
 
 import type { InvoiceScanFilters as FilterValues } from "../../domain/filters";
 import {
@@ -12,6 +16,7 @@ import {
   InvoiceScanDraftInput,
   InvoiceScanFilterFields,
 } from "./InvoiceScanFilterFields";
+import { filterChoiceLayoutId, MotionFilterButton } from "./InvoiceScanFilterChoice";
 
 interface Props {
   filters: FilterValues;
@@ -24,13 +29,13 @@ interface Props {
   onClear: () => void;
 }
 
-function activeChips(filters: FilterValues): Array<{ key: keyof FilterValues; label: string }> {
-  const chips: Array<{ key: keyof FilterValues; label: string }> = [];
+function activeChips(filters: FilterValues): Array<{ key: keyof FilterValues; label: string; layoutId?: string }> {
+  const chips: Array<{ key: keyof FilterValues; label: string; layoutId?: string }> = [];
   if (filters.search) chips.push({ key: "search", label: `Search: ${filters.search}` });
   for (const field of FILTER_SELECTS) {
     const value = filters[field.key];
     const option = field.options.find(([optionValue]) => optionValue === value);
-    if (option) chips.push({ key: field.key, label: `${field.label}: ${option[1]}` });
+    if (option) chips.push({ key: field.key, label: `${field.label}: ${option[1]}`, layoutId: filterChoiceLayoutId(field.key, option[0]) });
   }
   for (const field of FILTER_RANGES) {
     if (filters[field.key] !== undefined) {
@@ -44,8 +49,12 @@ export function InvoiceScanFilters({
   filters, resultCount, totalCount, isLoading, isError, resetKey, onChange, onClear,
 }: Props) {
   const chips = activeChips(filters);
+  const reduceMotion = usePrefersReducedMotion();
+  const scope = useId();
+  const [openField, setOpenField] = useState<keyof FilterValues | null>(null);
 
   return (
+    <LayoutGroup id={scope}>
     <section aria-label="Document filters" className="space-y-3 rounded-xl border border-line bg-elev-1 p-3 shadow-sm sm:p-4">
       <div className="flex flex-wrap items-end gap-3">
         <div className="min-w-0 flex-1 basis-60 space-y-1.5">
@@ -66,25 +75,30 @@ export function InvoiceScanFilters({
           Clear filters
         </Button>
       </div>
-      <InvoiceScanFilterFields filters={filters} onChange={onChange} resetKey={resetKey} />
+      <InvoiceScanFilterFields filters={filters} onChange={onChange} resetKey={resetKey} openField={openField} onOpenFieldChange={setOpenField} />
       {chips.length > 0 && (
         <div aria-label="Active filters" className="flex flex-wrap gap-2">
           {chips.map((chip) => (
-            <Button
-              key={chip.key}
+            <MotionFilterButton
+              key={`${chip.layoutId ?? chip.key}-${reduceMotion ? "static" : "motion"}`}
               type="button"
               variant="secondary"
               size="sm"
               className="max-w-full rounded-full text-xs"
               aria-label={`Remove filter ${chip.label}`}
-              onClick={() => onChange({ [chip.key]: undefined })}
+              {...reduceMotion ? {} : { layout: "position", layoutId: chip.layoutId, transition: sharedEntityReturnTransition }}
+              onClick={() => {
+                onChange({ [chip.key]: undefined });
+                if (chip.layoutId) setOpenField(chip.key);
+              }}
             >
               <span className="truncate">{chip.label}</span>
               <X className="size-3" aria-hidden="true" />
-            </Button>
+            </MotionFilterButton>
           ))}
         </div>
       )}
     </section>
+    </LayoutGroup>
   );
 }

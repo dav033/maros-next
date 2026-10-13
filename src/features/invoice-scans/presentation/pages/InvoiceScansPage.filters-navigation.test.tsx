@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 
 import {
+  chooseFilterOption,
   deferFilterNavigation,
   filterFixtureScans,
   flushFilterNavigation,
@@ -15,10 +16,10 @@ describe("InvoiceScansPage filter URL navigation", () => {
     await screen.findByText("10 of 10");
     const user = userEvent.setup();
     await user.type(screen.getByRole("searchbox", { name: "Search documents" }), "CAFE");
-    await user.selectOptions(screen.getByRole("combobox", { name: "Record type" }), "invoice");
-    await user.selectOptions(screen.getByRole("combobox", { name: "Money direction" }), "in");
-    await user.selectOptions(screen.getByRole("combobox", { name: "Status" }), "needs_review");
-    await user.selectOptions(screen.getByRole("combobox", { name: "Category" }), "customer_service");
+    await chooseFilterOption(user, "Record type", "Invoice file");
+    await chooseFilterOption(user, "Money direction", "Money in");
+    await chooseFilterOption(user, "Status", "Ready to enter");
+    await chooseFilterOption(user, "Category", "Customer service");
     fireEvent.change(screen.getByLabelText("Invoice date from"), { target: { value: "2026-09-10" } });
     fireEvent.change(screen.getByLabelText("Invoice date to"), { target: { value: "2026-09-10" } });
     await user.type(screen.getByLabelText("Minimum amount"), "100.5");
@@ -49,7 +50,7 @@ describe("InvoiceScansPage filter URL navigation", () => {
       expect(screen.getByLabelText(label)).toHaveValue("");
     }
     expect(screen.queryByRole("button", { name: /^Remove filter / })).not.toBeInTheDocument();
-    await userEvent.setup().selectOptions(screen.getByRole("combobox", { name: "Status" }), "failed");
+    await chooseFilterOption(userEvent.setup(), "Status", "Scan failed");
     expect(await screen.findByText("2 of 10")).toBeInTheDocument();
     expect(Object.fromEntries(new URLSearchParams(window.location.search))).toEqual({ campaign: "lab", status: "failed" });
   });
@@ -92,10 +93,11 @@ describe("InvoiceScansPage filter URL navigation", () => {
     renderPage(filterFixtureScans(), "?campaign=lab#results");
     await screen.findByText("10 of 10");
     deferFilterNavigation();
+    for (const [label, option] of [["Record type", "Invoice file"], ["Money direction", "Money in"], ["Status", "Ready to enter"]]) {
+      fireEvent.click(screen.getByRole("combobox", { name: label }));
+      fireEvent.click(screen.getByRole("button", { name: `Apply filter ${label}: ${option}` }));
+    }
     act(() => {
-      fireEvent.change(screen.getByRole("combobox", { name: "Record type" }), { target: { value: "invoice" } });
-      fireEvent.change(screen.getByRole("combobox", { name: "Money direction" }), { target: { value: "in" } });
-      fireEvent.change(screen.getByRole("combobox", { name: "Status" }), { target: { value: "needs_review" } });
       fireEvent.change(screen.getByRole("searchbox", { name: "Search documents" }), { target: { value: "Cafe " } });
       fireEvent.change(screen.getByRole("searchbox", { name: "Search documents" }), { target: { value: "Cafe Anderson" } });
     });

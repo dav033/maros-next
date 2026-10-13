@@ -128,12 +128,11 @@ export function InvoiceScansPage() {
                 : "Scan a document or add a payment manually. Items appear here to review before entering them in QuickBooks."}
             </p>
           </div>
-        ) : (
-          <InvoiceScansTable scans={pending} variant="pending" />
-        )}
+        ) : null}
+        {!query.isLoading && <InvoiceScansTable scans={pending} variant="pending" />}
       </section>
 
-      {(completed.length > 0 || showFilteredEmptyState) && (
+      {(query.data?.some((scan) => scan.enteredAt) || showFilteredEmptyState) && (
         <section aria-labelledby="completed-title" className="overflow-hidden rounded-xl border border-line bg-elev-1 shadow-sm">
           <header className="flex flex-wrap items-center gap-2 border-b border-line bg-elev-2 px-3 py-2 sm:px-4">
             <CheckCircle2 className="h-4 w-4 text-primary" aria-hidden="true" />
@@ -145,11 +144,10 @@ export function InvoiceScansPage() {
             </h2>
             <p className="ml-auto text-xs text-muted-foreground">Untick one to send it back.</p>
           </header>
-          {completed.length === 0 ? (
+          {completed.length === 0 && showFilteredEmptyState ? (
             <FilteredEmptyState onClear={clearFilters} />
-          ) : (
-            <InvoiceScansTable scans={completed} variant="completed" />
-          )}
+          ) : null}
+          <InvoiceScansTable scans={completed} variant="completed" />
         </section>
       )}
     </div>

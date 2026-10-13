@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowDownLeft, ArrowUpRight, TriangleAlert } from "lucide-react";
+import { AnimatePresence, LayoutGroup } from "motion/react";
 import Link from "next/link";
 import { SharedEntityName } from "@/components/shared/SharedEntityName";
 
@@ -14,6 +15,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useUserDirectory } from "@/features/users/presentation/hooks/data/useUserDirectory";
+import { usePrefersReducedMotion } from "@/shared/presentation/hooks/usePrefersReducedMotion";
 
 import {
   COUNTERPARTY_PREFIX,
@@ -35,6 +37,7 @@ import {
   ProjectCell,
 } from "./InvoiceRowEditors";
 import { InvoiceScanRowActions } from "./InvoiceScanRowActions";
+import { InvoiceScanAnimatedCard, InvoiceScanAnimatedRow, invoiceScanListMotion } from "./InvoiceScanListMotion";
 
 interface Props {
   scans: InvoiceScan[];
@@ -93,6 +96,8 @@ function recordDirection(scan: InvoiceScan): string {
 
 /** Table on desktop, cards on mobile; the same rows either way. */
 export function InvoiceScansTable({ scans, variant }: Props) {
+  const reduceMotion = usePrefersReducedMotion();
+  const itemMotion = reduceMotion ? {} : invoiceScanListMotion;
   const dateHeader = variant === "completed" ? "Entered" : "Date";
   const { users } = useUserDirectory(true);
   const dateOf = (scan: InvoiceScan) => {
@@ -102,10 +107,10 @@ export function InvoiceScansTable({ scans, variant }: Props) {
   const editorOf = (scan: InvoiceScan) => lastEditorLabel(scan, users);
 
   return (
-    <>
+    <LayoutGroup>
       <div className="hidden overflow-x-auto md:block">
         <Table>
-          <TableHeader className="bg-elev-2">
+          <TableHeader className={`bg-elev-2${scans.length === 0 ? " hidden" : ""}`}>
             <TableRow>
               <TableHead className="w-10 px-2">
                 <span className="sr-only">Entered in QuickBooks</span>
@@ -122,10 +127,11 @@ export function InvoiceScansTable({ scans, variant }: Props) {
               </TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody>
+          <TableBody className="relative">
+            <AnimatePresence key={reduceMotion ? "static" : "motion"} initial={false} mode="sync">
             {scans.map((scan) => {
               return (
-                <TableRow key={scan.id} className={scan.enteredAt ? "text-muted-foreground" : "transition-colors hover:bg-elev-3"}>
+                <InvoiceScanAnimatedRow key={scan.id} {...itemMotion} className={scan.enteredAt ? "text-muted-foreground" : "transition-colors hover:bg-elev-3"}>
                   <TableCell className="px-2">
                     <EnteredCheckbox scan={scan} />
                   </TableCell>
@@ -170,18 +176,20 @@ export function InvoiceScansTable({ scans, variant }: Props) {
                   <TableCell className="px-2">
                     <InvoiceScanRowActions scan={scan} />
                   </TableCell>
-                </TableRow>
+                </InvoiceScanAnimatedRow>
               );
             })}
+            </AnimatePresence>
           </TableBody>
         </Table>
       </div>
 
-      <ul className="divide-y md:hidden">
+      <ul className="relative divide-y md:hidden">
+        <AnimatePresence key={reduceMotion ? "static" : "motion"} initial={false} mode="sync">
         {scans.map((scan) => {
           const invoice = scan.extractedData;
           return (
-            <li key={scan.id} className="flex gap-2 p-4 transition-colors hover:bg-elev-3">
+            <InvoiceScanAnimatedCard key={scan.id} {...itemMotion} className="flex gap-2 p-4 transition-colors hover:bg-elev-3">
               <EnteredCheckbox scan={scan} className="pt-1" />
               <Link
                 href={`/finance/invoices/${scan.id}`}
@@ -209,10 +217,11 @@ export function InvoiceScansTable({ scans, variant }: Props) {
               <span className="shrink-0">
                 <InvoiceScanRowActions scan={scan} />
               </span>
-            </li>
+            </InvoiceScanAnimatedCard>
           );
         })}
+        </AnimatePresence>
       </ul>
-    </>
+    </LayoutGroup>
   );
 }

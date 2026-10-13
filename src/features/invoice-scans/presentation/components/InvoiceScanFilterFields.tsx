@@ -1,13 +1,19 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { ChevronDown } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { usePrefersReducedMotion } from "@/shared/presentation/hooks/usePrefersReducedMotion";
+import { sharedEntityReturnTransition } from "@/shared/presentation/motionTransitions";
 
 import { parseInvoiceScanFilters } from "../../domain/filterParams";
 import type { InvoiceScanFilters } from "../../domain/filters";
 import { CLASSIFICATION_LABELS, STATUS_LABELS } from "../../domain/labels";
+import { filterChoiceLayoutId, MotionFilterButton } from "./InvoiceScanFilterChoice";
 
 export const FILTER_SELECTS = [
   {
@@ -78,9 +84,12 @@ interface Props {
   filters: InvoiceScanFilters;
   resetKey: number;
   onChange: (patch: Partial<InvoiceScanFilters>) => void;
+  openField: keyof InvoiceScanFilters | null;
+  onOpenFieldChange: (key: keyof InvoiceScanFilters | null) => void;
 }
 
-export function InvoiceScanFilterFields({ filters, resetKey, onChange }: Props) {
+export function InvoiceScanFilterFields({ filters, resetKey, onChange, openField, onOpenFieldChange }: Props) {
+  const reduceMotion = usePrefersReducedMotion();
   const dateError = Boolean(filters.dateFrom && filters.dateTo && filters.dateFrom > filters.dateTo);
   const amountError = filters.amountMin !== undefined && filters.amountMax !== undefined && filters.amountMin > filters.amountMax;
   const update = (key: keyof InvoiceScanFilters, param: string, value: string) => {
@@ -94,15 +103,53 @@ export function InvoiceScanFilterFields({ filters, resetKey, onChange }: Props) 
         {FILTER_SELECTS.map((field) => (
           <div key={field.key} className="space-y-1.5">
             <Label htmlFor={`invoice-filter-${field.key}`} className="text-xs">{field.label}</Label>
-            <select
-              id={`invoice-filter-${field.key}`}
-              className="h-9 w-full rounded-md border border-input bg-input px-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-              value={filters[field.key] ?? ""}
-              onChange={(event) => update(field.key, field.param, event.target.value)}
-            >
-              <option value="">All</option>
-              {field.options.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-            </select>
+            <Popover open={openField === field.key} onOpenChange={(open) => onOpenFieldChange(open ? field.key : null)}>
+              <PopoverTrigger asChild>
+                <Button
+                  id={`invoice-filter-${field.key}`}
+                  type="button"
+                  role="combobox"
+                  aria-haspopup="dialog"
+                  variant="outline"
+                  className="h-9 w-full justify-between px-2 font-normal"
+                  value={filters[field.key] ?? ""}
+                  onKeyDown={(event) => {
+                    if (event.key === "ArrowDown") {
+                      event.preventDefault();
+                      onOpenFieldChange(field.key);
+                    }
+                  }}
+                >
+                  {field.options.find(([value]) => value === filters[field.key])?.[1] ?? "All"}
+                  <ChevronDown className="size-3" aria-hidden="true" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent aria-label={field.label} align="start" className="flex w-72 flex-col gap-1 p-2">
+                <Button type="button" variant="ghost" size="sm" onClick={() => {
+                  update(field.key, field.param, "");
+                  onOpenFieldChange(null);
+                }}>All</Button>
+                {field.options.map(([value, label]) => (
+                  <MotionFilterButton
+                    key={`${value}-${filters[field.key] === value ? "selected" : "available"}-${reduceMotion ? "static" : "motion"}`}
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="justify-start"
+                    aria-label={`Apply filter ${field.label}: ${label}`}
+                    aria-pressed={filters[field.key] === value}
+                    {...reduceMotion || filters[field.key] === value ? {} : {
+                      layoutId: filterChoiceLayoutId(field.key, value),
+                      transition: sharedEntityReturnTransition,
+                    }}
+                    onClick={() => {
+                      update(field.key, field.param, value);
+                      onOpenFieldChange(null);
+                    }}
+                  >{label}</MotionFilterButton>
+                ))}
+              </PopoverContent>
+            </Popover>
           </div>
         ))}
       </div>

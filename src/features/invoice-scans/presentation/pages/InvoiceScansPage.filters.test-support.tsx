@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, render } from "@testing-library/react";
+import { cleanup, render, screen, within } from "@testing-library/react";
+import type { UserEvent } from "@testing-library/user-event";
 import { afterEach, beforeEach, vi } from "vitest";
 
 import type { ExtractedInvoiceData, InvoiceScan } from "../../domain/models";
@@ -49,6 +50,11 @@ vi.mock("next/navigation", async () => {
 
 import { InvoiceScansPage } from "./InvoiceScansPage";
 
+export async function chooseFilterOption(user: UserEvent, label: string, option: string) {
+  await user.click(screen.getByRole("combobox", { name: label }));
+  await user.click(within(screen.getByRole("dialog", { name: label })).getByRole("button", { name: `Apply filter ${label}: ${option}` }));
+}
+
 export function flushFilterNavigation() {
   filterNavigation.deferNotifications = false;
   filterNavigation.query = window.location.search;
@@ -57,6 +63,10 @@ export function flushFilterNavigation() {
 
 export function deferFilterNavigation() {
   filterNavigation.deferNotifications = true;
+}
+
+export function rejectNextListRequest() {
+  api.listInvoiceScans.mockRejectedValueOnce(new Error("lab-only refetch failure"));
 }
 
 beforeEach(() => {
@@ -101,11 +111,12 @@ export function renderPage(scans: InvoiceScan[], query = "", error?: Error) {
   window.history.replaceState(null, "", `/finance/invoices${query}`);
   api.listInvoiceScans.mockImplementation(() => error ? Promise.reject(error) : Promise.resolve(scans));
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(
+  const page = render(
     <QueryClientProvider client={client}>
       <InvoiceScansPage />
     </QueryClientProvider>,
   );
+  return { ...page, client };
 }
 
 function invoiceData(overrides: Partial<ExtractedInvoiceData>): ExtractedInvoiceData {
