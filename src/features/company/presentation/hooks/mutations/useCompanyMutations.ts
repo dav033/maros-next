@@ -5,6 +5,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useEntityMutation } from "@/shared/presentation";
 import { optimisticRemove } from "@/shared/query/optimistic";
 import { contactsKeys } from "@/contact/application";
+import { leadsKeys } from "@/leads/application";
+import { projectsKeys } from "@/project/application";
 
 import { companyKeys } from "../../../application";
 import type { Company, CompanyDraft, CompanyPatch } from "../../../domain/models";
@@ -23,7 +25,9 @@ export function useCompanyMutations() {
   const invalidateQueries = () => {
     void queryClient.invalidateQueries({ queryKey: companyKeys.all });
     void queryClient.invalidateQueries({ queryKey: ["customers"] });
-    void queryClient.invalidateQueries({ queryKey: contactsKeys.list });
+    void queryClient.invalidateQueries({ queryKey: contactsKeys.all });
+    void queryClient.invalidateQueries({ queryKey: leadsKeys.all });
+    void queryClient.invalidateQueries({ queryKey: projectsKeys.all });
   };
 
   const createMutation = useEntityMutation<CreateInput, Company>({

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import type { TaskFilters, TaskKind, TaskPriority, TaskStatus } from "@/tasks/domain";
 import { addDays, format } from "date-fns";
 import { todayInBusinessTimezone } from "@/shared/lib/businessDate";
@@ -49,23 +49,28 @@ function parseNumbers(value: string | null): number[] {
 }
 
 export function useTasksViewState() {
-  const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
+  // Opening a detail changes only `task`; board filters must retain their identity.
+  const viewParams = new URLSearchParams(searchParams.toString());
+  viewParams.delete("task");
+  const viewQuery = viewParams.toString();
+
   const state = useMemo<TasksViewState>(() => {
-    const viewParam = searchParams.get("view");
+    const params = new URLSearchParams(viewQuery);
+    const viewParam = params.get("view");
     const view = VIEWS.includes(viewParam as TasksView) ? (viewParam as TasksView) : "board";
-    const groupParam = searchParams.get("group");
-    const sortParam = searchParams.get("sort");
-    const directionParam = searchParams.get("dir");
-    const dueParam = searchParams.get("due");
-    const jobParam = Number(searchParams.get("job"));
-    const workspaceParam = Number(searchParams.get("workspace"));
-    const folderParam = Number(searchParams.get("folder"));
+    const groupParam = params.get("group");
+    const sortParam = params.get("sort");
+    const directionParam = params.get("dir");
+    const dueParam = params.get("due");
+    const jobParam = Number(params.get("job"));
+    const workspaceParam = Number(params.get("workspace"));
+    const folderParam = Number(params.get("folder"));
 
     return {
-      scope: searchParams.get("scope") || "all",
+      scope: params.get("scope") || "all",
       job: Number.isFinite(jobParam) && jobParam > 0 ? jobParam : null,
       view,
       group: GROUPS.includes(groupParam as TasksGroup) ? (groupParam as TasksGroup) : "status",
@@ -75,21 +80,21 @@ export function useTasksViewState() {
       direction: DIRECTIONS.includes(directionParam as (typeof DIRECTIONS)[number])
         ? (directionParam as (typeof DIRECTIONS)[number])
         : "desc",
-      q: searchParams.get("q") || "",
-      status: splitParam(searchParams.get("status")) as TaskStatus[],
-      assignee: parseNumbers(searchParams.get("assignee")),
-      label: parseNumbers(searchParams.get("label")),
-      kind: splitParam(searchParams.get("kind")) as TaskKind[],
-      priority: splitParam(searchParams.get("priority")) as TaskPriority[],
+      q: params.get("q") || "",
+      status: splitParam(params.get("status")) as TaskStatus[],
+      assignee: parseNumbers(params.get("assignee")),
+      label: parseNumbers(params.get("label")),
+      kind: splitParam(params.get("kind")) as TaskKind[],
+      priority: splitParam(params.get("priority")) as TaskPriority[],
       due: DUE_FILTERS.includes(dueParam as TasksDueFilter) ? (dueParam as TasksDueFilter) : null,
       workspaceId: Number.isFinite(workspaceParam) && workspaceParam > 0 ? workspaceParam : null,
       folderId: Number.isFinite(folderParam) && folderParam > 0 ? folderParam : null,
     };
-  }, [searchParams]);
+  }, [viewQuery]);
 
   const replaceState = useCallback(
     (patch: Partial<TasksViewState>) => {
-      const next = new URLSearchParams(searchParams.toString());
+      const next = new URLSearchParams(window.location.search);
       const set = (
         key: string,
         value: string | number | null | undefined,
@@ -124,9 +129,14 @@ export function useTasksViewState() {
 
       next.delete("cursor");
       const query = next.toString();
-      router.replace(`${pathname}${query ? `?${query}` : ""}`, { scroll: false });
+      if (typeof window === "undefined") return;
+      window.history.replaceState(
+        null,
+        "",
+        `${pathname}${query ? `?${query}` : ""}${window.location.hash}`,
+      );
     },
-    [pathname, router, searchParams],
+    [pathname],
   );
 
   const filters = useMemo<TaskFilters>(() => ({
@@ -150,5 +160,5 @@ export function useTasksViewState() {
     folderId: state.folderId ?? undefined,
   }), [state]);
 
-  return { state, filters, replaceState };
+  return useMemo(() => ({ state, filters, replaceState }), [state, filters, replaceState]);
 }

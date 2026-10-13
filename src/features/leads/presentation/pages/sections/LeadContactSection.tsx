@@ -15,7 +15,7 @@ import { contactRoleOptions } from "@/contact/domain";
 import type { UseInlineEditReturn } from "@/common/hooks";
 import Link from "next/link";
 import { useState } from "react";
-import { Separator } from "@/components/ui/separator";
+import { SharedEntityName } from "@/components/shared/SharedEntityName";
 
 export interface LeadContactSectionProps {
   contact: {
@@ -326,7 +326,9 @@ export function LeadContactSection({
             <>
               <div>
                 <Link href={`/contact/${contact.id}`} className="text-lg font-semibold text-primary hover:underline">
-                  {contact.name}
+                  <SharedEntityName layoutId={`maros-contact-name-${contact.id}`}>
+                    {contact.name}
+                  </SharedEntityName>
                 </Link>
               </div>
               <DetailField icon={Phone} label="Phone" value={contact.phone} />
@@ -362,7 +364,9 @@ export function LeadContactSection({
                   </div>
                   <div className="space-y-3 rounded-lg border border-line bg-elev-3 p-3">
                     <Link href={`/company/${contact.company.id}`} className="font-medium text-primary hover:underline text-sm block">
-                      {contact.company.name}
+                      <SharedEntityName layoutId={`maros-company-name-${contact.company.id}`}>
+                        {contact.company.name}
+                      </SharedEntityName>
                     </Link>
                     <DetailField icon={Phone} label="Company Phone" value={contact.company.phone} />
                     <DetailField icon={Mail} label="Company Email" value={contact.company.email} isEmail />

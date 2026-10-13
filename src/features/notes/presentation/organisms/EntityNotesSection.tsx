@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { SharedEntityName } from "@/components/shared/SharedEntityName";
 import { useRouter } from "next/navigation";
 import { FileText, NotebookPen, Plus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -63,7 +64,7 @@ export function EntityNotesSection({
               <span className="shrink-0">
                 {page.icon ?? <FileText className="h-4 w-4 text-muted-foreground" />}
               </span>
-              <span className="truncate">{page.title || "Untitled"}</span>
+              <SharedEntityName layoutId={`maros-note-title-${page.id}`} className="truncate">{page.title || "Untitled"}</SharedEntityName>
             </Link>
           ))}
         </div>

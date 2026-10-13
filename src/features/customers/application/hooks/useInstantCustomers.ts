@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useNavigationDetailQuery } from "@/shared/query/useNavigationDetailQuery";
 import { buildInstantQueryResult } from "@/shared/query";
 import { STALE_TIMES } from "@/shared/lib/queryClient";
 import type { Contact } from "@/contact";
@@ -29,9 +29,10 @@ import type { CustomersPageData } from "@/customers/presentation/data/loadCustom
 export function useInstantCustomers(initialData?: CustomersPageData): UseInstantCustomersResult {
   const repository = new CustomersHttpRepository();
 
-  const query = useQuery<CustomersData, Error>({
+  const query = useNavigationDetailQuery<CustomersData>({
     queryKey: customersKeys.all,
     queryFn: () => repository.getCustomers(),
+    refetchOnMount: (query) => query.state.isInvalidated || query.state.dataUpdatedAt === 0,
     initialData: initialData ? { contacts: initialData.contacts, companies: initialData.companies } : undefined,
     // Same guard useInstantList applies: loadCustomersData turns a failed server-side
     // read into empty arrays, and counting that as fresh would pin an empty customers
@@ -50,15 +51,23 @@ export function useInstantCustomers(initialData?: CustomersPageData): UseInstant
     { contacts: [], companies: [] },
     DEFAULT_STALE_TIME,
   );
+  const hasData =
+    (instant.data?.contacts.length ?? 0) > 0 ||
+    (instant.data?.companies.length ?? 0) > 0;
+  const showSkeleton =
+    !hasData &&
+    (query.isPending || (query.isFetching && !query.isFetched));
+  const fromCache =
+    hasData && Date.now() - query.dataUpdatedAt <= DEFAULT_STALE_TIME;
 
   return {
     contacts: instant.data?.contacts,
     companies: instant.data?.companies,
-    hasData: instant.hasData,
+    hasData,
     isLoading: instant.isLoading,
     isFetching: instant.isFetching,
-    showSkeleton: instant.showSkeleton,
-    fromCache: instant.fromCache,
+    showSkeleton,
+    fromCache,
     error: instant.error,
     refetch: instant.refetch,
   };

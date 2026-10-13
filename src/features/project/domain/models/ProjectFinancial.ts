@@ -43,6 +43,8 @@ export interface ProjectPaymentSchedule {
 
 export interface ProjectFinancial {
   projectNumber: string;
+  /** Whether QuickBooks returned a financial profile for this project. */
+  found?: boolean;
   estimatedAmount: number;
   estimateCount: number;
   invoicedAmount: number;

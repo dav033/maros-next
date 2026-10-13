@@ -1,15 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { motion, type Variants } from "motion/react";
+import { SharedEntityName } from "@/components/shared/SharedEntityName";
+import { usePrefersReducedMotion } from "@/shared/presentation/hooks/usePrefersReducedMotion";
 import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
-import { Archive, AlertTriangle, CalendarPlus, Link2, MapPin, MoreHorizontal, X } from "lucide-react";
+import { Archive, AlertTriangle, CalendarPlus, Link2, MapPin, MoreHorizontal } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -41,23 +44,28 @@ import { NoteMentionsSection } from "@/features/notes/presentation/organisms/Not
 import { useCurrentUser } from "@/shared/auth/CurrentUserProvider";
 import { useTasksApp } from "@/di";
 import { useDraftField } from "@/shared/presentation/hooks/useDraftField";
+import { sharedEntityNameTransition, TASK_CARD_SURFACE_DURATION_MS } from "@/shared/presentation/motionTransitions";
 import { tasksKeys } from "@/tasks/application";
 import { TASK_KINDS, TASK_PRIORITIES, TASK_STATUSES } from "@/tasks/domain";
 import type { Task, TaskListResult, TaskPatch } from "@/tasks/domain";
 import { useInstantTask } from "../hooks/data/useInstantTask";
+import { findActiveTaskElement, useTaskSharedSource } from "../hooks/useTaskSharedSource";
 import { useInstantTaskLabels } from "../hooks/data/useInstantTaskLabels";
 import { useTaskMutations } from "../hooks/mutations/useTaskMutations";
 import { AssigneeAvatar } from "../atoms/AssigneeAvatar";
 import { TaskKindIcon } from "../atoms/TaskKindIcon";
 import { AssigneePicker } from "../molecules/AssigneePicker";
 import { LabelPicker } from "../molecules/LabelPicker";
+import { TaskLabelChips } from "../molecules/TaskLabelChips";
 import { TaskEntityPicker } from "../molecules/TaskEntityPicker";
 import { BlockedReasonDialog } from "../molecules/BlockedReasonDialog";
 import { TaskRichTextEditor } from "../molecules/TaskRichTextEditor";
 import { TaskDatePicker } from "../molecules/TaskDatePicker";
 import { SubtaskList } from "./SubtaskList";
+import { TaskDetailDialogSurface } from "./TaskDetailDialogSurface";
 import { TaskTimeline } from "./TaskTimeline";
 import { TaskWorkSection } from "./TaskWorkSection";
+import { findTaskSummaryFromCache } from "../data/taskSummaryFromCache";
 import {
   TASK_KIND_LABELS,
   TASK_PRIORITY_LABELS,
@@ -65,7 +73,6 @@ import {
   TASK_STATUS_LABELS,
   TASK_STATUS_COLORS,
   humanizeEntityStatus,
-  taskLabelColor,
 } from "../atoms/taskVisualTokens";
 import { classifyAttachmentsChange } from "./taskAttachmentsDiff";
 import { isTaskConflictError } from "./taskConflict";
@@ -84,25 +91,19 @@ function descriptionPreview(value: Record<string, unknown> | undefined): string 
   return parts.join(" ").replace(/\s+/g, " ").trim() || "Empty";
 }
 
-function TaskDetailDialogSurface({ pageMode, children }: { pageMode: boolean; children: React.ReactNode }) {
-  const content = <div className="@container/task-detail min-w-0 p-4 sm:p-6">{children}</div>;
-  if (pageMode) {
-    return (
-      <div className="relative min-w-0 w-full bg-background">
-        <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
-          <X className="h-4 w-4" />
-          <span className="sr-only">Close</span>
-        </DialogClose>
-        {content}
-      </div>
-    );
-  }
-  return (
-    <DialogContent className="h-[100dvh] max-h-[100dvh] w-screen max-w-none overflow-y-auto overscroll-contain bg-background p-0 sm:h-auto sm:max-h-[90dvh] sm:w-[min(1100px,calc(100vw-2rem))] sm:rounded-xl">
-      {content}
-    </DialogContent>
-  );
-}
+const taskDetailSectionVariants: Variants = {
+  hidden: { opacity: 0, y: 5 },
+  shared: { opacity: 1, y: 0 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      opacity: { duration: 0.2, ease: [0.22, 1, 0.36, 1] },
+      y: { type: "spring", stiffness: 220, damping: 25, mass: 0.7 },
+    },
+  },
+  reduced: { opacity: 1, y: 0 },
+};
 
 export function TaskDetailDialog({
   taskId,
@@ -116,9 +117,51 @@ export function TaskDetailDialog({
   onOpenTask: (id: number) => void;
   pageMode?: boolean;
 }) {
-  const { data: task, showSkeleton } = useInstantTask(taskId);
+  const {
+    data: task,
+    showSkeleton,
+    isFetching: isTaskFetching,
+    error: taskLoadError,
+    refetch: refetchTask,
+  } = useInstantTask(taskId);
+  const shouldReduceMotion = usePrefersReducedMotion();
+  const sharedSource = useTaskSharedSource(taskId);
+  const [readyTaskId, setReadyTaskId] = useState<number | null>(null);
+  const [isClosing, setIsClosing] = useState(false);
+  const openingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isOpening = !pageMode && !shouldReduceMotion && taskId !== readyTaskId;
+
+  useEffect(() => {
+    if (isClosing) return;
+    if (taskId === null) {
+      setReadyTaskId(null);
+      return;
+    }
+    if (pageMode || shouldReduceMotion) {
+      setReadyTaskId(taskId);
+      return;
+    }
+    // Paint the known summary first; mount editors and pickers after the surface settles.
+    openingTimer.current = setTimeout(() => {
+      openingTimer.current = null;
+      setReadyTaskId(taskId);
+    }, TASK_CARD_SURFACE_DURATION_MS);
+    return () => {
+      if (openingTimer.current) clearTimeout(openingTimer.current);
+      openingTimer.current = null;
+    };
+  }, [taskId, pageMode, shouldReduceMotion, isClosing]);
+  const [forceNormalExit, setForceNormalExit] = useState(false);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const focusReturnTaskId = useRef<number | null>(taskId);
+  const focusReturnLayoutId = useRef<string | undefined>(undefined);
+  const previousTaskId = useRef(taskId);
   const { labels: allLabels } = useInstantTaskLabels();
   const queryClient = useQueryClient();
+  const summaryPreview = useMemo(
+    () => findTaskSummaryFromCache(queryClient, taskId),
+    [queryClient, taskId],
+  );
   const tasksApp = useTasksApp();
   const {
     updateMutation,
@@ -137,6 +180,10 @@ export function TaskDetailDialog({
   const canScheduleMeetings = useHasPermission("tasks:write");
 
   const [pendingBlock, setPendingBlock] = useState(false);
+  const [cancelReasonOpen, setCancelReasonOpen] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
+  const focusStatusAfterCancel = useRef(false);
+  const cancelTaskTriggerRef = useRef<HTMLButtonElement>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [conflictPatch, setConflictPatch] = useState<TaskPatch | null>(null);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
@@ -153,8 +200,11 @@ export function TaskDetailDialog({
         return;
       }
       if (event.metaKey || event.ctrlKey || event.altKey) return;
-      const target = event.target as HTMLElement | null;
+      const target = event.target instanceof HTMLElement ? event.target : null;
       if (target?.tagName === "INPUT" || target?.tagName === "TEXTAREA" || target?.isContentEditable) return;
+      if (target?.closest('[role="alertdialog"], [role="menu"], [role="listbox"], [role="combobox"]')) return;
+      const activeDialog = target?.closest<HTMLElement>('[role="dialog"]');
+      if (activeDialog && activeDialog.dataset.taskDetailDialog !== "true") return;
       if (event.key === "?") { event.preventDefault(); setShortcutsOpen(true); }
       if (event.key === "e") { event.preventDefault(); document.querySelector<HTMLTextAreaElement>("[data-task-title]")?.focus(); }
       if (event.key === "a") { event.preventDefault(); document.querySelector<HTMLButtonElement>("[data-task-assignee]")?.click(); }
@@ -200,6 +250,71 @@ export function TaskDetailDialog({
   const title = titleField.value;
 
   const open = taskId !== null;
+  useLayoutEffect(() => {
+    if (taskId !== null) focusReturnLayoutId.current = sharedSource?.layoutId;
+  }, [taskId, sharedSource?.layoutId]);
+  const sharedTitleLayoutId =
+    (pageMode || sharedSource?.kind === "title") &&
+    !shouldReduceMotion &&
+    !taskLoadError &&
+    (task !== undefined || summaryPreview !== null)
+      ? sharedSource?.layoutId ?? `maros-task-title-${taskId}`
+      : undefined;
+  const hasSharedExitTarget = Boolean(
+    !pageMode &&
+      !shouldReduceMotion &&
+      (sharedSource?.kind === "card" || sharedTitleLayoutId),
+  );
+
+  useLayoutEffect(() => {
+    if (previousTaskId.current === null && taskId !== null) {
+      focusReturnTaskId.current = taskId;
+    }
+    previousTaskId.current = taskId;
+  }, [taskId]);
+
+  useEffect(() => {
+    setCancelReasonOpen(false);
+    if (taskId !== null) {
+      setForceNormalExit(false);
+      setIsClosing(false);
+      if (closeTimer.current) {
+        clearTimeout(closeTimer.current);
+        closeTimer.current = null;
+      }
+    } else {
+      setIsClosing(false);
+    }
+  }, [taskId]);
+
+  useEffect(() => () => {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+  }, []);
+
+  const handleClose = () => {
+    if (openingTimer.current) clearTimeout(openingTimer.current);
+    openingTimer.current = null;
+    const currentSharedExitTarget = taskId === null
+      ? null
+      : sharedSource?.kind === "card"
+        ? findActiveTaskElement<HTMLElement>(`[data-task-card-id="${taskId}"]`)
+        : sharedTitleLayoutId
+          ? findActiveTaskElement<HTMLElement>(sharedSource?.layoutId
+            ? `[data-task-title-layout-id="${CSS.escape(sharedSource.layoutId)}"]`
+            : `[data-task-title-id="${taskId}"]`)
+          : null;
+    if (pageMode || shouldReduceMotion || currentSharedExitTarget) {
+      onClose();
+      return;
+    }
+    if (closeTimer.current) return;
+    setForceNormalExit(true);
+    setIsClosing(true);
+    closeTimer.current = setTimeout(() => {
+      closeTimer.current = null;
+      onClose();
+    }, 180);
+  };
 
   /**
    * Every field edit made from this dialog (a human deliberately changing one thing)
@@ -252,9 +367,8 @@ export function TaskDetailDialog({
       return;
     }
     if (status === "cancelled") {
-      const reason = window.prompt("Why is this task being cancelled?", task.cancelledReason ?? "")?.trim();
-      if (!reason) return;
-      moveMutation.mutate({ id: task.id, input: { status: "cancelled", cancelledReason: reason } });
+      setCancelReason(task.cancelledReason ?? "");
+      setCancelReasonOpen(true);
       return;
     }
     moveMutation.mutate({ id: task.id, input: { status: status as (typeof TASK_STATUSES)[number] } });
@@ -270,16 +384,97 @@ export function TaskDetailDialog({
 
   return (
     <>
-      <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
-        <TaskDetailDialogSurface pageMode={pageMode}>
-          {showSkeleton || !task ? (
-            <div className="space-y-4 pt-8">
-              <Skeleton className="h-8 w-3/4" />
-              <Skeleton className="h-24 w-full" />
-              <Skeleton className="h-32 w-full" />
-            </div>
+      <Dialog open={open && !isClosing} onOpenChange={(next) => !next && handleClose()}>
+        <TaskDetailDialogSurface
+          pageMode={pageMode}
+          shouldReduceMotion={shouldReduceMotion ?? false}
+          sharedLayoutId={
+            sharedSource?.kind === "card" && !pageMode && !shouldReduceMotion && !forceNormalExit
+              ? `maros-task-card-${taskId}`
+              : undefined
+          }
+          hasSharedExitTarget={hasSharedExitTarget && !forceNormalExit}
+          onCloseAutoFocus={(event) => {
+            const returnTaskId = focusReturnTaskId.current;
+            if (returnTaskId === null) return;
+
+            const card = findActiveTaskElement<HTMLElement>(`[data-task-card-id="${returnTaskId}"]`);
+            const cardTrigger = card?.querySelector<HTMLElement>("button[data-task-open]");
+            const titleTrigger = findActiveTaskElement<HTMLElement>(
+              focusReturnLayoutId.current
+                ? `[data-task-title-layout-id="${CSS.escape(focusReturnLayoutId.current)}"]`
+                : `[data-task-title-id="${returnTaskId}"]`,
+            )
+              ?.closest<HTMLElement>("button");
+            const trigger = cardTrigger ?? titleTrigger;
+            const appMain = document.querySelector<HTMLElement>("[data-app-route-scroll]");
+            const focusTarget = trigger ?? appMain;
+            if (!focusTarget || focusTarget.closest("[inert]")) return;
+
+            event.preventDefault();
+            focusTarget.focus({ preventScroll: true });
+          }}
+        >
+          {taskLoadError && !task ? (
+            <motion.div variants={taskDetailSectionVariants} role="alert" className="space-y-4 pt-8">
+              <DialogHeader className="text-left">
+                <DialogDescription className="font-mono text-xs">T-{taskId}</DialogDescription>
+                <DialogTitle>Could not load task details</DialogTitle>
+                {summaryPreview ? (
+                  <DialogDescription>{summaryPreview.title}</DialogDescription>
+                ) : null}
+              </DialogHeader>
+              <p className="text-sm text-muted-foreground">
+                Check your connection and try loading this task again.
+              </p>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={isTaskFetching}
+                onClick={() => void refetchTask()}
+              >
+                {isTaskFetching ? "Retrying…" : "Retry"}
+              </Button>
+            </motion.div>
+          ) : showSkeleton || !task || isOpening ? (
+            <>
+              <DialogHeader className={cn("text-left", !summaryPreview && "sr-only")}>
+                <DialogDescription className="font-mono text-xs">
+                  T-{summaryPreview?.id ?? taskId}
+                </DialogDescription>
+                <DialogTitle>
+                  {summaryPreview && sharedTitleLayoutId ? (
+                    <SharedEntityName layoutId={sharedTitleLayoutId} transitionRole="detail" clipOverlay={pageMode}>
+                      {summaryPreview.title}
+                    </SharedEntityName>
+                  ) : summaryPreview?.title ?? "Loading task details"}
+                </DialogTitle>
+                <DialogDescription>
+                  {task ? "Opening task…" : summaryPreview ? "Loading the rest of this task…" : "Task details are loading."}
+                </DialogDescription>
+              </DialogHeader>
+              <motion.div variants={taskDetailSectionVariants} className="space-y-4 pt-8">
+                {summaryPreview ? (
+                  <div className="flex flex-wrap gap-2 text-xs text-muted-foreground" aria-label="Task summary">
+                    <span className="rounded-full border border-line bg-elev-2 px-2.5 py-1">
+                      {TASK_STATUS_LABELS[summaryPreview.status]}
+                    </span>
+                    <span className="rounded-full border border-line bg-elev-2 px-2.5 py-1">
+                      {TASK_PRIORITY_LABELS[summaryPreview.priority]}
+                    </span>
+                    <span className="rounded-full border border-line bg-elev-2 px-2.5 py-1">
+                      {summaryPreview.dueDate ?? "No due date"}
+                    </span>
+                  </div>
+                ) : null}
+                <Skeleton className="h-8 w-3/4" aria-hidden="true" />
+                <Skeleton className="h-24 w-full" />
+                <Skeleton className="h-32 w-full" />
+              </motion.div>
+            </>
           ) : (
             <>
+              <motion.div variants={taskDetailSectionVariants}>
               <DialogHeader className="gap-1 text-left">
                 <DialogDescription className="font-mono text-xs">
                   T-{task.id}
@@ -295,21 +490,30 @@ export function TaskDetailDialog({
                 </DialogDescription>
                 <DialogTitle className="sr-only">{title || "Task details"}</DialogTitle>
                 <div className="flex min-w-0 items-start gap-3">
-                  <Textarea
-                    data-task-title
-                    aria-label="Task title"
-                    rows={1}
-                    value={title}
-                    onChange={(e) => titleField.setValue(e.target.value.replace(/[\r\n]+/g, " "))}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter" && !event.metaKey && !event.ctrlKey && !event.nativeEvent.isComposing) {
-                        event.preventDefault();
-                        event.currentTarget.blur();
-                      }
-                    }}
-                    onBlur={saveTitle}
-                    className="min-h-9 min-w-0 flex-1 resize-none border-none bg-transparent px-0 py-1 font-display text-xl font-semibold leading-snug shadow-none [field-sizing:content] focus-visible:ring-1 md:text-xl"
-                  />
+                  <SharedEntityName
+                    as="div"
+                    transitionRole="detail"
+                    clipOverlay={pageMode}
+                    layoutId={sharedTitleLayoutId}
+                    transition={sharedEntityNameTransition}
+                    className="min-w-0 flex-1"
+                  >
+                    <Textarea
+                      data-task-title
+                      aria-label="Task title"
+                      rows={1}
+                      value={title}
+                      onChange={(e) => titleField.setValue(e.target.value.replace(/[\r\n]+/g, " "))}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" && !event.metaKey && !event.ctrlKey && !event.nativeEvent.isComposing) {
+                          event.preventDefault();
+                          event.currentTarget.blur();
+                        }
+                      }}
+                      onBlur={saveTitle}
+                      className="min-h-9 w-full min-w-0 resize-none border-none bg-transparent px-0 py-1 font-display text-xl font-semibold leading-snug shadow-none [field-sizing:content] focus-visible:ring-1 md:text-xl"
+                    />
+                  </SharedEntityName>
                   {canScheduleMeetings ? (
                     <Button
                       type="button"
@@ -337,9 +541,10 @@ export function TaskDetailDialog({
                   </DropdownMenu>
                 </div>
               </DialogHeader>
+              </motion.div>
 
               {task.entity ? (
-                <div className="mt-4 rounded-lg border border-line bg-elev-1 px-3 py-2">
+                <motion.div variants={taskDetailSectionVariants} className="mt-4 rounded-lg border border-line bg-elev-1 px-3 py-2">
                   <p className="font-display text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Job context</p>
                   <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
                     <Link href={task.entity.href} className="min-w-0 break-words font-medium hover:underline">{task.entity.label}</Link>
@@ -348,10 +553,10 @@ export function TaskDetailDialog({
                     {task.entity.address ? <span className="text-xs text-muted-foreground">{task.entity.address}</span> : null}
                     {task.entity.addressLink ? <a href={task.entity.addressLink} target="_blank" rel="noopener noreferrer" className="text-xs underline decoration-dotted">Map</a> : null}
                   </div>
-                </div>
+                </motion.div>
               ) : null}
 
-              <div className={cn("mt-5 min-w-0", pageMode && "@min-[56rem]/task-detail:grid @min-[56rem]/task-detail:grid-cols-[minmax(0,1fr)_18rem] @min-[56rem]/task-detail:items-start @min-[56rem]/task-detail:gap-6")}>
+              <motion.div variants={taskDetailSectionVariants} className={cn("mt-5 min-w-0", pageMode && "@min-[56rem]/task-detail:grid @min-[56rem]/task-detail:grid-cols-[minmax(0,1fr)_18rem] @min-[56rem]/task-detail:items-start @min-[56rem]/task-detail:gap-6")}>
               <Tabs defaultValue="details" className="@container/task-form min-w-0">
                 <TabsList>
                   <TabsTrigger value="details">Details</TabsTrigger>
@@ -365,7 +570,7 @@ export function TaskDetailDialog({
                     <div className="space-y-1.5">
                       <Label className="text-xs text-muted-foreground">Status</Label>
                       <Select value={task.status} onValueChange={changeStatus}>
-                        <SelectTrigger className="h-8 rounded-full border-0 bg-elev-4 px-3" style={{ color: TASK_STATUS_COLORS[task.status] }}>
+                        <SelectTrigger data-task-status-trigger="true" className="h-8 rounded-full border-0 bg-elev-4 px-3" style={{ color: TASK_STATUS_COLORS[task.status] }}>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -376,7 +581,7 @@ export function TaskDetailDialog({
                           ))}
                         </SelectContent>
                       </Select>
-                      {task.status !== "cancelled" ? <Button type="button" variant="ghost" size="sm" className="mt-1 h-7 px-2 text-xs text-destructive hover:text-destructive" onClick={() => changeStatus("cancelled")}>Cancel task…</Button> : null}
+                      {task.status !== "cancelled" ? <Button ref={cancelTaskTriggerRef} type="button" variant="ghost" size="sm" className="mt-1 h-7 px-2 text-xs text-destructive hover:text-destructive" onClick={() => changeStatus("cancelled")}>Cancel task…</Button> : null}
                     </div>
 
                     <div className="space-y-1.5">
@@ -479,25 +684,7 @@ export function TaskDetailDialog({
                   <div className="space-y-1.5">
                     <Label className="text-xs text-muted-foreground">Labels</Label>
                     <div className="flex flex-wrap items-center gap-1.5">
-                      {task.labels.map((label) => (
-                        <span
-                          key={label.id}
-                          className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium"
-                          style={{
-                            backgroundColor: `${taskLabelColor(label.color)}22`,
-                            color: taskLabelColor(label.color),
-                          }}
-                        >
-                          {label.name}
-                          <button
-                            type="button"
-                            onClick={() => toggleLabel(label.id)}
-                            aria-label={`Remove ${label.name}`}
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
-                        </span>
-                      ))}
+                      <TaskLabelChips labels={task.labels} onRemove={toggleLabel} />
                       <LabelPicker
                         labels={allLabels}
                         selectedIds={new Set(task.labels.map((l) => l.id))}
@@ -640,9 +827,9 @@ export function TaskDetailDialog({
                   </dl>
                 </aside>
               ) : null}
-              </div>
+              </motion.div>
 
-              <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-4 text-xs text-muted-foreground">
+              <motion.div variants={taskDetailSectionVariants} className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-4 text-xs text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <span>Reporter</span>
                   <AssigneePicker
@@ -672,10 +859,85 @@ export function TaskDetailDialog({
                     {task.watcherIds && task.watcherIds.length > 0 ? ` · ${task.watcherIds.length}` : ""}
                   </Button>
                 ) : null}
-              </div>
+              </motion.div>
             </>
           )}
         </TaskDetailDialogSurface>
+      </Dialog>
+
+      <Dialog open={cancelReasonOpen} onOpenChange={setCancelReasonOpen}>
+        <DialogContent
+          className="sm:max-w-md"
+          onCloseAutoFocus={(event) => {
+            if (focusStatusAfterCancel.current) {
+              focusStatusAfterCancel.current = false;
+              const statusTrigger = document.querySelector<HTMLButtonElement>("[data-task-status-trigger]");
+              if (!statusTrigger || statusTrigger.closest("[inert]")) return;
+              event.preventDefault();
+              statusTrigger.focus({ preventScroll: true });
+              return;
+            }
+
+            const cancelTaskTrigger = cancelTaskTriggerRef.current;
+            if (!cancelTaskTrigger?.isConnected || cancelTaskTrigger.closest("[inert]")) return;
+            event.preventDefault();
+            cancelTaskTrigger.focus({ preventScroll: true });
+          }}
+        >
+          <DialogHeader>
+            <DialogTitle>Cancel task</DialogTitle>
+            <DialogDescription>
+              Add a reason so the team can understand why this task was cancelled.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label htmlFor="task-cancellation-reason">Cancellation reason</Label>
+            <Textarea
+              id="task-cancellation-reason"
+              value={cancelReason}
+              onChange={(event) => setCancelReason(event.target.value)}
+              aria-describedby="task-cancellation-reason-help"
+              maxLength={500}
+              rows={3}
+              autoFocus
+            />
+            <p id="task-cancellation-reason-help" className="text-xs text-muted-foreground">
+              Required · {cancelReason.length}/500 characters
+            </p>
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={moveMutation.isPending}
+              onClick={() => setCancelReasonOpen(false)}
+            >
+              Keep task
+            </Button>
+            <Button
+              type="button"
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={!cancelReason.trim() || moveMutation.isPending}
+              onClick={() => {
+                if (!task || !cancelReason.trim()) return;
+                moveMutation.mutate(
+                  {
+                    id: task.id,
+                    input: { status: "cancelled", cancelledReason: cancelReason.trim() },
+                  },
+                  {
+                    onSuccess: () => {
+                      focusStatusAfterCancel.current = true;
+                      setCancelReasonOpen(false);
+                    },
+                  },
+                );
+              }}
+            >
+              {moveMutation.isPending ? "Cancelling…" : "Cancel task"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
       </Dialog>
 
       {task ? (

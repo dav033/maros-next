@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useNavigationDetailQuery } from "@/shared/query/useNavigationDetailQuery";
 import { useTasksApp } from "@/di";
 import { tasksKeys, getMyTasks } from "@/tasks/application";
 import type { Task } from "@/tasks/domain";
@@ -37,7 +37,7 @@ function readMineCache(): Record<string, Task[]> | undefined {
 /** overdue / today / thisWeek / later / noDueDate — see TasksRepositoryPort.getMine. */
 export function useInstantMyTasks() {
   const ctx = useTasksApp();
-  const query = useQuery<Record<string, Task[]>, Error>({
+  const query = useNavigationDetailQuery<Record<string, Task[]>>({
     queryKey: tasksKeys.mine(),
     queryFn: async () => {
       try {
@@ -48,6 +48,8 @@ export function useInstantMyTasks() {
       }
     },
     initialData: readMineCache,
+    initialDataUpdatedAt: 0,
+    refetchOnMount: (query) => query.state.isInvalidated || query.state.dataUpdatedAt === 0,
     staleTime: STALE_TIMES.lists,
   });
   useEffect(() => {

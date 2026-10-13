@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
 import { LeadsPageByType } from "@/features/leads/presentation/pages/LeadsPageByType";
-import { loadLeadsData } from "@/features/leads/presentation/data/loadLeadsData";
 import {
   leadTypeFromRouteSegment,
   LEAD_TYPE_ROUTE_SEGMENTS,
@@ -26,7 +25,5 @@ export default async function LeadsByTypePage({ params }: LeadsByTypePageProps) 
     notFound();
   }
 
-  const initialData = await loadLeadsData(leadType);
-
-  return <LeadsPageByType leadType={leadType} initialData={initialData} />;
+  return <LeadsPageByType leadType={leadType} />;
 }

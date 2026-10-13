@@ -9,6 +9,10 @@ export interface UseLeadsDataReturn {
   leads: Lead[];
   contacts: ReturnType<typeof useInstantContacts>["contacts"];
   projectTypes: ReturnType<typeof useProjectTypes>["projectTypes"];
+  projectTypesLoading: ReturnType<typeof useProjectTypes>["isLoading"];
+  projectTypesFetching: ReturnType<typeof useProjectTypes>["isFetching"];
+  projectTypesError: ReturnType<typeof useProjectTypes>["error"];
+  refetchProjectTypes: ReturnType<typeof useProjectTypes>["refetch"];
   showSkeleton: boolean;
   refetch: () => Promise<void>;
 }
@@ -18,12 +22,22 @@ import type { LeadsPageData } from "../../data/loadLeadsData";
 export function useLeadsData(leadType: LeadType, initialData?: LeadsPageData): UseLeadsDataReturn {
   const { leads, showSkeleton, refetch } = useInstantLeadsByType(leadType, initialData?.leads);
   const { contacts } = useInstantContacts(initialData?.contacts);
-  const { projectTypes } = useProjectTypes(initialData?.projectTypes);
+  const {
+    projectTypes,
+    isLoading: projectTypesLoading,
+    isFetching: projectTypesFetching,
+    error: projectTypesError,
+    refetch: refetchProjectTypes,
+  } = useProjectTypes(initialData?.projectTypes);
 
   return {
     leads: leads ?? [],
     contacts,
     projectTypes,
+    projectTypesLoading,
+    projectTypesFetching,
+    projectTypesError,
+    refetchProjectTypes,
     showSkeleton: !!showSkeleton,
     refetch,
   };

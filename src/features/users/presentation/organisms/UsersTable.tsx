@@ -1,7 +1,9 @@
 "use client";
 
-import { Ban, Send, UserPlus } from "lucide-react";
+import { Ban, Loader2, RefreshCw, Send, UserPlus } from "lucide-react";
 import { useState } from "react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -39,9 +41,9 @@ import { InviteUserDialog } from "./InviteUserDialog";
 import { LeadTypeScopeControl } from "./LeadTypeScopeControl";
 
 const STATUS_LABEL: Record<UserStatus, string> = {
-  invited: "Invited",
-  active: "Active",
-  disabled: "Disabled",
+  invited: "Invitado",
+  active: "Activo",
+  disabled: "Desactivado",
 };
 
 const STATUS_VARIANT: Record<UserStatus, "secondary" | "outline" | "destructive"> = {
@@ -51,8 +53,8 @@ const STATUS_VARIANT: Record<UserStatus, "secondary" | "outline" | "destructive"
 };
 
 function formatLastLogin(value: string | null): string {
-  if (!value) return "Never";
-  return new Date(value).toLocaleString(undefined, {
+  if (!value) return "Nunca";
+  return new Date(value).toLocaleString("es-CO", {
     dateStyle: "medium",
     timeStyle: "short",
   });
@@ -62,25 +64,69 @@ function formatLastLogin(value: string | null): string {
 function invitationNote(user: AppUser): string | null {
   if (user.status !== "invited" || !user.invitationExpiresAt) return null;
   const expiresAt = new Date(user.invitationExpiresAt);
-  if (expiresAt.getTime() <= Date.now()) return "Link expired";
-  return `Expires ${expiresAt.toLocaleDateString(undefined, { dateStyle: "medium" })}`;
+  if (expiresAt.getTime() <= Date.now()) return "Enlace vencido";
+  return `Vence ${expiresAt.toLocaleDateString("es-CO", { dateStyle: "medium" })}`;
 }
 
 export function UsersTable() {
   const { user: me } = useCurrentUser();
-  const { users, isLoading } = useInstantUsersList();
+  const { users, isLoading, isFetching, error, refetch } = useInstantUsersList();
   const { roles } = useInstantRolesList();
   const { updateMutation, resendInviteMutation, revokeInviteMutation } =
     useUserMutations();
   const [inviting, setInviting] = useState(false);
   const [pendingRevoke, setPendingRevoke] = useState<AppUser | null>(null);
 
-  if (isLoading) {
-    return <p className="text-sm text-muted-foreground">Loading users…</p>;
+  if (isLoading || (isFetching && users.length === 0)) {
+    return (
+      <div role="status" aria-label="Cargando usuarios" className="space-y-3">
+        <span className="sr-only">Cargando usuarios…</span>
+        <div className="flex justify-end">
+          <Skeleton className="h-9 w-28" />
+        </div>
+        <div className="space-y-3 rounded-lg border border-line p-3">
+          <Skeleton className="h-10 w-full" />
+          {Array.from({ length: 5 }, (_, index) => (
+            <Skeleton key={index} className="h-14 w-full" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  const loadError = error ? (
+    <Alert variant="destructive" className="flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <AlertTitle>
+          {users.length > 0 ? "No se pudieron actualizar los usuarios" : "No se pudieron cargar los usuarios"}
+        </AlertTitle>
+        <AlertDescription>
+          {users.length > 0
+            ? "Se conservan los usuarios cargados anteriormente. Intenta actualizar de nuevo."
+            : "No hay datos disponibles. Comprueba tu conexión e inténtalo de nuevo."}
+        </AlertDescription>
+      </div>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="shrink-0 border-destructive/50 text-foreground hover:bg-destructive/10"
+        disabled={isFetching}
+        onClick={() => void refetch()}
+      >
+        {isFetching ? <Loader2 className="animate-spin" /> : <RefreshCw />}
+        {isFetching ? "Reintentando…" : "Reintentar"}
+      </Button>
+    </Alert>
+  ) : null;
+
+  if (error && users.length === 0) {
+    return loadError;
   }
 
   return (
     <div className="space-y-4">
+      {loadError}
       <div className="flex justify-end">
         <Button onClick={() => setInviting(true)}>
           <UserPlus className="mr-2 h-4 w-4" />
@@ -88,20 +134,26 @@ export function UsersTable() {
         </Button>
       </div>
 
-      <Table>
+      <Table className="min-w-[980px]">
         <TableHeader>
           <TableRow>
-            <TableHead>User</TableHead>
-            <TableHead>Role</TableHead>
+            <TableHead>Usuario</TableHead>
+            <TableHead>Rol</TableHead>
             <TableHead>Tipos de lead</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Active</TableHead>
-            <TableHead>Last login</TableHead>
-            <TableHead className="w-24" />
+            <TableHead>Estado</TableHead>
+            <TableHead>Acceso</TableHead>
+            <TableHead>Último acceso</TableHead>
+            <TableHead className="w-24">Invitación</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {users.map((user) => {
+          {users.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
+                Todavía no hay usuarios. Invita a la primera persona para darle acceso.
+              </TableCell>
+            </TableRow>
+          ) : users.map((user) => {
             const isSelf = user.id === me?.id;
             const note = invitationNote(user);
             return (
@@ -110,7 +162,7 @@ export function UsersTable() {
                   <div className="flex items-center gap-2 font-medium">
                     {user.name ?? user.email}
                     {user.userType === "external" && (
-                      <Badge variant="outline">External</Badge>
+                      <Badge variant="outline">Externo</Badge>
                     )}
                   </div>
                   <div className="text-xs text-muted-foreground">{user.email}</div>
@@ -123,8 +175,11 @@ export function UsersTable() {
                       updateMutation.mutate({ id: user.id, patch: { roleId: Number(value) } })
                     }
                   >
-                    <SelectTrigger className="w-40 border-line-strong">
-                      <SelectValue placeholder="No role" />
+                    <SelectTrigger
+                      className="w-40 border-line-strong"
+                      aria-label={`Rol de ${user.name ?? user.email}`}
+                    >
+                      <SelectValue placeholder="Sin rol" />
                     </SelectTrigger>
                     <SelectContent>
                       {roles.map((role) => (
@@ -163,12 +218,13 @@ export function UsersTable() {
                   <div className="flex items-center gap-2">
                     <Switch
                       checked={user.isActive}
+                      aria-label={`${user.isActive ? "Desactivar" : "Activar"} acceso de ${user.name ?? user.email}`}
                       disabled={isSelf || updateMutation.isPending}
                       onCheckedChange={(checked) =>
                         updateMutation.mutate({ id: user.id, patch: { isActive: checked } })
                       }
                     />
-                    {isSelf && <Badge variant="outline">You</Badge>}
+                    {isSelf && <Badge variant="outline">Tú</Badge>}
                   </div>
                 </TableCell>
                 <TableCell className="text-sm text-muted-foreground">
@@ -181,6 +237,7 @@ export function UsersTable() {
                         variant="ghost"
                         size="icon"
                         title="Reenviar invitación"
+                        aria-label={`Reenviar invitación a ${user.name ?? user.email}`}
                         disabled={resendInviteMutation.isPending}
                         onClick={() => resendInviteMutation.mutate(user.id)}
                       >
@@ -190,6 +247,7 @@ export function UsersTable() {
                         variant="ghost"
                         size="icon"
                         title="Cancelar invitación"
+                        aria-label={`Cancelar invitación a ${user.name ?? user.email}`}
                         disabled={revokeInviteMutation.isPending}
                         onClick={() => setPendingRevoke(user)}
                       >

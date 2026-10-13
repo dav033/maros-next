@@ -1,5 +1,7 @@
 "use client";
 
+import { usePathname } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   EntityCrudPageTemplate,
   PageHeaderCard,
@@ -7,6 +9,10 @@ import {
 } from "@/components/shared";
 import { LeadTypeSwitcher } from "@/components/shared/LeadTypeSwitcher";
 import { LeadType } from "@/leads/domain";
+import { leadTypeFromRouteSegment } from "@/features/leads/utils/leadTypeRoute";
+import { getLeadTypeFromNumber } from "@/features/leads/domain/utils/lead-type.utils";
+import { projectsKeys } from "@/project/application";
+import type { Project } from "@/project/domain";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -25,12 +31,21 @@ import {
   SlidersHorizontal,
 } from "lucide-react";
 import { ProjectsTableSkeleton } from "../organisms/ProjectsTableSkeleton";
+import { ProjectsTable } from "../organisms/ProjectsTable";
 
 export function ProjectsPageSkeleton({
-  leadType = LeadType.CONSTRUCTION,
+  leadType: requestedLeadType,
 }: {
   leadType?: LeadType;
 } = {}) {
+  const pathname = usePathname();
+  const queryClient = useQueryClient();
+  const routeSegment = pathname.split("/").at(-1) ?? "";
+  const leadType = requestedLeadType ?? leadTypeFromRouteSegment(routeSegment) ?? LeadType.CONSTRUCTION;
+  const cachedProjects = queryClient
+    .getQueryData<Project[]>(projectsKeys.list())
+    ?.filter((project) => getLeadTypeFromNumber(project.lead?.leadNumber) === leadType) ?? [];
+
   return (
     <EntityCrudPageTemplate
       header={
@@ -99,9 +114,13 @@ export function ProjectsPageSkeleton({
           </div>
         </PageToolbarCard>
       }
-      isLoading={true}
+      isLoading={cachedProjects.length === 0}
       loadingContent={<ProjectsTableSkeleton />}
-      tableContent={null}
+      tableContent={
+        cachedProjects.length > 0 ? (
+          <ProjectsTable projects={cachedProjects} pagination={{ enabled: true }} />
+        ) : null
+      }
       modals={null}
     />
   );

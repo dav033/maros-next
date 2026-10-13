@@ -18,7 +18,7 @@ export type UseInstantProjectsResult = {
 
 export function useInstantProjects(
   initialData?: Project[],
-  options?: { enabled?: boolean },
+  options?: { enabled?: boolean; refetchOnMount?: boolean | "always" },
 ): UseInstantProjectsResult {
   const ctx = useProjectsApp();
   const r = useInstantList<Project>({
@@ -26,6 +26,7 @@ export function useInstantProjects(
     queryFn: () => listProjects(ctx),
     initialData,
     enabled: options?.enabled,
+    refetchOnMount: options?.refetchOnMount,
   });
   return { ...r, projects: r.data };
 }

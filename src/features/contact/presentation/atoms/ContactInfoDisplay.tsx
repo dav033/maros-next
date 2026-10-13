@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { User } from "lucide-react";
+import { SharedEntityName } from "@/components/shared/SharedEntityName";
 
 export interface ContactInfoDisplayProps {
   contact: {
@@ -16,6 +17,7 @@ export interface ContactInfoDisplayProps {
     isClient?: boolean;
   } | null;
   onClick?: () => void;
+  sourceInstance: string;
   variant?: "button" | "text";
   className?: string;
 }
@@ -23,6 +25,7 @@ export interface ContactInfoDisplayProps {
 export function ContactInfoDisplay({
   contact,
   onClick,
+  sourceInstance,
   variant = "button",
   className = "",
 }: ContactInfoDisplayProps) {
@@ -65,7 +68,15 @@ export function ContactInfoDisplay({
       <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-elev-5">
         <User className="size-2.5" />
       </div>
-      <span className="truncate">{contact.name}</span>
+      <span className="truncate">
+        {contact.id && !onClick ? (
+          <SharedEntityName layoutId={`maros-contact-name-${contact.id}`} sourceInstance={sourceInstance}>
+            {contact.name}
+          </SharedEntityName>
+        ) : (
+          contact.name
+        )}
+      </span>
     </button>
   );
 }

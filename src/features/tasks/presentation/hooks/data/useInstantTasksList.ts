@@ -26,6 +26,7 @@ export function useInstantTasksList(filters?: TaskFilters) {
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
     staleTime: STALE_TIMES.lists,
+    refetchOnMount: (query) => query.state.isInvalidated,
   });
   const pages = query.data?.pages ?? [];
   const data = pages.length > 0 ? pages : [EMPTY_LIST];

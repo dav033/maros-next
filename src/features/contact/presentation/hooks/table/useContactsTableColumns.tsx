@@ -4,10 +4,10 @@ import type { SimpleTableColumn } from "@/types/table";
 
 import * as React from "react";
 import type { Contact } from "@/contact";
-import { ContactRoleLabels } from "@/contact/domain";
 import type { Company } from "@/company";
 import { NotesButton, YesNoBadge } from "@/components/shared";
 import { CompanyCell } from "../../atoms/CompanyCell";
+import { SharedEntityName } from "@/components/shared/SharedEntityName";
 
 interface UseContactsTableColumnsProps {
   companies: Company[];
@@ -44,7 +44,15 @@ export function useContactsTableColumns({
         header: "Name",
         className: "w-[180px]",
         render: (contact: Contact) => (
-          <span className="text-foreground">{contact.name}</span>
+          <span className="text-foreground">
+            {contact.id ? (
+              <SharedEntityName layoutId={`maros-contact-name-${contact.id}`}>
+                {contact.name}
+              </SharedEntityName>
+            ) : (
+              contact.name
+            )}
+          </span>
         ),
         sortable: true,
         sortValue: (contact: Contact) => contact.name ?? "",

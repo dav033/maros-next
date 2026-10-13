@@ -40,10 +40,10 @@ export function InlineEditCardHeader({
   extraActions,
 }: InlineEditCardHeaderProps) {
   return (
-    <CardHeader className="flex flex-row items-center justify-between">
-      <CardTitle className="flex items-center gap-2">
-        <Icon className="size-5" />
-        {title}
+    <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2 space-y-0">
+      <CardTitle className="flex min-w-0 items-center gap-2 text-sm leading-tight sm:text-base">
+        <Icon className="size-4 shrink-0 sm:size-5" />
+        <span className="min-w-0 break-words">{title}</span>
       </CardTitle>
       {isEditing ? (
         <div className="flex items-center gap-2">
@@ -74,10 +74,11 @@ export function InlineEditCardHeader({
             variant="ghost"
             size="sm"
             onClick={onEdit}
+            aria-label={`Edit ${title}`}
             className="text-muted-foreground hover:text-foreground"
           >
-            <Edit className="size-4 mr-2" />
-            Edit
+            <Edit className="size-4 sm:mr-2" />
+            <span className="hidden sm:inline">Edit</span>
           </Button>
           {extraActions}
         </div>

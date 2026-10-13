@@ -11,12 +11,14 @@ import {
   History,
   MapPin,
   Megaphone,
+  RefreshCw,
   StickyNote,
   Edit,
   UserRound,
   XCircle,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, EMPTY_SELECT_VALUE } from "@/components/ui/select";
@@ -59,6 +61,9 @@ export interface LeadInfoSectionProps {
     statusChangedAt?: string | null;
   };
   projectTypes: Array<{ id: number; name: string }>;
+  projectTypesLoading?: boolean;
+  projectTypesError?: Error | null;
+  onRetryProjectTypes?: () => void;
   inlineEdit: UseInlineEditReturn<{
     name: string;
     location: string;
@@ -79,6 +84,9 @@ export interface LeadInfoSectionProps {
 export function LeadInfoSection({
   lead,
   projectTypes,
+  projectTypesLoading = false,
+  projectTypesError = null,
+  onRetryProjectTypes,
   inlineEdit,
   onOpenNotesModal,
 }: LeadInfoSectionProps) {
@@ -129,6 +137,30 @@ export function LeadInfoSection({
         onCancel={cancelEdit}
       />
       <CardContent className="space-y-4">
+        {projectTypesError ? (
+          <Alert variant="destructive">
+            <AlertTitle>No se pudieron actualizar los tipos de proyecto</AlertTitle>
+            <AlertDescription className="flex flex-wrap items-center justify-between gap-2">
+              <span>
+                {projectTypes.length > 0
+                  ? "Las opciones guardadas siguen disponibles."
+                  : "El selector estará disponible cuando cargue la lista."}
+              </span>
+              {onRetryProjectTypes ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={onRetryProjectTypes}
+                  disabled={projectTypesLoading}
+                >
+                  <RefreshCw className="mr-2 size-4" />
+                  Reintentar
+                </Button>
+              ) : null}
+            </AlertDescription>
+          </Alert>
+        ) : null}
         {/* El nombre ya viajaba en el patch del inline edit, pero no había campo
             donde escribirlo: una vez creado el lead no se podía corregir. */}
         {isEditing ? (
@@ -156,9 +188,18 @@ export function LeadInfoSection({
               <Select
                 value={editingValue.projectTypeId != null ? String(editingValue.projectTypeId) : EMPTY_SELECT_VALUE}
                 onValueChange={(val) => setField("projectTypeId", val === EMPTY_SELECT_VALUE ? undefined : Number(val))}
+                disabled={isSaving || projectTypesLoading || projectTypes.length === 0}
               >
                 <SelectTrigger className="border-line-strong">
-                  <SelectValue placeholder="Select Project Type" />
+                  <SelectValue
+                    placeholder={
+                      projectTypesLoading
+                        ? "Cargando tipos de proyecto…"
+                        : projectTypes.length === 0
+                          ? "No hay tipos de proyecto"
+                          : "Selecciona un tipo de proyecto"
+                    }
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value={EMPTY_SELECT_VALUE}>Select Project Type</SelectItem>

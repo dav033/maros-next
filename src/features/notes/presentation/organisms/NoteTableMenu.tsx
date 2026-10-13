@@ -137,11 +137,21 @@ export function NoteTableMenu({ editor }: { editor: Editor }) {
       editor={editor}
       pluginKey="noteTableMenu"
       shouldShow={({ editor }) => editor.isEditable && editor.isActive("table")}
-      options={{ placement: "top-start", offset: 10 }}
-      className="flex items-center gap-1 rounded-lg border border-line bg-elev-5 px-1.5 py-1 shadow-lg shadow-black/40"
+      options={{
+        placement: "top-start",
+        offset: 10,
+        shift: { crossAxis: true, padding: 8 },
+        size: {
+          padding: 8,
+          apply: ({ availableWidth, elements }) => {
+            elements.floating.style.maxWidth = `${availableWidth}px`;
+          },
+        },
+      }}
+      className="flex w-max max-w-[calc(100vw-1rem)] flex-wrap items-center gap-1 rounded-lg border border-line bg-elev-5 px-1.5 py-1 shadow-lg shadow-black/40"
     >
       {GROUPS.map((group, groupIndex) => (
-        <div key={group.id} className="flex items-center gap-0.5">
+        <div key={group.id} className="flex shrink-0 items-center gap-0.5">
           {groupIndex > 0 && (
             <span
               aria-hidden="true"

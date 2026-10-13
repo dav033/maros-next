@@ -100,7 +100,7 @@ export function useCreateLeadController({ leadType, inReview, onCreated }: UseCr
         policies: {},
       });
     },
-    invalidateKeys: [contactsKeys.list, leadsKeys.all],
+    invalidateKeys: [contactsKeys.all, leadsKeys.all],
     onSuccess: onCreated,
   });
 

@@ -65,7 +65,16 @@ export function LeadsInReviewPageView({ logic }: LeadsInReviewPageViewProps) {
 
   const { title, description, createModalTitle } = config;
 
-  const { leads, contacts, projectTypes, showSkeleton } = data;
+  const {
+    leads,
+    contacts,
+    projectTypes,
+    projectTypesLoading,
+    projectTypesFetching,
+    projectTypesError,
+    refetchProjectTypes,
+    showSkeleton,
+  } = data;
 
   const {
     isCreateModalOpen,
@@ -219,6 +228,10 @@ export function LeadsInReviewPageView({ logic }: LeadsInReviewPageViewProps) {
             controller={leadModalController}
             contacts={contactsForModal}
             projectTypes={projectTypes}
+            projectTypesLoading={projectTypesLoading}
+            projectTypesFetching={projectTypesFetching}
+            projectTypesError={projectTypesError}
+            onRetryProjectTypes={() => void refetchProjectTypes()}
           />
 
 {postConversionEstimateModal.projectId !== null && (

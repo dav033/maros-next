@@ -1,6 +1,8 @@
 "use client";
+import { contactsKeys } from "@/contact/application";
 
 import { useState } from "react";
+import { useUrlTabState } from "@/components/shared/DetailTabs";
 import type { LeadType } from "@/leads/domain";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
@@ -28,6 +30,8 @@ import { LeadStatus } from "@/leads/domain";
 import { useProjectsApp } from "@/di";
 import { createProject, projectsKeys } from "@/project/application";
 import type { LeadsPageData } from "../data/loadLeadsData";
+
+const LEAD_VIEWS = ["pipeline", "converted"] as const;
 
 export interface UseLeadsPageLogicReturn {
   config: typeof LEAD_TYPE_CONFIGS[LeadType];
@@ -99,7 +103,12 @@ export function useLeadsPageLogic({
 
   // 1) Datos
   const data = useLeadsData(leadType, initialData);
-  const [showConverted, setShowConverted] = useState(false);
+  const { activeTab: leadView, setActiveTab: setLeadView } = useUrlTabState(
+    LEAD_VIEWS,
+    "pipeline",
+    "view",
+  );
+  const showConverted = leadView === "converted";
   const convertedQuery = useInstantConvertedLeadsByType(leadType, showConverted);
   const visibleLeads = showConverted ? convertedQuery.leads ?? [] : data.leads;
   const [postConversionEstimate, setPostConversionEstimate] = useState<{
@@ -167,6 +176,7 @@ export function useLeadsPageLogic({
       });
       queryClient.invalidateQueries({ queryKey: leadsKeys.all });
       queryClient.invalidateQueries({ queryKey: projectsKeys.all });
+      void queryClient.invalidateQueries({ queryKey: contactsKeys.all });
       toast.success("Lead converted to project successfully!");
       setLeadToConvert(null);
       router.push(`/project/${created.id}`);
@@ -233,7 +243,7 @@ export function useLeadsPageLogic({
     data,
     converted: {
       active: showConverted,
-      setActive: setShowConverted,
+      setActive: (active) => setLeadView(active ? "converted" : "pipeline"),
       error: convertedQuery.error,
       showSkeleton: convertedQuery.showSkeleton,
       refetch: convertedQuery.refetch,

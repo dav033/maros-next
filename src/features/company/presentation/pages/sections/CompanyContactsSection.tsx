@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useState, useCallback } from "react";
 import { Users, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,7 @@ import { CompanyContactsSelector } from "../../molecules/form/CompanyContactsSel
 import { ContactModal } from "@/features/contact/presentation/organisms/ContactModal";
 import { useContactModalController } from "@/features/contact/presentation/hooks/controllers/useContactModalController";
 import { useQueryClient } from "@tanstack/react-query";
+import { SharedEntityName } from "@/components/shared/SharedEntityName";
 import type { Contact } from "@/contact/domain";
 import type { Company } from "../../../domain/models";
 
@@ -257,13 +259,23 @@ export function CompanyContactsSection({
                 <Card
                   key={contact.id}
                   className="cursor-pointer border-l-4 border-l-primary bg-elev-3 transition-colors hover:bg-elev-4"
-                  onClick={() => router.push(`/contact/${contact.id}`)}
+                  onClick={(event) => {
+                    if (event.target instanceof Element && event.target.closest("a, button")) return;
+                    router.push(`/contact/${contact.id}`);
+                  }}
                 >
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <CardTitle className="text-lg">
-                          {contact.name || "No name"}
+                          <Link
+                            href={`/contact/${contact.id}`}
+                            className="rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          >
+                            <SharedEntityName layoutId={`maros-contact-name-${contact.id}`}>
+                              {contact.name || "No name"}
+                            </SharedEntityName>
+                          </Link>
                         </CardTitle>
                       </div>
                       <div className="flex items-center gap-2">

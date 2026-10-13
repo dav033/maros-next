@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { TaskList } from "@tiptap/extension-task-list";
@@ -7,6 +8,10 @@ import { TaskItem } from "@tiptap/extension-task-item";
 import { Placeholder } from "@tiptap/extensions";
 import { Bold, Italic, Link2, List, ListChecks } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { TaskMention } from "../../config/taskMentionExtension";
 import { isEmptyDoc } from "./taskRichTextDoc";
 
@@ -74,6 +79,9 @@ export function TaskRichTextEditor({
   minHeightClassName?: string;
   autoFocus?: boolean;
 }) {
+  const [linkDialogOpen, setLinkDialogOpen] = useState(false);
+  const [linkUrl, setLinkUrl] = useState("");
+  const [editingExistingLink, setEditingExistingLink] = useState(false);
   const editor = useEditor({
     immediatelyRender: false,
     editable,
@@ -106,6 +114,25 @@ export function TaskRichTextEditor({
   });
 
   if (!editor) return null;
+
+  const openLinkDialog = () => {
+    const previousUrl = editor.getAttributes("link").href as string | undefined;
+    setLinkUrl(previousUrl ?? "");
+    setEditingExistingLink(Boolean(previousUrl));
+    setLinkDialogOpen(true);
+  };
+
+  const applyLink = () => {
+    const url = linkUrl.trim();
+    if (!url) return;
+    editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
+    setLinkDialogOpen(false);
+  };
+
+  const removeLink = () => {
+    editor.chain().focus().extendMarkRange("link").unsetLink().run();
+    setLinkDialogOpen(false);
+  };
 
   return (
     <div
@@ -147,16 +174,7 @@ export function TaskRichTextEditor({
           <ToolbarButton
             label="Link"
             active={editor.isActive("link")}
-            onClick={() => {
-              const previousUrl = editor.getAttributes("link").href as string | undefined;
-              const url = window.prompt("Link URL", previousUrl ?? "");
-              if (url === null) return;
-              if (url === "") {
-                editor.chain().focus().extendMarkRange("link").unsetLink().run();
-                return;
-              }
-              editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
-            }}
+            onClick={openLinkDialog}
           >
             <Link2 className="h-3.5 w-3.5" />
           </ToolbarButton>
@@ -165,6 +183,45 @@ export function TaskRichTextEditor({
       <div className="px-3 py-2">
         <EditorContent editor={editor} />
       </div>
+      <Dialog open={linkDialogOpen} onOpenChange={setLinkDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <form
+            className="space-y-5"
+            onSubmit={(event) => {
+              event.preventDefault();
+              applyLink();
+            }}
+          >
+            <DialogHeader>
+              <DialogTitle>{editingExistingLink ? "Edit link" : "Add link"}</DialogTitle>
+              <DialogDescription>Paste the address for the selected text.</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2">
+              <Label htmlFor="task-rich-text-link-url">Link address</Label>
+              <Input
+                id="task-rich-text-link-url"
+                type="text"
+                inputMode="url"
+                value={linkUrl}
+                onChange={(event) => setLinkUrl(event.target.value)}
+                placeholder="https://example.com"
+                autoFocus
+              />
+            </div>
+            <DialogFooter className="flex-wrap sm:justify-between">
+              {editingExistingLink ? (
+                <Button type="button" variant="ghost" className="text-destructive hover:text-destructive" onClick={removeLink}>
+                  Remove link
+                </Button>
+              ) : <span />}
+              <div className="flex gap-2">
+                <Button type="button" variant="outline" onClick={() => setLinkDialogOpen(false)}>Cancel</Button>
+                <Button type="submit" disabled={!linkUrl.trim()}>Apply link</Button>
+              </div>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

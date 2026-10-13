@@ -1,4 +1,5 @@
 "use client";
+import { contactsKeys } from "@/contact/application";
 
 import { useFormController } from "@/common/hooks";
 import { useProjectsApp } from "@/di";
@@ -40,7 +41,7 @@ export function useCreateProjectController({ onCreated }: UseCreateProjectContro
 
       return await createProject(ctx, draft);
     },
-    invalidateKeys: [projectsKeys.all, leadsKeys.all],
+    invalidateKeys: [projectsKeys.all, leadsKeys.all, contactsKeys.all],
     onSuccess: onCreated,
   });
 

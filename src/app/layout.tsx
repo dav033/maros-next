@@ -38,6 +38,9 @@ const fontMono = IBM_Plex_Mono({
 export const metadata: Metadata = {
   title: "Maros Construction CRM",
   description: "Construction project, customer, task, and meeting management for Maros Construction.",
+  icons: {
+    icon: "/icon.svg",
+  },
 };
 
 export default async function RootLayout({

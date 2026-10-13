@@ -1,5 +1,4 @@
 import { NotesSidebar } from "@/features/notes/presentation/organisms/NotesSidebar";
-import { NoteSearchPalette } from "@/features/notes/presentation/organisms/NoteSearchPalette";
 import { NotebookPen } from "lucide-react";
 
 export default function NotesLayout({
@@ -23,7 +22,6 @@ export default function NotesLayout({
             </p>
           </div>
         </div>
-        <NoteSearchPalette showTrigger />
       </header>
 
       <section

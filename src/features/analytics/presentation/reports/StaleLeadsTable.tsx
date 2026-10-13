@@ -19,6 +19,7 @@ import {
 import { LeadStatus, type LeadLostReason } from "@/leads/domain";
 import { money } from "../widgets/formatters";
 import type { StaleLead, StaleLeadStatus } from "./useStaleLeads";
+import { SharedEntityName } from "@/components/shared/SharedEntityName";
 
 export type StaleLeadDecision = (
   lead: StaleLead,
@@ -90,10 +91,12 @@ export function StaleLeadsTable({
             <TableRow key={lead.id} className="hover:bg-elev-3">
               <TableCell>
                 <Link href={`/lead/${lead.id}`} className="font-medium hover:underline">
-                  {lead.name ?? `Lead #${lead.id}`}
+                  <SharedEntityName layoutId={`maros-lead-name-${lead.id}`}>
+                    {lead.name ?? `Lead #${lead.id}`}
+                  </SharedEntityName>
                 </Link>
                 {lead.leadNumber ? (
-                  <p className="font-mono text-xs text-muted-foreground">{lead.leadNumber}</p>
+                  <p className="font-mono text-xs text-muted-foreground"><SharedEntityName layoutId={`maros-lead-number-${lead.id}`}>{lead.leadNumber}</SharedEntityName></p>
                 ) : null}
               </TableCell>
               <TableCell>

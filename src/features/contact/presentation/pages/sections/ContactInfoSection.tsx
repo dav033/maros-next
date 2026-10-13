@@ -15,6 +15,7 @@ import {
   EMPTY_SELECT_VALUE,
 } from "@/components/ui/select";
 import { DetailField, InlineEditCardHeader, LocationField } from "@/components/shared";
+import { SharedEntityName } from "@/components/shared/SharedEntityName";
 import { ContactCompanySelector } from "@/features/contact/presentation/molecules/ContactCompanySelector";
 import { contactRoleOptions } from "@/contact/domain";
 import type { UseInlineEditReturn } from "@/common/hooks";
@@ -228,7 +229,9 @@ export function ContactInfoSection({
                   href={`/company/${contact.company.id}`}
                   className="text-foreground hover:underline"
                 >
-                  {contact.company.name}
+                  <SharedEntityName layoutId={`maros-company-name-${contact.company.id}`}>
+                    {contact.company.name}
+                  </SharedEntityName>
                 </Link>
               )}
             </DetailField>

@@ -1,5 +1,6 @@
 import { parseProjectReport } from "@/project/domain";
 import { ProjectQboReportPage } from "@/project/presentation/pages/ProjectQboReportPage";
+import { parsePositiveSafeInteger } from "@/shared/utils/parsePositiveSafeInteger";
 
 export default async function ProjectQboReportRoutePage({
   params,
@@ -10,9 +11,9 @@ export default async function ProjectQboReportRoutePage({
 }) {
   const { id } = await params;
   const { report } = await searchParams;
-  const projectId = Number.parseInt(id, 10);
+  const projectId = parsePositiveSafeInteger(id);
 
-  if (!Number.isInteger(projectId) || projectId <= 0) {
+  if (projectId === null) {
     return (
       <div className="container mx-auto p-6">
         <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-6">

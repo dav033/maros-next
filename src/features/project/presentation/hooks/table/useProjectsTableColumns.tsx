@@ -4,6 +4,8 @@ import type { SimpleTableColumn } from "@/types/table";
 import Link from "next/link";
 
 import * as React from "react";
+import { SharedEntityName } from "@/components/shared/SharedEntityName";
+import { usePrefersReducedMotion } from "@/shared/presentation/hooks/usePrefersReducedMotion";
 import type { Project, ProjectProgressStatus } from "@/project/domain";
 import { Badge } from "@/components/ui/badge";
 import { NotesButton } from "@/components/shared";
@@ -12,6 +14,8 @@ import { MoneyLine } from "../../molecules/MoneyLine";
 import { LIST_AXIS_MAX_PERCENT } from "../../molecules/moneyLineGeometry";
 import { PROGRESS_COLORS, PROGRESS_LABELS } from "../../organisms/projectVisualTokens";
 import { useHasPermission } from "@/shared/auth/useHasPermission";
+import { projectReturnElementTransition } from "../../projectMotion";
+import { useRouteSharedLayoutScope } from "@/shared/presentation/RouteMotionContext";
 
 function ProjectStatusBadge({ status }: { status: ProjectProgressStatus }) {
   const label = PROGRESS_LABELS[status] ?? status;
@@ -86,9 +90,34 @@ export function useProjectsTableColumns(
   const { onOpenNotesModal } = options || {};
   const { onOpenPayments } = options || {};
   const canReadFinance = useHasPermission("finance:read");
+  const shouldReduceMotion = usePrefersReducedMotion();
+  const sharedLayoutScope = useRouteSharedLayoutScope();
   
   return React.useMemo<SimpleTableColumn<Project>[]>(() => {
     return [
+      {
+        key: "leadName",
+        header: "Project Name",
+        className: "w-[260px] min-w-[220px]",
+        render: (project: Project) => (
+          <Link
+            href={`/project/${project.id}`}
+            className="font-medium text-foreground underline-offset-4 hover:underline"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <SharedEntityName
+              layoutCrossfade={false}
+              layoutId={shouldReduceMotion ? undefined : `maros-project-name-${project.id}-desktop-${sharedLayoutScope}`}
+              transition={projectReturnElementTransition}
+              className="inline-block"
+            >
+              {project.lead.name}
+            </SharedEntityName>
+          </Link>
+        ),
+        sortable: true,
+        sortValue: (project: Project) => project.lead.name,
+      },
       {
         key: "notes",
         header: "Notes",
@@ -114,20 +143,17 @@ export function useProjectsTableColumns(
         header: "Project Number",
         className: "w-[135px]",
         render: (project: Project) => (
-          <span className="font-mono text-sm">{project.lead.leadNumber}</span>
+          <SharedEntityName
+            layoutCrossfade={false}
+            layoutId={shouldReduceMotion ? undefined : `maros-project-number-${project.id}-desktop-${sharedLayoutScope}`}
+            transition={projectReturnElementTransition}
+            className="inline-block font-mono text-sm"
+          >
+            {project.lead.leadNumber}
+          </SharedEntityName>
         ),
         sortable: true,
         sortValue: (project: Project) => project.lead.leadNumber,
-      },
-      {
-        key: "leadName",
-        header: "Project Name",
-        className: "w-[200px]",
-        render: (project: Project) => (
-          <span>{project.lead.name}</span>
-        ),
-        sortable: true,
-        sortValue: (project: Project) => project.lead.name,
       },
       {
         key: "projectProgressStatus",
@@ -160,7 +186,7 @@ export function useProjectsTableColumns(
               className="text-foreground hover:underline"
               onClick={(event) => event.stopPropagation()}
             >
-              {client.name}
+              <SharedEntityName layoutId={`maros-${client.type === "company" ? "company" : "contact"}-name-${client.id}`} sourceInstance={`project-${project.id}-desktop`}>{client.name}</SharedEntityName>
             </Link>
           );
         },
@@ -276,6 +302,6 @@ export function useProjectsTableColumns(
         sortValue: (project: Project) => getCashProfit(project) ?? 0,
       },
     ];
-  }, [onOpenNotesModal, onOpenPayments, canReadFinance]);
+  }, [onOpenNotesModal, onOpenPayments, canReadFinance, shouldReduceMotion, sharedLayoutScope]);
 }
 

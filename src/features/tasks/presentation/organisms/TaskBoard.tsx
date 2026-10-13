@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { memo, useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { isValid, parse } from "date-fns";
-import { Filter, Rows3, Search, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Filter, Rows3, Search, X } from "lucide-react";
 import {
   DndContext,
   DragOverlay,
@@ -51,6 +51,7 @@ import { BOARD_STATUSES, TASK_KINDS, TASK_PRIORITIES, TASK_STATUSES } from "@/ta
 import type { Task, TaskBoardColumns, TaskEntityKind, TaskKind, TaskPriority, TaskStatus } from "@/tasks/domain";
 import type { DirectoryUser } from "@/features/users/domain";
 import { useInstantTasksBoard } from "../hooks/data/useInstantTasksBoard";
+import type { InitialTasksBoard } from "../data/loadInitialTasksBoard";
 import { useTaskMutations } from "../hooks/mutations/useTaskMutations";
 import { TaskCard } from "../molecules/TaskCard";
 import { AssigneeFilterDropdown } from "../molecules/AssigneeFilterDropdown";
@@ -162,6 +163,9 @@ function SortableTaskCard({ task, onClick, onComplete, onAssigneeClick, onAssign
   });
   const prefersReducedMotion = usePrefersReducedMotion();
 
+  // Pointer coordinates belong to the sortable shell, not the card's menus and pickers.
+  const dragHandle = useMemo(() => ({ attributes, listeners }), [attributes, listeners]);
+
   const style = {
     transform: CSS.Transform.toString(transform),
     transition: prefersReducedMotion ? undefined : transition,
@@ -173,10 +177,41 @@ function SortableTaskCard({ task, onClick, onComplete, onAssigneeClick, onAssign
 
   return (
     <div ref={setNodeRef} style={style}>
-      <TaskCard task={task} dragHandle={{ attributes, listeners }} onClick={onClick} onComplete={onComplete} onAssigneeClick={onAssigneeClick} onAssigneeChange={onAssigneeChange} onDueDateClick={onDueDateClick} onDueDateChange={onDueDateChange} onDuplicate={onDuplicate} onDelete={onDelete} onPriorityChange={onPriorityChange} onLabelsClick={onLabelsClick} onArchive={onArchive} onSelect={onSelect} selected={selected} />
+      <TaskCard task={task} dragHandle={dragHandle} onClick={onClick} onComplete={onComplete} onAssigneeClick={onAssigneeClick} onAssigneeChange={onAssigneeChange} onDueDateClick={onDueDateClick} onDueDateChange={onDueDateChange} onDuplicate={onDuplicate} onDelete={onDelete} onPriorityChange={onPriorityChange} onLabelsClick={onLabelsClick} onArchive={onArchive} onSelect={onSelect} selected={selected} />
     </div>
   );
 }
+
+/** Keep droppable highlight updates from rebuilding every card's action callbacks. */
+const TaskCardList = memo(function TaskCardList({ tasks, onCardClick, onComplete, onAssigneeChange, onDueDateChange, onDuplicate, onDelete, onPriorityChange, selectedIds, onSelect }: {
+  tasks: Task[];
+  onCardClick: (id: number) => void;
+  onComplete: (task: Task) => void;
+  onAssigneeChange: (task: Task, user: DirectoryUser | null) => void;
+  onDueDateChange: (task: Task, date: string | null) => void;
+  onDuplicate: (task: Task) => void;
+  onDelete: (task: Task) => void;
+  onPriorityChange: (task: Task, priority: TaskPriority) => void;
+  selectedIds: Set<number>;
+  onSelect: (taskId: number, shiftKey: boolean) => void;
+}) {
+  return <>{tasks.map((task) => (
+    <SortableTaskCard
+      key={task.id}
+      task={task}
+      onClick={() => onCardClick(task.id)}
+      onComplete={() => onComplete(task)}
+      onAssigneeChange={(user) => onAssigneeChange(task, user)}
+      onDueDateChange={(date) => onDueDateChange(task, date)}
+      onDuplicate={() => onDuplicate(task)}
+      onDelete={() => onDelete(task)}
+      onPriorityChange={(priority) => onPriorityChange(task, priority)}
+      onLabelsClick={() => onCardClick(task.id)}
+      onSelect={(shiftKey) => onSelect(task.id, shiftKey)}
+      selected={selectedIds.has(task.id)}
+    />
+  ))}</>;
+});
 
 function BoardColumn({
   status,
@@ -230,22 +265,7 @@ function BoardColumn({
       </div>
       <div className="flex min-h-24 flex-1 flex-col gap-2 overflow-y-auto p-2">
         <SortableContext items={tasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
-          {tasks.map((task) => (
-            <SortableTaskCard
-              key={task.id}
-              task={task}
-              onClick={() => onCardClick(task.id)}
-              onComplete={() => onComplete(task)}
-              onAssigneeChange={(user) => onAssigneeChange(task, user)}
-              onDueDateChange={(date) => onDueDateChange(task, date)}
-              onDuplicate={() => onDuplicate(task)}
-              onDelete={() => onDelete(task)}
-              onPriorityChange={(priority) => onPriorityChange(task, priority)}
-              onLabelsClick={() => onCardClick(task.id)}
-              onSelect={(shiftKey) => onSelect(task.id, shiftKey)}
-              selected={selectedIds.has(task.id)}
-            />
-          ))}
+          <TaskCardList tasks={tasks} onCardClick={onCardClick} onComplete={onComplete} onAssigneeChange={onAssigneeChange} onDueDateChange={onDueDateChange} onDuplicate={onDuplicate} onDelete={onDelete} onPriorityChange={onPriorityChange} selectedIds={selectedIds} onSelect={onSelect} />
         </SortableContext>
         {tasks.length === 0 ? <TaskEmptyState compact title="No tasks" /> : null}
       </div>
@@ -329,22 +349,7 @@ function AssigneeSwimlane({
                 </div>
                 <div className="flex flex-col gap-2">
                   {previewTask && status === previewTask.status ? <TaskCard task={previewTask} className="border-dashed opacity-60" /> : null}
-                  {tasks.map((task) => (
-                    <SortableTaskCard
-                      key={task.id}
-                      task={task}
-                      onClick={() => onCardClick(task.id)}
-                      onComplete={() => onComplete(task)}
-                      onAssigneeChange={(user) => onAssigneeChange(task, user)}
-                      onDueDateChange={(date) => onDueDateChange(task, date)}
-                      onDuplicate={() => onDuplicate(task)}
-                      onDelete={() => onDelete(task)}
-                      onPriorityChange={(priority) => onPriorityChange(task, priority)}
-                      onLabelsClick={() => onCardClick(task.id)}
-                      onSelect={(shiftKey) => onSelect(task.id, shiftKey)}
-                      selected={selectedIds.has(task.id)}
-                    />
-                  ))}
+                  <TaskCardList tasks={tasks} onCardClick={onCardClick} onComplete={onComplete} onAssigneeChange={onAssigneeChange} onDueDateChange={onDueDateChange} onDuplicate={onDuplicate} onDelete={onDelete} onPriorityChange={onPriorityChange} selectedIds={selectedIds} onSelect={onSelect} />
                   {tasks.length === 0 ? (
                     <div className="rounded-md border border-dashed border-line px-2 py-3 text-center text-[10px] text-muted-foreground">
                       —
@@ -381,17 +386,29 @@ function GenericGroupLane({ group, children, isDropPreview = false, previewTask,
   );
 }
 
-export function TaskBoard({
-  onOpenTask,
-  embeddedTasks,
-  embeddedEntity,
-}: {
+type TaskBoardProps = {
   onOpenTask: (id: number) => void;
   embeddedTasks?: Task[];
   embeddedEntity?: { entityKind?: TaskEntityKind; entityId?: number; partyKind?: "company" | "contact"; partyId?: number };
-}) {
-  const { state, filters, replaceState } = useTasksViewState();
-  const { board: fetchedBoard, doneTotalCount: fetchedDoneTotalCount, showSkeleton: fetchedShowSkeleton } = useInstantTasksBoard(filters);
+  initialBoard?: InitialTasksBoard;
+};
+
+export function TaskBoard(props: TaskBoardProps) {
+  const viewState = useTasksViewState();
+  return <TaskBoardView {...props} viewState={viewState} />;
+}
+
+// The URL adapter observes modal navigation; the expensive board only observes its own view state.
+const TaskBoardView = memo(function TaskBoardView({
+  onOpenTask,
+  embeddedTasks,
+  embeddedEntity,
+  initialBoard,
+  viewState,
+}: TaskBoardProps & { viewState: ReturnType<typeof useTasksViewState> }) {
+  const statusColumnsId = useId();
+  const { state, filters, replaceState } = viewState;
+  const { board: fetchedBoard, doneTotalCount: fetchedDoneTotalCount, showSkeleton: fetchedShowSkeleton } = useInstantTasksBoard(filters, initialBoard);
   const board = useMemo<TaskBoardColumns>(() => {
     if (!embeddedTasks) return fetchedBoard;
     const columns: TaskBoardColumns = {};
@@ -435,6 +452,57 @@ export function TaskBoard({
   const [lastSelectedId, setLastSelectedId] = useState<number | null>(null);
   const [pendingDeleteTask, setPendingDeleteTask] = useState<Task | null>(null);
   const pendingMoveTaskIds = useRef(new Set<number>());
+  const statusColumnsRef = useRef<HTMLDivElement>(null);
+  const [statusColumnsScroll, setStatusColumnsScroll] = useState({
+    hasOverflow: false,
+    canScrollLeft: false,
+    canScrollRight: false,
+  });
+  const prefersReducedMotion = usePrefersReducedMotion();
+
+  useEffect(() => {
+    const rail = statusColumnsRef.current;
+    if (!rail || state.group !== "status") {
+      setStatusColumnsScroll({ hasOverflow: false, canScrollLeft: false, canScrollRight: false });
+      return;
+    }
+
+    const syncScrollState = () => {
+      const maxScrollLeft = rail.scrollWidth - rail.clientWidth;
+      const canScrollLeft = rail.scrollLeft > 1;
+      const canScrollRight = rail.scrollLeft < maxScrollLeft - 1;
+      setStatusColumnsScroll((current) => {
+        const next = { hasOverflow: maxScrollLeft > 1, canScrollLeft, canScrollRight };
+        return current.hasOverflow === next.hasOverflow &&
+          current.canScrollLeft === next.canScrollLeft &&
+          current.canScrollRight === next.canScrollRight
+          ? current
+          : next;
+      });
+    };
+
+    syncScrollState();
+    rail.addEventListener("scroll", syncScrollState, { passive: true });
+    window.addEventListener("resize", syncScrollState);
+    const resizeObserver = new ResizeObserver(syncScrollState);
+    resizeObserver.observe(rail);
+
+    return () => {
+      rail.removeEventListener("scroll", syncScrollState);
+      window.removeEventListener("resize", syncScrollState);
+      resizeObserver.disconnect();
+    };
+  }, [state.group]);
+
+  const scrollStatusColumns = (direction: -1 | 1) => {
+    const rail = statusColumnsRef.current;
+    if (!rail) return;
+    rail.scrollBy({
+      left: direction * Math.min(300, rail.clientWidth * 0.8),
+      behavior: prefersReducedMotion ? "auto" : "smooth",
+    });
+  };
+
   useEffect(() => setSearchDraft(state.q), [state.q]);
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -969,6 +1037,7 @@ export function TaskBoard({
       </PageToolbarCard>
 
       <DndContext
+          id={`task-board-${statusColumnsId}`}
           sensors={sensors}
           collisionDetection={taskBoardCollisionDetection}
           accessibility={{ announcements }}
@@ -978,26 +1047,67 @@ export function TaskBoard({
           onDragCancel={handleDragCancel}
         >
           {state.group === "status" ? (
-            <div className="flex gap-3 overflow-x-auto pb-2">
-              {BOARD_STATUSES.map((status) => (
-                <BoardColumn
-                  key={status}
-                  status={status}
-                  tasks={filteredBoard[status] ?? []}
-                  totalCount={status === "done" ? doneTotalCount : undefined}
-                  onCardClick={openBoardTask}
-                  onQuickAdd={(value) => quickAddToColumn(status, value)}
-                  onComplete={completeTask}
-                  onAssigneeChange={changeAssignee}
-                  onDueDateChange={changeDueDate}
-                  onDuplicate={duplicateTask}
-                  onDelete={deleteTask}
-                  onPriorityChange={(task, priority) => updateMutation.mutate({ id: task.id, patch: { priority } })}
-                  selectedIds={selectedIds}
-                  onSelect={selectTask}
-                />
-              ))}
-            </div>
+            <>
+              {statusColumnsScroll.hasOverflow ? (
+                <div className="mb-1 flex min-w-0 items-center justify-between gap-2">
+                  <p className="min-w-0 text-[11px] text-muted-foreground">
+                    Desliza o desplázate para ver todas las columnas
+                  </p>
+                  <div className="flex shrink-0 items-center gap-1">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      className="size-8"
+                      aria-label="Desplazar a las columnas anteriores"
+                      aria-controls={statusColumnsId}
+                      disabled={!statusColumnsScroll.canScrollLeft}
+                      onClick={() => scrollStatusColumns(-1)}
+                    >
+                      <ChevronLeft className="size-4" aria-hidden="true" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      className="size-8"
+                      aria-label="Desplazar a las columnas siguientes"
+                      aria-controls={statusColumnsId}
+                      disabled={!statusColumnsScroll.canScrollRight}
+                      onClick={() => scrollStatusColumns(1)}
+                    >
+                      <ChevronRight className="size-4" aria-hidden="true" />
+                    </Button>
+                  </div>
+                </div>
+              ) : null}
+              <div
+                ref={statusColumnsRef}
+                id={statusColumnsId}
+                role="region"
+                aria-label="Columnas de estado de tareas"
+                className="flex gap-3 overflow-x-auto overscroll-x-contain pb-2 scrollbar-thin"
+              >
+                {BOARD_STATUSES.map((status) => (
+                  <BoardColumn
+                    key={status}
+                    status={status}
+                    tasks={filteredBoard[status] ?? []}
+                    totalCount={status === "done" ? doneTotalCount : undefined}
+                    onCardClick={openBoardTask}
+                    onQuickAdd={(value) => quickAddToColumn(status, value)}
+                    onComplete={completeTask}
+                    onAssigneeChange={changeAssignee}
+                    onDueDateChange={changeDueDate}
+                    onDuplicate={duplicateTask}
+                    onDelete={deleteTask}
+                    onPriorityChange={(task, priority) => updateMutation.mutate({ id: task.id, patch: { priority } })}
+                    selectedIds={selectedIds}
+                    onSelect={selectTask}
+                  />
+                ))}
+              </div>
+            </>
           ) : groupByAssignee ? (
             <div className="flex flex-col gap-3">
               {assigneeGroups.length === 0 ? (
@@ -1058,4 +1168,4 @@ export function TaskBoard({
       <TaskBulkActionBar selectedIds={selectedIds} onClear={() => setSelectedIds(new Set())} />
     </div>
   );
-}
+});

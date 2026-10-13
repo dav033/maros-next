@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { FileText, Folder, Printer } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -11,6 +12,13 @@ import { NoteReadOnlyView } from "../organisms/NoteReadOnlyView";
 import { PublicNoteImageSource } from "../organisms/NoteImageSourceContext";
 import { noteTagColor } from "../atoms/noteVisualTokens";
 import { formatRelativeTime } from "../atoms/formatRelativeTime";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export interface PublicNoteReaderProps {
   token: string;
@@ -22,6 +30,12 @@ function initials(name: string | null): string {
   return (name?.trim() || "?").slice(0, 2).toUpperCase();
 }
 
+function publicPageHref(token: string, currentPageId: number, targetPageId: number): string {
+  return targetPageId === currentPageId
+    ? `/p/${token}`
+    : `/p/${token}?page=${targetPageId}`;
+}
+
 /**
  * The page an outside reader actually sees.
  *
@@ -31,6 +45,7 @@ function initials(name: string | null): string {
  * so nobody works from a version that moved on.
  */
 export function PublicNoteReader({ token, data, tree }: PublicNoteReaderProps) {
+  const router = useRouter();
   const { page } = data;
 
   const toc = useMemo(() => buildNoteToc(page.content), [page.content]);
@@ -73,11 +88,7 @@ export function PublicNoteReader({ token, data, tree }: PublicNoteReaderProps) {
               {navRows.map((row) => (
                 <Link
                   key={row.id}
-                  href={
-                    row.id === page.id
-                      ? `/p/${token}`
-                      : `/p/${token}?page=${row.id}`
-                  }
+                  href={publicPageHref(token, page.id, row.id)}
                   style={{ paddingLeft: `${row.depth * 12}px` }}
                   className={
                     row.id === page.id
@@ -98,6 +109,29 @@ export function PublicNoteReader({ token, data, tree }: PublicNoteReaderProps) {
         )}
 
         <article className="min-w-0 flex-1">
+          {navRows.length > 1 && (
+            <nav aria-label="Pages" className="mb-6 lg:hidden print:hidden">
+              <Select
+                value={String(page.id)}
+                onValueChange={(value) => {
+                  const targetPageId = Number(value);
+                  if (!Number.isSafeInteger(targetPageId)) return;
+                  router.push(publicPageHref(token, page.id, targetPageId));
+                }}
+              >
+                <SelectTrigger aria-label="Go to page">
+                  <SelectValue placeholder="Choose a page" />
+                </SelectTrigger>
+                <SelectContent>
+                  {navRows.map((row) => (
+                    <SelectItem key={row.id} value={String(row.id)}>
+                      {row.title || "Untitled"}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </nav>
+          )}
           <header className="mb-8 border-b border-line pb-6">
             <div className="mb-3 flex items-start gap-3">
               {page.icon && <span className="text-3xl leading-none">{page.icon}</span>}

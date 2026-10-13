@@ -8,6 +8,7 @@ import type { Company } from "../../../domain/models";
 import { NotesButton, YesNoBadge } from "@/components/shared";
 import { CompanyTypeBadge } from "../../atoms/CompanyTypeBadge";
 import { ServiceBadge } from "../../atoms/ServiceBadge";
+import { SharedEntityName } from "@/components/shared/SharedEntityName";
 
 interface UseCompaniesTableColumnsProps {
   services: Array<{ id: number; name: string; color?: string | null }>;
@@ -46,7 +47,13 @@ export function useCompaniesTableColumns({
             href={`/company/${company.id}`}
             className="text-foreground hover:underline"
           >
-            {company.name}
+            {company.id ? (
+              <SharedEntityName layoutId={`maros-company-name-${company.id}`}>
+                {company.name}
+              </SharedEntityName>
+            ) : (
+              company.name
+            )}
           </Link>
         ),
         sortable: true,

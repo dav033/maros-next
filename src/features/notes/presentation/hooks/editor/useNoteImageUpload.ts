@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
+import { toast } from "sonner";
 import { getEntityPresignedUploadUrl } from "@/features/attachments/actions/s3Actions";
 
 const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
@@ -17,7 +18,9 @@ export function useNoteImageUpload(pageId: number) {
     async (file: File): Promise<string | null> => {
       if (!file.type.startsWith("image/")) return null;
       if (file.size > MAX_FILE_SIZE_BYTES) {
-        window.alert(`${file.name} is larger than 5MB and was not uploaded.`);
+        toast.error("Image was not uploaded", {
+          description: `${file.name} is larger than 5 MB. Choose a smaller image.`,
+        });
         return null;
       }
 

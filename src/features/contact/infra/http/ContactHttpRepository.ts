@@ -1,4 +1,4 @@
-import type { Contact, ContactDraft, ContactPatch } from "@/features/contact/domain";
+import type { Contact, ContactDetails, ContactDraft, ContactPatch } from "@/features/contact/domain";
 import type { ContactRepositoryPort } from "@/features/contact/domain";
 import type { HttpClientLike } from "@/shared/infra";
 import { makeHttpResourceRepository, optimizedApiClient } from "@/shared/infra";
@@ -6,9 +6,9 @@ import { makeHttpResourceRepository, optimizedApiClient } from "@/shared/infra";
 import { contactEndpoints } from "./endpoints";
 import {
   mapContactDraftToCreateDTO,
+  mapContactDetailsFromApi,
   mapContactFromApi,
   mapContactPatchToUpdateDTO,
-  mapContactsFromApi,
   ApiContactDTO,
 } from "./mappers";
 
@@ -76,12 +76,8 @@ export class ContactHttpRepository implements ContactRepositoryPort {
     return Array.isArray(data) ? data.map(mapContactFromApi) : [];
   }
 
-  async getDetails(id: number): Promise<any> {
-    try {
-      const { data } = await this.api.get(contactEndpoints.details(id));
-      return data;
-    } catch (error: any) {
-      throw error;
-    }
+  async getDetails(id: number): Promise<ContactDetails> {
+    const { data } = await this.api.get<unknown>(contactEndpoints.details(id));
+    return mapContactDetailsFromApi(data);
   }
 }

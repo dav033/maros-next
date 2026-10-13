@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { SharedEntityName } from "@/components/shared/SharedEntityName";
 import { AtSign, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { NoteReferenceKind } from "@/notes/domain";
@@ -49,7 +50,7 @@ export function NoteMentionsSection({
                   <FileText className="size-4 text-muted-foreground" aria-hidden="true" />
                 )}
               </span>
-              <span className="truncate">{page.title}</span>
+              <SharedEntityName layoutId={`maros-note-title-${page.id}`} className="truncate">{page.title}</SharedEntityName>
             </Link>
             {contexts[0] && (
               <p className="ml-9 line-clamp-1 text-xs text-muted-foreground">{contexts[0]}</p>

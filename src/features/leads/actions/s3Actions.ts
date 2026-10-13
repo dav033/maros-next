@@ -2,6 +2,11 @@
 
 import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { hasS3PreviewConfiguration } from "@/shared/infra/s3PreviewConfiguration";
+
+export type PresignedPreviewResult =
+  | { status: "ready"; url: string }
+  | { status: "not_configured" };
 
 function getS3Client() {
   return new S3Client({
@@ -49,7 +54,9 @@ export async function getPresignedDownloadUrl(key: string): Promise<string> {
   return getSignedUrl(getS3Client(), command, { expiresIn: 3600 });
 }
 
-export async function getPresignedPreviewUrl(key: string): Promise<string> {
+export async function getPresignedPreviewUrl(key: string): Promise<PresignedPreviewResult> {
+  if (!hasS3PreviewConfiguration()) return { status: "not_configured" };
+
   const ext = key.split(".").pop()?.toLowerCase() ?? "";
   const contentTypeMap: Record<string, string> = {
     pdf: "application/pdf",
@@ -75,5 +82,6 @@ export async function getPresignedPreviewUrl(key: string): Promise<string> {
     ResponseContentDisposition: "inline",
     ResponseContentType: contentTypeMap[ext],
   });
-  return getSignedUrl(getS3Client(), command, { expiresIn: 3600 });
+  const url = await getSignedUrl(getS3Client(), command, { expiresIn: 3600 });
+  return { status: "ready", url };
 }

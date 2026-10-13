@@ -10,6 +10,8 @@ import { getLeadTypeFromNumber } from "@/features/leads/domain/utils/lead-type.u
 export type UseProjectsDataReturn = {
   projects: Project[];
   showSkeleton: boolean;
+  error: Error | null;
+  isFetching: boolean;
   /** True while QuickBooks financial data is still loading in the background (projects are already rendered). */
   financialsLoading: boolean;
   refetch: () => Promise<void>;
@@ -24,7 +26,7 @@ export function useProjectsData({
   initialData?: ProjectsPageData;
   leadType: LeadType;
 }): UseProjectsDataReturn {
-  const { projects, showSkeleton, refetch } = useInstantProjects(initialData?.projects);
+  const { projects, hasData, showSkeleton, error, isFetching, refetch } = useInstantProjects(initialData?.projects);
   const { financialsById, isLoading: financialsLoading } = useProjectsFinancials({
     enabled: !showSkeleton,
   });
@@ -39,7 +41,9 @@ export function useProjectsData({
 
   return {
     projects: projectsByType,
-    showSkeleton,
+    showSkeleton: showSkeleton || (isFetching && !hasData),
+    error,
+    isFetching,
     financialsLoading,
     refetch,
   };

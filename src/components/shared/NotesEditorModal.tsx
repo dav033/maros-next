@@ -84,7 +84,7 @@ export function NotesEditorModal({ controller }: NotesEditorModalProps) {
                 <button
                   type="button"
                   onClick={() => handleRemoveNote(index)}
-                  className="absolute right-2 top-2 rounded p-1 text-muted-foreground opacity-0 transition-opacity hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100"
+                  className="absolute right-2 top-2 rounded p-1 text-muted-foreground opacity-100 transition-opacity motion-reduce:transition-none hover:bg-destructive/10 hover:text-destructive focus-visible:opacity-100 lg:opacity-0 lg:group-hover:opacity-100 lg:group-focus-within:opacity-100"
                   aria-label="Remove note"
                 >
                   <X className="size-3.5" />

@@ -27,7 +27,12 @@ export function buildInstantQueryResult<TData>(
   const hasData = hasDataValue(query.data);
   const isLoading = query.isPending;
   const isFetching = query.isFetching;
-  const showSkeleton = isLoading && !hasData;
+  // An empty initialData fallback is still provisional until its first request
+  // settles. Keep list consumers in their loading state instead of showing a
+  // false empty result while that request is in flight.
+  const showSkeleton =
+    (isLoading && !hasData) ||
+    (isFetching && !query.isFetched && !hasData);
   const fromCache =
     hasData && Date.now() - (query.dataUpdatedAt ?? 0) <= staleTime;
 

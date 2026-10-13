@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useUrlTabState } from "@/components/shared/DetailTabs";
 import { Hourglass } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,11 +14,11 @@ import { StaleLeadsTable, type StaleLeadDecision } from "./StaleLeadsTable";
 import { useCloseStaleLead, useStaleLeads } from "./useStaleLeads";
 
 const DAY_OPTIONS = [30, 60, 90] as const;
+const DAY_VIEWS = ["30", "60", "90"] as const;
 
 export function StaleLeadsReport() {
-  // Local state, not a URL param: each threshold is its own query key, so switching
-  // is a cache hit after the first look and never remounts the page.
-  const [days, setDays] = useState<number>(60);
+  const { activeTab: selectedDays, setActiveTab: setDays } = useUrlTabState(DAY_VIEWS, "60", "days");
+  const days = Number(selectedDays);
   const query = useStaleLeads(days);
   const report = query.data;
 
@@ -67,7 +67,7 @@ export function StaleLeadsReport() {
               variant={days === option ? "default" : "ghost"}
               className="h-7 px-3 text-xs"
               aria-pressed={days === option}
-              onClick={() => setDays(option)}
+              onClick={() => setDays(String(option))}
             >
               {option} days
             </Button>

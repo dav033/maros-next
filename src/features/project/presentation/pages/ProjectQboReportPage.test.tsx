@@ -1,5 +1,6 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import type { ProjectQboReport } from "@/project/domain";
 
@@ -14,6 +15,14 @@ vi.mock("../organisms/ProjectCostBreakdownCard", () => ({
 import { ProjectQboReportPage } from "./ProjectQboReportPage";
 
 afterEach(cleanup);
+
+function renderReport() {
+  return render(
+    <QueryClientProvider client={new QueryClient()}>
+      <ProjectQboReportPage projectId={12} />
+    </QueryClientProvider>,
+  );
+}
 
 const report: ProjectQboReport = {
   projectId: 12,
@@ -53,7 +62,7 @@ describe("ProjectQboReportPage", () => {
       isPending: false,
       refetch: vi.fn(),
     });
-    render(<ProjectQboReportPage projectId={12} />);
+    renderReport();
 
     const trigger = screen.getByRole("combobox", { name: "Report" });
     expect(trigger).toHaveTextContent("Profit and Loss");
@@ -63,7 +72,7 @@ describe("ProjectQboReportPage", () => {
   it("renders the figures and the report provenance once the data arrives", () => {
     useProjectQboReport.mockReturnValue({ data: report, error: null, isPending: false, refetch: vi.fn() });
 
-    render(<ProjectQboReportPage projectId={12} />);
+    renderReport();
 
     expect(screen.getByText("12,500.00")).toBeInTheDocument();
     expect(screen.getByText("15,750.00")).toBeInTheDocument();

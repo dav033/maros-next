@@ -25,6 +25,7 @@ import { ContactMode } from "@/leads/presentation";
 import { toContactDraft } from "@/features/contact/domain/mappers";
 import { CompanyModal } from "@/features/company/presentation/organisms/CompanyModal";
 import { useContactCompanyModalController } from "@/features/contact/presentation/hooks/controllers/useContactCompanyModalController";
+import { useContactCacheInvalidation } from "@/features/contact/presentation/hooks/mutations/useContactCacheInvalidation";
 import { useCompanyMutations } from "@/features/company/presentation/hooks";
 import { initialCompanyFormValue, toDraft as toCompanyDraft } from "@/features/company/presentation/helpers/companyFormHelpers";
 import type { CompanyFormValue } from "@/features/company/presentation/molecules/CompanyForm";
@@ -96,8 +97,14 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
     : LeadType.CONSTRUCTION;
   
   const { contacts = [] } = useInstantContacts();
-  const { projectTypes = [] } = useProjectTypes();
+  const {
+    projectTypes = [],
+    isLoading: projectTypesLoading,
+    error: projectTypesError,
+    refetch: refetchProjectTypes,
+  } = useProjectTypes();
   const queryClient = useQueryClient();
+  const invalidateContact = useContactCacheInvalidation();
   const data = useLeadsData(leadType);
   const ctx = useLeadsApp();
   const projectsApp = useProjectsApp();
@@ -123,6 +130,7 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
       });
       queryClient.invalidateQueries({ queryKey: leadsKeys.all });
       queryClient.invalidateQueries({ queryKey: projectsKeys.all });
+      void queryClient.invalidateQueries({ queryKey: contactsKeys.all });
       setLeadDetails({
         ...leadDetails,
         status: LeadStatus.WON,
@@ -170,6 +178,7 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
           return oldLeads.map((l) => (l.id === leadDetails.id ? updated : l));
         });
         queryClient.invalidateQueries({ queryKey: leadsKeys.all });
+        void queryClient.invalidateQueries({ queryKey: contactsKeys.all });
         await data.refetch();
         
         setLeadDetails({
@@ -222,6 +231,7 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
     onSave: async (patch) => {
       if (leadDetails?.contact && typeof leadDetails.contact.id === "number") {
         await patchContact(contactCtx, leadDetails.contact.id, patch);
+        invalidateContact();
         setLeadDetails({
           ...leadDetails,
           contact: {
@@ -268,13 +278,14 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
           inlineEditContact.setField("companyId", createdCompanyId);
         } else if (companyAssignTarget === "existingContact" && leadDetails?.contact?.id) {
           await patchContact(contactCtx, leadDetails.contact.id, { companyId: createdCompanyId });
+          invalidateContact();
         }
       }
       setIsCompanyModalOpen(false);
     } catch (error) {
       setCompanyServerError(error instanceof Error ? error.message : "Could not create company");
     }
-  }, [companyFormValue, createCompanyMutation, companyAssignTarget, inlineEditContact, leadDetails, contactCtx, router]);
+  }, [companyFormValue, createCompanyMutation, companyAssignTarget, inlineEditContact, leadDetails, contactCtx, invalidateContact, router]);
 
   const companyModalController = useContactCompanyModalController({
     isOpen: isCompanyModalOpen,
@@ -312,6 +323,7 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
     try {
       const patch: LeadPatch = { contactId: 0 as number };
       const updated = await patchLead(ctx, leadDetails.id, patch, {});
+      void queryClient.invalidateQueries({ queryKey: contactsKeys.all });
       queryClient.setQueryData<Lead[]>(leadsKeys.byType(leadType), (oldLeads) => {
         if (!oldLeads) return oldLeads;
         return oldLeads.map((l) => (l.id === leadDetails.id ? updated : l));
@@ -353,6 +365,7 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
 
       const patch: LeadPatch = { contactId: finalContactId };
       const updated = await patchLead(ctx, leadDetails.id, patch, {});
+      invalidateContact();
       
       queryClient.setQueryData<Lead[]>(leadsKeys.byType(leadType), (oldLeads) => {
         if (!oldLeads) return oldLeads;
@@ -377,6 +390,9 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
     <div className="container mx-auto p-6 space-y-6">
       <EntityDetailHeader
         title={leadDetails.name || "No name"}
+        sharedNameLayoutId={`maros-lead-name-${leadDetails.id}`}
+        identifier={leadDetails.leadNumber}
+        sharedIdentifierLayoutId={`maros-lead-number-${leadDetails.id}`}
         subtitle={leadDetails.projectType?.name}
         actions={
           <>
@@ -403,7 +419,7 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
       {/* La cabecera —título, estado, Schedule Meet y Convert to Project— queda
           fuera de <Tabs>, a la vista en todas las pestañas. */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <DetailTabsBar tabs={LEAD_TABS} />
+        <DetailTabsBar tabs={LEAD_TABS} activeTab={activeTab} />
 
         <TabsContent value="resumen" className="mt-0">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -411,6 +427,9 @@ export function LeadDetailsPage({ leadId, initialData }: LeadDetailsPageProps) {
               <LeadInfoSection
                 lead={leadDetails}
                 projectTypes={projectTypes}
+                projectTypesLoading={projectTypesLoading}
+                projectTypesError={projectTypesError}
+                onRetryProjectTypes={() => void refetchProjectTypes()}
                 inlineEdit={inlineEditLead}
                 onOpenNotesModal={() => notesLogic.openFromLead(leadDetails as unknown as Lead)}
               />

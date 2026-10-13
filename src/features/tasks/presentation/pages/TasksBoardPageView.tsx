@@ -1,5 +1,6 @@
 "use client";
 
+import { useIsPresent } from "motion/react";
 import { KanbanSquare } from "lucide-react";
 import Link from "next/link";
 import { PageHeaderCard } from "@/components/shared";
@@ -10,8 +11,10 @@ import { TaskViewSwitcher } from "../molecules/TaskViewSwitcher";
 import { TaskScopeBar } from "../molecules/TaskScopeBar";
 import { TaskSavedViews } from "../molecules/TaskSavedViews";
 import { useTaskDetailRoute } from "../hooks/useTaskDetailRoute";
+import type { InitialTasksBoard } from "../data/loadInitialTasksBoard";
 
-export function TasksBoardPageView() {
+export function TasksBoardPageView({ initialBoard }: { initialBoard?: InitialTasksBoard }) {
+  const isPresent = useIsPresent();
   const { taskId, openTask, closeTask } = useTaskDetailRoute();
 
   return (
@@ -25,10 +28,10 @@ export function TasksBoardPageView() {
       />
 
       <section className="mt-2 flex-1 overflow-hidden">
-        <TaskBoard onOpenTask={openTask} />
+        <TaskBoard onOpenTask={openTask} initialBoard={initialBoard} />
       </section>
 
-      <TaskDetailDialog taskId={taskId} onClose={closeTask} onOpenTask={openTask} />
+      {isPresent ? <TaskDetailDialog taskId={taskId} onClose={closeTask} onOpenTask={openTask} /> : null}
     </div>
   );
 }

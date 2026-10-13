@@ -1,5 +1,8 @@
 "use client";
 
+import { SharedEntityName } from "@/components/shared/SharedEntityName";
+import { useIsMobile } from "@/common/hooks/use-mobile";
+
 import { AlertCircle, ArrowLeft, LoaderCircle, RotateCcw } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -109,6 +112,7 @@ function QboSuggestions({ scan }: { scan: InvoiceScan }) {
 }
 
 export function InvoiceScanDetailPage({ id }: { id: string }) {
+  const isMobile = useIsMobile();
   const router = useRouter();
   const query = useInvoiceScanDetail(id);
   const update = useUpdateInvoiceScan(id);
@@ -159,6 +163,18 @@ export function InvoiceScanDetailPage({ id }: { id: string }) {
           <AlertCircle aria-hidden="true" />
           <AlertDescription>This document scan could not be loaded.</AlertDescription>
         </Alert>
+        {query.isError && (
+          <Button
+            type="button"
+            variant="outline"
+            className="w-fit"
+            onClick={() => void query.refetch()}
+            disabled={query.isFetching}
+          >
+            <RotateCcw className={query.isFetching ? "animate-spin" : undefined} aria-hidden="true" />
+            {query.isFetching ? "Retrying…" : "Try again"}
+          </Button>
+        )}
       </div>
     );
   }
@@ -176,7 +192,7 @@ export function InvoiceScanDetailPage({ id }: { id: string }) {
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
           <h1 className="break-words font-display text-2xl font-semibold tracking-tight sm:text-3xl">
-            {invoiceTitle(scan)}
+            <SharedEntityName layoutId={`maros-invoice-title-${scan.id}-${isMobile ? "mobile" : "desktop"}`} transitionRole="detail">{invoiceTitle(scan)}</SharedEntityName>
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             {isManualTransaction ? (

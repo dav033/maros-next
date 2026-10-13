@@ -1,9 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { ChevronDown, ChevronRight, LogOut } from "lucide-react";
+import { motion } from "motion/react";
+import { usePrefersReducedMotion } from "@/shared/presentation/hooks/usePrefersReducedMotion";
+import { cn } from "@/lib/utils";
 import {
   Sidebar,
   SidebarContent,
@@ -15,6 +18,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -32,8 +36,63 @@ import { logoutAction } from "@/app/actions/auth";
 import { SIDEBAR_CONFIG } from "./sidebarConfig";
 import type { SidebarDropdownConfig, SidebarSection } from "./sidebarConfig";
 import type { SidebarItemProps } from "./sidebarConfig";
+import { sharedEntityNameTransition } from "@/shared/presentation/motionTransitions";
 
 const SIDEBAR_GROUPS_STORAGE_KEY = "maros.sidebar.openGroups";
+const SIDEBAR_ACCOUNT_MENU_TRIGGER_ID = "maros-sidebar-account-menu-trigger";
+const SIDEBAR_ACCOUNT_MENU_CONTENT_ID = "maros-sidebar-account-menu-content";
+
+function SidebarNavLink({
+  item,
+  active,
+  nested,
+  grouped,
+  layoutId,
+  shouldReduceMotion,
+  onNavigate,
+}: {
+  item: SidebarItemProps;
+  active: boolean;
+  nested: boolean;
+  grouped: boolean;
+  layoutId: string;
+  shouldReduceMotion: boolean;
+  onNavigate: () => void;
+}) {
+  const Icon = item.icon;
+
+  return (
+    <SidebarMenuItem>
+      <SidebarMenuButton
+        asChild
+        isActive={active}
+        className="relative isolate data-[active=true]:!bg-transparent motion-reduce:transition-none"
+      >
+        <Link
+          href={item.href}
+          onNavigate={onNavigate}
+          aria-current={active ? "page" : undefined}
+          className={cn(
+            "relative",
+            grouped && (nested ? "pl-7 group-data-[collapsible=icon]:pl-0" : "pl-5 text-sm group-data-[collapsible=icon]:pl-0"),
+          )}
+        >
+          {active ? (
+            <motion.span
+              aria-hidden="true"
+              className="absolute inset-0 z-0 rounded-md bg-sidebar-accent before:absolute before:inset-y-1 before:left-0 before:w-0.5 before:rounded-full before:bg-sidebar-primary"
+              layoutId={shouldReduceMotion ? undefined : layoutId}
+              transition={sharedEntityNameTransition}
+              initial={false}
+            />
+          ) : null}
+          {Icon ? <Icon className="relative z-10 h-4 w-4" /> : null}
+          <span className="relative z-10">{item.title}</span>
+        </Link>
+      </SidebarMenuButton>
+    </SidebarMenuItem>
+  );
+}
 
 function filterByPermission(
   items: SidebarDropdownConfig[],
@@ -55,32 +114,49 @@ function filterByPermission(
 
 export function AppSidebar() {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const shouldReduceMotion = usePrefersReducedMotion();
+  const sidebarIndicatorId = useId();
+  const { isMobile, setOpenMobile } = useSidebar();
   const { user, hasPermission } = useCurrentUser();
-  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() => {
-    const defaults = {
-      Leads: true,
-      Projects: true,
-    };
-
-    if (typeof window === "undefined") {
-      return defaults;
-    }
-
-    try {
-      const raw = window.localStorage.getItem(SIDEBAR_GROUPS_STORAGE_KEY);
-      if (!raw) return defaults;
-      const parsed = JSON.parse(raw) as Record<string, boolean>;
-      return {
-        ...defaults,
-        ...parsed,
-      };
-    } catch {
-      return defaults;
-    }
+  const previousPathname = useRef(pathname);
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
+    Leads: true,
+    Projects: true,
   });
+  const [hasLoadedOpenGroups, setHasLoadedOpenGroups] = useState(false);
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+
+  const closeMobileSidebar = useCallback(() => {
+    if (isMobile) setOpenMobile(false);
+  }, [isMobile, setOpenMobile]);
+
+  useLayoutEffect(() => {
+    if (previousPathname.current === pathname) return;
+    previousPathname.current = pathname;
+    closeMobileSidebar();
+  }, [closeMobileSidebar, pathname]);
 
   useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(SIDEBAR_GROUPS_STORAGE_KEY);
+      if (raw) {
+        const parsed: unknown = JSON.parse(raw);
+        if (typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)) {
+          const savedGroups = Object.fromEntries(
+            Object.entries(parsed).filter((entry): entry is [string, boolean] => typeof entry[1] === "boolean"),
+          );
+          setOpenGroups((current) => ({ ...current, ...savedGroups }));
+        }
+      }
+    } catch {
+      // Keep the defaults when local storage is unavailable or malformed.
+    } finally {
+      setHasLoadedOpenGroups(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!hasLoadedOpenGroups) return;
     try {
       window.localStorage.setItem(
         SIDEBAR_GROUPS_STORAGE_KEY,
@@ -89,41 +165,24 @@ export function AppSidebar() {
     } catch {
       // ignore storage write errors
     }
-  }, [openGroups]);
+  }, [hasLoadedOpenGroups, openGroups]);
 
-  const isActiveRoute = (href: string) => {
-    const [hrefPath, hrefQuery] = href.split("?");
-    const pathMatches =
-      pathname === hrefPath || (hrefPath !== "/" && pathname?.startsWith(hrefPath));
+  const matchesPathPrefix = (prefix: string) =>
+    Boolean(pathname && (pathname === prefix || pathname.startsWith(`${prefix}/`)));
 
-    if (!pathMatches) {
-      return false;
-    }
-
-    if (!hrefQuery) {
-      return true;
-    }
-
-    const expectedParams = new URLSearchParams(hrefQuery);
-    for (const [key, expectedValue] of expectedParams.entries()) {
-      if (searchParams.get(key) !== expectedValue) {
-        return false;
-      }
-    }
-
-    return true;
-  };
+  const isActiveRoute = (href: string) => matchesPathPrefix(href);
 
   const isActiveItem = (item: SidebarItemProps) => {
     // Checked first: when href and activePrefix are the same string (Tasks' "Board"
     // links to /tasks with activePrefix "/tasks"), isActiveRoute below already matches
     // every nested path via its own startsWith, which would make activeExclude
     // unreachable for exactly the sibling routes ("/tasks/mine") it exists to rule out.
-    if ((item.activeExclude ?? []).some((prefix) => pathname?.startsWith(prefix))) {
+    if ((item.activeExclude ?? []).some(matchesPathPrefix)) {
       return false;
     }
     if (isActiveRoute(item.href)) return true;
-    return Boolean(item.activePrefix && pathname?.startsWith(item.activePrefix));
+    const activePrefixes = [item.activePrefix, ...(item.activePrefixes ?? [])];
+    return activePrefixes.some((prefix) => prefix && matchesPathPrefix(prefix));
   };
 
   const renderItems = (items: SidebarDropdownConfig[], nested = false) => {
@@ -160,16 +219,16 @@ export function AppSidebar() {
               const active = isActiveRoute(childLink.href);
 
               return (
-                <SidebarMenuItem key={childLink.title}>
-                  <SidebarMenuButton asChild isActive={active}>
-                    <Link
-                      href={childLink.href}
-                      className={nested ? "pl-7 group-data-[collapsible=icon]:pl-0" : "pl-5 text-sm group-data-[collapsible=icon]:pl-0"}
-                    >
-                      <span>{childLink.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+                <SidebarNavLink
+                  key={childLink.title}
+                  item={childLink}
+                  active={active}
+                  nested={nested}
+                  grouped
+                  layoutId={sidebarIndicatorId}
+                  shouldReduceMotion={shouldReduceMotion ?? false}
+                  onNavigate={closeMobileSidebar}
+                />
               );
             })}
           </div>
@@ -178,17 +237,18 @@ export function AppSidebar() {
 
       const linkItem = item as SidebarItemProps;
       const active = isActiveItem(linkItem);
-      const Icon = linkItem.icon;
 
       return (
-        <SidebarMenuItem key={linkItem.title}>
-          <SidebarMenuButton asChild isActive={active}>
-            <Link href={linkItem.href} className={nested ? "pl-6" : undefined}>
-              {Icon ? <Icon className="h-4 w-4" /> : null}
-              <span>{linkItem.title}</span>
-            </Link>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
+        <SidebarNavLink
+          key={linkItem.title}
+          item={linkItem}
+          active={active}
+          nested={nested}
+          grouped={false}
+          layoutId={sidebarIndicatorId}
+          shouldReduceMotion={shouldReduceMotion ?? false}
+          onNavigate={closeMobileSidebar}
+        />
       );
     });
   };
@@ -222,8 +282,12 @@ export function AppSidebar() {
 
       <SidebarFooter className="border-t p-2">
         <div className="flex items-center gap-1">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+          <DropdownMenu open={accountMenuOpen} onOpenChange={setAccountMenuOpen}>
+            <DropdownMenuTrigger
+              asChild
+              id={SIDEBAR_ACCOUNT_MENU_TRIGGER_ID}
+              aria-controls={accountMenuOpen ? SIDEBAR_ACCOUNT_MENU_CONTENT_ID : undefined}
+            >
               <SidebarMenuButton className="h-auto flex-1 py-2">
                 <Avatar className="h-7 w-7">
                   <AvatarImage src={user?.picture ?? undefined} alt={user?.name ?? user?.email} />
@@ -239,7 +303,13 @@ export function AppSidebar() {
                 </div>
               </SidebarMenuButton>
             </DropdownMenuTrigger>
-            <DropdownMenuContent side="top" align="start" className="w-56">
+            <DropdownMenuContent
+              id={SIDEBAR_ACCOUNT_MENU_CONTENT_ID}
+              aria-labelledby={SIDEBAR_ACCOUNT_MENU_TRIGGER_ID}
+              side="top"
+              align="start"
+              className="w-56"
+            >
               <DropdownMenuLabel className="truncate font-normal text-muted-foreground">
                 {user?.email}
               </DropdownMenuLabel>
@@ -251,7 +321,7 @@ export function AppSidebar() {
             </DropdownMenuContent>
           </DropdownMenu>
           <div className="group-data-[collapsible=icon]:hidden">
-            <NotificationBell />
+            <NotificationBell instance="sidebar" />
           </div>
         </div>
       </SidebarFooter>

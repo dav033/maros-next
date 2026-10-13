@@ -1,7 +1,12 @@
+"use client";
+
 import Link from "next/link";
 import { AlertTriangle, ArrowUpRight, ShieldCheck, Siren } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { SharedEntityName } from "@/components/shared/SharedEntityName";
+import { useRouteSharedLayoutScope } from "@/shared/presentation/RouteMotionContext";
+import { sharedEntityReturnTransition } from "@/shared/presentation/motionTransitions";
 import type { ProjectHealth } from "../../domain";
 import { WidgetCardHeader } from "./WidgetCardHeader";
 
@@ -31,6 +36,7 @@ const riskStyles: Record<
 };
 
 export function ProjectHealthList({ data }: ProjectHealthListProps) {
+  const sharedLayoutScope = useRouteSharedLayoutScope();
   const hasAlerts = data.length > 0;
 
   return (
@@ -61,14 +67,59 @@ export function ProjectHealthList({ data }: ProjectHealthListProps) {
           data.map((item) => {
             const styles = riskStyles[item.riskLevel];
             const hasLink = item.projectId > 0;
+            const hasMatchingProjectName =
+              item.projectName.trim().length > 0 &&
+              item.projectName.trim() !== item.projectNumber.trim();
             const href = hasLink ? `/project/${item.projectId}` : "#";
 
             const inner = (
               <>
                 <div className="flex items-center justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold">{item.projectName}</p>
-                    <p className="font-mono text-xs text-muted-foreground">{item.projectNumber}</p>
+                    <p className="truncate text-sm font-semibold">
+                      {hasMatchingProjectName ? (
+                        <>
+                          <SharedEntityName
+                            layoutId={`maros-project-name-${item.projectId}-desktop-${sharedLayoutScope}`}
+                            className="hidden xl:inline"
+                          >
+                            {item.projectName}
+                          </SharedEntityName>
+                          <SharedEntityName
+                            layoutId={`maros-project-name-${item.projectId}-mobile-${sharedLayoutScope}`}
+                            className="xl:hidden"
+                          >
+                            {item.projectName}
+                          </SharedEntityName>
+                        </>
+                      ) : (
+                        item.projectName
+                      )}
+                    </p>
+                    <p className="font-mono text-xs text-muted-foreground">
+                      {hasLink && item.projectNumber.trim() ? (
+                        <>
+                          <SharedEntityName
+                            layoutCrossfade={false}
+                            layoutId={`maros-project-number-${item.projectId}-desktop-${sharedLayoutScope}`}
+                            transition={sharedEntityReturnTransition}
+                            className="hidden xl:inline-block"
+                          >
+                            {item.projectNumber}
+                          </SharedEntityName>
+                          <SharedEntityName
+                            layoutCrossfade={false}
+                            layoutId={`maros-project-number-${item.projectId}-mobile-${sharedLayoutScope}`}
+                            transition={sharedEntityReturnTransition}
+                            className="inline-block xl:hidden"
+                          >
+                            {item.projectNumber}
+                          </SharedEntityName>
+                        </>
+                      ) : (
+                        item.projectNumber
+                      )}
+                    </p>
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge className={`font-display text-xs font-semibold uppercase tracking-wide ${styles.badge}`}>

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { SharedEntityName } from "@/components/shared/SharedEntityName";
 import {
   Check,
   ChevronRight,
@@ -52,6 +53,42 @@ const SAVE_LABEL: Record<string, string> = {
   error: "Couldn't save — edit again to retry",
 };
 
+function NoteTreeLoadError({
+  hasStaleData,
+  isFetching,
+  onRetry,
+}: {
+  hasStaleData: boolean;
+  isFetching: boolean;
+  onRetry: () => void;
+}) {
+  return (
+    <div
+      role="alert"
+      className="flex min-w-0 flex-wrap items-center gap-3 rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 text-sm"
+    >
+      <TriangleAlert className="size-4 shrink-0 text-amber-300" aria-hidden="true" />
+      <div className="min-w-0 flex-1">
+        <p className="font-medium">Couldn't load your notes.</p>
+        <p className="text-xs text-muted-foreground">
+          {hasStaleData
+            ? "Showing the latest notes available. Retry to check for updates."
+            : "Check your connection and try again."}
+        </p>
+      </div>
+      <Button
+        type="button"
+        size="sm"
+        variant="outline"
+        disabled={isFetching}
+        onClick={onRetry}
+      >
+        {isFetching ? "Retrying…" : "Try again"}
+      </Button>
+    </div>
+  );
+}
+
 export function NotesWorkspaceView({
   logic,
 }: {
@@ -65,7 +102,8 @@ export function NotesWorkspaceView({
   const isFolder = logic.activePage?.kind === "folder";
 
   if (
-    (logic.activePageId == null && logic.treeLoading) ||
+    (logic.activePageId == null &&
+      (logic.treeLoading || (logic.tree.length === 0 && logic.treeFetching))) ||
     (logic.activePageId != null && logic.activePageLoading)
   ) {
     return (
@@ -75,10 +113,27 @@ export function NotesWorkspaceView({
         aria-label="Loading notes"
       >
         <Skeleton className="mb-4 h-5 w-32" />
-        <Skeleton className="mb-8 h-10 w-2/3" />
+        {logic.activePageSummary ? <h1 className="mb-8 font-display text-xl font-semibold sm:text-2xl"><SharedEntityName layoutId={`maros-note-title-${logic.activePageId}`} transitionRole="detail">{logic.activePageSummary.title || "Untitled"}</SharedEntityName></h1> : <Skeleton className="mb-8 h-10 w-2/3" />}
         {[1, 2, 3, 4].map((line) => (
           <Skeleton key={line} className="mb-4 h-8 w-full" />
         ))}
+      </main>
+    );
+  }
+  if (
+    logic.activePageId == null &&
+    logic.treeError &&
+    logic.tree.length === 0
+  ) {
+    return (
+      <main className="flex min-w-0 flex-1 items-center justify-center p-6">
+        <div className="w-full max-w-md">
+          <NoteTreeLoadError
+            hasStaleData={false}
+            isFetching={logic.treeFetching}
+            onRetry={() => void logic.retryTree()}
+          />
+        </div>
       </main>
     );
   }
@@ -115,12 +170,23 @@ export function NotesWorkspaceView({
   return (
     <main className="notes-scrollbar min-h-0 min-w-0 flex-1 overflow-y-auto bg-background">
       {logic.activePageId == null ? (
-        <NotesHomeView
-          pages={logic.tree}
-          onCreate={logic.onCreateRoot}
-          onSetFavorite={logic.onSetFavorite}
-          creating={logic.creating}
-        />
+        <>
+          {logic.treeError ? (
+            <div className="mx-auto w-full max-w-5xl px-4 pt-4 sm:px-6">
+              <NoteTreeLoadError
+                hasStaleData={logic.tree.length > 0}
+                isFetching={logic.treeFetching}
+                onRetry={() => void logic.retryTree()}
+              />
+            </div>
+          ) : null}
+          <NotesHomeView
+            pages={logic.tree}
+            onCreate={logic.onCreateRoot}
+            onSetFavorite={logic.onSetFavorite}
+            creating={logic.creating}
+          />
+        </>
       ) : (
         <div className="mx-auto max-w-4xl px-4 py-3 sm:px-7 sm:py-5">
           <nav
@@ -161,6 +227,7 @@ export function NotesWorkspaceView({
                 <FileText className="size-4" aria-hidden="true" />
               )}
             </div>
+            <SharedEntityName as="div" layoutId={`maros-note-title-${logic.activePageId}`} transitionRole="detail" className="min-w-0 flex-1">
             {logic.canEdit ? (
               <textarea
                 rows={1}
@@ -184,6 +251,7 @@ export function NotesWorkspaceView({
                 {logic.title || "Untitled"}
               </h1>
             )}
+            </SharedEntityName>
           </div>
 
           <div className="mb-2.5 flex flex-wrap items-center justify-between gap-2 border-b border-line pb-2.5">

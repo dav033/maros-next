@@ -10,14 +10,25 @@ export const TASK_SEARCH_INPUT_ID = "task-search-input";
 function isTypingTarget(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return false;
   const tag = target.tagName;
-  return tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || target.isContentEditable;
+  return (
+    tag === "INPUT" ||
+    tag === "TEXTAREA" ||
+    tag === "SELECT" ||
+    target.isContentEditable
+  );
+}
+
+function isShortcutSurfaceOpen(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) return false;
+  return target.closest(
+    '[role="dialog"], [role="alertdialog"], [role="menu"], [role="listbox"], [role="combobox"]',
+  ) !== null;
 }
 
 /**
  * Global `c` (new task) and `/` (focus search) shortcuts for every /tasks route —
- * mounted once in TasksLayout, same spot as useTaskEventsStream. `⌘K` lives inside
- * TaskSearchPalette instead, since it owns its own dialog the same way
- * NoteSearchPalette does for notes.
+ * mounted once in TasksLayout, same spot as useTaskEventsStream. `⌘K` is owned by
+ * the authenticated palette mounted in AppShell.
  */
 export function TaskKeyboardShortcuts() {
   const { openTask } = useTaskDetailRoute();
@@ -25,7 +36,15 @@ export function TaskKeyboardShortcuts() {
 
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {
-      if (event.metaKey || event.ctrlKey || event.altKey || isTypingTarget(event.target)) return;
+      if (
+        event.defaultPrevented ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.altKey ||
+        isTypingTarget(event.target) ||
+        isShortcutSurfaceOpen(event.target)
+      )
+        return;
       if (event.key === "c") {
         event.preventDefault();
         setCreateOpen(true);
@@ -38,5 +57,11 @@ export function TaskKeyboardShortcuts() {
     return () => document.removeEventListener("keydown", handler);
   }, []);
 
-  return <CreateTaskDialog open={createOpen} onOpenChange={setCreateOpen} onCreated={openTask} />;
+  return (
+    <CreateTaskDialog
+      open={createOpen}
+      onOpenChange={setCreateOpen}
+      onCreated={openTask}
+    />
+  );
 }

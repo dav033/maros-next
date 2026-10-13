@@ -14,6 +14,7 @@ import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import type { EvidenceImageRow, RestorationFinalReport } from "@/reports/domain/models";
 import { FileInputList } from "../components/FileInputList";
+import { RestorationImageCompare } from "../components/RestorationImageCompare";
 import {
   useRestorationFinalQuery,
   useSubmitRestorationFinalMutation,
@@ -25,6 +26,8 @@ import { getProjectById } from "@/features/project/application/usecases/queries/
 import { useInstantContacts, useInstantContactsByCompany } from "@/features/contact/presentation/hooks";
 import { useInstantCompanies } from "@/features/company/presentation/hooks/data/useInstantCompanies";
 import type { Contact } from "@/contact/domain";
+
+const EMPTY_IMAGE_FILES: File[] = [];
 
 const createEmptyEvidence = (): EvidenceImageRow => ({
   description: "",
@@ -495,6 +498,9 @@ export function RestorationFinalPage() {
                       })
                     }
                     helperText="Supported formats: images or PDF."
+                  />
+                  <RestorationImageCompare
+                    files={row.imageFiles ?? EMPTY_IMAGE_FILES}
                   />
                 </CardContent>
               </Card>

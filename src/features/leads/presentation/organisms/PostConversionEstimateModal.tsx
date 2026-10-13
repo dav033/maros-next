@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback, type ChangeEvent } from "react";
+import { useRouter } from "next/navigation";
 import { Loader2, Paperclip, Mail, ExternalLink, Upload } from "lucide-react";
 import {
   Dialog,
@@ -50,6 +51,7 @@ export function PostConversionEstimateModal({
   leadName,
   contactEmail,
 }: PostConversionEstimateModalProps) {
+  const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [estimateFile, setEstimateFile] = useState<EstimateFileInfo | null>(null);
@@ -183,7 +185,7 @@ export function PostConversionEstimateModal({
 
   const handleViewProject = () => {
     onClose();
-    window.location.href = `/project/${projectId}`;
+    router.push(`/project/${projectId}`);
   };
 
   return (

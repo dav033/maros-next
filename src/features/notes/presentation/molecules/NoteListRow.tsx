@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { SharedEntityName } from "@/components/shared/SharedEntityName";
 import type { ReactNode } from "react";
 import { FileText, Folder } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -67,7 +68,7 @@ export function NoteListRow({
           muted && "text-foreground/60",
         )}
       >
-        {isUntitled ? "Untitled" : title}
+        {href && /^\/notes\/\d+$/.test(href) ? <SharedEntityName layoutId={`maros-note-title-${href.split("/").at(-1)}`}>{isUntitled ? "Untitled" : title}</SharedEntityName> : isUntitled ? "Untitled" : title}
       </span>
       {badges}
       {context != null && context !== "" && (

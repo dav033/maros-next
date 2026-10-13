@@ -11,6 +11,7 @@ import { useInstantNoteTags } from "../hooks/data/useInstantNoteTags";
 import { useNoteTagMutations } from "../hooks/mutations/useNoteTagMutations";
 import { noteTagColor } from "../atoms/noteVisualTokens";
 import { ManageLabelsDialog } from "../organisms/ManageLabelsDialog";
+import { SelectedNoteTagChips } from "./SelectedNoteTagChips";
 import type { NoteTag } from "@/notes/domain";
 
 export function TagPicker({
@@ -61,6 +62,10 @@ export function TagPicker({
         </PopoverTrigger>
         <PopoverContent align="end" className="w-[min(16rem,calc(100vw-2rem))] max-w-[calc(100vw-2rem)] p-2">
           <div className="space-y-1">
+            <SelectedNoteTagChips
+              tags={tags.filter((tag) => selectedTagIds.includes(tag.id))}
+              onRemove={(tagId) => onChange(selectedTagIds.filter((id) => id !== tagId))}
+            />
             {tags.length === 0 && (
               <p className="px-1 py-2 text-sm text-muted-foreground">No tags yet.</p>
             )}

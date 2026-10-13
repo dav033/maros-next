@@ -34,7 +34,7 @@ export function useNotesWorkspaceLogic({
   } = useNoteMutations();
   const autosave = useNoteAutosave(activePageId ?? -1);
 
-  const [title, setTitle] = useState(initialPage?.title ?? "");
+  const [title, setTitle] = useState(activePage.page?.title ?? activePage.summary?.title ?? initialPage?.title ?? "");
   const [shareOpen, setShareOpen] = useState(false);
   const loadedPageIdRef = useRef<number | null>(null);
 
@@ -184,13 +184,17 @@ export function useNotesWorkspaceLogic({
   return {
     tree: tree.pages,
     treeLoading: tree.isLoading,
+    treeFetching: tree.isFetching,
+    treeError: tree.error,
+    retryTree: tree.refetch,
     activePageId,
     activePage: activePage.page,
+    activePageSummary: activePage.summary,
     activePageLoading: activePage.isLoading,
     activePageError: activePage.error,
     retryPage: activePage.refetch,
     creating: createMutation.isPending,
-    title,
+    title: activePage.page && loadedPageIdRef.current !== activePage.page.id ? activePage.page.title : title,
     setTitle,
     onContentChange: handleContentChange,
     onTitleBlur: handleTitleBlur,

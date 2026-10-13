@@ -11,6 +11,7 @@ export type InstantListConfig<T> = {
   queryFn: () => Promise<T[] | null | undefined>;
   enabled?: boolean;
   initialData?: T[];
+  refetchOnMount?: boolean | "always";
   staleTime?: number;
   gcTime?: number;
 };
@@ -24,6 +25,7 @@ export function useInstantList<T>({
   queryFn,
   enabled,
   initialData,
+  refetchOnMount,
   staleTime = STALE_TIMES.lists,
   gcTime = 10 * 60 * 1000,
 }: InstantListConfig<T>): InstantQueryResult<T[]> {
@@ -37,6 +39,7 @@ export function useInstantList<T>({
     initialDataUpdatedAt:
       initialData === undefined ? undefined : initialData.length > 0 ? undefined : 0,
     enabled,
+    refetchOnMount: refetchOnMount ?? ((query) => query.state.isInvalidated || query.state.dataUpdatedAt === 0),
     staleTime,
     gcTime,
   });

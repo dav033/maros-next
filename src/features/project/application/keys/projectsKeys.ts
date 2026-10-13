@@ -1,3 +1,8 @@
 import { createEntityKeys } from "@/shared/query";
 
-export const projectsKeys = createEntityKeys("projects");
+const entityKeys = createEntityKeys("projects");
+
+export const projectsKeys = {
+  ...entityKeys,
+  financials: () => [...entityKeys.all, "financials"] as const,
+};

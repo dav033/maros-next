@@ -4,7 +4,7 @@ const BASE = api.resource("projects");
 
 export const endpoints = {
   ...buildCrudEndpoints<number>(BASE, {
-    listPath: "/all",
+    listPath: "/v2/all",
   }),
   financials: () => `${BASE}/financials`,
   details: (id: number | string) => `${BASE}/${id}/details`,

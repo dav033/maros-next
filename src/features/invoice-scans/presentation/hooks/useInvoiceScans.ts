@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef } from "react";
 
 import { STALE_TIMES } from "@/shared/lib/queryClient";
+import { useNavigationDetailQuery } from "@/shared/query/useNavigationDetailQuery";
 import { notifyError, notifySuccess } from "@/shared/presentation/toast";
 
 import type { InvoiceScan, InvoiceScanPatch } from "../../domain/models";
@@ -30,17 +31,23 @@ export const invoiceScanKeys = {
 };
 
 export function useInvoiceScansList() {
-  return useQuery({
+  return useNavigationDetailQuery({
     queryKey: invoiceScanKeys.list(),
     queryFn: listInvoiceScans,
     staleTime: STALE_TIMES.volatile,
+    refetchOnMount: (query) => query.state.isInvalidated || Boolean(query.state.data?.some((scan) => scan.status === "uploaded" || scan.status === "processing")),
   });
 }
 
 export function useInvoiceScanDetail(id: string) {
-  return useQuery({
+  const queryClient = useQueryClient();
+  const row = queryClient.getQueryData<InvoiceScan[]>(invoiceScanKeys.list())?.find((scan) => scan.id === id);
+  return useNavigationDetailQuery<InvoiceScan>({
     queryKey: invoiceScanKeys.detail(id),
     queryFn: () => getInvoiceScan(id),
+    initialData: row?.hasFile === false ? row : undefined,
+    placeholderData: row,
+    refetchOnMount: (query) => query.state.isInvalidated || Boolean(query.state.data?.hasFile && (!query.state.data.imageUrl || Date.now() - query.state.dataUpdatedAt >= 10 * 60 * 1000)),
     staleTime: STALE_TIMES.volatile,
     refetchOnWindowFocus: true,
     // Detail responses include a 15-minute signed document URL. Refresh active

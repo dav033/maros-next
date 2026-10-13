@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { SharedEntityName } from "@/components/shared/SharedEntityName";
 import { useState } from "react";
 import { FolderKanban, Plus } from "lucide-react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigationDetailQuery } from "@/shared/query/useNavigationDetailQuery";
 import { useTasksApp } from "@/di";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,7 +18,7 @@ export function TaskWorkspacesPageView() {
   const queryClient = useQueryClient();
   const [queryText, setQueryText] = useState("");
   const [title, setTitle] = useState("");
-  const workspaces = useQuery({ queryKey: [...key, queryText], queryFn: () => ctx.repos.workspace.list({ query: queryText || undefined }) });
+  const workspaces = useNavigationDetailQuery({ queryKey: [...key, queryText], queryFn: () => ctx.repos.workspace.list({ query: queryText || undefined }) });
   const create = useMutation({
     mutationFn: () => ctx.repos.workspace.create({ title: title.trim() }),
     onSuccess: () => { setTitle(""); void queryClient.invalidateQueries({ queryKey: key }); },
@@ -43,7 +45,7 @@ export function TaskWorkspacesPageView() {
           <Link key={workspace.id} href={`/tasks/workspaces/${workspace.id}`} className="block">
             <Card className="h-full transition-colors hover:border-primary/50">
               <CardHeader className="flex-row items-start justify-between space-y-0">
-                <CardTitle className="flex items-center gap-2 text-base"><FolderKanban className="h-4 w-4 text-primary" />{workspace.title}</CardTitle>
+                <CardTitle className="flex items-center gap-2 text-base"><FolderKanban className="h-4 w-4 text-primary" /><SharedEntityName layoutId={`maros-workspace-title-${workspace.id}`}>{workspace.title}</SharedEntityName></CardTitle>
                 {workspace.archivedAt ? <span className="text-xs text-muted-foreground">Archived</span> : null}
               </CardHeader>
               <CardContent className="grid grid-cols-3 gap-2 text-xs text-muted-foreground">

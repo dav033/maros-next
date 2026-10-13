@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useIsPresent } from "motion/react";
 import { Filter, ListTodo, Search, X } from "lucide-react";
 import { PageHeaderCard, PageToolbarCard, MultiSelectFilter } from "@/components/shared";
 import { Input } from "@/components/ui/input";
@@ -41,6 +42,7 @@ const KIND_OPTIONS = TASK_KINDS.map((k) => ({ value: k, label: TASK_KIND_LABELS[
  * narrowed it to — a full round trip per keystroke isn't worth it for that.
  */
 export function TasksListPageView() {
+  const isPresent = useIsPresent();
   const { taskId, openTask, closeTask } = useTaskDetailRoute();
   const { state, filters, replaceState } = useTasksViewState();
   const [searchDraft, setSearchDraft] = useState(state.q);
@@ -137,7 +139,7 @@ export function TasksListPageView() {
         </div>
       </PageToolbarCard>
 
-      <section className="dashboard-section-enter mt-2 flex-1">
+      <section className="mt-2 flex-1">
         <TaskListTable
           tasks={tasks}
           isLoading={showSkeleton}
@@ -153,7 +155,7 @@ export function TasksListPageView() {
         </div>
       </section>
 
-      <TaskDetailDialog taskId={taskId} onClose={closeTask} onOpenTask={openTask} />
+      {isPresent ? <TaskDetailDialog taskId={taskId} onClose={closeTask} onOpenTask={openTask} /> : null}
 
       <TaskBulkActionBar
         selectedIds={selectedIds}

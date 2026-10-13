@@ -23,5 +23,12 @@ export function useNoteSearch(rawQuery: string) {
     staleTime: 30_000,
   });
 
-  return { hits: query.data ?? [], isLoading: query.isFetching };
+  return {
+    hits: query.data ?? [],
+    isLoading: query.isFetching,
+    error: query.error ?? null,
+    refetch: async () => {
+      await query.refetch();
+    },
+  };
 }

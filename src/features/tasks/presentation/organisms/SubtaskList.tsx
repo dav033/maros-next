@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import { Check, GripVertical, Plus } from "lucide-react";
 import {
   DndContext,
@@ -18,6 +18,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { motion } from "motion/react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -26,6 +27,9 @@ import type { Task } from "@/tasks/domain";
 import { useTaskMutations } from "../hooks/mutations/useTaskMutations";
 import { AssigneeAvatar } from "../atoms/AssigneeAvatar";
 import { reorderSubtasks, resolveSubtaskDrop } from "./subtaskReorder";
+
+// Adapted from Bencho Checklist's spring-filled checkbox and drawn checkmark.
+// Licensed MIT: https://bencho.dev/licence (source: https://bencho.dev/, src/lab/Checklist.tsx).
 
 /**
  * The drag handle is its own control rather than the whole row, unlike the board's
@@ -45,6 +49,7 @@ function SortableSubtask({
     id: subtask.id,
   });
   const prefersReducedMotion = usePrefersReducedMotion();
+  const isDone = subtask.status === "done";
 
   return (
     <li
@@ -65,19 +70,52 @@ function SortableSubtask({
       >
         <GripVertical className="h-3.5 w-3.5" />
       </button>
-      <button
+      <motion.button
         type="button"
         onClick={onToggleDone}
-        aria-label={subtask.status === "done" ? "Mark as not done" : "Mark as done"}
+        aria-label={isDone ? "Mark as not done" : "Mark as done"}
+        aria-pressed={isDone}
         className={cn(
-          "grid h-4 w-4 shrink-0 place-items-center rounded-sm border",
-          subtask.status === "done"
-            ? "border-primary bg-primary text-primary-foreground"
-            : "border-line-strong"
+          "grid h-11 w-11 shrink-0 place-items-center rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+          isDone ? "text-primary-foreground" : "text-muted-foreground"
         )}
+        whileTap={prefersReducedMotion ? undefined : { scale: 0.92 }}
+        transition={
+          prefersReducedMotion
+            ? { duration: 0 }
+            : { type: "spring", stiffness: 420, damping: 26 }
+        }
       >
-        {subtask.status === "done" && <Check className="h-3 w-3" />}
-      </button>
+        <span
+          className={cn(
+            "relative grid h-[18px] w-[18px] place-items-center overflow-hidden rounded-[5px] border",
+            isDone ? "border-primary bg-primary" : "border-line-strong bg-background"
+          )}
+        >
+          <motion.span
+            aria-hidden="true"
+            className="absolute inset-0 rounded-[4px] bg-primary"
+            initial={false}
+            animate={{ scale: isDone ? 1 : 0 }}
+            transition={
+              prefersReducedMotion
+                ? { duration: 0 }
+                : { type: "spring", stiffness: 420, damping: 26 }
+            }
+          />
+          <motion.span
+            aria-hidden="true"
+            className="relative z-10"
+            initial={false}
+            animate={{ opacity: isDone ? 1 : 0, scale: isDone ? 1 : 0.7 }}
+            transition={
+              prefersReducedMotion ? { duration: 0 } : { duration: 0.16 }
+            }
+          >
+            <Check className="h-3 w-3" />
+          </motion.span>
+        </span>
+      </motion.button>
       <button
         type="button"
         onClick={onOpen}
@@ -107,6 +145,7 @@ export function SubtaskList({
   subtasks: Task[];
   onOpenSubtask: (id: number) => void;
 }) {
+  const dndContextId = useId();
   const [title, setTitle] = useState("");
   // Holds the post-drop order until the refetched parent comes back with it, so the
   // row doesn't snap back to its old slot for the length of the round trip.
@@ -167,7 +206,7 @@ export function SubtaskList({
         </p>
       )}
 
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <DndContext id={`task-subtasks-${parentId}-${dndContextId}`} sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <ul className="space-y-1.5">
           <SortableContext
             items={ordered.map((s) => s.id)}

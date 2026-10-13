@@ -5,6 +5,7 @@ import { useCallback } from "react";
 import { useEntityCrud } from "@/shared/presentation";
 import type { EntityKeys } from "@/shared/query/createEntityKeys";
 import { contactsKeys } from "@/contact/application";
+import { useContactCacheInvalidation } from "./useContactCacheInvalidation";
 
 import type { Contact, ContactPatch } from "../../../domain/models";
 import type { ContactFormValue } from "../../../domain/mappers";
@@ -35,6 +36,7 @@ export const initialContactFormValue: ContactFormValue = {
 };
 
 export function useContactMutations() {
+  const invalidateContact = useContactCacheInvalidation();
   const { updateMutation, removeMutation, queryClient } = useEntityCrud<
     Contact,
     never,
@@ -45,8 +47,16 @@ export function useContactMutations() {
     keys: contactsEntityKeys,
     optimistic: true,
     actions: {
-      update: (id, patch) => updateContactAction(id, patch),
-      remove: (id) => deleteContactAction(id),
+      update: async (id, patch) => {
+        const result = await updateContactAction(id, patch);
+        if (result.success) invalidateContact();
+        return result;
+      },
+      remove: async (id) => {
+        const result = await deleteContactAction(id);
+        if (result.success) invalidateContact();
+        return result;
+      },
     },
   });
 

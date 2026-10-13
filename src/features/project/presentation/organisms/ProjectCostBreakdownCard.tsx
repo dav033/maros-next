@@ -140,7 +140,7 @@ function CategoryRow({
 
   return (
     <div className="border-t border-line first:border-t-0">
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3">
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2 px-4 py-3 sm:flex sm:flex-wrap">
         <button
           type="button"
           onClick={onToggle}
@@ -243,7 +243,7 @@ function ForecastField({
   }
 
   return (
-    <div className="flex shrink-0 items-end gap-2">
+    <div className="col-span-2 ml-auto flex shrink-0 items-end gap-2 sm:col-span-1 sm:ml-0">
       <div className="text-right">
         <label className="sr-only" htmlFor={`forecast-${category.key}`}>
           Pronóstico de {COST_CATEGORY_LABELS[category.key]}
@@ -255,7 +255,7 @@ function ForecastField({
           step="0.01"
           inputMode="decimal"
           value={draft}
-          placeholder="sin pronóstico"
+          placeholder="Sin dato"
           onChange={(event) => setDraft(event.target.value)}
           onBlur={() => void save()}
           aria-invalid={invalid || undefined}

@@ -1,8 +1,5 @@
-import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { ProjectsPage } from "@/features/project/presentation";
-import { loadProjectsData } from "@/features/project/presentation/data/loadProjectsData";
-import { ProjectsPageSkeleton } from "@/features/project/presentation/components/ProjectsPageSkeleton";
 import {
   leadTypeFromRouteSegment,
   LEAD_TYPE_ROUTE_SEGMENTS,
@@ -18,11 +15,6 @@ export async function generateStaticParams() {
   }));
 }
 
-async function ProjectsPageWithData({ leadType }: { leadType: NonNullable<ReturnType<typeof leadTypeFromRouteSegment>> }) {
-  const initialData = await loadProjectsData();
-  return <ProjectsPage initialData={initialData} leadType={leadType} />;
-}
-
 export default async function ProjectsByTypePage({
   params,
 }: ProjectsByTypePageProps) {
@@ -33,9 +25,5 @@ export default async function ProjectsByTypePage({
     notFound();
   }
 
-  return (
-    <Suspense fallback={<ProjectsPageSkeleton />}>
-      <ProjectsPageWithData leadType={leadType} />
-    </Suspense>
-  );
+  return <ProjectsPage leadType={leadType} />;
 }

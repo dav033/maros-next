@@ -4,6 +4,8 @@ import { useQueryClient } from "@tanstack/react-query";
 
 import { useEntityMutation } from "@/shared/presentation";
 import { leadsKeys } from "@/leads/application";
+import { contactsKeys } from "@/contact/application";
+import { companyKeys } from "@/company/application/keys/companyKeys";
 import { projectsKeys } from "@/project/application";
 import { LeadStatus, type LeadLostReason } from "@/leads/domain";
 
@@ -43,6 +45,7 @@ export function useLeadsMutations() {
 
   const invalidateQueries = () => {
     void queryClient.invalidateQueries({ queryKey: leadsKeys.all });
+    void queryClient.invalidateQueries({ queryKey: contactsKeys.all });
   };
 
   const deleteMutation = useEntityMutation<number | DeleteLeadOptions, void>({
@@ -56,6 +59,7 @@ export function useLeadsMutations() {
           : { deleteContact: options.deleteContact, deleteCompany: options.deleteCompany };
       return deleteLeadAction(id, opts);
     },
+    invalidateKeys: [contactsKeys.all, companyKeys.all, ["customers"]],
     invalidate: (qc) => {
       void qc.invalidateQueries({ queryKey: leadsKeys.all });
     },
@@ -66,6 +70,7 @@ export function useLeadsMutations() {
     action: "updated",
     successMessage: "Lead accepted successfully!",
     mutationFn: (id) => acceptLeadAction(id),
+    invalidateKeys: [contactsKeys.all],
     invalidate: (qc) => {
       void qc.invalidateQueries({ queryKey: leadsKeys.all });
     },
@@ -76,6 +81,7 @@ export function useLeadsMutations() {
     action: "updated",
     successMessage: "Lead status updated successfully!",
     mutationFn: ({ id, status, lostReason }) => updateLeadStatusAction(id, status, lostReason),
+    invalidateKeys: [contactsKeys.all],
     invalidate: (qc, _, { status }) => {
       void qc.invalidateQueries({ queryKey: leadsKeys.all });
       if (status === LeadStatus.WON) {
@@ -89,6 +95,7 @@ export function useLeadsMutations() {
     action: "updated",
     successMessage: "Lead project type updated successfully!",
     mutationFn: ({ id, projectTypeId }) => updateLeadProjectTypeAction(id, projectTypeId),
+    invalidateKeys: [contactsKeys.all],
     invalidate: (qc) => {
       void qc.invalidateQueries({ queryKey: leadsKeys.all });
     },

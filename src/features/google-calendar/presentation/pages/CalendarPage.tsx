@@ -2,11 +2,13 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
 import { addDays, addMonths, differenceInCalendarDays, endOfMonth, format, isSameDay, isSameMonth, startOfMonth, startOfWeek } from "date-fns";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CalendarDays, ChevronLeft, ChevronRight, Clock3, ExternalLink, List, LoaderCircle, Pencil, Search, Trash2, Video } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeaderCard } from "@/components/shared";
+import { AnimatedBackground } from "@/components/ui/animated-background";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +20,7 @@ import { googleCalendarConnectionKey, googleCalendarMeetingsKey, type GoogleCale
 import { MeetingEditDialog } from "../MeetingEditDialog";
 import { GoogleCalendarPrivacyNotice } from "../GoogleCalendarPrivacyNotice";
 import { Skeleton } from "@/components/ui/skeleton";
+import { usePrefersReducedMotion } from "@/shared/presentation/hooks/usePrefersReducedMotion";
 
 type CalendarMode = "month" | "agenda";
 type AgendaPeriod = "upcoming" | "past";
@@ -30,9 +33,8 @@ const WEEKDAY_LABELS = Array.from({ length: 7 }, (_, index) =>
   format(addDays(startOfWeek(new Date(2024, 0, 7)), index), "EEE"),
 );
 
-const SEGMENT_BASE = "h-7 rounded-md px-2.5 text-xs";
-const SEGMENT_ON = `${SEGMENT_BASE} bg-elev-5 text-foreground shadow-sm hover:bg-elev-5`;
-const SEGMENT_OFF = `${SEGMENT_BASE} text-muted-foreground hover:text-foreground`;
+const SEGMENT_BASE = "h-7 rounded-md px-2.5 text-xs transition-colors motion-reduce:transition-none";
+const SEGMENT_TEXT = "text-muted-foreground hover:text-foreground data-[checked=true]:text-foreground";
 
 function formatDate(value: string, includeDate: boolean): string {
   return new Intl.DateTimeFormat(undefined, {
@@ -42,6 +44,7 @@ function formatDate(value: string, includeDate: boolean): string {
 }
 
 export function CalendarPage() {
+  const reduceMotion = usePrefersReducedMotion();
   const queryClient = useQueryClient();
   const [mode, setMode] = useState<CalendarMode>("month");
   const [period, setPeriod] = useState<AgendaPeriod>("upcoming");
@@ -174,7 +177,9 @@ export function CalendarPage() {
         icon={CalendarDays}
         title="Calendar"
         description="Schedule events, manage meetings, and join invitations from your Maros teammates."
-        rightSlot={<Button asChild><Link href="/meet"><CalendarDays className="mr-2 size-4" />Add event</Link></Button>}
+        rightSlot={connection.data?.configured === false ? undefined : (
+          <Button asChild><Link href="/meet"><CalendarDays className="mr-2 size-4" />Add event</Link></Button>
+        )}
         metaSlot={connection.isPending ? (
           <span className="inline-flex items-center gap-1.5 rounded-full bg-elev-3 px-2.5 py-1 text-xs text-muted-foreground" role="status">
             <LoaderCircle className="size-3 animate-spin" />Checking Google Calendar…
@@ -225,145 +230,169 @@ export function CalendarPage() {
               <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search meetings or people" className="h-8 rounded-md pl-8 text-xs md:text-xs" aria-label="Search meetings or people" />
             </div>
             {mode === "agenda" ? (
-              <div className="flex shrink-0 rounded-lg bg-elev-3 p-0.5" aria-label="Meeting period">
-                <Button type="button" size="sm" variant="ghost" className={period === "upcoming" ? SEGMENT_ON : SEGMENT_OFF} aria-pressed={period === "upcoming"} onClick={() => setPeriod("upcoming")}>Upcoming</Button>
-                <Button type="button" size="sm" variant="ghost" className={period === "past" ? SEGMENT_ON : SEGMENT_OFF} aria-pressed={period === "past"} onClick={() => setPeriod("past")}>Past</Button>
+              <div role="group" aria-label="Meeting period" className="flex shrink-0 rounded-lg bg-elev-3 p-0.5">
+                <AnimatedBackground value={period} onValueChange={setPeriod}>
+                  <Button type="button" size="sm" variant="ghost" data-id="upcoming" className={cn(SEGMENT_BASE, SEGMENT_TEXT)} aria-pressed={period === "upcoming"}>Upcoming</Button>
+                  <Button type="button" size="sm" variant="ghost" data-id="past" className={cn(SEGMENT_BASE, SEGMENT_TEXT)} aria-pressed={period === "past"}>Past</Button>
+                </AnimatedBackground>
               </div>
             ) : null}
-            <div className="flex shrink-0 rounded-lg bg-elev-3 p-0.5" aria-label="Calendar view">
-              <Button type="button" size="sm" variant="ghost" className={mode === "month" ? SEGMENT_ON : SEGMENT_OFF} aria-pressed={mode === "month"} onClick={() => setMode("month")}><CalendarDays className="mr-1 size-3.5" />Month</Button>
-              <Button type="button" size="sm" variant="ghost" className={mode === "agenda" ? SEGMENT_ON : SEGMENT_OFF} aria-pressed={mode === "agenda"} onClick={() => setMode("agenda")}><List className="mr-1 size-3.5" />Agenda</Button>
+            <div role="group" aria-label="Calendar view" className="flex shrink-0 rounded-lg bg-elev-3 p-0.5">
+              <AnimatedBackground value={mode} onValueChange={setMode}>
+                <Button type="button" size="sm" variant="ghost" data-id="month" className={cn(SEGMENT_BASE, SEGMENT_TEXT)} aria-pressed={mode === "month"}><CalendarDays className="mr-1 size-3.5" />Month</Button>
+                <Button type="button" size="sm" variant="ghost" data-id="agenda" className={cn(SEGMENT_BASE, SEGMENT_TEXT)} aria-pressed={mode === "agenda"}><List className="mr-1 size-3.5" />Agenda</Button>
+              </AnimatedBackground>
             </div>
           </div>
         </div>
 
-        {mode === "month" ? (
-          <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_20rem]">
-            <div className="min-w-0 p-3">
-              {meetings.isError ? (
-                <div className="mb-3 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs">
-                  <span className="text-destructive">Could not load your meetings.</span>
-                  <Button type="button" variant="outline" size="sm" className="h-7 px-2.5 text-xs" onClick={() => void meetings.refetch()}>Try again</Button>
-                </div>
-              ) : meetings.isPending ? (
-                <p className="mb-2 flex items-center gap-1.5 text-xs text-muted-foreground" role="status"><LoaderCircle className="size-3 animate-spin" />Loading meetings…</p>
-              ) : null}
+        <AnimatePresence mode="wait" initial={false}>
+          {mode === "month" ? (
+            <motion.div
+              key="calendar-month"
+              initial={reduceMotion ? false : { opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={reduceMotion ? { opacity: 1 } : { opacity: 0, y: -3 }}
+              transition={{ duration: reduceMotion ? 0 : 0.16, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_20rem]">
+                <div className="min-w-0 p-3">
+                  {meetings.isError ? (
+                    <div className="mb-3 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs">
+                      <span className="text-destructive">Could not load your meetings.</span>
+                      <Button type="button" variant="outline" size="sm" className="h-7 px-2.5 text-xs" onClick={() => void meetings.refetch()}>Try again</Button>
+                    </div>
+                  ) : meetings.isPending ? (
+                    <p className="mb-2 flex items-center gap-1.5 text-xs text-muted-foreground" role="status"><LoaderCircle className="size-3 animate-spin" />Loading meetings…</p>
+                  ) : null}
 
-              <div className="grid grid-cols-7 gap-1" aria-label={`${format(month, "MMMM yyyy")} calendar`}>
-                {WEEKDAYS.map((weekday, index) => (
-                  <div key={WEEKDAY_LABELS[index]} aria-hidden="true" className="pb-0.5 text-center font-display text-[10px] font-semibold uppercase tracking-widest text-fg-faint">
-                    <span className="sm:hidden">{weekday}</span>
-                    <span className="hidden sm:inline">{WEEKDAY_LABELS[index]}</span>
-                  </div>
-                ))}
-                {monthDays.map((day) => {
-                  const dayMeetings = meetingsByDay.get(format(day, "yyyy-MM-dd")) ?? [];
-                  const selected = isSameDay(day, selectedDate);
-                  const currentMonth = isSameMonth(day, month);
-                  const today = isSameDay(day, new Date());
-                  return (
-                    <button
-                      key={format(day, "yyyy-MM-dd")}
-                      type="button"
-                      aria-label={`${format(day, "EEEE, MMMM d, yyyy")}: ${dayMeetings.length} ${dayMeetings.length === 1 ? "meeting" : "meetings"}`}
-                      aria-pressed={selected}
-                      aria-current={today ? "date" : undefined}
-                      onClick={() => { setSelectedDate(day); if (!currentMonth) setMonth(startOfMonth(day)); }}
-                      className={cn(
-                        "flex min-h-11 min-w-0 flex-col gap-0.5 rounded-md border p-1 text-left transition-colors focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:min-h-[3.25rem]",
-                        selected
-                          ? "border-primary/60 bg-primary-container text-primary-on-container"
-                          : currentMonth
-                            ? "border-transparent bg-elev-2 text-foreground hover:bg-elev-4"
-                            : "border-transparent bg-elev-1 text-fg-faint hover:bg-elev-3",
-                      )}
-                    >
-                      <span className="flex items-center justify-between gap-1">
-                        <span
+                  <div className="grid grid-cols-7 gap-1" aria-label={`${format(month, "MMMM yyyy")} calendar`}>
+                    {WEEKDAYS.map((weekday, index) => (
+                      <div key={WEEKDAY_LABELS[index]} aria-hidden="true" className="pb-0.5 text-center font-display text-[10px] font-semibold uppercase tracking-widest text-fg-faint">
+                        <span className="sm:hidden">{weekday}</span>
+                        <span className="hidden sm:inline">{WEEKDAY_LABELS[index]}</span>
+                      </div>
+                    ))}
+                    {monthDays.map((day) => {
+                      const dayMeetings = meetingsByDay.get(format(day, "yyyy-MM-dd")) ?? [];
+                      const selected = isSameDay(day, selectedDate);
+                      const currentMonth = isSameMonth(day, month);
+                      const today = isSameDay(day, new Date());
+                      return (
+                        <button
+                          key={format(day, "yyyy-MM-dd")}
+                          type="button"
+                          aria-label={`${format(day, "EEEE, MMMM d, yyyy")}: ${dayMeetings.length} ${dayMeetings.length === 1 ? "meeting" : "meetings"}`}
+                          aria-pressed={selected}
+                          aria-current={today ? "date" : undefined}
+                          onClick={() => { setSelectedDate(day); if (!currentMonth) setMonth(startOfMonth(day)); }}
                           className={cn(
-                            "flex size-[18px] items-center justify-center rounded-full font-mono text-[11px] leading-none tabular-nums",
+                            "flex min-h-11 min-w-0 flex-col gap-0.5 rounded-md border p-1 text-left transition-colors focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:min-h-[3.25rem]",
                             selected
-                              ? "bg-primary font-semibold text-primary-foreground"
-                              : today
-                                ? "font-semibold text-primary ring-1 ring-inset ring-primary"
-                                : currentMonth
-                                  ? "text-foreground"
-                                  : "text-fg-faint",
+                              ? "border-primary/60 bg-primary-container text-primary-on-container"
+                              : currentMonth
+                                ? "border-transparent bg-elev-2 text-foreground hover:bg-elev-4"
+                                : "border-transparent bg-elev-1 text-fg-faint hover:bg-elev-3",
                           )}
                         >
-                          {format(day, "d")}
-                        </span>
-                        {dayMeetings.length ? (
-                          <span className={cn("font-mono text-[10px] tabular-nums md:hidden", selected ? "text-primary-on-container" : "text-primary")}>{dayMeetings.length}</span>
-                        ) : null}
-                      </span>
-
-                      {dayMeetings.length ? (
-                        <>
-                          <span className="flex items-center gap-0.5 md:hidden">
-                            {dayMeetings.slice(0, 3).map((meeting) => (
-                              <span key={meeting.id} className={cn("size-1 rounded-full", selected ? "bg-primary-on-container" : "bg-primary")} />
-                            ))}
+                          <span className="flex items-center justify-between gap-1">
+                            <span
+                              className={cn(
+                                "flex size-[18px] items-center justify-center rounded-full font-mono text-[11px] leading-none tabular-nums",
+                                selected
+                                  ? "bg-primary font-semibold text-primary-foreground"
+                                  : today
+                                    ? "font-semibold text-primary ring-1 ring-inset ring-primary"
+                                    : currentMonth
+                                      ? "text-foreground"
+                                      : "text-fg-faint",
+                              )}
+                            >
+                              {format(day, "d")}
+                            </span>
+                            {dayMeetings.length ? (
+                              <span className={cn("font-mono text-[10px] tabular-nums md:hidden", selected ? "text-primary-on-container" : "text-primary")}>{dayMeetings.length}</span>
+                            ) : null}
                           </span>
-                          <span className="hidden min-w-0 flex-col gap-px md:flex">
-                            {dayMeetings.slice(0, 2).map((meeting) => (
-                              <span
-                                key={meeting.id}
-                                className={cn(
-                                  "flex min-w-0 items-center gap-1 rounded-[3px] px-1 text-[10px] leading-[15px]",
-                                  selected ? "bg-primary/20 text-primary-on-container" : "bg-elev-4 text-foreground",
-                                )}
-                              >
-                                <span className={cn("size-1 shrink-0 rounded-full", selected ? "bg-primary-on-container" : "bg-primary")} />
-                                <span className="hidden shrink-0 font-mono tabular-nums opacity-70 xl:inline">{format(new Date(meeting.startsAt), "h:mm")}</span>
-                                <span className="truncate">{meeting.title}</span>
+
+                          {dayMeetings.length ? (
+                            <>
+                              <span className="flex items-center gap-0.5 md:hidden">
+                                {dayMeetings.slice(0, 3).map((meeting) => (
+                                  <span key={meeting.id} className={cn("size-1 rounded-full", selected ? "bg-primary-on-container" : "bg-primary")} />
+                                ))}
                               </span>
-                            ))}
-                            {dayMeetings.length > 2 ? <span className="truncate px-1 text-[10px] leading-[14px] text-muted-foreground">+{dayMeetings.length - 2} more</span> : null}
-                          </span>
-                        </>
-                      ) : null}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <aside className="min-w-0 border-t border-line bg-elev-2 p-3 lg:border-l lg:border-t-0">
-              <div className="flex items-baseline justify-between gap-2">
-                <h3 className="truncate font-display text-sm font-semibold tracking-tight">{format(selectedDate, "EEEE, MMM d")}</h3>
-                <span className="shrink-0 font-mono text-[11px] tabular-nums text-muted-foreground">{selectedDayMeetings.length} {selectedDayMeetings.length === 1 ? "meeting" : "meetings"}</span>
-              </div>
-              {selectedDayMeetings.length ? (
-                <div className="mt-2.5 flex flex-col gap-2">{selectedDayMeetings.map(renderDayMeeting)}</div>
-              ) : (
-                <div className="mt-2.5 rounded-lg border border-dashed border-line px-3 py-6 text-center">
-                  <p className="text-xs font-medium">No meetings this day</p>
-                  <p className="mt-0.5 text-xs text-muted-foreground">Pick another date or add an event.</p>
-                  {connected ? <Button asChild size="sm" variant="secondary" className="mt-3 h-7 px-2.5 text-xs"><Link href="/meet"><CalendarDays className="mr-1 size-3.5" />Add event</Link></Button> : null}
+                              <span className="hidden min-w-0 flex-col gap-px md:flex">
+                                {dayMeetings.slice(0, 2).map((meeting) => (
+                                  <span
+                                    key={meeting.id}
+                                    className={cn(
+                                      "flex min-w-0 items-center gap-1 rounded-[3px] px-1 text-[10px] leading-[15px]",
+                                      selected ? "bg-primary/20 text-primary-on-container" : "bg-elev-4 text-foreground",
+                                    )}
+                                  >
+                                    <span className={cn("size-1 shrink-0 rounded-full", selected ? "bg-primary-on-container" : "bg-primary")} />
+                                    <span className="hidden shrink-0 font-mono tabular-nums opacity-70 xl:inline">{format(new Date(meeting.startsAt), "h:mm")}</span>
+                                    <span className="truncate">{meeting.title}</span>
+                                  </span>
+                                ))}
+                                {dayMeetings.length > 2 ? <span className="truncate px-1 text-[10px] leading-[14px] text-muted-foreground">+{dayMeetings.length - 2} more</span> : null}
+                              </span>
+                            </>
+                          ) : null}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
+
+                <aside className="min-w-0 border-t border-line bg-elev-2 p-3 lg:border-l lg:border-t-0">
+                  <div className="flex items-baseline justify-between gap-2">
+                    <h3 className="truncate font-display text-sm font-semibold tracking-tight">{format(selectedDate, "EEEE, MMM d")}</h3>
+                    <span className="shrink-0 font-mono text-[11px] tabular-nums text-muted-foreground">{selectedDayMeetings.length} {selectedDayMeetings.length === 1 ? "meeting" : "meetings"}</span>
+                  </div>
+                  {selectedDayMeetings.length ? (
+                    <div className="mt-2.5 flex flex-col gap-2">{selectedDayMeetings.map(renderDayMeeting)}</div>
+                  ) : (
+                    <div className="mt-2.5 rounded-lg border border-dashed border-line px-3 py-6 text-center">
+                      <p className="text-xs font-medium">No meetings this day</p>
+                      <p className="mt-0.5 text-xs text-muted-foreground">Pick another date or add an event.</p>
+                      {connected ? <Button asChild size="sm" variant="secondary" className="mt-3 h-7 px-2.5 text-xs"><Link href="/meet"><CalendarDays className="mr-1 size-3.5" />Add event</Link></Button> : null}
+                    </div>
+                  )}
+                </aside>
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="calendar-agenda"
+              initial={reduceMotion ? false : { opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={reduceMotion ? { opacity: 1 } : { opacity: 0, y: -3 }}
+              transition={{ duration: reduceMotion ? 0 : 0.16, ease: [0.22, 1, 0.36, 1] }}
+            >
+              {meetings.isPending ? (
+                <div className="space-y-3 p-4 sm:p-6" role="status" aria-label="Loading meetings">
+                  {Array.from({ length: 3 }, (_, index) => <Skeleton key={index} className="h-24 rounded-xl" />)}
+                </div>
+              ) : meetings.isError ? (
+                <div className="p-6 text-sm">
+                  <p className="text-destructive">Could not load your meetings.</p>
+                  <Button type="button" variant="outline" className="mt-3" onClick={() => void meetings.refetch()}>Try again</Button>
+                </div>
+              ) : visibleMeetings.length === 0 ? (
+                <div className="px-6 py-12 text-center">
+                  <CalendarDays className="mx-auto size-8 text-fg-faint" />
+                  <h3 className="mt-3 text-sm font-medium">{search ? "No matching meetings" : period === "upcoming" ? "Nothing scheduled yet" : "No past meetings"}</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">{search ? "Try a different title or participant email." : period === "upcoming" ? "Add an event for any day and invite teammates or guests." : "Completed meetings will appear here."}</p>
+                  {!search && period === "upcoming" && connected ? <Button asChild className="mt-4"><Link href="/meet"><CalendarDays className="mr-2 size-4" />Schedule a meeting</Link></Button> : null}
+                </div>
+              ) : (
+                <div className="divide-y">{visibleMeetings.map(renderMeeting)}</div>
               )}
-            </aside>
-          </div>
-        ) : meetings.isPending ? (
-          <div className="space-y-3 p-4 sm:p-6" role="status" aria-label="Loading meetings">
-            {Array.from({ length: 3 }, (_, index) => <Skeleton key={index} className="h-24 rounded-xl" />)}
-          </div>
-        ) : meetings.isError ? (
-          <div className="p-6 text-sm">
-            <p className="text-destructive">Could not load your meetings.</p>
-            <Button type="button" variant="outline" className="mt-3" onClick={() => void meetings.refetch()}>Try again</Button>
-          </div>
-        ) : visibleMeetings.length === 0 ? (
-          <div className="px-6 py-12 text-center">
-            <CalendarDays className="mx-auto size-8 text-fg-faint" />
-            <h3 className="mt-3 text-sm font-medium">{search ? "No matching meetings" : period === "upcoming" ? "Nothing scheduled yet" : "No past meetings"}</h3>
-            <p className="mt-1 text-sm text-muted-foreground">{search ? "Try a different title or participant email." : period === "upcoming" ? "Add an event for any day and invite teammates or guests." : "Completed meetings will appear here."}</p>
-            {!search && period === "upcoming" && connected ? <Button asChild className="mt-4"><Link href="/meet"><CalendarDays className="mr-2 size-4" />Schedule a meeting</Link></Button> : null}
-          </div>
-        ) : (
-          <div className="divide-y">{visibleMeetings.map(renderMeeting)}</div>
-        )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </section>
 
       <MeetingEditDialog meeting={meetingToEdit} open={meetingToEdit !== null} onOpenChange={(open) => { if (!open) setMeetingToEdit(null); }} />

@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/table";
 import { money } from "../widgets/formatters";
 import type { ClientScorecardRow } from "./useClientScorecard";
+import { SharedEntityName } from "@/components/shared/SharedEntityName";
 
 const DAY_MS = 86_400_000;
 const AVG_MONTH_DAYS = 30.44;
@@ -83,9 +84,9 @@ export function ClientScorecardTable({
   now?: number;
 }) {
   return (
-    <Card className="border-line">
-      <CardContent className="pt-6">
-        <Table>
+    <Card className="min-w-0 border-line">
+      <CardContent className="min-w-0 pt-4 sm:pt-6">
+        <Table className="min-w-[760px]">
           <TableHeader>
             <TableRow className="hover:bg-transparent">
               <TableHead className="font-display text-xs uppercase tracking-wide text-muted-foreground">
@@ -122,7 +123,9 @@ export function ClientScorecardTable({
                       href={`/contact/${row.contactId}`}
                       className="font-medium hover:underline"
                     >
-                      {row.contactName ?? `Contact #${row.contactId}`}
+                      <SharedEntityName layoutId={`maros-contact-name-${row.contactId}`}>
+                        {row.contactName ?? `Contact #${row.contactId}`}
+                      </SharedEntityName>
                     </Link>
                     {row.companyName ? (
                       <p className="truncate text-xs text-muted-foreground">{row.companyName}</p>

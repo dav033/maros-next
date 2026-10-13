@@ -1,7 +1,7 @@
 "use client";
 
 import { CalendarDays, KanbanSquare, Rows3, UserCheck } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { AnimatedBackground } from "@/components/ui/animated-background";
 import { useTasksViewState, type TasksView } from "../hooks/useTasksViewState";
 
 export function TaskViewSwitcher({ current }: { current: TasksView }) {
@@ -14,27 +14,34 @@ export function TaskViewSwitcher({ current }: { current: TasksView }) {
   ];
 
   return (
-    <div className="inline-flex rounded-lg border border-line bg-elev-1 p-0.5">
-      {options.map((option) => {
-        const active = option.value === current;
-        const Icon = option.icon;
-        return (
-          <button
-            key={option.value}
-            onClick={() => replaceState({ view: option.value })}
-            aria-current={active ? "page" : undefined}
-            className={cn(
-              "inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
-              active
-                ? "bg-card text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            <Icon className="h-3.5 w-3.5" />
-            {option.label}
-          </button>
-        );
-      })}
+    <div
+      role="group"
+      aria-label="Task views"
+      data-task-view-switcher
+      className="inline-flex rounded-lg border border-line bg-elev-1 p-0.5"
+    >
+      <AnimatedBackground
+        value={current}
+        onValueChange={(view) => replaceState({ view })}
+      >
+        {options.map((option) => {
+          const active = option.value === current;
+          const Icon = option.icon;
+          return (
+            <button
+              key={option.value}
+              type="button"
+              data-id={option.value}
+              aria-current={active ? "page" : undefined}
+              aria-pressed={active}
+              className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground data-[checked=true]:text-foreground motion-reduce:transition-none"
+            >
+              <Icon className="h-3.5 w-3.5" />
+              {option.label}
+            </button>
+          );
+        })}
+      </AnimatedBackground>
     </div>
   );
 }

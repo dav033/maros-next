@@ -1,7 +1,7 @@
 import { Suspense } from "react";
-import { CompanyDetailsPage } from "@/features/company/presentation/pages/CompanyDetailsPage";
+import { CompanyDetailsRoute } from "@/features/company/presentation/pages/CompanyDetailsRoute";
 import { CompanyDetailsPageSkeleton } from "@/features/company/presentation/components/CompanyDetailsPageSkeleton";
-import { loadCompanyDetailsData } from "@/features/company/presentation/data/loadCompanyDetailsData";
+import { parsePositiveSafeInteger } from "@/shared/utils/parsePositiveSafeInteger";
 
 async function CompanyDetailsPageWithData({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params;
@@ -20,9 +20,9 @@ async function CompanyDetailsPageWithData({ params }: { params: Promise<{ id: st
     );
   }
   
-  const companyId = parseInt(idString, 10);
+  const companyId = parsePositiveSafeInteger(idString);
   
-  if (isNaN(companyId) || companyId <= 0) {
+  if (companyId === null) {
     return (
       <div className="container mx-auto p-6">
         <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-6">
@@ -35,8 +35,7 @@ async function CompanyDetailsPageWithData({ params }: { params: Promise<{ id: st
     );
   }
   
-  const initialData = await loadCompanyDetailsData(companyId);
-  return <CompanyDetailsPage companyId={companyId} initialData={initialData} />;
+  return <CompanyDetailsRoute companyId={companyId} />;
 }
 
 export default async function CompanyDetailsRoutePage({ params }: { params: Promise<{ id: string }> }) {

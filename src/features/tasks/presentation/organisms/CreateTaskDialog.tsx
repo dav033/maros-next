@@ -1,10 +1,11 @@
 "use client";
 
 import { useRef, useState, type ReactNode } from "react";
-import { ChevronDown, ChevronRight, Link2, Plus, X } from "lucide-react";
+import { ChevronDown, ChevronRight, Link2, Plus } from "lucide-react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -29,10 +30,11 @@ import { TaskKindIcon } from "../atoms/TaskKindIcon";
 import { AssigneePicker } from "../molecules/AssigneePicker";
 import { TaskDatePicker } from "../molecules/TaskDatePicker";
 import { LabelPicker } from "../molecules/LabelPicker";
+import { TaskLabelChips } from "../molecules/TaskLabelChips";
 import { TaskEntityPicker } from "../molecules/TaskEntityPicker";
 import { TaskRichTextEditor } from "../molecules/TaskRichTextEditor";
 import { isBlankDoc } from "../molecules/taskRichTextDoc";
-import { TASK_KIND_LABELS, TASK_PRIORITY_LABELS, taskLabelColor } from "../atoms/taskVisualTokens";
+import { TASK_KIND_LABELS, TASK_PRIORITY_LABELS } from "../atoms/taskVisualTokens";
 import { taskEntityLabel } from "../atoms/taskEntityTokens";
 import { PendingAttachmentPicker, type PendingAttachment } from "@/features/attachments/presentation/PendingAttachmentPicker";
 import { ManagedFilesHttpRepository } from "@/features/attachments/infra/ManagedFilesHttpRepository";
@@ -233,6 +235,9 @@ export function CreateTaskDialog({
       >
         <DialogHeader>
           <DialogTitle>New task</DialogTitle>
+          <DialogDescription className="sr-only">
+            Create a task and set its owner, due date, and related record.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -350,25 +355,10 @@ export function CreateTaskDialog({
               </div>
 
               {labelIds.size > 0 ? (
-                <div className="flex flex-wrap gap-1.5">
-                  {allLabels
-                    .filter((l) => labelIds.has(l.id))
-                    .map((label) => (
-                      <span
-                        key={label.id}
-                        className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium"
-                        style={{
-                          backgroundColor: `${taskLabelColor(label.color)}22`,
-                          color: taskLabelColor(label.color),
-                        }}
-                      >
-                        {label.name}
-                        <button type="button" onClick={() => toggleLabel(label.id)} aria-label={`Remove ${label.name}`}>
-                          <X className="h-3 w-3" />
-                        </button>
-                      </span>
-                    ))}
-                </div>
+                <TaskLabelChips
+                  labels={allLabels.filter((label) => labelIds.has(label.id))}
+                  onRemove={toggleLabel}
+                />
               ) : null}
 
               <div className="space-y-1.5">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { AlertCircle, ArrowLeft, Link2Off, RotateCcw } from "lucide-react";
 
@@ -17,6 +18,10 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AppError } from "@/shared/errors";
+import { projectsKeys } from "@/project/application";
+import type { Project } from "@/project/domain";
+import { SharedEntityName } from "@/components/shared/SharedEntityName";
+import { useRouteSharedLayoutScope } from "@/shared/presentation/RouteMotionContext";
 import {
   isPointInTimeReport,
   QBO_ACCOUNTING_METHODS,
@@ -136,6 +141,11 @@ export function ProjectQboReportPage({
   initialReport?: QboReportName;
 }) {
   const [report, setReport] = useState<QboReportName>(initialReport ?? DEFAULT_PROJECT_REPORT);
+  const queryClient = useQueryClient();
+  const sharedLayoutScope = useRouteSharedLayoutScope();
+  const cachedProject = queryClient
+    .getQueryData<Project[]>(projectsKeys.list())
+    ?.find((project) => project.id === projectId);
   const [accountingMethod, setAccountingMethod] = useState<QboAccountingMethod>("Accrual");
   const [startDate, setStartDate] = useState(() => `${new Date().getFullYear()}-01-01`);
   const [endDate, setEndDate] = useState(() => toDateString(new Date()));
@@ -166,10 +176,33 @@ export function ProjectQboReportPage({
             <ArrowLeft className="size-4" />
           </Link>
         </Button>
-        <h1 className="font-display text-2xl font-bold text-foreground">QuickBooks report</h1>
-        <p className="text-sm text-muted-foreground">
-          Project {data?.leadNumber ? `#${data.leadNumber}` : `#${projectId}`}
-        </p>
+        <div className="min-w-0">
+          <h1 className="font-display text-2xl font-bold text-foreground">QuickBooks report</h1>
+          <div className="flex min-w-0 flex-wrap items-center gap-x-2 text-sm text-muted-foreground">
+            {cachedProject?.lead?.name ? (
+              <>
+                <SharedEntityName
+                  layoutCrossfade={false}
+                  layoutId={`maros-project-name-${projectId}-desktop-${sharedLayoutScope}`}
+                  transitionRole="detail"
+                  className="hidden min-w-0 break-words xl:inline"
+                >
+                  {cachedProject.lead.name}
+                </SharedEntityName>
+                <SharedEntityName
+                  layoutCrossfade={false}
+                  layoutId={`maros-project-name-${projectId}-mobile-${sharedLayoutScope}`}
+                  transitionRole="detail"
+                  className="min-w-0 break-words xl:hidden"
+                >
+                  {cachedProject.lead.name}
+                </SharedEntityName>
+                <span aria-hidden="true">·</span>
+              </>
+            ) : null}
+            <span>Project {data?.leadNumber ? `#${data.leadNumber}` : `#${projectId}`}</span>
+          </div>
+        </div>
       </div>
 
       <Card>

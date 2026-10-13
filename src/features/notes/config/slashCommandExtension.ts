@@ -1,4 +1,4 @@
-import { Extension } from "@tiptap/core";
+import { Extension, type Editor, type Range } from "@tiptap/core";
 import Suggestion, { type SuggestionOptions } from "@tiptap/suggestion";
 import { ReactRenderer } from "@tiptap/react";
 import {
@@ -7,12 +7,17 @@ import {
 } from "@/features/notes/presentation/organisms/NoteSlashMenuList";
 import { filterNoteSlashCommands, type NoteSlashCommandItem } from "./noteSlashCommands";
 
+type SlashCommandOptions = {
+  requestImageUrl: (editor: Editor, range: Range) => void;
+  suggestion: Omit<SuggestionOptions<NoteSlashCommandItem>, "editor">;
+};
+
 const suggestionOptions: Omit<SuggestionOptions<NoteSlashCommandItem>, "editor"> = {
   char: "/",
   startOfLine: false,
   items: ({ query }) => filterNoteSlashCommands(query),
   command: ({ editor, range, props }) => {
-    props.run(editor, range);
+    props.run?.(editor, range);
   },
   render: () => {
     let component: ReactRenderer<NoteSlashMenuListHandle> | null = null;
@@ -45,11 +50,14 @@ const suggestionOptions: Omit<SuggestionOptions<NoteSlashCommandItem>, "editor">
   },
 };
 
-export const SlashCommand = Extension.create({
+export const SlashCommand = Extension.create<SlashCommandOptions>({
   name: "slashCommand",
 
   addOptions() {
-    return { suggestion: suggestionOptions };
+    return {
+      requestImageUrl: () => undefined,
+      suggestion: suggestionOptions,
+    };
   },
 
   addProseMirrorPlugins() {
@@ -57,6 +65,13 @@ export const SlashCommand = Extension.create({
       Suggestion({
         editor: this.editor,
         ...this.options.suggestion,
+        command: ({ editor, range, props }) => {
+          if (props.id === "image") {
+            this.options.requestImageUrl(editor, range);
+            return;
+          }
+          props.run?.(editor, range);
+        },
       }),
     ];
   },

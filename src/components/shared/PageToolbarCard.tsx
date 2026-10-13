@@ -28,14 +28,13 @@ export function PageToolbarCard({
   return (
     <div
       className={cn(
-        "dashboard-section-enter rounded-2xl border border-line bg-elev-1 p-4 shadow-sm",
+        "w-full min-w-0 max-w-full rounded-2xl border border-line bg-elev-1 p-4 shadow-sm",
         className,
       )}
-      style={{ animationDelay: "60ms" }}
     >
       {showHeader ? (
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-2 font-display text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        <div className="mb-3 flex min-w-0 flex-wrap items-center justify-between gap-2">
+          <div className="flex min-w-0 flex-wrap items-center gap-2 font-display text-xs font-medium uppercase tracking-wide text-muted-foreground">
             {Icon ? <Icon className="h-3.5 w-3.5" /> : null}
             {label ? <span>{label}</span> : null}
             {typeof resultCount === "number" && typeof totalCount === "number" ? (
@@ -46,11 +45,11 @@ export function PageToolbarCard({
               </span>
             ) : null}
           </div>
-          {rightSlot ? <div className="flex flex-wrap items-center gap-2">{rightSlot}</div> : null}
+          {rightSlot ? <div className="flex min-w-0 flex-wrap items-center gap-2">{rightSlot}</div> : null}
         </div>
       ) : null}
 
-      <div className="flex flex-wrap items-center gap-2">{children}</div>
+      <div className="flex min-w-0 flex-wrap items-center gap-2">{children}</div>
     </div>
   );
 }

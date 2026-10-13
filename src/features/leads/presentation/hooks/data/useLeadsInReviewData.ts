@@ -9,6 +9,10 @@ export interface UseLeadsInReviewDataReturn {
   leads: Lead[];
   contacts: ReturnType<typeof useInstantContacts>["contacts"];
   projectTypes: ReturnType<typeof useProjectTypes>["projectTypes"];
+  projectTypesLoading: ReturnType<typeof useProjectTypes>["isLoading"];
+  projectTypesFetching: ReturnType<typeof useProjectTypes>["isFetching"];
+  projectTypesError: ReturnType<typeof useProjectTypes>["error"];
+  refetchProjectTypes: ReturnType<typeof useProjectTypes>["refetch"];
   showSkeleton: boolean;
   refetch: () => Promise<void>;
 }
@@ -16,12 +20,22 @@ export interface UseLeadsInReviewDataReturn {
 export function useLeadsInReviewData(): UseLeadsInReviewDataReturn {
   const { leads, showSkeleton, refetch } = useInstantLeadsInReview();
   const { contacts } = useInstantContacts();
-  const { projectTypes } = useProjectTypes();
+  const {
+    projectTypes,
+    isLoading: projectTypesLoading,
+    isFetching: projectTypesFetching,
+    error: projectTypesError,
+    refetch: refetchProjectTypes,
+  } = useProjectTypes();
 
   return {
     leads: leads ?? [],
     contacts,
     projectTypes,
+    projectTypesLoading,
+    projectTypesFetching,
+    projectTypesError,
+    refetchProjectTypes,
     showSkeleton: !!showSkeleton,
     refetch,
   };

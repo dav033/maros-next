@@ -1,11 +1,10 @@
 "use client";
 
 import { useCallback, useRef } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 
 /** Drives the detail sheet from a `?task=id` query param, so the link is shareable. */
 export function useTaskDetailRoute() {
-  const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
@@ -16,29 +15,30 @@ export function useTaskDetailRoute() {
 
   const openTask = useCallback(
     (id: number) => {
-      const next = new URLSearchParams(searchParams.toString());
+      const next = new URLSearchParams(window.location.search);
+      const alreadyOpen = next.has("task");
       next.set("task", String(id));
-      if (searchParams.get("task") == null) {
+      if (!alreadyOpen) {
         openedInternally.current = true;
-        router.push(`${pathname}?${next.toString()}`, { scroll: false });
+        window.history.pushState(null, "", `${pathname}?${next.toString()}`);
       } else {
-        router.replace(`${pathname}?${next.toString()}`, { scroll: false });
+        window.history.replaceState(null, "", `${pathname}?${next.toString()}`);
       }
     },
-    [router, pathname, searchParams]
+    [pathname]
   );
 
   const closeTask = useCallback(() => {
     if (openedInternally.current) {
       openedInternally.current = false;
-      router.back();
+      window.history.back();
       return;
     }
-    const next = new URLSearchParams(searchParams.toString());
+    const next = new URLSearchParams(window.location.search);
     next.delete("task");
     const query = next.toString();
-    router.replace(`${pathname}${query ? `?${query}` : ""}`, { scroll: false });
-  }, [router, pathname, searchParams]);
+    window.history.replaceState(null, "", `${pathname}${query ? `?${query}` : ""}`);
+  }, [pathname]);
 
   return { taskId, openTask, closeTask };
 }

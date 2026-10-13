@@ -15,8 +15,23 @@ export type ApiContactDTO = {
   phone?: string | null;
   email?: string | null;
   address?: string | null;
+  addressLink?: string | null;
   isCustomer?: boolean | null;
   isClient?: boolean | null;
+  company?: {
+    id?: number | null;
+    name?: string | null;
+    address?: string | null;
+    addressLink?: string | null;
+    phone?: string | null;
+    email?: string | null;
+    submiz?: string | null;
+    notes?: string[] | null;
+    type?: string | null;
+    serviceId?: number | null;
+    isCustomer?: boolean | null;
+    isClient?: boolean | null;
+  } | null;
 } | null;
 
 export type ApiLeadDTO = {
@@ -44,6 +59,7 @@ export type ApiLeadDTO = {
   estimate?: number | string | null;
   /** Bloque QBO adjuntado por el backend (Estimate real, solo lectura). */
   financial?: {
+    found?: boolean;
     estimatedAmount?: number | null;
   } | null;
   ownerId?: number | null;
@@ -134,8 +150,31 @@ export function mapLeadFromDTO(dto: ApiLeadDTO): Lead {
   const contactEmail = normalizeText(dto?.contact?.email ?? "");
   const contactOccupation = normalizeText(dto?.contact?.occupation ?? "");
   const contactAddress = normalizeText(dto?.contact?.address ?? "");
+  const contactAddressLink = normalizeText(dto?.contact?.addressLink ?? "");
   const contactIsCustomer = !!dto?.contact?.isCustomer;
   const contactIsClient = !!dto?.contact?.isClient;
+  const companyId = dto?.contact?.company?.id;
+  const companyName = normalizeText(dto?.contact?.company?.name ?? "");
+  const company =
+    typeof companyId === "number" && companyId > 0 && companyName
+      ? {
+          id: companyId,
+          name: companyName,
+          address: normalizeText(dto?.contact?.company?.address ?? "") || undefined,
+          addressLink: normalizeText(dto?.contact?.company?.addressLink ?? "") || undefined,
+          phone: normalizeText(dto?.contact?.company?.phone ?? "") || undefined,
+          email: normalizeText(dto?.contact?.company?.email ?? "") || undefined,
+          submiz: normalizeText(dto?.contact?.company?.submiz ?? "") || undefined,
+          type: dto?.contact?.company?.type ?? "unknown",
+          serviceId:
+            typeof dto?.contact?.company?.serviceId === "number"
+              ? dto.contact.company.serviceId
+              : undefined,
+          isCustomer: dto?.contact?.company?.isCustomer === true,
+          isClient: dto?.contact?.company?.isClient === true,
+          notes: dto?.contact?.company?.notes?.filter((note) => typeof note === "string") ?? [],
+        }
+      : undefined;
 
   const projectTypeId =
     typeof dto?.projectType?.id === "number"
@@ -163,7 +202,7 @@ export function mapLeadFromDTO(dto: ApiLeadDTO): Lead {
   // Estimado manual (editable en el CRM), independiente del Estimate real de QuickBooks.
   const estimate = dto?.estimate != null ? Number(dto.estimate) : null;
   const qboEstimate =
-    dto?.financial?.estimatedAmount != null
+    dto?.financial?.found !== false && dto?.financial?.estimatedAmount != null
       ? Number(dto.financial.estimatedAmount)
       : null;
   const ownerId =
@@ -198,8 +237,10 @@ export function mapLeadFromDTO(dto: ApiLeadDTO): Lead {
       email: contactEmail || undefined,
       occupation: contactOccupation || undefined,
       address: contactAddress || undefined,
+      addressLink: contactAddressLink || undefined,
       isCustomer: contactIsCustomer,
       isClient: contactIsClient,
+      company,
       notes: [],
     },
     projectType: {

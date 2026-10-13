@@ -24,6 +24,8 @@ import type {
 
 import { endpoints } from "./endpoints";
 
+const TASK_DETAIL_TIMEOUT_MS = 12_000;
+
 /**
  * No DTO mapping here: TaskMapper on the backend already emits exactly this shape
  * (camelCase, same field names as the domain model), so there is nothing to translate —
@@ -100,7 +102,9 @@ export class TasksHttpRepository implements TasksRepositoryPort {
   }
 
   async get(id: number): Promise<TaskDetail> {
-    const { data } = await this.api.get<TaskDetail>(endpoints.getById(id));
+    const { data } = await this.api.get<TaskDetail>(endpoints.getById(id), {
+      signal: AbortSignal.timeout(TASK_DETAIL_TIMEOUT_MS),
+    });
     return data;
   }
 

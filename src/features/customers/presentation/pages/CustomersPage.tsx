@@ -1,7 +1,10 @@
 "use client";
 
-import { HeartHandshake } from "lucide-react";
+import { HeartHandshake, RefreshCw } from "lucide-react";
 import { PageHeaderCard } from "@/components/shared";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useInstantCustomers } from "../../application/hooks/useInstantCustomers";
 import { useCompanyServices } from "@/features/company/presentation/hooks";
 import { CustomerContactsSection } from "../components/CustomerContactsSection";
@@ -14,7 +17,15 @@ export interface CustomersPageProps {
 }
 
 export function CustomersPage({ initialData }: CustomersPageProps = {}) {
-  const { contacts, companies, showSkeleton } = useInstantCustomers(initialData);
+  const {
+    contacts,
+    companies,
+    showSkeleton,
+    hasData,
+    error,
+    isFetching,
+    refetch,
+  } = useInstantCustomers(initialData);
   const { services } = useCompanyServices();
 
   const safeContacts = contacts ?? [];
@@ -28,32 +39,69 @@ export function CustomersPage({ initialData }: CustomersPageProps = {}) {
         title="Customers"
         description="View and manage all customers (contacts and companies)"
         metaSlot={
-          <>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 font-medium text-primary">
-              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-              {safeContacts.length} contacts
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-elev-4 px-2.5 py-1 font-medium text-foreground">
-              <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground" />
-              {safeCompanies.length} companies
-            </span>
-          </>
+          showSkeleton ? (
+            <>
+              <Skeleton className="h-7 w-28 rounded-full" />
+              <Skeleton className="h-7 w-32 rounded-full" />
+            </>
+          ) : error && !hasData ? undefined : (
+            <>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 font-medium text-primary">
+                <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+                {safeContacts.length} contacts
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-elev-4 px-2.5 py-1 font-medium text-foreground">
+                <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground" />
+                {safeCompanies.length} companies
+              </span>
+            </>
+          )
         }
       />
 
-      <section className="dashboard-section-enter mt-2 flex flex-col gap-6" style={{ animationDelay: "120ms" }}>
-        <CustomerContactsSection
-          contacts={safeContacts}
-          companies={safeCompanies}
-          isLoading={showSkeleton}
-        />
-        <CustomerCompaniesSection
-          companies={safeCompanies}
-          contacts={safeContacts}
-          services={safeServices}
-          isLoading={showSkeleton}
-        />
-      </section>
+      <div className="mt-2 space-y-4">
+        {error ? (
+          <Alert variant="destructive" className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <AlertTitle>
+                {hasData ? "No se pudieron actualizar los clientes" : "No se pudieron cargar los clientes"}
+              </AlertTitle>
+              <AlertDescription>
+                {hasData
+                  ? "Se conservan los datos cargados anteriormente. Puedes volver a intentarlo."
+                  : "Comprueba tu conexión y vuelve a intentarlo."}
+              </AlertDescription>
+            </div>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="shrink-0 border-destructive/50 text-foreground hover:bg-destructive/10"
+              disabled={isFetching}
+              onClick={() => void refetch()}
+            >
+              <RefreshCw className={isFetching ? "animate-spin" : undefined} />
+              {isFetching ? "Reintentando…" : "Reintentar"}
+            </Button>
+          </Alert>
+        ) : null}
+
+        {error && !hasData ? null : (
+          <section className="flex flex-col gap-6">
+            <CustomerContactsSection
+              contacts={safeContacts}
+              companies={safeCompanies}
+              isLoading={showSkeleton}
+            />
+            <CustomerCompaniesSection
+              companies={safeCompanies}
+              contacts={safeContacts}
+              services={safeServices}
+              isLoading={showSkeleton}
+            />
+          </section>
+        )}
+      </div>
     </div>
   );
 }

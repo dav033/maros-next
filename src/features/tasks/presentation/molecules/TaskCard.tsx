@@ -1,5 +1,8 @@
 import { AlertTriangle, CheckCircle2, Link2 } from "lucide-react";
-import type { PointerEvent as ReactPointerEvent } from "react";
+import { motion } from "motion/react";
+import { taskCardSurfaceTransition } from "@/shared/presentation/motionTransitions";
+import { usePrefersReducedMotion } from "@/shared/presentation/hooks/usePrefersReducedMotion";
+import { memo, type PointerEvent as ReactPointerEvent } from "react";
 import type { DraggableAttributes, DraggableSyntheticListeners } from "@dnd-kit/core";
 import { cn } from "@/lib/utils";
 import { type Task, type TaskPriority } from "@/tasks/domain";
@@ -14,7 +17,7 @@ import { TaskDragHandle } from "./TaskDragHandle";
 import { AssigneePicker } from "./AssigneePicker";
 import { TaskDatePicker } from "./TaskDatePicker";
 
-export function TaskCard({
+export const TaskCard = memo(function TaskCard({
   task,
   onClick,
   className,
@@ -49,12 +52,13 @@ export function TaskCard({
   selected?: boolean;
   dragHandle?: { attributes: DraggableAttributes; listeners: DraggableSyntheticListeners };
 }) {
+  const shouldReduceMotion = usePrefersReducedMotion();
   const metaParts: string[] = [];
   if (task.subtasksTotal > 0) metaParts.push(`${task.subtasksDone}/${task.subtasksTotal} subtasks`);
   if (task.commentsCount > 0) metaParts.push(`${task.commentsCount} ${task.commentsCount === 1 ? "comment" : "comments"}`);
   const footerMetaText = metaParts.join(" · ");
   const actionHandlers = { onOpen: onClick, onComplete, onDuplicate, onDelete, onPriorityChange, onLabelsClick, onArchive };
-  const handleCardPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+  const handleCardPointerDown = (event: ReactPointerEvent<HTMLElement>) => {
     const target = event.target instanceof Element ? event.target : null;
     if (target?.closest("[data-no-drag],button,a,input,textarea,select,[contenteditable='true']")) return;
     const onPointerDown = dragHandle?.listeners?.onPointerDown;
@@ -63,10 +67,23 @@ export function TaskCard({
 
   return (
     <TaskContextMenu task={task} handlers={actionHandlers}>
-      <div
-        role={onClick ? "button" : undefined}
-        tabIndex={onClick ? 0 : undefined}
+      <motion.article
+        layoutId={onClick && !shouldReduceMotion ? `maros-task-card-${task.id}` : undefined}
+        data-task-card-id={onClick ? task.id : undefined}
+        whileHover={onClick && !shouldReduceMotion ? { y: -2 } : undefined}
+        whileTap={onClick && !dragHandle && !shouldReduceMotion ? { y: 0 } : undefined}
+        transition={{
+          ...taskCardSurfaceTransition,
+          y: { duration: 0.16, ease: [0.22, 1, 0.36, 1] },
+        }}
         onClick={(event) => {
+          const target = event.target instanceof Element ? event.target : null;
+          const interactiveTarget = target?.closest("button,a,input,textarea,select,[contenteditable='true']");
+          if (
+            interactiveTarget &&
+            interactiveTarget !== event.currentTarget &&
+            !interactiveTarget.hasAttribute("data-task-open")
+          ) return;
           if (event.shiftKey && onSelect) {
             event.preventDefault();
             event.stopPropagation();
@@ -75,18 +92,8 @@ export function TaskCard({
           }
           onClick?.();
         }}
-        onKeyDown={
-          onClick
-            ? (event) => {
-                if (event.key === "Enter" || event.key === " ") {
-                  event.preventDefault();
-                  onClick();
-                }
-              }
-            : undefined
-        }
         className={cn(
-          "group flex min-h-[132px] flex-col gap-2 rounded-lg border border-border bg-card p-3 text-left shadow-sm transition-colors hover:border-primary hover:bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+          "group flex min-h-[132px] flex-col gap-2 rounded-lg border border-border bg-card p-3 text-left shadow-sm transition-[background-color,border-color,box-shadow] duration-150 motion-reduce:transition-none hover:border-primary hover:bg-card hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
           onClick && "cursor-pointer",
           selected && "ring-2 ring-primary ring-offset-1",
           className,
@@ -138,7 +145,7 @@ export function TaskCard({
                 type="button"
                 aria-label="Mark task done"
                 data-no-drag="true"
-                className="rounded-full p-1 text-muted-foreground opacity-0 transition-opacity hover:text-emerald-600 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring group-hover:opacity-100"
+                className="rounded-full p-1 text-muted-foreground opacity-100 transition-opacity motion-reduce:transition-none hover:text-emerald-600 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:opacity-0 lg:group-hover:opacity-100 lg:group-focus-within:opacity-100"
                 onClick={(event) => {
                   event.stopPropagation();
                   onComplete();
@@ -151,7 +158,28 @@ export function TaskCard({
           </div>
         </div>
 
-        <p className="line-clamp-2 text-sm font-medium leading-snug text-foreground">{task.title}</p>
+        {onClick ? (
+          <button
+            type="button"
+            data-no-drag="true"
+            data-task-open="true"
+            onClick={(event) => {
+              if (event.detail > 0 && event.shiftKey && onSelect) {
+                event.preventDefault();
+                event.stopPropagation();
+                onSelect(true);
+                return;
+              }
+              event.stopPropagation();
+              onClick();
+            }}
+            className="w-full rounded-sm text-left text-sm font-medium leading-snug text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <span className="line-clamp-2">{task.title}</span>
+          </button>
+        ) : (
+          <p className="line-clamp-2 text-sm font-medium leading-snug text-foreground">{task.title}</p>
+        )}
 
         {task.entity ? (
           <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
@@ -200,7 +228,7 @@ export function TaskCard({
             {footerMetaText ? <span className="shrink-0 text-[11px] text-muted-foreground">{footerMetaText}</span> : null}
           </div>
         ) : null}
-      </div>
+      </motion.article>
     </TaskContextMenu>
   );
-}
+});

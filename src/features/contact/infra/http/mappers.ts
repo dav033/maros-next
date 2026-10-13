@@ -1,8 +1,11 @@
 import type {
   Contact,
+  ContactDetails,
   ContactDraft,
   ContactPatch,
 } from "../../domain/models";
+import { CompanyType } from "@/features/company/domain/models/Company";
+import { z } from "zod";
 
 
 export type ApiContactDTO = {
@@ -24,11 +27,86 @@ export type ApiContactDTO = {
     serviceId?: number | null;
     isCustomer: boolean;
     isClient: boolean;
-    notes: string[];
+    notes?: unknown;
   } | null;
-  notes?: string[] | null;
+  notes?: unknown;
   attachments?: string[] | null;
 };
+
+const LegacyNotesSchema = z.union([
+  z.array(z.string()),
+  z.string(),
+  z.record(z.string(), z.unknown()),
+]).nullish();
+
+const ContactLeadDetailsSchema = z.object({
+  id: z.number(),
+  leadNumber: z.string().nullish(),
+  name: z.string().nullish(),
+  startDate: z.string().nullish(),
+  location: z.string().nullish(),
+  addressLink: z.string().nullish(),
+  status: z.string().nullish(),
+  inReview: z.boolean(),
+  projectType: z.object({ id: z.number(), name: z.string() }).nullish(),
+  project: z.object({
+    id: z.number(),
+    projectProgressStatus: z.string().nullish(),
+    overview: z.string().nullish(),
+    notes: LegacyNotesSchema,
+  }).nullish(),
+  notes: LegacyNotesSchema,
+}).passthrough();
+
+const ContactDetailsApiSchema = z.object({
+  id: z.number().int().positive(),
+  name: z.string(),
+  occupation: z.string().nullish(),
+  role: z.string().nullish(),
+  phone: z.string().nullish(),
+  email: z.string().nullish(),
+  address: z.string().nullish(),
+  addressLink: z.string().nullish(),
+  isCustomer: z.boolean(),
+  isClient: z.boolean(),
+  companyId: z.number().nullish(),
+  company: z.object({
+    id: z.number(),
+    name: z.string(),
+    address: z.string().nullish(),
+    type: z.string().nullish(),
+    serviceId: z.number().nullish(),
+    isCustomer: z.boolean(),
+    isClient: z.boolean(),
+    notes: LegacyNotesSchema,
+  }).nullish(),
+  notes: LegacyNotesSchema,
+  attachments: z.array(z.string()).nullish(),
+  leads: z.array(ContactLeadDetailsSchema),
+  stats: z.object({
+    totalLeads: z.number(),
+    totalProjects: z.number(),
+    activeProjects: z.number(),
+    completedProjects: z.number(),
+  }),
+}).passthrough();
+
+function normalizeNotes(value: unknown, field: string): string[] {
+  if (typeof value === "string") return value.trim() ? [value] : [];
+  if (Array.isArray(value)) return value.filter((note): note is string => typeof note === "string");
+  if (value && typeof value === "object") {
+    console.warn("Ignoring structured legacy data in a notes field", { field, keys: Object.keys(value) });
+  }
+  return [];
+}
+
+function isCompanyType(value: string): value is CompanyType {
+  return Object.values(CompanyType).some((companyType) => companyType === value);
+}
+
+function mapCompanyType(value: string | null | undefined): CompanyType {
+  return value && isCompanyType(value) ? value : CompanyType.OTHER;
+}
 
 
 export type CreateContactRequestDTO = {
@@ -82,14 +160,43 @@ export function mapContactFromApi(dto: ApiContactDTO): Contact {
       id: dto.company.id,
       name: normalizedCompanyName,
       address: dto.company.address ?? undefined,
-      type: dto.company.type as any,
+      type: mapCompanyType(dto.company.type),
       serviceId: dto.company.serviceId ?? undefined,
       isCustomer: dto.company.isCustomer,
       isClient: dto.company.isClient,
-      notes: dto.company.notes || [],
+      notes: normalizeNotes(dto.company.notes, "company.notes"),
     } : undefined,
-    notes: dto.notes ?? [],
+    notes: normalizeNotes(dto.notes, "contact.notes"),
     attachments: dto.attachments ?? [],
+  };
+}
+
+export function mapContactDetailsFromApi(dto: unknown): ContactDetails {
+  const parsed = ContactDetailsApiSchema.parse(dto);
+  const contact = mapContactFromApi(parsed);
+  return {
+    ...contact,
+    id: parsed.id,
+    notes: normalizeNotes(parsed.notes, "contact.notes"),
+    leads: parsed.leads.map((lead) => ({
+      id: lead.id,
+      leadNumber: lead.leadNumber ?? undefined,
+      name: lead.name ?? undefined,
+      startDate: lead.startDate ?? undefined,
+      location: lead.location ?? undefined,
+      addressLink: lead.addressLink ?? undefined,
+      status: lead.status ?? undefined,
+      inReview: lead.inReview,
+      projectType: lead.projectType ?? null,
+      notes: normalizeNotes(lead.notes, "lead.notes"),
+      project: lead.project ? {
+        id: lead.project.id,
+        projectProgressStatus: lead.project.projectProgressStatus ?? undefined,
+        overview: lead.project.overview ?? undefined,
+        notes: normalizeNotes(lead.project.notes, "project.notes"),
+      } : null,
+    })),
+    stats: parsed.stats,
   };
 }
 

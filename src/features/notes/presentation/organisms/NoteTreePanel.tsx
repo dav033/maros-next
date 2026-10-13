@@ -1,5 +1,6 @@
 "use client";
 
+import { useId } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -40,6 +41,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { cn } from "@/lib/utils";
+import { usePrefersReducedMotion } from "@/shared/presentation/hooks/usePrefersReducedMotion";
 import {
   buildNoteTree,
   flattenVisibleTree,
@@ -95,10 +97,11 @@ function SortableNoteTreeRow({
   } = useSortable({
     id: row.id,
   });
+  const prefersReducedMotion = usePrefersReducedMotion();
 
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition,
+    transition: prefersReducedMotion ? undefined : transition,
     opacity: isDragging ? 0.5 : 1,
   };
 
@@ -120,7 +123,7 @@ function SortableNoteTreeRow({
           type="button"
           {...attributes}
           {...listeners}
-          className="flex h-6 w-3.5 shrink-0 cursor-grab touch-none items-center justify-center rounded text-muted-foreground opacity-0 hover:bg-elev-5 focus-visible:opacity-100 group-hover:opacity-100 group-focus-within:opacity-100"
+          className="flex h-6 w-3.5 shrink-0 cursor-grab touch-none items-center justify-center rounded text-muted-foreground opacity-100 transition-opacity motion-reduce:transition-none hover:bg-elev-5 focus-visible:opacity-100 lg:opacity-0 lg:group-hover:opacity-100 lg:group-focus-within:opacity-100"
           aria-label="Drag to reorder"
           title="Drag to reorder"
         >
@@ -268,6 +271,7 @@ export function NoteTreePanel({
   onSetFavorite: (id: number, isFavorite: boolean) => void;
   onTrash: (id: number) => void;
 }) {
+  const dndContextId = useId();
   const pathname = usePathname();
   const [expandedIds, setExpandedIds] = usePersistedState<Set<string>>(
     EXPANDED_STORAGE_KEY,
@@ -385,6 +389,7 @@ export function NoteTreePanel({
           </div>
         ) : (
           <DndContext
+            id={`note-tree-${dndContextId}`}
             sensors={sensors}
             collisionDetection={closestCenter}
             onDragEnd={handleDragEnd}

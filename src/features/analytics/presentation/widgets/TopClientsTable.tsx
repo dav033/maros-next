@@ -2,6 +2,8 @@
 
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { SharedEntityName } from "@/components/shared/SharedEntityName";
+import { useRouteSharedLayoutScope } from "@/shared/presentation/RouteMotionContext";
 import { Crown } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -82,6 +84,7 @@ function resolveProjectHref(
 
 export function TopClientsTable({ data, by, onByChange }: TopClientsTableProps) {
   const router = useRouter();
+  const sharedLayoutScope = useRouteSharedLayoutScope();
   const { projects } = useInstantProjects();
   const sortLabel = by === "revenue" ? "Sorted by total invoiced" : "Sorted by invoice count";
   const projectNumberToId = useMemo(() => {
@@ -98,6 +101,10 @@ export function TopClientsTable({ data, by, onByChange }: TopClientsTableProps) 
 
     return map;
   }, [projects]);
+  const projectsById = useMemo(
+    () => new Map((projects ?? []).map((project) => [Number(project.id), project])),
+    [projects],
+  );
 
   return (
     <Card className="border-line">
@@ -148,6 +155,9 @@ export function TopClientsTable({ data, by, onByChange }: TopClientsTableProps) 
           <TableBody>
             {data.map((client, index) => {
               const href = resolveProjectHref(client, projectNumberToId);
+              const projectId = href ? Number(href.split("/").at(-1)) : 0;
+              const linkedProject = projectsById.get(projectId);
+              const linkedProjectNumber = linkedProject?.lead?.leadNumber;
               const isClickable = Boolean(href);
               return (
                 <TableRow
@@ -169,7 +179,28 @@ export function TopClientsTable({ data, by, onByChange }: TopClientsTableProps) 
                 >
                   <TableCell className="font-mono text-xs font-medium tabular-nums text-muted-foreground">{index + 1}</TableCell>
                   <TableCell className="font-medium">{client.customerName}</TableCell>
-                  <TableCell className="font-mono text-muted-foreground">{client.projectNumber ?? "—"}</TableCell>
+                  <TableCell className="font-mono text-muted-foreground">
+                    {href && linkedProjectNumber ? (
+                      <>
+                        <SharedEntityName
+                          layoutCrossfade={false}
+                          layoutId={`maros-project-number-${projectId}-desktop-${sharedLayoutScope}`}
+                          className="hidden xl:inline-block"
+                        >
+                          {linkedProjectNumber}
+                        </SharedEntityName>
+                        <SharedEntityName
+                          layoutCrossfade={false}
+                          layoutId={`maros-project-number-${projectId}-mobile-${sharedLayoutScope}`}
+                          className="xl:hidden"
+                        >
+                          {linkedProjectNumber}
+                        </SharedEntityName>
+                      </>
+                    ) : (
+                      client.projectNumber ?? "—"
+                    )}
+                  </TableCell>
                   <TableCell className="text-right font-mono font-medium tabular-nums">{money.format(client.totalInvoiced)}</TableCell>
                   <TableCell className="text-right font-mono tabular-nums text-muted-foreground">{client.invoiceCount}</TableCell>
                 </TableRow>

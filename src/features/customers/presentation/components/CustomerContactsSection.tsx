@@ -1,4 +1,5 @@
 "use client";
+import { useContactCacheInvalidation } from "@/features/contact/presentation/hooks/mutations/useContactCacheInvalidation";
 
 import { useTableWithSearch } from "@/common/hooks";
 
@@ -60,16 +61,21 @@ export function CustomerContactsSection({
     normalize: customerContactsSearchConfig.normalize,
   });
 
+  const invalidateContact = useContactCacheInvalidation();
   const { modal, handlers } = useCustomerCrudSection<Contact & { id: number }, typeof initialContactFormValue, ReturnType<typeof toContactPatch>>({
     initialFormValue: initialContactFormValue,
     toPatch: toContactPatch,
     toFormValue: mapContactToFormValue,
     updateFn: async (id, patch) => {
       const res = await patchContact(contactsApp, id, patch);
+      invalidateContact();
       if (typeof res.id !== "number") throw new Error("Updated contact has no id");
       return res as Contact & { id: number };
     },
-    deleteFn: (id) => deleteContact(contactsApp, id),
+    deleteFn: async (id) => {
+      await deleteContact(contactsApp, id);
+      invalidateContact();
+    },
     invalidateKeys: [customersKeys.all, contactsKeys.list],
     messages: {
       successUpdate: "Contact updated successfully!",

@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Check, Pencil, Plus, Trash2, X } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import {
   Dialog,
   DialogContent,
@@ -48,6 +49,8 @@ function ColorSwatchPicker({
 function TagRow({ tag, noteCount }: { tag: NoteTag; noteCount: number }) {
   const { updateTagMutation, deleteTagMutation } = useNoteTagMutations();
   const [isEditing, setIsEditing] = useState(false);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const focusLabelsHeadingAfterDelete = useRef(false);
   const [name, setName] = useState(tag.name);
   const [color, setColor] = useState(tag.color);
 
@@ -69,12 +72,10 @@ function TagRow({ tag, noteCount }: { tag: NoteTag; noteCount: number }) {
   };
 
   const remove = async () => {
-    const confirmed = window.confirm(
-      `Delete label "${tag.name}"? It will be removed from ${noteCount} note${noteCount === 1 ? "" : "s"}.`
-    );
-    if (!confirmed) return;
     try {
       await deleteTagMutation.mutateAsync(tag.id);
+      focusLabelsHeadingAfterDelete.current = true;
+      setConfirmDeleteOpen(false);
     } catch {
       // handled by onError
     }
@@ -130,11 +131,43 @@ function TagRow({ tag, noteCount }: { tag: NoteTag; noteCount: number }) {
         size="icon"
         variant="ghost"
         className="h-8 w-8 shrink-0 hover:bg-destructive/15 hover:text-destructive"
-        onClick={remove}
+        onClick={() => setConfirmDeleteOpen(true)}
         aria-label={`Delete ${tag.name}`}
       >
         <Trash2 className="h-3.5 w-3.5" />
       </Button>
+      <AlertDialog open={confirmDeleteOpen} onOpenChange={setConfirmDeleteOpen}>
+        <AlertDialogContent
+          onCloseAutoFocus={(event) => {
+            if (!focusLabelsHeadingAfterDelete.current) return;
+            focusLabelsHeadingAfterDelete.current = false;
+            const heading = document.querySelector<HTMLElement>("[data-manage-labels-title]");
+            if (!heading) return;
+            event.preventDefault();
+            heading.focus({ preventScroll: true });
+          }}
+        >
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete label?</AlertDialogTitle>
+            <AlertDialogDescription>
+              “{tag.name}” will be removed from {noteCount} note{noteCount === 1 ? "" : "s"}.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteTagMutation.isPending}>Keep label</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={deleteTagMutation.isPending}
+              onClick={(event) => {
+                event.preventDefault();
+                void remove();
+              }}
+            >
+              {deleteTagMutation.isPending ? "Deleting…" : "Delete label"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
@@ -178,7 +211,7 @@ export function ManageLabelsDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[calc(100svh-1rem)] w-[calc(100%-1rem)] max-w-md overflow-y-auto overscroll-contain p-4 sm:max-h-[calc(100svh-2rem)] sm:p-6">
         <DialogHeader>
-          <DialogTitle>Labels</DialogTitle>
+          <DialogTitle data-manage-labels-title="true" tabIndex={-1}>Labels</DialogTitle>
           <DialogDescription>
             Reusable labels to organize notes across your workspace.
           </DialogDescription>

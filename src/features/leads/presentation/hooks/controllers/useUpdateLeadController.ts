@@ -6,6 +6,7 @@ import { useFormController } from "@/common/hooks";
 import { useEffect } from "react";
 import { useLeadsApp } from "@/di";
 import { leadsKeys, patchLead } from "@/leads/application";
+import { contactsKeys } from "@/contact/application";
 import type { Lead, LeadPatch, LeadStatus } from "@/leads/domain";
 
 
@@ -75,7 +76,7 @@ export function useUpdateLeadController({ lead, onUpdated }: UseUpdateLeadContro
       if (!lead) throw new Error("No lead to update");
       return await patchLead(ctx, lead.id, patch as LeadPatch, {});
     },
-    invalidateKeys: [leadsKeys.all],
+    invalidateKeys: [leadsKeys.all, contactsKeys.all],
     onSuccess: onUpdated,
   });
 

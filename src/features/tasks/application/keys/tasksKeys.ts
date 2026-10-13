@@ -9,6 +9,7 @@ export const tasksKeys = {
   board: (filters?: TaskFilters) => [...base.all, "board", normalizeTaskFilters(filters)] as const,
   mine: () => [...base.all, "mine"] as const,
   archived: () => [...base.all, "archived"] as const,
+  schedules: () => [...base.all, "schedule"] as const,
   schedule: (from: string, to: string, signature = "") => [...base.all, "schedule", from, to, signature] as const,
   templates: () => [...base.all, "templates"] as const,
   savedViews: () => [...base.all, "savedViews"] as const,

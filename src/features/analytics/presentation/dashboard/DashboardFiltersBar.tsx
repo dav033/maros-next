@@ -83,7 +83,7 @@ export function DashboardFiltersBar({
         <div className="flex items-center gap-2">
           <p className="font-display text-xs font-medium uppercase tracking-wide text-muted-foreground">Business line</p>
           {isUpdating ? (
-            <span className="inline-flex animate-in items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary fade-in-0 zoom-in-95 duration-200">
+            <span className="inline-flex animate-in items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary fade-in-0 zoom-in-95 duration-200 motion-reduce:!animate-none motion-reduce:!transition-none">
               <Loader2 className="h-3 w-3 animate-spin" />
               Updating…
             </span>
@@ -188,7 +188,7 @@ export function DashboardFiltersBar({
       {hasInvertedDates ? (
         <p
           role="alert"
-          className="mt-3 animate-in rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive fade-in-0 slide-in-from-top-1 duration-200"
+          className="mt-3 animate-in rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive fade-in-0 slide-in-from-top-1 duration-200 motion-reduce:!animate-none motion-reduce:!transition-none"
         >
           Invalid range: "From" date must be before or equal to "To" date.
         </p>

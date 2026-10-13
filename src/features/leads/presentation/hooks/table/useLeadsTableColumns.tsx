@@ -6,6 +6,9 @@ import { ContactInfoDisplay } from "@/features/contact/presentation/atoms/Contac
 import { NotesButton } from "@/components/shared";
 import { LeadStatusBadge } from "../../atoms/LeadStatusBadge";
 import { ProjectTypeBadge } from "../../atoms/ProjectTypeBadge";
+import { SharedEntityName } from "@/components/shared/SharedEntityName";
+import { useRouteSharedLayoutScope } from "@/shared/presentation/RouteMotionContext";
+import { sharedEntityReturnTransition } from "@/shared/presentation/motionTransitions";
 
 interface UseLeadsTableColumnsProps {
   onOpenContactModal: (contact: any) => void;
@@ -18,6 +21,7 @@ export function useLeadsTableColumns({
   onOpenNotesModal,
   readOnly = false,
 }: UseLeadsTableColumnsProps): SimpleTableColumn<Lead>[] {
+  const sharedLayoutScope = useRouteSharedLayoutScope();
   return React.useMemo<SimpleTableColumn<Lead>[]>(() => {
     return [
       {
@@ -44,11 +48,37 @@ export function useLeadsTableColumns({
         key: "leadNumber",
         header: "Lead #",
         className: "w-[110px]",
-        render: (lead: Lead) => (
-          <span className="whitespace-nowrap font-mono tabular-nums text-foreground">
-            {lead.leadNumber}
-          </span>
-        ),
+        render: (lead: Lead) => {
+          const projectId = readOnly ? lead.project?.id : undefined;
+          return (
+            <span className="whitespace-nowrap font-mono tabular-nums text-foreground">
+              {projectId ? (
+                <>
+                  <SharedEntityName
+                    layoutCrossfade={false}
+                    layoutId={`maros-project-number-${projectId}-desktop-${sharedLayoutScope}`}
+                    transition={sharedEntityReturnTransition}
+                    className="hidden xl:inline-block"
+                  >
+                    {lead.leadNumber}
+                  </SharedEntityName>
+                  <SharedEntityName
+                    layoutCrossfade={false}
+                    layoutId={`maros-project-number-${projectId}-mobile-${sharedLayoutScope}`}
+                    transition={sharedEntityReturnTransition}
+                    className="inline-block xl:hidden"
+                  >
+                    {lead.leadNumber}
+                  </SharedEntityName>
+                </>
+              ) : (
+                <SharedEntityName layoutId={`maros-lead-number-${lead.id}`}>
+                  {lead.leadNumber}
+                </SharedEntityName>
+              )}
+            </span>
+          );
+        },
         sortable: true,
         sortValue: (lead: Lead) => lead.leadNumber ?? "",
       },
@@ -60,7 +90,26 @@ export function useLeadsTableColumns({
         className: "w-[200px] max-w-[200px]",
         render: (lead: Lead) => (
           <span className="block truncate text-foreground" title={lead.name ?? undefined}>
-            {lead.name}
+            {readOnly && lead.project?.id ? (
+              <>
+                <SharedEntityName
+                  layoutId={`maros-project-name-${lead.project.id}-desktop-${sharedLayoutScope}`}
+                  className="hidden xl:inline"
+                >
+                  {lead.name}
+                </SharedEntityName>
+                <SharedEntityName
+                  layoutId={`maros-project-name-${lead.project.id}-mobile-${sharedLayoutScope}`}
+                  className="xl:hidden"
+                >
+                  {lead.name}
+                </SharedEntityName>
+              </>
+            ) : !readOnly && lead.id ? (
+              <SharedEntityName layoutId={`maros-lead-name-${lead.id}`}>
+                {lead.name}
+              </SharedEntityName>
+            ) : lead.name}
           </span>
         ),
         sortable: true,
@@ -73,6 +122,7 @@ export function useLeadsTableColumns({
         render: (lead: Lead) => (
           <ContactInfoDisplay
             contact={lead.contact}
+            sourceInstance={`lead-${lead.id}`}
           />
         ),
         sortable: true,
@@ -125,5 +175,5 @@ export function useLeadsTableColumns({
         sortValue: (lead: Lead) => lead.status ?? "",
       },
     ];
-  }, [onOpenContactModal, onOpenNotesModal, readOnly]);
+  }, [onOpenContactModal, onOpenNotesModal, readOnly, sharedLayoutScope]);
 }

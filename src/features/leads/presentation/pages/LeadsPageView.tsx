@@ -88,7 +88,15 @@ export function LeadsPageView({ logic, leadType }: LeadsPageViewProps) {
 
   const { title, description } = config;
 
-  const { contacts, projectTypes, showSkeleton } = data;
+  const {
+    contacts,
+    projectTypes,
+    projectTypesLoading,
+    projectTypesFetching,
+    projectTypesError,
+    refetchProjectTypes,
+    showSkeleton,
+  } = data;
   const isConvertedView = converted.active;
   const visibleSkeleton = isConvertedView ? converted.showSkeleton : showSkeleton;
 
@@ -378,6 +386,10 @@ export function LeadsPageView({ logic, leadType }: LeadsPageViewProps) {
             controller={leadModalController}
             contacts={contactsForModal}
             projectTypes={projectTypes}
+            projectTypesLoading={projectTypesLoading}
+            projectTypesFetching={projectTypesFetching}
+            projectTypesError={projectTypesError}
+            onRetryProjectTypes={() => void refetchProjectTypes()}
           />
 
 {postConversionEstimateModal.projectId !== null && (

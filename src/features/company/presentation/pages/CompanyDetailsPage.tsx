@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useCallback } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   EntityDetailHeader,
@@ -29,23 +30,28 @@ interface CompanyDetailsPageProps {
     companyDetails: CompanyDetails | null;
     error?: string;
   };
+  relationsPending?: boolean;
+  relationsError?: string;
+  onRetry?: () => void;
 }
 
 export function CompanyDetailsPage({
   companyId,
   initialData,
+  relationsPending,
+  relationsError,
+  onRetry,
 }: CompanyDetailsPageProps) {
-  const router = useRouter();
   const { companyDetails, error } = initialData;
 
   // Data hooks
-  const { updateMutation } = useCompanyMutations();
+  const { updateMutation, invalidateQueries: refreshCompany } = useCompanyMutations();
   const data = useContactsData();
   const { contacts = [], companies = [] } = data;
 
   // Notes logic
   const notesLogic = useCompanyNotesLogic({
-    onSuccess: () => router.refresh(),
+    onSuccess: refreshCompany,
   });
 
   // Inline editing
@@ -67,7 +73,7 @@ export function CompanyDetailsPage({
       }
     },
     successMessage: "Company updated successfully!",
-    onSuccess: () => router.refresh(),
+    onSuccess: refreshCompany,
   });
 
   const handleOpenNotesModal = useCallback(() => {
@@ -115,6 +121,7 @@ export function CompanyDetailsPage({
       {/* Header */}
       <EntityDetailHeader
         title={companyDetails.name}
+        sharedNameLayoutId={`maros-company-name-${companyDetails.id}`}
         actions={
           <>
             {companyDetails.isCustomer && (
@@ -152,14 +159,15 @@ export function CompanyDetailsPage({
 
         {/* Right column: Contacts */}
         <div className="space-y-6">
-          <CompanyContactsSection
+          {relationsError ? <div role="alert" className="space-y-2 text-sm text-destructive"><p>{relationsError}</p><Button variant="outline" onClick={onRetry}>Retry</Button></div> : null}
+          {relationsPending ? <Skeleton className="h-48 w-full rounded-xl" /> : !relationsError ? <CompanyContactsSection
             companyId={companyDetails.id}
             contacts={companyDetails.contacts ?? []}
             allContacts={contacts}
             allCompanies={companies}
             currentContactIds={currentContactIds}
             onUpdateCompany={handleUpdateCompany}
-          />
+          /> : null}
         </div>
       </div>
 
@@ -169,7 +177,7 @@ export function CompanyDetailsPage({
         attachments={companyDetails.attachments ?? []}
         onAttachmentsChange={async (newAttachments) => {
           await updateCompanyAction(companyDetails.id, { attachments: newAttachments });
-          router.refresh();
+          refreshCompany();
         }}
       />
 

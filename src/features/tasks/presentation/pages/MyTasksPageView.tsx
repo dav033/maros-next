@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useIsPresent } from "motion/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { addDays, format } from "date-fns";
 import { CheckCheck, UserCheck } from "lucide-react";
@@ -46,6 +47,7 @@ const SECTIONS: Array<{ key: MyTasksBucketKey; label: string }> = [
  * drag & drop.
  */
 export function MyTasksPageView() {
+  const isPresent = useIsPresent();
   const ctx = useTasksApp();
   const queryClient = useQueryClient();
   const { user } = useCurrentUser();
@@ -297,13 +299,13 @@ export function MyTasksPageView() {
           icon={CheckCheck}
           title="Nothing due"
           description="You're all caught up."
-          className="dashboard-section-enter flex-1 py-16"
+          className="flex-1 py-16"
         />
       ) : (
         // Capped width: rows carry a full-bleed h-12 CTA button by design (mobile-first,
         // one-tap — see PLAN-TAREAS.md §6.3), which reads fine on a phone but stretches
         // into an absurdly wide, mostly-empty bar on a desktop-width column.
-        <div className="dashboard-section-enter flex w-full flex-1 flex-col gap-4">
+        <div className="flex w-full flex-1 flex-col gap-4">
           {groups.map((job) => (
             <section key={job.key} className="flex flex-col gap-3">
               <header className="flex items-baseline justify-between gap-3 border-b border-line pb-2">
@@ -345,7 +347,7 @@ export function MyTasksPageView() {
         </div>
       )}
 
-      <TaskDetailDialog taskId={taskId} onClose={closeTask} onOpenTask={openTask} />
+      {isPresent ? <TaskDetailDialog taskId={taskId} onClose={closeTask} onOpenTask={openTask} /> : null}
     </div>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useNavigationDetailQuery } from "@/shared/query/useNavigationDetailQuery";
 import { useProjectsApp } from "@/di";
 import { projectsKeys, listProjectsFinancials } from "@/project/application";
 import type { Project, ProjectFinancialsEntry } from "@/project/domain";
@@ -18,19 +18,24 @@ export type UseProjectsFinancialsResult = {
  * rendering the projects themselves. Callers merge the result into their
  * project rows by id once it arrives.
  */
-export function useProjectsFinancials(options?: { enabled?: boolean }): UseProjectsFinancialsResult {
+export function useProjectsFinancials(options?: {
+  enabled?: boolean;
+  poll?: boolean;
+  refetchOnMount?: boolean | "always";
+  refetchOnWindowFocus?: boolean | "always";
+}): UseProjectsFinancialsResult {
   const ctx = useProjectsApp();
-  const query = useQuery<ProjectFinancialsEntry[], Error>({
-    queryKey: [...projectsKeys.all, "financials"],
+  const query = useNavigationDetailQuery<ProjectFinancialsEntry[]>({
+    queryKey: projectsKeys.financials(),
     queryFn: () => listProjectsFinancials(ctx),
     enabled: options?.enabled,
     // Keep the projects table synchronized with QuickBooks while it is open.
     // The API also has a short read cache, so this avoids stale financials
     // without hammering QBO on every render.
-    refetchInterval: 20_000,
+    refetchInterval: options?.poll === false ? false : 20_000,
     refetchIntervalInBackground: false,
-    refetchOnMount: "always",
-    refetchOnWindowFocus: "always",
+    refetchOnMount: options?.refetchOnMount,
+    refetchOnWindowFocus: options?.refetchOnWindowFocus ?? "always",
     staleTime: 5_000,
     gcTime: 10 * 60 * 1000,
   });

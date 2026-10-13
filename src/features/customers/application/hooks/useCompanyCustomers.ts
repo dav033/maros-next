@@ -12,6 +12,8 @@ import {
   type UpdateCompanyWithContactsInput 
 } from "@/company/application";
 import { contactsKeys } from "@/contact/application";
+import { leadsKeys } from "@/leads/application";
+import { projectsKeys } from "@/project/application";
 import { toast } from "sonner";
 import { customersKeys } from "../../infra/keys";
 import { 
@@ -58,6 +60,9 @@ export function useCompanyCustomers({ contacts }: UseCompanyCustomersOptions) {
         await companyCrudUseCases.delete(companyApp)(companyId);
         queryClient.invalidateQueries({ queryKey: customersKeys.all });
         queryClient.invalidateQueries({ queryKey: companyKeys.all });
+        void queryClient.invalidateQueries({ queryKey: contactsKeys.all });
+        void queryClient.invalidateQueries({ queryKey: leadsKeys.all });
+        void queryClient.invalidateQueries({ queryKey: projectsKeys.all });
         toast.success("Company deleted successfully!");
       } catch (error: unknown) {
         const message =
@@ -96,7 +101,9 @@ export function useCompanyCustomers({ contacts }: UseCompanyCustomersOptions) {
 
         queryClient.invalidateQueries({ queryKey: customersKeys.all });
         queryClient.invalidateQueries({ queryKey: companyKeys.all });
-        queryClient.invalidateQueries({ queryKey: contactsKeys.list });
+        queryClient.invalidateQueries({ queryKey: contactsKeys.all });
+        void queryClient.invalidateQueries({ queryKey: leadsKeys.all });
+        void queryClient.invalidateQueries({ queryKey: projectsKeys.all });
 
         toast.success("Company updated successfully!");
         closeModal();

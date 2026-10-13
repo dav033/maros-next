@@ -1,13 +1,15 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader } from "lucide-react";
+import { Loader, RefreshCw } from "lucide-react";
 import { type ReactNode, useEffect, useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { SearchableSelect } from "@/components/shared/SearchableSelect";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,
   DialogContent,
@@ -84,7 +86,13 @@ function Field({
 }
 
 export function InviteUserDialog({ open, onOpenChange }: Props) {
-  const { roles } = useInstantRolesList();
+  const {
+    roles,
+    isLoading: rolesLoading,
+    isFetching: rolesFetching,
+    error: rolesError,
+    refetch: refetchRoles,
+  } = useInstantRolesList();
   const { inviteMutation } = useUserMutations();
 
   const form = useForm<InviteFormValues>({
@@ -112,6 +120,9 @@ export function InviteUserDialog({ open, onOpenChange }: Props) {
     () => (userType === "external" ? roles.filter((role) => role.permissions.length === 0) : roles),
     [roles, userType]
   );
+  const rolesStillLoading = rolesLoading || (rolesFetching && roles.length === 0);
+  const cannotInviteWithCurrentRoles =
+    selectableRoles.length === 0 || (Boolean(rolesError) && roles.length === 0);
 
   const roleId = watch("roleId");
   useEffect(() => {
@@ -213,22 +224,76 @@ export function InviteUserDialog({ open, onOpenChange }: Props) {
               control={control}
               name="roleId"
               render={({ field }) => (
-                <Select
-                  value={field.value}
-                  disabled={isPending}
-                  onValueChange={field.onChange}
-                >
-                  <SelectTrigger id="invite-role" className="border-line-strong">
-                    <SelectValue placeholder="Elige un rol" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {selectableRoles.map((role) => (
-                      <SelectItem key={role.id} value={String(role.id)}>
-                        {role.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="space-y-2">
+                  {rolesError && (
+                    <Alert variant="destructive" className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <AlertTitle>
+                          {roles.length > 0 ? "No se pudieron actualizar los roles" : "No se pudieron cargar los roles"}
+                        </AlertTitle>
+                        <AlertDescription>
+                          {roles.length > 0
+                            ? "Se muestran los roles cargados anteriormente."
+                            : "No se puede enviar la invitación hasta que carguen los roles."}
+                        </AlertDescription>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="shrink-0 border-destructive/50 text-foreground hover:bg-destructive/10"
+                        disabled={rolesFetching}
+                        onClick={() => void refetchRoles()}
+                      >
+                        <RefreshCw className={rolesFetching ? "animate-spin" : undefined} />
+                        {rolesFetching ? "Reintentando…" : "Reintentar"}
+                      </Button>
+                    </Alert>
+                  )}
+                  {!rolesStillLoading && !rolesError && selectableRoles.length === 0 && (
+                    <Alert variant="destructive">
+                      <AlertTitle>
+                        {userType === "external" && roles.length > 0
+                          ? "No hay roles externos disponibles"
+                          : "No hay roles disponibles"}
+                      </AlertTitle>
+                      <AlertDescription>
+                        {userType === "external" && roles.length > 0
+                          ? "Crea un rol sin permisos en Ajustes → Roles para invitar a una persona externa."
+                          : "Crea un rol en Ajustes → Roles antes de enviar una invitación."}
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                  {!rolesStillLoading && rolesError && userType === "external" && roles.length > 0 && selectableRoles.length === 0 && (
+                    <Alert variant="destructive">
+                      <AlertTitle>No hay roles externos disponibles</AlertTitle>
+                      <AlertDescription>
+                        Ninguno de los roles cargados anteriormente es válido para una persona externa.
+                        Crea un rol sin permisos en Ajustes → Roles.
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                  {rolesStillLoading ? (
+                    <Skeleton className="h-10 w-full" />
+                  ) : (
+                    <Select
+                      value={field.value}
+                      disabled={isPending || cannotInviteWithCurrentRoles}
+                      onValueChange={field.onChange}
+                    >
+                      <SelectTrigger id="invite-role" className="border-line-strong">
+                        <SelectValue placeholder="Elige un rol" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {selectableRoles.map((role) => (
+                          <SelectItem key={role.id} value={String(role.id)}>
+                            {role.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                </div>
               )}
             />
           </Field>
@@ -323,7 +388,7 @@ export function InviteUserDialog({ open, onOpenChange }: Props) {
             >
               Cancelar
             </Button>
-            <Button type="submit" disabled={isPending}>
+            <Button type="submit" disabled={isPending || rolesStillLoading || cannotInviteWithCurrentRoles}>
               {isPending ? (
                 <span className="flex items-center gap-2">
                   <Loader className="size-4 animate-spin" />

@@ -1,13 +1,13 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useNavigationDetailQuery } from "@/shared/query/useNavigationDetailQuery";
 import { useTasksApp } from "@/di";
 import { getTaskSchedule, tasksKeys } from "@/tasks/application";
 import type { TaskScheduleFilters } from "@/tasks/domain";
 
 export function useInstantTaskSchedule(filters: TaskScheduleFilters) {
   const ctx = useTasksApp();
-  const query = useQuery({
+  const query = useNavigationDetailQuery({
     queryKey: tasksKeys.schedule(filters.from, filters.to, JSON.stringify(filters)),
     queryFn: () => getTaskSchedule(ctx, filters),
     staleTime: 30_000,

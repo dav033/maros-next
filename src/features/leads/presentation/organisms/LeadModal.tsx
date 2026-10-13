@@ -1,8 +1,9 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import { Plus, Save, Loader } from "lucide-react";
+import { Plus, RefreshCw, Save, Loader } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   Dialog,
   DialogContent,
@@ -83,12 +84,20 @@ interface LeadModalProps {
   controller: LeadModalController;
   contacts: Contact[] | ContactForSelect[];
   projectTypes: ProjectType[];
+  projectTypesLoading?: boolean;
+  projectTypesFetching?: boolean;
+  projectTypesError?: Error | null;
+  onRetryProjectTypes?: () => void;
 }
 
 export function LeadModal({
   controller,
   contacts,
   projectTypes,
+  projectTypesLoading = false,
+  projectTypesFetching = false,
+  projectTypesError = null,
+  onRetryProjectTypes,
 }: LeadModalProps) {
   const { companies = [] } = useInstantCompanies();
   const { services = [] } = useCompanyServices();
@@ -193,6 +202,35 @@ export function LeadModal({
           <DialogTitle className="text-left font-display">{title}</DialogTitle>
         </div>
         <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-4 sm:px-6">
+          {projectTypesError ? (
+            <Alert variant="destructive" className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <AlertTitle>
+                  {projectTypes.length > 0
+                    ? "Project types could not be refreshed"
+                    : "Project types could not be loaded"}
+                </AlertTitle>
+                <AlertDescription>
+                  {projectTypes.length > 0
+                    ? "The types already loaded remain available."
+                    : "You can continue with the other fields and retry loading the types."}
+                </AlertDescription>
+              </div>
+              {onRetryProjectTypes ? (
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="shrink-0 border-destructive/50 text-foreground hover:bg-destructive/10"
+                  disabled={projectTypesFetching}
+                  onClick={onRetryProjectTypes}
+                >
+                  <RefreshCw className={projectTypesFetching ? "animate-spin" : undefined} />
+                  {projectTypesFetching ? "Retrying…" : "Retry"}
+                </Button>
+              ) : null}
+            </Alert>
+          ) : null}
           {isCreateMode && createController && (
             <>
               <div className="space-y-3 rounded-lg border border-line bg-elev-3 p-3">
@@ -240,6 +278,7 @@ export function LeadModal({
                   contacts={contactForSelect}
                   showContactSelect={createController.contactMode === ContactMode.EXISTING_CONTACT}
                   disabled={isLoading}
+                  projectTypesLoading={projectTypesLoading}
                 />
                 </div>
               
@@ -253,6 +292,7 @@ export function LeadModal({
               projectTypes={projectTypes}
               contacts={contacts as Contact[]}
               disabled={isLoading}
+              projectTypesLoading={projectTypesLoading}
             />
           )}
 

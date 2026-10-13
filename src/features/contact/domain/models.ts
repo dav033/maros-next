@@ -14,6 +14,10 @@ export interface Contact {
     id: number;
     name: string;
     address?: string | undefined;
+    addressLink?: string;
+    phone?: string;
+    email?: string;
+    submiz?: string;
     type: any;
     serviceId?: number | undefined;
     isCustomer: boolean;

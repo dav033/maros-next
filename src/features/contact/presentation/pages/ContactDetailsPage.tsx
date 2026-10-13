@@ -1,15 +1,13 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
-import { ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardDescription, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CompanyModal } from "@/features/company/presentation/organisms/CompanyModal";
 import { useContactCompanyModalController } from "../hooks/controllers/useContactCompanyModalController";
 import { useCompanyMutations } from "@/features/company/presentation/hooks";
 import { useContactMutations } from "../hooks/mutations/useContactMutations";
+import { useContactCacheInvalidation } from "../hooks/mutations/useContactCacheInvalidation";
 import { initialCompanyFormValue, toDraft as toCompanyDraft } from "@/features/company/presentation/helpers/companyFormHelpers";
 import type { CompanyFormValue } from "@/features/company/presentation/molecules/CompanyForm";
 import { useContactsNotesLogic } from "../hooks/notes/useContactsNotesLogic";
@@ -24,6 +22,8 @@ import { useLeadCreateModal } from "@/features/leads/presentation/hooks/modals/u
 import { useProjectTypes } from "@/projectType/presentation";
 import { LeadType } from "@/leads/domain";
 import type { ContactDetails } from "@/contact/domain";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import { useInlineEdit } from "@/common/hooks";
 import { ContactInfoSection } from "./sections/ContactInfoSection";
 import { ContactNotesSection } from "./sections/ContactNotesSection";
@@ -33,27 +33,54 @@ import { EntityNotesSection } from "@/features/notes/presentation/organisms/Enti
 import { EntityTasksSection } from "@/features/tasks/presentation/organisms/EntityTasksSection";
 
 
+export type ContactDetailsView = Omit<ContactDetails, "leads" | "stats"> & Partial<Pick<ContactDetails, "leads" | "stats">>;
+
 interface ContactDetailsPageProps {
   contactId: number;
   initialData: {
-    contactDetails: ContactDetails | null;
+    contactDetails: ContactDetailsView | null;
     error?: string;
   };
+  relationsError?: string;
+  onRetry?: () => void;
 }
 
-export function ContactDetailsPage({ contactId, initialData }: ContactDetailsPageProps) {
-  const router = useRouter();
+function ContactStatCard({
+  label,
+  value,
+}: {
+  label: string;
+  value: number | undefined;
+}) {
+  return (
+    <Card>
+      <CardHeader className="p-4 pb-3 sm:p-6 sm:pb-3">
+        <CardDescription className="text-xs sm:text-sm">{label}</CardDescription>
+        <CardTitle className="font-mono text-xl tabular-nums sm:text-2xl">{value ?? <Skeleton className="h-8 w-12" />}</CardTitle>
+      </CardHeader>
+    </Card>
+  );
+}
+
+export function ContactDetailsPage({ contactId, initialData, relationsError, onRetry }: ContactDetailsPageProps) {
+  const refreshContact = useContactCacheInvalidation();
   const { contactDetails, error } = initialData;
   
   // Data hooks
   const data = useContactsData();
   const { companies, services } = data;
-  const { projectTypes = [] } = useProjectTypes();
+  const {
+    projectTypes = [],
+    isLoading: projectTypesLoading,
+    isFetching: projectTypesFetching,
+    error: projectTypesError,
+    refetch: refetchProjectTypes,
+  } = useProjectTypes();
   const { contacts = [] } = data;
   
   // Notes logic
   const notesLogic = useContactsNotesLogic({
-    onSuccess: () => router.refresh(),
+    onSuccess: refreshContact,
   });
   const app = useContactsApp();
   
@@ -94,7 +121,7 @@ export function ContactDetailsPage({ contactId, initialData }: ContactDetailsPag
       }
     },
     successMessage: "Contact updated successfully!",
-    onSuccess: () => router.refresh(),
+    onSuccess: refreshContact,
   });
   
   // Company modal state
@@ -137,7 +164,7 @@ export function ContactDetailsPage({ contactId, initialData }: ContactDetailsPag
       const message = err instanceof Error ? err.message : "Could not create company";
       setCompanyServerError(message);
     }
-  }, [companyFormValue, createCompanyMutation, contactId, router]);
+  }, [companyFormValue, createCompanyMutation, contactId]);
   
   const handleOpenNotesModal = useCallback(() => {
     if (contactDetails) {
@@ -174,6 +201,7 @@ export function ContactDetailsPage({ contactId, initialData }: ContactDetailsPag
       {/* Header */}
       <EntityDetailHeader
         title={contactDetails.name}
+        sharedNameLayoutId={`maros-contact-name-${contactDetails.id}`}
         actions={
           <>
             {contactDetails.isCustomer && (
@@ -187,31 +215,11 @@ export function ContactDetailsPage({ contactId, initialData }: ContactDetailsPag
       />
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription>Total Leads</CardDescription>
-            <CardTitle className="font-mono text-2xl tabular-nums">{contactDetails.stats.totalLeads}</CardTitle>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription>Total Projects</CardDescription>
-            <CardTitle className="font-mono text-2xl tabular-nums">{contactDetails.stats.totalProjects}</CardTitle>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription>Active Projects</CardDescription>
-            <CardTitle className="font-mono text-2xl tabular-nums">{contactDetails.stats.activeProjects}</CardTitle>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription>Completed Projects</CardDescription>
-            <CardTitle className="font-mono text-2xl tabular-nums">{contactDetails.stats.completedProjects}</CardTitle>
-          </CardHeader>
-        </Card>
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
+        <ContactStatCard label="Total Leads" value={contactDetails.stats?.totalLeads} />
+        <ContactStatCard label="Total Projects" value={contactDetails.stats?.totalProjects} />
+        <ContactStatCard label="Active Projects" value={contactDetails.stats?.activeProjects} />
+        <ContactStatCard label="Completed Projects" value={contactDetails.stats?.completedProjects} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -232,7 +240,8 @@ export function ContactDetailsPage({ contactId, initialData }: ContactDetailsPag
 
         {/* Right Column: Leads and Projects */}
         <div className="space-y-6">
-          <ContactLeadsSection
+          {relationsError ? <div role="alert" className="space-y-2 text-sm text-destructive"><p>{relationsError}</p><Button variant="outline" onClick={onRetry}>Retry</Button></div> : null}
+          {contactDetails.leads ? <ContactLeadsSection
             leads={contactDetails.leads}
             onCreateLead={() => {
               if (contactId) {
@@ -241,7 +250,7 @@ export function ContactDetailsPage({ contactId, initialData }: ContactDetailsPag
               }
               leadCreateModal.open();
             }}
-          />
+          /> : !relationsError ? <Skeleton className="h-48 w-full rounded-xl" /> : null}
         </div>
       </div>
       
@@ -258,6 +267,10 @@ export function ContactDetailsPage({ contactId, initialData }: ContactDetailsPag
         controller={leadModalController}
         contacts={contactsForModal}
         projectTypes={projectTypes}
+        projectTypesLoading={projectTypesLoading}
+        projectTypesFetching={projectTypesFetching}
+        projectTypesError={projectTypesError}
+        onRetryProjectTypes={() => void refetchProjectTypes()}
       />
 
       <EntityAttachmentsSection
@@ -266,7 +279,7 @@ export function ContactDetailsPage({ contactId, initialData }: ContactDetailsPag
         attachments={contactDetails.attachments ?? []}
         onAttachmentsChange={async (newAttachments) => {
           await patchContact(app, contactDetails.id, { attachments: newAttachments });
-          router.refresh();
+          refreshContact();
         }}
       />
 

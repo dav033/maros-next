@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { SharedEntityName } from "@/components/shared/SharedEntityName";
 import { CornerDownRight, FileText } from "lucide-react";
 import type { NoteBacklink } from "@/notes/domain";
 import { useNoteBacklinks } from "../hooks/data/useNoteBacklinks";
@@ -52,7 +53,7 @@ function BacklinkRow({ backlink }: { backlink: NoteBacklink }) {
         <span className="shrink-0">
           {page.icon ?? <FileText className="size-3.5 text-muted-foreground" aria-hidden="true" />}
         </span>
-        <span className="truncate">{page.title}</span>
+        <span className="truncate"><SharedEntityName layoutId={`maros-note-title-${page.id}`}>{page.title}</SharedEntityName></span>
         {/* Only worth saying when the link is *only* a header relation: otherwise the
             quoted line below already shows where it came from. */}
         {!origins.includes("inline") && (

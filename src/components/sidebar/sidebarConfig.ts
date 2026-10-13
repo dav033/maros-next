@@ -30,6 +30,8 @@ export type SidebarItemProps = {
   icon?: LucideIcon;
   /** Prefijo de ruta que marca el link como activo (además del href exacto). */
   activePrefix?: string;
+  /** Rutas alternativas que representan esta misma sección, como páginas de detalle. */
+  activePrefixes?: string[];
   /** Prefijos excluidos del match de activePrefix (ej. /leads/lost). */
   activeExclude?: string[];
   /** Oculto si el usuario no tiene este permiso. Sin valor = visible para cualquiera autenticado. */
@@ -72,6 +74,7 @@ const salesSection: SidebarSection = {
       href: "/leads/construction",
       icon: Briefcase,
       activePrefix: "/leads",
+      activePrefixes: ["/lead"],
       activeExclude: ["/leads/lost"],
       permission: "leads:read",
     },
@@ -94,6 +97,7 @@ const projectsSection: SidebarSection = {
       href: "/projects/construction",
       icon: FolderKanban,
       activePrefix: "/projects",
+      activePrefixes: ["/project"],
       activeExclude: ["/projects/completed", "/projects/lost", "/projects/import-from-quickbooks"],
       permission: "projects:read",
     },
@@ -122,6 +126,7 @@ const workspaceSection: SidebarSection = {
       href: "/tasks",
       icon: KanbanSquare,
       activePrefix: "/tasks",
+      activeExclude: ["/tasks/workspaces"],
       permission: "tasks:read",
     },
     {
@@ -150,6 +155,7 @@ const directorySection: SidebarSection = {
       title: "Contacts",
       href: "/contacts",
       icon: Users,
+      activePrefixes: ["/contact"],
       permission: "contacts:read",
     },
     {

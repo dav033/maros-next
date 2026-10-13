@@ -32,6 +32,7 @@ type LeadEditFormProps = {
     value: LeadEditFormProps["form"][K]
   ) => void;
   projectTypes: ProjectType[];
+  projectTypesLoading?: boolean;
   contacts: Contact[];
   disabled?: boolean;
 };
@@ -50,6 +51,7 @@ export function LeadEditForm({
   form,
   onChange,
   projectTypes,
+  projectTypesLoading = false,
   contacts,
   disabled = false,
 }: LeadEditFormProps) {
@@ -80,16 +82,30 @@ export function LeadEditForm({
         <Select
           value={form.projectTypeId != null ? String(form.projectTypeId) : EMPTY_SELECT_VALUE}
           onValueChange={(val) => onChange("projectTypeId", val === EMPTY_SELECT_VALUE ? undefined : Number(val))}
-          disabled={disabled}
+          disabled={disabled || projectTypesLoading || projectTypes.length === 0}
         >
           <SelectTrigger className="w-full border-line-strong">
             <div className="flex items-center">
               <Wrench className="size-4 text-muted-foreground mr-2 shrink-0" />
-              <SelectValue placeholder="Select Project Type" />
+              <SelectValue
+                placeholder={
+                  projectTypesLoading
+                    ? "Cargando tipos de proyecto…"
+                    : projectTypes.length === 0
+                      ? "No hay tipos de proyecto"
+                      : "Selecciona un tipo de proyecto"
+                }
+              />
             </div>
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={EMPTY_SELECT_VALUE}>Select Project Type</SelectItem>
+            <SelectItem value={EMPTY_SELECT_VALUE}>
+              {projectTypesLoading
+                ? "Cargando tipos de proyecto…"
+                : projectTypes.length === 0
+                  ? "No hay tipos de proyecto"
+                  : "Selecciona un tipo de proyecto"}
+            </SelectItem>
             {projectTypes.map((pt) => (
               <SelectItem key={pt.id} value={String(pt.id)}>
                 {pt.name}

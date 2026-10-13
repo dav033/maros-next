@@ -1,5 +1,6 @@
 import type { Project } from "../models";
 import type { Lead } from "@/leads/domain";
+import type { ApiLeadDTO } from "@/leads/domain/services/leadReadMapper";
 import { ProjectProgressStatus, InvoiceStatus } from "../models";
 import type {
   ProjectFinancial,
@@ -10,6 +11,7 @@ import type {
 
 export type ApiProjectDTO = {
   id?: number | null;
+  qboCustomerId?: string | null;
   projectProgressStatus?: string | null;
   invoiceStatus?: string | null;
   overview?: string | null;
@@ -34,26 +36,7 @@ export type ApiProjectDTO = {
     lastPaymentDate?: string | null;
     hasDetails?: boolean;
   } | null;
-  lead?: {
-    id?: number | null;
-    leadNumber?: string | null;
-    name?: string | null;
-    startDate?: string | null;
-    location?: string | null;
-    addressLink?: string | null;
-    status?: string | null;
-    contact?: {
-      id?: number | null;
-      name?: string | null;
-      phone?: string | null;
-      email?: string | null;
-    } | null;
-    projectType?: {
-      id?: number | null;
-      name?: string | null;
-      color?: string | null;
-    } | null;
-  } | null;
+  lead?: ApiLeadDTO;
 } | null;
 
 function resolveProjectProgressStatus(input: unknown): ProjectProgressStatus | undefined {
@@ -261,6 +244,8 @@ export function mapProjectFromDTO(dto: ApiProjectDTO, leadMapper: (dto: any) => 
 
   return {
     id,
+    qboCustomerId:
+      typeof dto?.qboCustomerId === "string" ? dto.qboCustomerId : undefined,
     projectProgressStatus,
     invoiceStatus,
     overview,

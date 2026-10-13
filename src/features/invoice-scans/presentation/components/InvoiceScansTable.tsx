@@ -2,6 +2,7 @@
 
 import { ArrowDownLeft, ArrowUpRight, TriangleAlert } from "lucide-react";
 import Link from "next/link";
+import { SharedEntityName } from "@/components/shared/SharedEntityName";
 
 import { Badge } from "@/components/ui/badge";
 import {
@@ -136,7 +137,7 @@ export function InvoiceScansTable({ scans, variant }: Props) {
                       href={`/finance/invoices/${scan.id}`}
                       className="block truncate font-medium text-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     >
-                      {invoiceTitle(scan)}
+                      <SharedEntityName layoutId={`maros-invoice-title-${scan.id}-desktop`}>{invoiceTitle(scan)}</SharedEntityName>
                     </Link>
                     <span className="block truncate text-xs text-muted-foreground">
                       {recordDirection(scan)}
@@ -188,7 +189,7 @@ export function InvoiceScansTable({ scans, variant }: Props) {
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="truncate font-medium">{invoiceTitle(scan)}</p>
+                    <p className="truncate font-medium"><SharedEntityName layoutId={`maros-invoice-title-${scan.id}-mobile`}>{invoiceTitle(scan)}</SharedEntityName></p>
                     <p className="mt-0.5 truncate text-sm text-muted-foreground">
                       {invoice?.counterpartyName || "Counterparty not identified"}
                     </p>

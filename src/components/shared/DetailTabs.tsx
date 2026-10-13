@@ -1,8 +1,10 @@
 "use client";
 
 import type { ComponentType } from "react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { AnimatePresence, motion } from "motion/react";
+import { usePrefersReducedMotion } from "@/shared/presentation/hooks/usePrefersReducedMotion";
 
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
@@ -85,22 +87,81 @@ export function useUrlTabState<T extends string>(
  */
 export function DetailTabsBar({
   tabs,
+  activeTab,
   className,
 }: {
   tabs: readonly DetailTabDef[];
+  activeTab: string;
   className?: string;
 }) {
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const layoutId = useId();
+  const shouldReduceMotion = usePrefersReducedMotion();
+
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+
+    const activeTrigger = Array.from(
+      viewport.querySelectorAll<HTMLButtonElement>('[role="tab"]'),
+    ).find((trigger) => trigger.dataset.state === "active");
+    if (!activeTrigger) return;
+
+    const viewportRect = viewport.getBoundingClientRect();
+    const triggerRect = activeTrigger.getBoundingClientRect();
+    const triggerStart = viewport.scrollLeft + triggerRect.left - viewportRect.left;
+    const centeredScrollLeft = triggerStart + triggerRect.width / 2 - viewport.clientWidth / 2;
+    const maxScrollLeft = viewport.scrollWidth - viewport.clientWidth;
+
+    viewport.scrollTo({
+      left: Math.max(0, Math.min(centeredScrollLeft, maxScrollLeft)),
+      behavior: shouldReduceMotion ? "auto" : "smooth",
+    });
+  }, [activeTab, shouldReduceMotion]);
+
   return (
-    <div className={cn("-mx-1 overflow-x-auto px-1 pb-0.5", className)}>
+    <div
+      ref={viewportRef}
+      role="region"
+      aria-label="Secciones del detalle"
+      className={cn("-mx-1 overflow-x-auto overscroll-x-contain px-1 pb-0.5", className)}
+    >
       <TabsList className="h-9 w-max gap-1 rounded-lg border border-line bg-elev-1 p-1">
         {tabs.map(({ value, label, icon: Icon }) => (
           <TabsTrigger
             key={value}
             value={value}
-            className="gap-1.5 px-3 py-1 text-xs font-medium text-muted-foreground data-[state=active]:bg-elev-3 data-[state=active]:text-foreground"
+            className="relative isolate shrink-0 gap-1.5 whitespace-nowrap px-3 py-1 text-xs font-medium text-muted-foreground transition-colors motion-reduce:transition-none data-[state=active]:bg-transparent data-[state=active]:text-foreground"
           >
-            {Icon ? <Icon className="size-3.5" /> : null}
-            {label}
+            {activeTab === value ? (
+              <AnimatePresence initial={false}>
+                <motion.span
+                  aria-hidden="true"
+                  className="absolute inset-0 z-0 rounded-md bg-elev-3"
+                  layoutId={`maros-detail-tab-background-${layoutId}`}
+                  transition={
+                    shouldReduceMotion
+                      ? { duration: 0 }
+                      : {
+                          layout: {
+                            type: "spring",
+                            stiffness: 280,
+                            damping: 28,
+                            mass: 0.8,
+                          },
+                          opacity: { duration: 0.14, ease: [0.22, 1, 0.36, 1] },
+                        }
+                  }
+                  initial={false}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                />
+              </AnimatePresence>
+            ) : null}
+            <span className="relative z-10 inline-flex items-center gap-1.5">
+              {Icon ? <Icon className="size-3.5" /> : null}
+              {label}
+            </span>
           </TabsTrigger>
         ))}
       </TabsList>

@@ -2,6 +2,7 @@
 
 import { useCrudPage } from "@/common/hooks";
 import { useContactsApp } from "@/di";
+import { useContactCacheInvalidation } from "@/features/contact/presentation/hooks/mutations/useContactCacheInvalidation";
 import { toContactDraft, toContactFormValue, toContactPatch, type Contact, type ContactDraft, type ContactFormValue, type ContactPatch } from "@/contact/domain";
 import {
   contactsKeys,
@@ -32,6 +33,7 @@ export type ContactsCrudReturn = ReturnType<
 
 export function useContactsCrud(): ContactsCrudReturn {
   const app = useContactsApp();
+  const invalidateContact = useContactCacheInvalidation();
 
   const crud = useCrudPage<
     Contact & { id: number },
@@ -42,6 +44,7 @@ export function useContactsCrud(): ContactsCrudReturn {
     queryKey: [contactsKeys.list, ["customers"]],
     createFn: async (draft) => {
       const res = await createContact(app, draft);
+      invalidateContact();
       if (typeof res.id !== "number") {
         throw new Error("Created contact has no id");
       }
@@ -49,6 +52,7 @@ export function useContactsCrud(): ContactsCrudReturn {
     },
     updateFn: async (id, patch) => {
       const res = await patchContact(app, id, patch);
+      invalidateContact();
       if (typeof res.id !== "number") {
         throw new Error("Updated contact has no id");
       }

@@ -129,6 +129,7 @@ export function useTaskEventsStream(): void {
           queryClient.setQueryData(tasksKeys.detail(payload.taskId), detail);
           patchListCaches(detail, payload.taskId);
           patchBoardCache(detail, payload.taskId);
+          void queryClient.invalidateQueries({ queryKey: tasksKeys.schedules() });
           queryClient.setQueriesData({ queryKey: tasksKeys.mine() }, (old: unknown) => {
             if (!old || typeof old !== "object") return old;
             const buckets = old as Record<string, Task[]>;
@@ -157,6 +158,7 @@ export function useTaskEventsStream(): void {
           queryClient.removeQueries({ queryKey: tasksKeys.detail(payload.taskId) });
           patchListCaches(null, payload.taskId);
           patchBoardCache(null, payload.taskId);
+          void queryClient.invalidateQueries({ queryKey: tasksKeys.schedules() });
         });
     });
 

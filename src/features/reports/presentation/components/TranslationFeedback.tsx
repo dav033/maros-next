@@ -22,7 +22,7 @@ export const TranslationFeedback = ({
     : 0;
 
   return (
-    <Card className="fixed bottom-6 right-6 z-50 min-w-[320px] max-w-md animate-in slide-in-from-bottom-5 shadow-2xl">
+    <Card className="fixed bottom-6 right-6 z-50 min-w-[320px] max-w-md animate-in slide-in-from-bottom-5 shadow-2xl motion-reduce:!animate-none motion-reduce:!transition-none">
       <CardContent className="p-4">
         <div className="flex items-start gap-3">
           <div className="flex-shrink-0 mt-0.5">

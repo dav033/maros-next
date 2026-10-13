@@ -23,5 +23,8 @@ export function useNotePresignedImageUrl(src: string) {
   if (isExternalUrl) {
     return { url: src, isLoading: false };
   }
-  return { url: query.data, isLoading: query.isPending };
+  return {
+    url: query.data?.status === "ready" ? query.data.url : undefined,
+    isLoading: query.isPending,
+  };
 }

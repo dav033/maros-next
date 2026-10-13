@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { ListTodo } from "lucide-react";
+import { SharedEntityName } from "@/components/shared/SharedEntityName";
 import {
   EntityTable,
   type EntityTableGroupBy,
@@ -46,7 +47,15 @@ function buildColumns(onOpen: (id: number) => void): SimpleTableColumn<Task>[] {
           onClick={() => onOpen(task.id)}
           className="truncate text-left font-medium text-foreground hover:underline"
         >
-          {task.title}
+            <span data-task-title-id={task.id}>
+              <SharedEntityName
+                layoutId={`maros-task-title-${task.id}`}
+              clipOverlay={false}
+                className="inline-block max-w-full truncate align-bottom"
+              >
+                {task.title}
+              </SharedEntityName>
+            </span>
         </button>
       ),
     },

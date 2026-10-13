@@ -202,7 +202,7 @@ export function NoteEditorToolbar({ editor }: { editor: Editor }) {
                 key={command.id}
                 onSelect={() => {
                   const pos = editor.state.selection.from;
-                  command.run(editor, { from: pos, to: pos });
+                  command.run?.(editor, { from: pos, to: pos });
                 }}
               >
                 <command.icon className="mr-2 size-4" aria-hidden="true" />

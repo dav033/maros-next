@@ -1,6 +1,7 @@
 import { keepPreviousData, type QueryClient } from "@tanstack/react-query";
 import { analyticsKeys } from "../keys/analyticsKeys";
 import { STALE_TIMES } from "@/shared/lib/queryClient";
+import { shouldRefetchNavigationOnMount } from "@/shared/query/useNavigationDetailQuery";
 
 const STALE_TIME = STALE_TIMES.analytics;
 const GC_TIME = 30 * 60 * 1000;
@@ -10,7 +11,7 @@ export const analyticsQueryDefaults = {
   gcTime: GC_TIME,
   refetchOnWindowFocus: true,
   refetchOnReconnect: true,
-  refetchOnMount: false,
+  refetchOnMount: shouldRefetchNavigationOnMount,
   retry: 1,
   placeholderData: keepPreviousData,
 } as const;

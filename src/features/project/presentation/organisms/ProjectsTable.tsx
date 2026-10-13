@@ -3,6 +3,8 @@
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { SharedEntityName } from "@/components/shared/SharedEntityName";
+import { usePrefersReducedMotion } from "@/shared/presentation/hooks/usePrefersReducedMotion";
 import { CreditCard, FolderX } from "lucide-react";
 
 import {
@@ -15,6 +17,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency } from "@/shared/utils";
 import { useHasPermission } from "@/shared/auth/useHasPermission";
+import { projectReturnElementTransition } from "../projectMotion";
+import { useRouteSharedLayoutScope } from "@/shared/presentation/RouteMotionContext";
 import type { Project } from "@/project/domain";
 import { getLeadTypeFromNumber } from "@/leads/domain";
 import type { LeadType } from "@/leads/domain";
@@ -83,6 +87,8 @@ function ProjectMobileCard({
   onOpenNotesModal?: (project: Project) => void;
   onOpenPayments?: (project: Project) => void;
 }) {
+  const shouldReduceMotion = usePrefersReducedMotion();
+  const sharedLayoutScope = useRouteSharedLayoutScope();
   const estimate = toProjectAmount(project.financial?.estimatedAmount);
   const paymentAmount = project.paymentSummary?.totalAmount ?? project.financial?.paidAmount;
   const collected = toProjectAmount(
@@ -107,9 +113,14 @@ function ProjectMobileCard({
     <div className="space-y-3">
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="font-mono text-xs text-muted-foreground">
+          <SharedEntityName
+            layoutCrossfade={false}
+            layoutId={shouldReduceMotion ? undefined : `maros-project-number-${project.id}-mobile-${sharedLayoutScope}`}
+            transition={projectReturnElementTransition}
+            className="inline-block font-mono text-xs text-muted-foreground"
+          >
             {project.lead.leadNumber}
-          </span>
+          </SharedEntityName>
           {status ? (
             <Badge
               variant="outline"
@@ -125,7 +136,14 @@ function ProjectMobileCard({
           href={`/project/${project.id}`}
           className="mt-1 block break-words text-sm font-semibold leading-snug text-foreground underline-offset-4 hover:underline"
         >
-          {project.lead.name}
+          <SharedEntityName
+            layoutCrossfade={false}
+            layoutId={shouldReduceMotion ? undefined : `maros-project-name-${project.id}-mobile-${sharedLayoutScope}`}
+            transition={projectReturnElementTransition}
+            className="inline-block"
+          >
+            {project.lead.name}
+          </SharedEntityName>
         </Link>
         {project.client ? (
           <p className="mt-1 break-words text-xs text-muted-foreground">
@@ -134,7 +152,7 @@ function ProjectMobileCard({
               href={project.client.type === "company" ? `/company/${project.client.id}` : `/contact/${project.client.id}`}
               className="text-foreground underline-offset-4 hover:underline"
             >
-              {project.client.name}
+              <SharedEntityName layoutId={`maros-${project.client.type === "company" ? "company" : "contact"}-name-${project.client.id}`} sourceInstance={`project-${project.id}-mobile`}>{project.client.name}</SharedEntityName>
             </Link>
           </p>
         ) : null}

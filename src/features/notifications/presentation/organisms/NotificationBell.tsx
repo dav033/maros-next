@@ -41,9 +41,10 @@ function taskHref(notification: AppNotification): string | null {
   return typeof taskId === "number" ? `/tasks?task=${taskId}` : null;
 }
 
-export function NotificationBell() {
+export function NotificationBell({ instance }: { instance: "header" | "sidebar" }) {
   const [open, setOpen] = useState(false);
   const [hydrated, setHydrated] = useState(false);
+  const contentId = `notification-popover-${instance}`;
   const unreadCount = useUnreadCount();
   const { notifications, isLoading } = useInstantNotifications(open);
   const { markReadMutation, markAllReadMutation } = useNotificationMutations();
@@ -58,6 +59,7 @@ export function NotificationBell() {
       <PopoverTrigger asChild>
         <button
           type="button"
+          aria-controls={open ? contentId : undefined}
           aria-label={visibleUnreadCount > 0 ? `${visibleUnreadCount} unread notifications` : "Notifications"}
           className="relative grid h-8 w-8 shrink-0 place-items-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
         >
@@ -69,7 +71,7 @@ export function NotificationBell() {
           ) : null}
         </button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-0" align="start" side="top">
+      <PopoverContent id={contentId} className="w-80 p-0" align="start" side="top">
         <div className="flex items-center justify-between border-b border-line px-3 py-2">
           <span className="text-sm font-medium">Notifications</span>
           {notifications.some((n) => !n.readAt) ? (

@@ -16,7 +16,6 @@ import { ProjectsTable } from "@/project/presentation";
 import { ProjectModal } from "../organisms/ProjectModal";
 import {
   X,
-  FolderPlus,
   Search,
   Layers,
   FolderKanban,
@@ -54,6 +53,7 @@ import { useInstantLeadsByType } from "@/leads/presentation";
 import { LeadTypeSwitcher } from "@/components/shared/LeadTypeSwitcher";
 import { ProjectPaymentsDialog } from "../organisms/ProjectPaymentsDialog";
 import { QuickbooksLinkProjectDialog } from "../organisms/QuickbooksLinkProjectButton";
+import { ProjectListLoadError } from "../components/ProjectListLoadError";
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -92,7 +92,7 @@ export function ProjectsPageView({ logic }: ProjectsPageViewProps) {
   const pathname = usePathname();
   const { leadType, data, crud, table, bulkActions, notesModal, openNotesModal, quickbooksLink } = logic;
 
-  const { projects, showSkeleton, financialsLoading } = data;
+  const { projects, showSkeleton, financialsLoading, error, isFetching, refetch } = data;
 
   const projectsMissingQboData = projects.filter((p) => p.qboError).length;
 
@@ -103,19 +103,16 @@ export function ProjectsPageView({ logic }: ProjectsPageViewProps) {
     createController,
     isEditModalOpen,
     selectedProject,
-    openEditModal,
     closeEditModal,
     updateController,
   } = crud;
 
   const {
-    rows,
     totalCount,
     filteredCount,
     searchState,
     filterState,
     deleteModalProps,
-    getContextMenuItems,
   } = table;
 
   const { searchQuery, searchField, setSearchQuery, setSearchField } = searchState;
@@ -275,6 +272,13 @@ export function ProjectsPageView({ logic }: ProjectsPageViewProps) {
       loadingContent={<ProjectsTableSkeleton />}
       tableContent={
         <div className="space-y-3">
+          {error ? (
+            <ProjectListLoadError
+              hasVisibleProjects={projects.length > 0}
+              isFetching={isFetching}
+              onRetry={refetch}
+            />
+          ) : null}
           {financialsLoading && (
             <Alert>
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -336,18 +340,20 @@ export function ProjectsPageView({ logic }: ProjectsPageViewProps) {
             </Button>
           </BulkActionsBar>
 
-          <ProjectsTable
-            tableLogic={table}
-            isLoading={showSkeleton}
-            onOpenNotesModal={openNotesModal}
-            onOpenPayments={setPaymentsProject}
-            groupBy={groupBy}
-            pagination={{ enabled: true }}
-            selection={{
-              selectedIds: bulkActions.selectedIds,
-              onSelectionChange: bulkActions.onSelectionChange,
-            }}
-          />
+          {(!error || projects.length > 0) && (
+            <ProjectsTable
+              tableLogic={table}
+              isLoading={showSkeleton}
+              onOpenNotesModal={openNotesModal}
+              onOpenPayments={setPaymentsProject}
+              groupBy={groupBy}
+              pagination={{ enabled: true }}
+              selection={{
+                selectedIds: bulkActions.selectedIds,
+                onSelectionChange: bulkActions.onSelectionChange,
+              }}
+            />
+          )}
         </div>
       }
       modals={

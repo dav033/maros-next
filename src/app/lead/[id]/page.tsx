@@ -1,7 +1,7 @@
 import { Suspense } from "react";
-import { LeadDetailsPage } from "@/leads/presentation/pages/LeadDetailsPage";
+import { LeadDetailsRoute } from "@/leads/presentation/pages/LeadDetailsRoute";
 import { LeadDetailsPageSkeleton } from "@/features/leads/presentation/components/LeadDetailsPageSkeleton";
-import { loadLeadDetailsData } from "@/features/leads/presentation/data/loadLeadDetailsData";
+import { parsePositiveSafeInteger } from "@/shared/utils/parsePositiveSafeInteger";
 
 async function LeadDetailsPageWithData({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params;
@@ -20,9 +20,9 @@ async function LeadDetailsPageWithData({ params }: { params: Promise<{ id: strin
     );
   }
   
-  const leadId = parseInt(idString, 10);
+  const leadId = parsePositiveSafeInteger(idString);
   
-  if (isNaN(leadId) || leadId <= 0) {
+  if (leadId === null) {
     return (
       <div className="container mx-auto p-6">
         <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-6">
@@ -35,8 +35,7 @@ async function LeadDetailsPageWithData({ params }: { params: Promise<{ id: strin
     );
   }
   
-  const initialData = await loadLeadDetailsData(leadId);
-  return <LeadDetailsPage leadId={leadId} initialData={initialData} />;
+  return <LeadDetailsRoute leadId={leadId} />;
 }
 
 export default async function LeadDetailsRoutePage({ params }: { params: Promise<{ id: string }> }) {

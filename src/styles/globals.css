@@ -1,6 +1,10 @@
 @config "../../tailwind.config.ts";
 @import "tailwindcss";
 
+[data-shared-element-overlay-active="true"] {
+  opacity: 0 !important;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 /* ---------------------------------------------------------------------------
@@ -276,11 +280,11 @@ select option:focus {
   animation: dashboardWidgetEnter 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-.dashboard-widget-enter.is-refetching {
+.dashboard-widget.is-refetching {
   animation: none;
 }
 
-.dashboard-widget-enter.is-refetching > :not(.refetch-indicator) {
+.dashboard-widget.is-refetching > :not(.refetch-indicator) {
   opacity: 0.55;
   transition: opacity 0.2s ease-in-out;
   pointer-events: none;
@@ -375,6 +379,26 @@ select option:focus {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  /* Apply the system preference to CSS motion even when a component omits its own variant. */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  /* Keep loading status visible without perpetual motion. */
+  .animate-spin {
+    animation: none !important;
+  }
+
+  .animate-ping {
+    animation: none !important;
+    opacity: 0 !important;
+  }
+
   .skeleton-sheen::after {
     animation: none;
   }

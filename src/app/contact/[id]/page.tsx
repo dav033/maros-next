@@ -1,7 +1,7 @@
 import { Suspense } from "react";
-import { ContactDetailsPage } from "@/contact/presentation/pages/ContactDetailsPage";
+import { ContactDetailsRoute } from "@/contact/presentation/pages/ContactDetailsRoute";
 import { ContactDetailsPageSkeleton } from "@/contact/presentation/components/ContactDetailsPageSkeleton";
-import { loadContactDetailsData } from "@/contact/presentation/data/loadContactDetailsData";
+import { parsePositiveSafeInteger } from "@/shared/utils/parsePositiveSafeInteger";
 
 async function ContactDetailsPageWithData({ params }: { params: Promise<{ id: string }> }) {
   // Manejar params como Promise o objeto directo
@@ -21,9 +21,9 @@ async function ContactDetailsPageWithData({ params }: { params: Promise<{ id: st
     );
   }
   
-  const contactId = parseInt(idString, 10);
+  const contactId = parsePositiveSafeInteger(idString);
   
-  if (isNaN(contactId) || contactId <= 0) {
+  if (contactId === null) {
     return (
       <div className="container mx-auto p-6">
         <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-6">
@@ -36,8 +36,7 @@ async function ContactDetailsPageWithData({ params }: { params: Promise<{ id: st
     );
   }
   
-  const initialData = await loadContactDetailsData(contactId);
-  return <ContactDetailsPage contactId={contactId} initialData={initialData} />;
+  return <ContactDetailsRoute contactId={contactId} />;
 }
 
 export default async function ContactDetailsRoutePage({ params }: { params: Promise<{ id: string }> }) {

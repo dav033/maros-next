@@ -102,6 +102,8 @@ export enum InvoiceStatus {
 
 export interface Project {
   id: number;
+  /** QuickBooks customer/job link returned by the projects read endpoints. */
+  qboCustomerId?: string | null;
   projectProgressStatus?: ProjectProgressStatus;
   invoiceStatus?: InvoiceStatus;
   overview?: string;

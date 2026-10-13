@@ -17,6 +17,7 @@ import type { UseProjectsByStatusPageLogicReturn } from "./useProjectsByStatusPa
 import { useProjectsToolbarSearchController } from "../hooks/table/useProjectsToolbarSearchController";
 import { useProjectsNotesModalController } from "../hooks/modals/useProjectsNotesModalController";
 import { QuickbooksLinkProjectDialog } from "../organisms/QuickbooksLinkProjectButton";
+import { ProjectListLoadError } from "../components/ProjectListLoadError";
 
 export interface ProjectsByStatusPageViewProps {
   logic: UseProjectsByStatusPageLogicReturn;
@@ -32,7 +33,7 @@ export function ProjectsByStatusPageView({
   description,
 }: ProjectsByStatusPageViewProps) {
   const { data, table, notesModal } = logic;
-  const { showSkeleton } = data;
+  const { projects, showSkeleton, error, isFetching, refetch } = data;
 
   const { totalCount, filteredCount, searchState, deleteModalProps } = table;
 
@@ -95,13 +96,24 @@ export function ProjectsByStatusPageView({
       isLoading={showSkeleton}
       loadingContent={<ProjectsTableSkeleton />}
       tableContent={
-        <ProjectsTable
-          tableLogic={table}
-          isLoading={showSkeleton}
-          onOpenNotesModal={logic.openNotesModal}
-          groupBy="leadType"
-          pagination={{ enabled: true }}
-        />
+        <div className="space-y-3">
+          {error ? (
+            <ProjectListLoadError
+              hasVisibleProjects={projects.length > 0}
+              isFetching={isFetching}
+              onRetry={refetch}
+            />
+          ) : null}
+          {(!error || projects.length > 0) && (
+            <ProjectsTable
+              tableLogic={table}
+              isLoading={showSkeleton}
+              onOpenNotesModal={logic.openNotesModal}
+              groupBy="leadType"
+              pagination={{ enabled: true }}
+            />
+          )}
+        </div>
       }
       modals={
         <>

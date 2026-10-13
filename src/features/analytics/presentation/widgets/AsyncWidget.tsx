@@ -14,6 +14,7 @@ type AsyncWidgetProps<T> = {
   errorText: string;
   emptyText?: string;
   skeleton?: ReactNode;
+  animateOnLoad?: boolean;
   isEmpty?: (data: T) => boolean;
   children: (data: T) => ReactNode;
 };
@@ -28,6 +29,7 @@ export function AsyncWidget<T>({
   errorText,
   emptyText,
   skeleton,
+  animateOnLoad = true,
   isEmpty = defaultIsEmpty,
   children,
 }: AsyncWidgetProps<T>) {
@@ -50,7 +52,7 @@ export function AsyncWidget<T>({
   const isRefetching = Boolean(query.isFetching) && !query.isLoading;
 
   return (
-    <div className={`relative dashboard-widget-enter ${isRefetching ? "is-refetching" : ""}`}>
+    <div className={`relative dashboard-widget ${animateOnLoad ? "dashboard-widget-enter" : ""} ${isRefetching ? "is-refetching" : ""}`}>
       {isRefetching ? (
         <span
           className="refetch-indicator pointer-events-none absolute right-3 top-3 z-10 flex h-2 w-2"

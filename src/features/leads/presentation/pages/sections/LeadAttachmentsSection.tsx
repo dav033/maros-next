@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useId, useRef, useState, useCallback } from "react";
 import { Paperclip, Upload, X, Download, Loader2, Eye, GripVertical } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import {
   DndContext,
+  KeyboardSensor,
   closestCenter,
   PointerSensor,
   useSensor,
@@ -16,12 +17,15 @@ import {
 import {
   SortableContext,
   verticalListSortingStrategy,
+  sortableKeyboardCoordinates,
   useSortable,
   arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { motion } from "motion/react";
+import { usePrefersReducedMotion } from "@/shared/presentation/hooks/usePrefersReducedMotion";
 import { getPresignedUploadUrl, getPresignedDownloadUrl, getPresignedPreviewUrl } from "@/features/leads/actions/s3Actions";
-import { FilePreviewModal } from "./FilePreviewModal";
+import { FilePreviewModal } from "@/features/attachments/presentation/FilePreviewModal";
 
 interface LeadAttachmentsSectionProps {
   leadId: number;
@@ -73,19 +77,24 @@ function AttachmentThumbnail({
   onClick,
 }: {
   keyName: string;
-  onClick: () => void;
+  onClick: (trigger: HTMLButtonElement) => void;
 }) {
   const [url, setUrl] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const shouldReduceMotion = usePrefersReducedMotion();
 
   useEffect(() => {
     let cancelled = false;
     setUrl(null);
     setFailed(false);
+    setImageLoaded(false);
 
     getPresignedPreviewUrl(keyName)
-      .then((nextUrl) => {
-        if (!cancelled) setUrl(nextUrl);
+      .then((result) => {
+        if (cancelled) return;
+        if (result.status === "ready") setUrl(result.url);
+        else setFailed(true);
       })
       .catch(() => {
         if (!cancelled) setFailed(true);
@@ -99,20 +108,31 @@ function AttachmentThumbnail({
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={(event) => onClick(event.currentTarget)}
       className="flex h-16 w-20 shrink-0 items-center justify-center overflow-hidden rounded-md border border-line-strong bg-elev-4 p-1 hover:border-primary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
       aria-label={`Preview ${getFileName(keyName)}`}
       title="Preview image"
     >
       {url && !failed ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={url}
-          alt={getFileName(keyName)}
-          className="max-h-full max-w-full object-contain"
-          loading="lazy"
-          onError={() => setFailed(true)}
-        />
+        <motion.div
+          layout={!shouldReduceMotion}
+          layoutId={shouldReduceMotion || !imageLoaded ? undefined : `maros-attachment-image-${keyName}`}
+          data-attachment-image-source={imageLoaded ? keyName : undefined}
+          transition={{ layout: { type: "spring", stiffness: 230, damping: 28, mass: 0.9 } }}
+          className="flex max-h-full max-w-full items-center justify-center"
+        >
+          <img
+            src={url}
+            alt={getFileName(keyName)}
+            className="max-h-full max-w-full object-contain"
+            loading="lazy"
+            onLoad={() => setImageLoaded(true)}
+            onError={() => {
+              setImageLoaded(false);
+              setFailed(true);
+            }}
+          />
+        </motion.div>
       ) : failed ? (
         <Paperclip className="size-5 text-muted-foreground" />
       ) : (
@@ -124,20 +144,21 @@ function AttachmentThumbnail({
 
 interface SortableItemProps {
   id: string;
-  onPreview: (key: string) => void;
+  onPreview: (key: string, trigger: HTMLButtonElement) => void;
   onDownload: (key: string) => void;
   onRemove: (key: string) => void;
   downloadingKey: string | null;
 }
 
 function SortableItem({ id, onPreview, onDownload, onRemove, downloadingKey }: SortableItemProps) {
+  const shouldReduceMotion = usePrefersReducedMotion();
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
   const canPreview = isPreviewable(id);
   const image = isImage(id);
 
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition,
+    transition: shouldReduceMotion ? undefined : transition,
     opacity: isDragging ? 0.5 : 1,
   };
 
@@ -150,18 +171,18 @@ function SortableItem({ id, onPreview, onDownload, onRemove, downloadingKey }: S
       <button
         {...attributes}
         {...listeners}
+        aria-label={`Reorder ${getFileName(id)}`}
         className="cursor-grab active:cursor-grabbing touch-none text-muted-foreground hover:text-foreground shrink-0"
-        tabIndex={-1}
       >
         <GripVertical className="size-4" />
       </button>
 
-      {image && <AttachmentThumbnail keyName={id} onClick={() => onPreview(id)} />}
+      {image && <AttachmentThumbnail keyName={id} onClick={(trigger) => onPreview(id, trigger)} />}
 
       <button
         type="button"
         className="group flex min-w-0 flex-1 items-center gap-2 rounded-sm px-2 py-1 text-left hover:bg-elev-4 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-        onClick={() => (canPreview ? onPreview(id) : onDownload(id))}
+        onClick={(event) => (canPreview ? onPreview(id, event.currentTarget) : onDownload(id))}
         disabled={!canPreview && downloadingKey === id}
         title={canPreview ? "Preview attachment" : "Open attachment"}
       >
@@ -173,7 +194,7 @@ function SortableItem({ id, onPreview, onDownload, onRemove, downloadingKey }: S
 
       <div className="flex items-center gap-1 shrink-0">
         {canPreview && (
-          <Button variant="ghost" size="icon" className="size-7" onClick={() => onPreview(id)}>
+          <Button variant="ghost" size="icon" className="size-7" aria-label={`Preview ${getFileName(id)}`} onClick={(event) => onPreview(id, event.currentTarget)}>
             <Eye className="size-3" />
           </Button>
         )}
@@ -181,6 +202,7 @@ function SortableItem({ id, onPreview, onDownload, onRemove, downloadingKey }: S
           variant="ghost"
           size="icon"
           className="size-7"
+          aria-label={`Download ${getFileName(id)}`}
           onClick={() => onDownload(id)}
           disabled={downloadingKey === id}
         >
@@ -194,6 +216,7 @@ function SortableItem({ id, onPreview, onDownload, onRemove, downloadingKey }: S
           variant="ghost"
           size="icon"
           className="size-7 text-destructive hover:text-destructive"
+          aria-label={`Remove ${getFileName(id)}`}
           onClick={() => onRemove(id)}
         >
           <X className="size-3" />
@@ -208,13 +231,18 @@ export function LeadAttachmentsSection({
   attachments,
   onAttachmentsChange,
 }: LeadAttachmentsSectionProps) {
+  const dndContextId = useId();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [downloadingKey, setDownloadingKey] = useState<string | null>(null);
-  const [preview, setPreview] = useState<{ url: string; fileName: string } | null>(null);
+  const [preview, setPreview] = useState<{ url: string; fileName: string; sourceKey: string } | null>(null);
+  const previewTriggerRef = useRef<HTMLButtonElement | null>(null);
 
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
 
   const uploadFiles = useCallback(async (files: File[]) => {
     if (!files.length) return;
@@ -287,10 +315,15 @@ export function LeadAttachmentsSection({
     }
   };
 
-  const handlePreview = async (key: string) => {
+  const handlePreview = async (key: string, trigger: HTMLButtonElement) => {
+    previewTriggerRef.current = trigger;
     try {
-      const url = await getPresignedPreviewUrl(key);
-      setPreview({ url, fileName: getFileName(key) });
+      const result = await getPresignedPreviewUrl(key);
+      if (result.status === "not_configured") {
+        toast.error("Attachment preview is unavailable in this environment.");
+        return;
+      }
+      setPreview({ url: result.url, fileName: getFileName(key), sourceKey: key });
     } catch {
       toast.error("Could not load preview");
     }
@@ -331,17 +364,19 @@ export function LeadAttachmentsSection({
           onChange={handleFileSelect}
         />
 
-        <div
+        <button
+          type="button"
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleFileDrop}
-          onClick={() => !isUploading && fileInputRef.current?.click()}
+          onClick={() => fileInputRef.current?.click()}
+          disabled={isUploading}
           className={[
-            "border-2 border-dashed rounded-lg px-4 py-6 text-center cursor-pointer transition-colors",
+            "w-full border-2 border-dashed rounded-lg px-4 py-6 text-center cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
             isDragging
               ? "border-primary bg-primary/5 text-primary"
               : "border-line-strong text-muted-foreground hover:bg-elev-3",
-            isUploading ? "pointer-events-none opacity-60" : "",
+            isUploading ? "opacity-60" : "",
           ].join(" ")}
         >
           {isUploading ? (
@@ -357,10 +392,10 @@ export function LeadAttachmentsSection({
               </p>
             </div>
           )}
-        </div>
+        </button>
 
         {attachments.length > 0 && (
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <DndContext id={`lead-attachments-${leadId}-${dndContextId}`} sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
             <SortableContext items={attachments} strategy={verticalListSortingStrategy}>
               <ul className="space-y-2">
                 {attachments.map((key) => (
@@ -379,14 +414,14 @@ export function LeadAttachmentsSection({
         )}
       </CardContent>
 
-      {preview && (
-        <FilePreviewModal
-          open
-          onClose={() => setPreview(null)}
-          fileName={preview.fileName}
-          presignedUrl={preview.url}
-        />
-      )}
+      <FilePreviewModal
+        open={preview !== null}
+        onClose={() => setPreview(null)}
+        fileName={preview?.fileName ?? ""}
+        presignedUrl={preview?.url ?? ""}
+        sourceKey={preview?.sourceKey}
+        returnFocusRef={previewTriggerRef}
+      />
     </Card>
   );
 }

@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { AlertTriangle, Camera, CheckCircle2, Clock3, Loader2, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { SharedEntityName } from "@/components/shared/SharedEntityName";
 import type { Task, TaskStatus } from "@/tasks/domain";
 import { TaskKindIcon } from "../atoms/TaskKindIcon";
 import { DueDatePill } from "../atoms/DueDatePill";
@@ -66,7 +67,15 @@ export function MyTaskRow({
             <TaskKindIcon kind={task.kind} />
             T-{task.id}
           </span>
-          <span className="text-sm font-medium leading-snug text-foreground">{task.title}</span>
+          <span data-task-title-id={task.id} className="block min-w-0">
+            <SharedEntityName
+              layoutId={`maros-task-title-${task.id}`}
+              clipOverlay={false}
+              className="block text-sm font-medium leading-snug text-foreground"
+            >
+              {task.title}
+            </SharedEntityName>
+          </span>
         </button>
         <Button
           type="button"

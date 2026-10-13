@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useId, useMemo, useState } from "react";
 import {
   DndContext,
   DragOverlay,
@@ -16,6 +16,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { BOARD_STATUSES } from "@/tasks/domain";
 import type { Task, TaskStatus } from "@/tasks/domain";
 import { cn } from "@/lib/utils";
+import { usePrefersReducedMotion } from "@/shared/presentation/hooks/usePrefersReducedMotion";
 import { useTaskMutations } from "../hooks/mutations/useTaskMutations";
 import { TaskCard } from "../molecules/TaskCard";
 import { TASK_STATUS_LABELS } from "../atoms/taskVisualTokens";
@@ -32,14 +33,20 @@ function SortableEntityTaskCard({ task, onOpenTask, onComplete }: {
   onComplete: () => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: task.id });
+  const prefersReducedMotion = usePrefersReducedMotion();
+  const openTask = useCallback(() => onOpenTask(task.id), [onOpenTask, task.id]);
   return (
     <div
       ref={setNodeRef}
-      style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.4 : 1 }}
+      style={{
+        transform: CSS.Transform.toString(transform),
+        transition: prefersReducedMotion ? undefined : transition,
+        opacity: isDragging ? 0.4 : 1,
+      }}
       {...attributes}
       {...listeners}
     >
-      <TaskCard task={task} onClick={() => onOpenTask(task.id)} onComplete={onComplete} />
+      <TaskCard task={task} onClick={openTask} onComplete={onComplete} />
     </div>
   );
 }
@@ -83,6 +90,7 @@ function EntityColumn({ status, tasks, onOpenTask, onComplete, onQuickAdd }: {
 }
 
 export function EntityTaskBoard({ tasks, onOpenTask, entityKind, entityId, partyKind, partyId }: { tasks: Task[]; onOpenTask: (id: number) => void; entityKind?: Task["entityKind"]; entityId?: number; partyKind?: "company" | "contact"; partyId?: number }) {
+  const dndContextId = useId();
   const { moveMutation, createMutation, setPartiesMutation } = useTaskMutations();
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
   const [activeId, setActiveId] = useState<number | null>(null);
@@ -121,6 +129,7 @@ export function EntityTaskBoard({ tasks, onOpenTask, entityKind, entityId, party
   return (
     <>
       <DndContext
+        id={`entity-task-board-${dndContextId}`}
         sensors={sensors}
         collisionDetection={closestCorners}
         onDragStart={({ active }) => setActiveId(Number(active.id))}

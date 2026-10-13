@@ -25,7 +25,7 @@ export interface NoteSlashCommandItem {
   description: string;
   icon: LucideIcon;
   keywords: string[];
-  run: (editor: Editor, range: Range) => void;
+  run?: (editor: Editor, range: Range) => void;
 }
 
 export const NOTE_SLASH_COMMANDS: NoteSlashCommandItem[] = [
@@ -109,11 +109,6 @@ export const NOTE_SLASH_COMMANDS: NoteSlashCommandItem[] = [
     description: "Insert an image by URL",
     icon: ImageIcon,
     keywords: ["image", "picture", "photo"],
-    run: (editor, range) => {
-      const url = window.prompt("Image URL");
-      if (!url) return;
-      editor.chain().focus().deleteRange(range).setImage({ src: url }).run();
-    },
   },
   {
     id: "callout",

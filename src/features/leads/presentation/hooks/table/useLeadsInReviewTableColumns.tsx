@@ -8,6 +8,7 @@ import { NotesButton } from "@/components/shared";
 import { Loader, Check, X } from "lucide-react";
 import { LeadStatusBadge } from "../../atoms/LeadStatusBadge";
 import { LeadTypeBadge } from "../../atoms/LeadTypeBadge";
+import { SharedEntityName } from "@/components/shared/SharedEntityName";
 
 interface UseLeadsInReviewTableColumnsProps {
   onOpenContactModal: (contact: any) => void;
@@ -116,7 +117,7 @@ export function useLeadsInReviewTableColumns({
         className: "w-[110px]",
         render: (lead: Lead) => (
           <span className="whitespace-nowrap font-mono tabular-nums text-foreground">
-            {lead.leadNumber}
+            <SharedEntityName layoutId={`maros-lead-number-${lead.id}`}>{lead.leadNumber}</SharedEntityName>
           </span>
         ),
         sortable: true,
@@ -127,7 +128,15 @@ export function useLeadsInReviewTableColumns({
         header: "Name",
         className: "w-[200px]",
         render: (lead: Lead) => (
-          <span className="text-foreground">{lead.name}</span>
+          <span className="text-foreground">
+            {lead.id ? (
+              <SharedEntityName layoutId={`maros-lead-name-${lead.id}`}>
+                {lead.name}
+              </SharedEntityName>
+            ) : (
+              lead.name
+            )}
+          </span>
         ),
         sortable: true,
         sortValue: (lead: Lead) => lead.name ?? "",
@@ -139,6 +148,7 @@ export function useLeadsInReviewTableColumns({
         render: (lead: Lead) => (
           <ContactInfoDisplay
             contact={lead.contact}
+            sourceInstance={`review-lead-${lead.id}`}
           />
         ),
         sortable: true,

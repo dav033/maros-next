@@ -8,6 +8,8 @@ import type { Project, ProjectProgressStatus } from "@/project/domain";
 export type UseProjectsByStatusDataReturn = {
   projects: Project[];
   showSkeleton: boolean;
+  error: Error | null;
+  isFetching: boolean;
   /** True while QuickBooks financial data is still loading in the background (projects are already rendered). */
   financialsLoading: boolean;
   refetch: () => Promise<void>;
@@ -17,7 +19,7 @@ export type UseProjectsByStatusDataReturn = {
 export function useProjectsByStatusData(
   status: ProjectProgressStatus,
 ): UseProjectsByStatusDataReturn {
-  const { projects, showSkeleton, refetch } = useInstantProjects();
+  const { projects, showSkeleton, error, isFetching, refetch } = useInstantProjects();
   const { financialsById, isLoading: financialsLoading } = useProjectsFinancials({
     enabled: !showSkeleton,
   });
@@ -33,6 +35,8 @@ export function useProjectsByStatusData(
   return {
     projects: filtered,
     showSkeleton,
+    error,
+    isFetching,
     financialsLoading,
     refetch,
   };

@@ -1,10 +1,14 @@
 "use client";
+import { contactsKeys } from "@/contact/application";
+import { leadsKeys } from "@/leads/application";
 
 import { useRouter } from "next/navigation";
 import { useState, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { usePrefersReducedMotion } from "@/shared/presentation/hooks/usePrefersReducedMotion";
 import { ArrowLeft, FolderTree, User, Phone, Mail, MapPin, Building, Receipt, StickyNote, DollarSign, Edit, Plus, Save, X, FileText, FileBarChart, Trash2, Undo2, LayoutDashboard, ListTodo, NotebookPen, Paperclip } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -14,6 +18,7 @@ import Link from "next/link";
 import { useProjectsNotesLogic } from "../hooks/notes/useProjectsNotesLogic";
 import { useProjectsNotesModalController } from "../hooks/modals/useProjectsNotesModalController";
 import { NotesEditorModal, DetailField } from "@/components/shared";
+import { SharedEntityName } from "@/components/shared/SharedEntityName";
 import { MoneyLine } from "../molecules/MoneyLine";
 import { formatPercentOfContract } from "../molecules/moneyLineGeometry";
 import { ProjectForm } from "../molecules/ProjectForm";
@@ -41,8 +46,10 @@ import { QuickbooksLinkProjectButton } from "../organisms/QuickbooksLinkProjectB
 import { Can } from "@/shared/auth/Can";
 import { EntityNotesSection } from "@/features/notes/presentation/organisms/EntityNotesSection";
 import { EntityTasksSection } from "@/features/tasks/presentation/organisms/EntityTasksSection";
+import { projectSharedElementTransition } from "../projectMotion";
+import { useRouteSharedLayoutScope } from "@/shared/presentation/RouteMotionContext";
 
-interface ProjectDetails {
+export interface ProjectDetails {
   id: number;
   projectProgressStatus?: string;
   invoiceStatus?: string;
@@ -366,7 +373,9 @@ function ProjectContactCard({ contact, onEdit }: { contact: Contact; onEdit: () 
             href={`/contact/${contact.id}`}
             className="text-lg font-semibold text-foreground hover:underline"
           >
-            {contact.name}
+            <SharedEntityName layoutId={`maros-contact-name-${contact.id}`}>
+              {contact.name}
+            </SharedEntityName>
           </Link>
           {contact.occupation && (
             <p className="text-sm text-muted-foreground mt-1">{contact.occupation}</p>
@@ -402,7 +411,9 @@ function ProjectContactCard({ contact, onEdit }: { contact: Contact; onEdit: () 
               href={`/company/${contact.company.id}`}
               className="text-foreground hover:underline"
             >
-              {contact.company.name}
+              <SharedEntityName layoutId={`maros-company-name-${contact.company.id}`}>
+                {contact.company.name}
+              </SharedEntityName>
             </Link>
           )}
         </DetailField>
@@ -416,30 +427,41 @@ function ProjectContactCard({ contact, onEdit }: { contact: Contact; onEdit: () 
 }
 
 export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPageProps) {
+  const shouldReduceMotion = usePrefersReducedMotion();
+  const sharedLayoutScope = useRouteSharedLayoutScope();
   const router = useRouter();
   const { projectDetails, error } = initialData;
   const app = useProjectsApp();
   const queryClient = useQueryClient();
   const { companies } = useInstantCompanies();
   const { updateContactMutation } = useContactMutations();
+  const refreshProjectData = useCallback(() => {
+    void queryClient.invalidateQueries({ queryKey: projectsKeys.all });
+    void queryClient.invalidateQueries({ queryKey: leadsKeys.all });
+    void queryClient.invalidateQueries({ queryKey: contactsKeys.all });
+  }, [queryClient]);
 
   const { activeTab, setActiveTab } = useUrlTabState(PROJECT_TAB_VALUES, DEFAULT_PROJECT_TAB);
+
+  const projectLayoutId = (field: "name" | "number", viewport: "desktop" | "mobile") =>
+    shouldReduceMotion
+      ? undefined
+      : `maros-project-${field}-${projectId}-${viewport}-${sharedLayoutScope}`;
 
   const [isEditingProject, setIsEditingProject] = useState(false);
   const [editingProject, setEditingProject] = useState<ProjectFormData>({});
   const [isSavingProject, setIsSavingProject] = useState(false);
   const [isReverting, setIsReverting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [confirmRevertOpen, setConfirmRevertOpen] = useState(false);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
   const handleRevertToLead = useCallback(async () => {
     if (!projectDetails || typeof projectDetails.id !== "number") return;
-    const confirmed = window.confirm(
-      "Revert this project back to a lead? The project will be deleted and the lead status will be set to FOLLOW_UP.",
-    );
-    if (!confirmed) return;
     setIsReverting(true);
     try {
       const { leadId } = await revertProjectToLead(app, projectDetails.id);
+      refreshProjectData();
       toast.success("Project reverted to lead.");
       router.push(`/lead/${leadId}`);
     } catch (err) {
@@ -447,17 +469,14 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
     } finally {
       setIsReverting(false);
     }
-  }, [projectDetails, app, router]);
+  }, [projectDetails, app, refreshProjectData, router]);
 
   const handleDeleteProject = useCallback(async () => {
     if (!projectDetails || typeof projectDetails.id !== "number") return;
-    const confirmed = window.confirm(
-      "Delete this project? The associated lead will also be deleted. This cannot be undone.",
-    );
-    if (!confirmed) return;
     setIsDeleting(true);
     try {
       await deleteProject(app, projectDetails.id);
+      refreshProjectData();
       toast.success("Project and lead deleted.");
       router.push("/projects");
     } catch (err) {
@@ -465,17 +484,13 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
     } finally {
       setIsDeleting(false);
     }
-  }, [projectDetails, app, router]);
+  }, [projectDetails, app, refreshProjectData, router]);
 
-  // La ficha se pinta con datos del servidor, así que además de invalidar las
-  // claves del proyecto hay que volver a pedir el render para ver el cambio.
-  // Toda la rama `projects`: las cifras de QuickBooks de la tabla de proyectos
-  // cuelgan de `[...projectsKeys.all, "financials"]`, que ni el detalle ni las
-  // listas arrastran, así que sin esto la tabla seguiría mostrando las viejas.
+  // The detail page and projects table share the same list/financial query cache.
+  // Invalidating this branch refreshes the current detail and any list consumers.
   const handleQboUnlinked = useCallback(() => {
-    void queryClient.invalidateQueries({ queryKey: projectsKeys.all });
-    router.refresh();
-  }, [queryClient, router]);
+    refreshProjectData();
+  }, [refreshProjectData]);
 
   // Enlazar mueve exactamente lo mismo que desenlazar, en el otro sentido.
   const handleQboLinked = handleQboUnlinked;
@@ -522,13 +537,13 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
           { duration: 8000 },
         );
       }
-      router.refresh();
+      refreshProjectData();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to update estimate");
     } finally {
       setIsSavingEstimate(false);
     }
-  }, [projectDetails, editingEstimate, router]);
+  }, [projectDetails, editingEstimate, refreshProjectData]);
 
   const [isEditingContact, setIsEditingContact] = useState(false);
   const [contactFormValue, setContactFormValue] = useState<ContactFormValue>(initialContactFormValue);
@@ -548,17 +563,17 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
       if (!result.success) throw new Error(reportActionFailure(result));
       setIsEditingName(false);
       toast.success("Project name updated!");
-      router.refresh();
+      refreshProjectData();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to update name");
     } finally {
       setIsSavingName(false);
     }
-  }, [projectDetails, editingName, router]);
+  }, [projectDetails, editingName, refreshProjectData]);
 
   const notesLogic = useProjectsNotesLogic({
     refetch: async () => {
-      router.refresh();
+      refreshProjectData();
     },
   });
 
@@ -599,14 +614,14 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
       setIsEditingProject(false);
       setEditingProject({});
       toast.success("Project updated successfully!");
-      router.refresh();
+      refreshProjectData();
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Failed to update project";
       toast.error(message);
     } finally {
       setIsSavingProject(false);
     }
-  }, [projectDetails, editingProject, app, router]);
+  }, [projectDetails, editingProject, app, refreshProjectData]);
 
   const handleOpenNotesModal = useCallback(() => {
     if (projectDetails && projectDetails.lead) {
@@ -677,12 +692,12 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
       const patch = toContactPatch(currentForPatch, contactFormValue);
       await updateContactMutation.mutateAsync({ id: contact.id, patch });
       setIsEditingContact(false);
-      router.refresh();
+      refreshProjectData();
     } catch (err) {
       const message = err instanceof Error ? err.message : "Could not update contact";
       setContactFormError(message);
     }
-  }, [projectDetails, contactFormValue, updateContactMutation, router]);
+  }, [projectDetails, contactFormValue, updateContactMutation, refreshProjectData]);
 
   const contactModalController = useContactModalController({
     mode: isEditingContact ? "edit" : "list",
@@ -725,19 +740,38 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
   const paymentRows = toPaymentRows(projectDetails.financial?.payments);
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto space-y-6 px-4 py-4 sm:p-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => router.back()}>
+      <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex min-w-0 items-start gap-3 sm:gap-4">
+          <Button variant="ghost" size="icon" onClick={() => router.back()} className="mt-0.5 shrink-0">
             <ArrowLeft className="size-4" />
           </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">
-              Project {lead?.leadNumber && `#${lead.leadNumber}`}
+          <div className="min-w-0 flex-1">
+            <h1 className="break-words text-2xl font-bold text-foreground [overflow-wrap:anywhere] sm:text-3xl">
+              Project {lead?.leadNumber ? (
+                <>
+                  #<SharedEntityName transitionRole="detail"
+                    layoutCrossfade={false}
+                    layoutId={projectLayoutId("number", "desktop")}
+                    transition={projectSharedElementTransition}
+                    className="hidden xl:inline-block"
+                  >
+                    {lead.leadNumber}
+                  </SharedEntityName>
+                  <SharedEntityName transitionRole="detail"
+                    layoutCrossfade={false}
+                    layoutId={projectLayoutId("number", "mobile")}
+                    transition={projectSharedElementTransition}
+                    className="inline-block xl:hidden"
+                  >
+                    {lead.leadNumber}
+                  </SharedEntityName>
+                </>
+              ) : null}
             </h1>
             {isEditingName ? (
-              <div className="flex items-center gap-2 mt-1">
+              <div className="mt-1 flex min-w-0 flex-wrap items-center gap-2">
                 <Input
                   value={editingName}
                   onChange={(e) => setEditingName(e.target.value)}
@@ -745,7 +779,7 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
                     if (e.key === "Enter") handleSaveName();
                     if (e.key === "Escape") setIsEditingName(false);
                   }}
-                  className="h-7 text-sm w-64"
+                  className="h-7 w-64 max-w-full text-sm"
                   disabled={isSavingName}
                   autoFocus
                 />
@@ -757,13 +791,30 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
                 </Button>
               </div>
             ) : (
-              <div className="flex items-center gap-1 mt-1 group">
-                <p className="text-muted-foreground">{lead?.name ?? "Unnamed project"}</p>
+              <div className="group mt-1 flex min-w-0 flex-wrap items-center gap-1">
+                <SharedEntityName as="p" transitionRole="detail"
+                  layoutCrossfade={false}
+                  layoutId={projectLayoutId("name", "desktop")}
+                  transition={projectSharedElementTransition}
+                  className="hidden min-w-0 break-words font-display text-xl font-semibold leading-tight text-foreground [overflow-wrap:anywhere] xl:block"
+                >
+                  {lead?.name ?? "Unnamed project"}
+                </SharedEntityName>
+                <SharedEntityName as="p" transitionRole="detail"
+                  layoutCrossfade={false}
+                  layoutId={projectLayoutId("name", "mobile")}
+                  transition={projectSharedElementTransition}
+                  className="min-w-0 break-words font-display text-xl font-semibold leading-tight text-foreground [overflow-wrap:anywhere] xl:hidden"
+                >
+                  {lead?.name ?? "Unnamed project"}
+                </SharedEntityName>
                 {lead?.id && (
                   <Button
                     size="icon"
                     variant="ghost"
-                    className="size-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                    aria-label="Edit project name"
+                    title="Edit project name"
+                    className="size-7 shrink-0 opacity-100 transition-opacity motion-reduce:transition-none xl:opacity-0 xl:group-hover:opacity-100 xl:focus-visible:opacity-100"
                     onClick={handleStartEditingName}
                   >
                     <Edit className="size-3" />
@@ -773,7 +824,7 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
             )}
           </div>
         </div>
-        <div className="flex flex-wrap items-center justify-end gap-2">
+        <div className="flex w-full flex-wrap items-center justify-start gap-2 sm:w-auto sm:justify-end">
           {projectDetails.projectProgressStatus && (
             <Badge variant="outline">{projectDetails.projectProgressStatus}</Badge>
           )}
@@ -815,7 +866,7 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
           <Button
             variant="outline"
             size="sm"
-            onClick={handleRevertToLead}
+            onClick={() => setConfirmRevertOpen(true)}
             disabled={isReverting || isDeleting}
           >
             <Undo2 className="size-4 mr-2" />
@@ -824,7 +875,7 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
           <Button
             variant="destructive"
             size="sm"
-            onClick={handleDeleteProject}
+            onClick={() => setConfirmDeleteOpen(true)}
             disabled={isDeleting || isReverting}
           >
             <Trash2 className="size-4 mr-2" />
@@ -837,7 +888,7 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
           acciones (reporte, enlazar/desvincular QuickBooks, revertir, borrar)
           siguen a la vista en todas las pestañas. */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <DetailTabsBar tabs={PROJECT_TABS} />
+        <DetailTabsBar tabs={PROJECT_TABS} activeTab={activeTab} />
 
         <TabsContent value="resumen" className="mt-0 space-y-6">
           {/* Lo primero de la ficha: cuanto ha costado y cuanto se espera que
@@ -1117,7 +1168,7 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
             attachments={projectDetails.attachments ?? []}
             onAttachmentsChange={async (newAttachments) => {
               await updateProject(app, projectDetails.id, { attachments: newAttachments });
-              router.refresh();
+              refreshProjectData();
             }}
           />
         </TabsContent>
@@ -1129,6 +1180,53 @@ export function ProjectDetailsPage({ projectId, initialData }: ProjectDetailsPag
         controller={contactModalController}
         companies={companies ?? []}
       />
+
+      <AlertDialog open={confirmRevertOpen} onOpenChange={setConfirmRevertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Revert project to lead?</AlertDialogTitle>
+            <AlertDialogDescription>
+              The project will be deleted and the lead status will return to FOLLOW_UP.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isReverting}>Keep project</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={isReverting}
+              onClick={(event) => {
+                event.preventDefault();
+                void handleRevertToLead();
+              }}
+            >
+              {isReverting ? "Reverting…" : "Revert to lead"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={confirmDeleteOpen} onOpenChange={setConfirmDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete project and lead?</AlertDialogTitle>
+            <AlertDialogDescription>
+              The project and its associated lead will be deleted. This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Keep project</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={isDeleting}
+              onClick={(event) => {
+                event.preventDefault();
+                void handleDeleteProject();
+              }}
+            >
+              {isDeleting ? "Deleting…" : "Delete project"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
