@@ -1,8 +1,9 @@
 "use client";
 
 import { motion, PresenceContext, useIsPresent, type HTMLMotionProps } from "motion/react";
-import { forwardRef, useContext, useMemo, type ReactNode } from "react";
+import { forwardRef, useContext, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
+import { SharedEntityName } from "@/components/shared/SharedEntityName";
 import { TableRow } from "@/components/ui/table";
 import { taskCardSurfaceTransition, routeEntranceTransition } from "@/shared/presentation/motionTransitions";
 
@@ -20,6 +21,21 @@ type AnimatedProps<T extends "tr" | "li"> = Omit<HTMLMotionProps<T>, "children">
 
 const noop = () => {};
 const registerNothing = () => noop;
+
+export function InvoiceScanAnimatedTitle({ layoutId, children }: { layoutId: string; children: ReactNode }) {
+  const isPresent = useIsPresent();
+  const wasPresent = useRef(isPresent);
+  const [generation, setGeneration] = useState(0);
+
+  useLayoutEffect(() => {
+    // A revived zero-size responsive title cannot clear Motion's old hidden projection through a layout delta.
+    // Recreate only that projection; surviving titles keep their nodes and the list/detail layout ID is unchanged.
+    if (isPresent && !wasPresent.current) setGeneration((current) => current + 1);
+    wasPresent.current = isPresent;
+  }, [isPresent]);
+
+  return <SharedEntityName key={generation} layoutId={layoutId}>{children}</SharedEntityName>;
+}
 
 /**
  * A leaving record must not wait for the shared title inside it: when the same record enters the other section its

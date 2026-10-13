@@ -1,5 +1,7 @@
 "use client";
 
+import { useId } from "react";
+
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 
@@ -16,12 +18,13 @@ interface Props {
 
 /** The one-click "this is in QuickBooks now" control, shared by the list and the detail page. */
 export function EnteredCheckbox({ scan, withLabel, className }: Props) {
+  const instanceId = useId();
   const mutation = useSetInvoiceScanEntered();
   const entered = !!scan.enteredAt;
   const allowed = entered || canMarkEntered(scan);
   const pendingId = mutation.isPending ? mutation.variables?.id : null;
   const busy = pendingId === scan.id;
-  const id = `entered-${scan.id}`;
+  const id = `entered-${scan.id}-${instanceId}`;
 
   return (
     <label

@@ -18,6 +18,53 @@ function search(value: string) {
 }
 
 describe("InvoiceScansPage record presence", () => {
+  it("keeps every checkbox label associated with its own responsive and exiting instance", async () => {
+    const page = renderPage([scan({ id: "checkbox-mover" })]);
+    await screen.findByText("1 of 1");
+    act(() => {
+      page.client.setQueryData(invoiceScanKeys.list(), [scan({ id: "checkbox-mover", enteredAt: "2026-09-03T12:00:00Z" })]);
+    });
+    await screen.findByRole("region", { name: /entered in quickbooks/i });
+    const checkboxes = document.querySelectorAll<HTMLElement>('[role="checkbox"]');
+    expect(checkboxes).toHaveLength(4);
+    expect(new Set(Array.from(checkboxes, (checkbox) => checkbox.id)).size).toBe(4);
+    for (const checkbox of checkboxes) {
+      const label = checkbox.closest("label");
+      expect(label).not.toBeNull();
+      expect(label?.htmlFor).toBe(checkbox.id);
+      expect(document.getElementById(label!.htmlFor)).toBe(checkbox);
+    }
+    await waitFor(() => expect(document.querySelectorAll("tr[inert], li[inert]")).toHaveLength(0));
+  });
+
+  it.each([false, true])("restores both responsive titles after reversing a section move (initial entered: %s)", async (initialEntered) => {
+    const initial = scan({ id: "reversal", enteredAt: initialEntered ? "2026-09-03T12:00:00Z" : null });
+    // Active filters keep both sections mounted, including when the last entered record moves back.
+    const page = renderPage([initial], "?q=Lion");
+    await screen.findByText("1 of 1");
+    const original = recordSurfaces();
+    act(() => {
+      page.client.setQueryData(invoiceScanKeys.list(), [
+        { ...initial, enteredAt: initialEntered ? null : "2026-09-03T12:00:00Z" },
+      ]);
+    });
+    expect(original).toHaveLength(2);
+    await waitFor(() => {
+      for (const surface of original) expect(surface).toHaveAttribute("inert");
+    });
+    act(() => page.client.setQueryData(invoiceScanKeys.list(), [initial]));
+    await waitFor(() => expect(document.querySelectorAll("tr[inert], li[inert]")).toHaveLength(0));
+    // Zero-size jsdom boxes reproduce the projection of the hidden responsive variant.
+    await act(async () => { await new Promise((resolve) => setTimeout(resolve, 800)); });
+    const returned = recordSurfaces();
+    expect(returned).toHaveLength(2);
+    for (const surface of returned) {
+      expect(surface).not.toHaveAttribute("inert");
+      const title = within(surface as HTMLElement).getByText("Lion plumbing.pdf");
+      expect(title).not.toHaveStyle({ visibility: "hidden" });
+    }
+  });
+
   it("does not fade records in or hide them on the first render", async () => {
     renderPage([scan({ id: "first-pending" }), scan({ id: "first-entered", enteredAt: "2026-09-03T12:00:00Z" })]);
     await screen.findByText("2 of 2");

@@ -3,7 +3,6 @@
 import { ArrowDownLeft, ArrowUpRight, TriangleAlert } from "lucide-react";
 import { AnimatePresence, LayoutGroup } from "motion/react";
 import Link from "next/link";
-import { SharedEntityName } from "@/components/shared/SharedEntityName";
 
 import { Badge } from "@/components/ui/badge";
 import {
@@ -37,7 +36,7 @@ import {
   ProjectCell,
 } from "./InvoiceRowEditors";
 import { InvoiceScanRowActions } from "./InvoiceScanRowActions";
-import { InvoiceScanAnimatedCard, InvoiceScanAnimatedRow, invoiceScanListMotion } from "./InvoiceScanListMotion";
+import { InvoiceScanAnimatedCard, InvoiceScanAnimatedRow, InvoiceScanAnimatedTitle, invoiceScanListMotion } from "./InvoiceScanListMotion";
 import { useInvoiceScanNavigation } from "../hooks/useInvoiceScanNavigation";
 
 interface Props {
@@ -145,7 +144,7 @@ export function InvoiceScansTable({ scans, variant }: Props) {
                       href={detailHref(scan.id)}
                       className="block truncate font-medium text-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     >
-                      <SharedEntityName layoutId={`maros-invoice-title-${scan.id}-desktop`}>{invoiceTitle(scan)}</SharedEntityName>
+                      <InvoiceScanAnimatedTitle layoutId={`maros-invoice-title-${scan.id}-desktop`}>{invoiceTitle(scan)}</InvoiceScanAnimatedTitle>
                     </Link>
                     <span className="block truncate text-xs text-muted-foreground">
                       {recordDirection(scan)}
@@ -199,7 +198,7 @@ export function InvoiceScansTable({ scans, variant }: Props) {
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="truncate font-medium"><SharedEntityName layoutId={`maros-invoice-title-${scan.id}-mobile`}>{invoiceTitle(scan)}</SharedEntityName></p>
+                    <p className="truncate font-medium"><InvoiceScanAnimatedTitle layoutId={`maros-invoice-title-${scan.id}-mobile`}>{invoiceTitle(scan)}</InvoiceScanAnimatedTitle></p>
                     <p className="mt-0.5 truncate text-sm text-muted-foreground">
                       {invoice?.counterpartyName || "Counterparty not identified"}
                     </p>
