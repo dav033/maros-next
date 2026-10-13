@@ -35,11 +35,12 @@ import {
   useUpdateInvoiceScan,
 } from "../hooks/useInvoiceScans";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useInvoiceScanNavigation } from "../hooks/useInvoiceScanNavigation";
 
-function BackLink() {
+function BackLink({ href }: { href: string }) {
   return (
     <Link
-      href="/finance/invoices"
+      href={href}
       className="inline-flex w-fit items-center gap-2 text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
       <ArrowLeft className="h-4 w-4" aria-hidden="true" /> All document scans
@@ -112,6 +113,7 @@ function QboSuggestions({ scan }: { scan: InvoiceScan }) {
 }
 
 export function InvoiceScanDetailPage({ id }: { id: string }) {
+  const { listHref } = useInvoiceScanNavigation();
   const isMobile = useIsMobile();
   const router = useRouter();
   const query = useInvoiceScanDetail(id);
@@ -158,7 +160,7 @@ export function InvoiceScanDetailPage({ id }: { id: string }) {
   if (!scan) {
     return (
       <div className="flex w-full flex-1 flex-col gap-4">
-        <BackLink />
+        <BackLink href={listHref} />
         <Alert variant="destructive">
           <AlertCircle aria-hidden="true" />
           <AlertDescription>This document scan could not be loaded.</AlertDescription>
@@ -187,7 +189,7 @@ export function InvoiceScanDetailPage({ id }: { id: string }) {
 
   return (
     <div className="flex w-full flex-1 flex-col gap-4">
-      <BackLink />
+      <BackLink href={listHref} />
 
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
@@ -227,7 +229,7 @@ export function InvoiceScanDetailPage({ id }: { id: string }) {
           )}
           <DeleteInvoiceScanButton
             scan={scan}
-            onDeleted={() => router.push("/finance/invoices")}
+            onDeleted={() => router.push(listHref)}
           />
         </div>
       </header>

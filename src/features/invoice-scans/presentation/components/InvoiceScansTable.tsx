@@ -38,6 +38,7 @@ import {
 } from "./InvoiceRowEditors";
 import { InvoiceScanRowActions } from "./InvoiceScanRowActions";
 import { InvoiceScanAnimatedCard, InvoiceScanAnimatedRow, invoiceScanListMotion } from "./InvoiceScanListMotion";
+import { useInvoiceScanNavigation } from "../hooks/useInvoiceScanNavigation";
 
 interface Props {
   scans: InvoiceScan[];
@@ -96,6 +97,7 @@ function recordDirection(scan: InvoiceScan): string {
 
 /** Table on desktop, cards on mobile; the same rows either way. */
 export function InvoiceScansTable({ scans, variant }: Props) {
+  const { detailHref } = useInvoiceScanNavigation();
   const reduceMotion = usePrefersReducedMotion();
   const itemMotion = reduceMotion ? {} : invoiceScanListMotion;
   const dateHeader = variant === "completed" ? "Entered" : "Date";
@@ -140,7 +142,7 @@ export function InvoiceScansTable({ scans, variant }: Props) {
                       se encontraba. */}
                   <TableCell className="max-w-64 px-2">
                     <Link
-                      href={`/finance/invoices/${scan.id}`}
+                      href={detailHref(scan.id)}
                       className="block truncate font-medium text-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     >
                       <SharedEntityName layoutId={`maros-invoice-title-${scan.id}-desktop`}>{invoiceTitle(scan)}</SharedEntityName>
@@ -192,7 +194,7 @@ export function InvoiceScansTable({ scans, variant }: Props) {
             <InvoiceScanAnimatedCard key={scan.id} {...itemMotion} className="flex gap-2 p-4 transition-colors hover:bg-elev-3">
               <EnteredCheckbox scan={scan} className="pt-1" />
               <Link
-                href={`/finance/invoices/${scan.id}`}
+                href={detailHref(scan.id)}
                 className="min-w-0 flex-1 space-y-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <div className="flex items-start justify-between gap-3">

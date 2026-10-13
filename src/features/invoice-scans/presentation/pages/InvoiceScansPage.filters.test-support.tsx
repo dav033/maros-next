@@ -1,11 +1,12 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { cleanup, render, screen, within } from "@testing-library/react";
 import type { UserEvent } from "@testing-library/user-event";
+import type { ReactNode } from "react";
 import { afterEach, beforeEach, vi } from "vitest";
 
 import type { ExtractedInvoiceData, InvoiceScan } from "../../domain/models";
 
-const api = vi.hoisted(() => ({ listInvoiceScans: vi.fn() }));
+const api = vi.hoisted(() => ({ listInvoiceScans: vi.fn(), getInvoiceScan: vi.fn() }));
 const filterNavigation = vi.hoisted(() => ({
   query: "",
   deferNotifications: false,
@@ -14,6 +15,8 @@ const filterNavigation = vi.hoisted(() => ({
 
 vi.mock("../../infra/invoiceScansApi", () => ({
   listInvoiceScans: api.listInvoiceScans,
+  getInvoiceScan: api.getInvoiceScan,
+  retryInvoiceScan: vi.fn(),
   updateInvoiceScan: vi.fn(),
   deleteInvoiceScan: vi.fn(),
   getInvoiceScanDownloadUrl: vi.fn(),
@@ -107,13 +110,14 @@ export function scan(overrides: Partial<InvoiceScan>): InvoiceScan {
   };
 }
 
-export function renderPage(scans: InvoiceScan[], query = "", error?: Error) {
+export function renderPage(scans: InvoiceScan[], query = "", error?: Error, view: ReactNode = <InvoiceScansPage />) {
   window.history.replaceState(null, "", `/finance/invoices${query}`);
   api.listInvoiceScans.mockImplementation(() => error ? Promise.reject(error) : Promise.resolve(scans));
+  api.getInvoiceScan.mockImplementation((id: string) => Promise.resolve(scans.find((scan) => scan.id === id)));
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const page = render(
     <QueryClientProvider client={client}>
-      <InvoiceScansPage />
+      {view}
     </QueryClientProvider>,
   );
   return { ...page, client };
