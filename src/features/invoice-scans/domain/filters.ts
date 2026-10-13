@@ -58,7 +58,13 @@ function scanDate(scan: InvoiceScan): string | null {
 
   if (!isValidDateOnly(scan.createdAt.slice(0, 10))) return null;
   const createdAt = new Date(scan.createdAt);
-  return Number.isNaN(createdAt.getTime()) ? null : createdAt.toISOString().slice(0, 10);
+  if (Number.isNaN(createdAt.getTime())) return null;
+
+  // Local calendar day, like `formatDate` shows it: the UTC day would move an
+  // evening record to tomorrow for any user west of UTC.
+  const month = String(createdAt.getMonth() + 1).padStart(2, "0");
+  const day = String(createdAt.getDate()).padStart(2, "0");
+  return `${createdAt.getFullYear()}-${month}-${day}`;
 }
 
 function matchesSearch(scan: InvoiceScan, search: string): boolean {

@@ -71,6 +71,30 @@ describe("filterInvoiceScans", () => {
     expect(filterInvoiceScans([invoice, transaction], { classification: "materials_expense" })).toEqual([invoice]);
   });
 
+  it("handles a scan that has no extracted data yet", () => {
+    const unscanned = scan({ id: "unscanned", status: "uploaded", extractedData: null, comments: "Pendiente" });
+
+    for (const filters of [
+      { status: "uploaded" as const },
+      { search: "pr-101" },
+      { search: "factura.pdf" },
+      { search: "pendiente" },
+      // Wide enough for the local day of 12:00Z in any time zone.
+      { dateFrom: "2026-09-30", dateTo: "2026-10-02" },
+    ]) {
+      expect(filterInvoiceScans([unscanned], filters)).toEqual([unscanned]);
+    }
+    for (const filters of [
+      { classification: "unknown" as const },
+      { moneyDirection: "in" as const },
+      { moneyDirection: "out" as const },
+      { amountMin: 0 },
+      { amountMax: 1000 },
+    ]) {
+      expect(filterInvoiceScans([unscanned], filters)).toEqual([]);
+    }
+  });
+
   it("uses issue date for invoices and creation date when no issue date exists", () => {
     const invoice = scan({ extractedData: extractedData({ issueDate: "2026-09-15" }) });
     const transaction = scan({
@@ -83,6 +107,30 @@ describe("filterInvoiceScans", () => {
     expect(filterInvoiceScans([invoice, transaction], { dateFrom: "2026-10-01", dateTo: "2026-10-02" })).toEqual([
       transaction,
     ]);
+  });
+
+  it("places a creation timestamp on the local calendar day, as the list displays it", () => {
+    const originalTimeZone = process.env.TZ;
+    process.env.TZ = "America/Bogota";
+
+    try {
+      // 22:30 on Oct 1 in Bogota (UTC-5) is already Oct 2 in UTC; the precondition fails loudly if TZ is ignored.
+      expect(new Date("2026-10-02T03:30:00Z").getDate()).toBe(1);
+      const eveningRecord = scan({
+        id: "evening",
+        recordType: "transaction",
+        createdAt: "2026-10-02T03:30:00Z",
+        extractedData: extractedData({ issueDate: null, transactionDirection: "payment_made" }),
+      });
+
+      expect(filterInvoiceScans([eveningRecord], { dateFrom: "2026-10-01", dateTo: "2026-10-01" })).toEqual([
+        eveningRecord,
+      ]);
+      expect(filterInvoiceScans([eveningRecord], { dateFrom: "2026-10-02" })).toEqual([]);
+    } finally {
+      if (originalTimeZone === undefined) delete process.env.TZ;
+      else process.env.TZ = originalTimeZone;
+    }
   });
 
   it("excludes records with invalid constrained dates and totals", () => {
