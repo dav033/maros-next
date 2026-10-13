@@ -77,7 +77,7 @@ export function InvoiceScanFilters({
       </div>
       <InvoiceScanFilterFields filters={filters} onChange={onChange} resetKey={resetKey} openField={openField} onOpenFieldChange={setOpenField} />
       {chips.length > 0 && (
-        <div aria-label="Active filters" className="flex flex-wrap gap-2">
+        <div role="group" aria-label="Active filters" className="flex flex-wrap gap-2">
           {chips.map((chip) => (
             <MotionFilterButton
               key={`${chip.layoutId ?? chip.key}-${reduceMotion ? "static" : "motion"}`}

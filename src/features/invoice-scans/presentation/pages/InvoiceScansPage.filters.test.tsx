@@ -139,6 +139,35 @@ describe("InvoiceScansPage filters", () => {
     expect(new URLSearchParams(window.location.search).has("min")).toBe(false);
   });
 
+  it("empties a search draft that never reached the URL when the filters are cleared", async () => {
+    renderPage([scan({})], "?status=needs_review");
+    await screen.findByText("1 of 1");
+    const user = userEvent.setup();
+    await user.type(screen.getByRole("searchbox", { name: "Search documents" }), "   ");
+    expect(screen.getByRole("searchbox", { name: "Search documents" })).toHaveValue("   ");
+    expect(new URLSearchParams(window.location.search).has("q")).toBe(false);
+
+    const filters = screen.getByRole("region", { name: "Document filters" });
+    await user.click(within(filters).getByRole("button", { name: "Clear filters" }));
+    await waitFor(() => expect(screen.getByRole("searchbox", { name: "Search documents" })).toHaveValue(""));
+    expect(window.location.search).toBe("");
+  });
+
+  it("names the active chips as a group that is absent without filters", async () => {
+    renderPage(filterFixtureScans(), "?type=invoice&status=failed");
+    await screen.findByText("2 of 10");
+    const group = screen.getByRole("group", { name: "Active filters" });
+    expect(within(group).getAllByRole("button").map((chip) => chip.getAttribute("aria-label"))).toEqual([
+      "Remove filter Record type: Invoice file",
+      "Remove filter Status: Scan failed",
+    ]);
+
+    const filters = screen.getByRole("region", { name: "Document filters" });
+    await userEvent.setup().click(within(filters).getByRole("button", { name: "Clear filters" }));
+    await screen.findByText("10 of 10");
+    expect(screen.queryByRole("group", { name: "Active filters" })).not.toBeInTheDocument();
+  });
+
   it("announces unavailable results without claiming filters matched an empty dataset", async () => {
     renderPage([], "?status=needs_review", new Error("unreachable"));
     expect(await screen.findByText("Results unavailable")).toBeInTheDocument();
