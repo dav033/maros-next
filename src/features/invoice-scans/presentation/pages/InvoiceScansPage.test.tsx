@@ -81,6 +81,47 @@ function renderPage() {
 }
 
 describe("InvoiceScansPage", () => {
+  it("searches both queues, narrows by a field and clears filters", async () => {
+    api.listInvoiceScans.mockResolvedValue([
+      scan({ id: "pending-filter", fileName: "Alpha.pdf", projectNumber: "JOB-10" }),
+      scan({ id: "done-filter", fileName: "Beta.pdf", projectNumber: "JOB-10", enteredAt: "2026-09-10" }),
+      scan({ id: "other-filter", fileName: "Other.pdf", projectNumber: "JOB-20" }),
+    ]);
+    renderPage();
+    await screen.findAllByRole("link", { name: "Alpha.pdf" });
+    const user = userEvent.setup();
+    await user.type(screen.getByRole("searchbox", { name: "Search documents" }), "JOB-10");
+    expect(screen.getByRole("status")).toHaveTextContent("2 of 3 loaded records");
+    expect(screen.queryByRole("link", { name: "Other.pdf" })).not.toBeInTheDocument();
+    expect(screen.getAllByRole("link", { name: "Beta.pdf" }).length).toBeGreaterThan(0);
+    await user.selectOptions(screen.getByRole("combobox", { name: "Search in" }), "fileName");
+    expect(screen.getByText("No matching documents to enter")).toBeInTheDocument();
+    expect(screen.queryByText("Everything is entered")).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Clear filters" }));
+    expect(screen.getByRole("status")).toHaveTextContent("3 of 3 loaded records");
+    expect(screen.getAllByRole("link", { name: "Other.pdf" }).length).toBeGreaterThan(0);
+    await user.selectOptions(screen.getByRole("combobox", { name: "QuickBooks entry" }), "entered");
+    expect(screen.getByRole("status")).toHaveTextContent("1 of 3 loaded records");
+    expect(screen.queryByRole("link", { name: "Alpha.pdf" })).not.toBeInTheDocument();
+  });
+
+  it("combines advanced filters and explains invalid ranges", async () => {
+    api.listInvoiceScans.mockResolvedValue([scan({ id: "manual-filter", recordType: "transaction", fileName: "Manual.pdf" }), scan({ id: "invoice-filter", fileName: "Invoice.pdf" })]);
+    renderPage();
+    await screen.findAllByRole("link", { name: "Invoice.pdf" });
+    const user = userEvent.setup();
+    await user.click(screen.getByText("More filters"));
+    await user.selectOptions(screen.getByRole("combobox", { name: "Record type" }), "transaction");
+    await user.selectOptions(screen.getByRole("combobox", { name: "Money flow" }), "unknown");
+    expect(screen.getByRole("status")).toHaveTextContent("1 of 2 loaded records");
+    await user.type(screen.getByLabelText("Minimum amount"), "100");
+    await user.type(screen.getByLabelText("Maximum amount"), "50");
+    expect(screen.getByRole("alert")).toHaveTextContent("The minimum amount must not exceed the maximum.");
+    await user.click(screen.getByRole("button", { name: "Clear filters" }));
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent("2 of 2 loaded records");
+  });
+
   it("splits scans into 'to enter' and 'entered' and lets the reviewer tick one", async () => {
     const pending = scan({
       id: "pending",

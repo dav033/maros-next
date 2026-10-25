@@ -12,6 +12,8 @@ import { InvoiceScansTable } from "../components/InvoiceScansTable";
 import { NewTransactionDialog } from "../components/NewTransactionDialog";
 import { useInvoiceScansList } from "../hooks/useInvoiceScans";
 import { Skeleton } from "@/components/ui/skeleton";
+import { EMPTY_INVOICE_SCAN_FILTERS, filterInvoiceScans, invoiceScanFilterError } from "../../domain/filters";
+import { InvoiceScanFiltersBar } from "../components/InvoiceScanFiltersBar";
 
 function LoadingRows() {
   return (
@@ -31,10 +33,17 @@ function LoadingRows() {
 export function InvoiceScansPage() {
   const query = useInvoiceScansList();
   const [transactionOpen, setTransactionOpen] = useState(false);
-  const { pending, completed } = useMemo(
-    () => partitionInvoiceScans(query.data ?? []),
-    [query.data],
+  const [filters, setFilters] = useState(EMPTY_INVOICE_SCAN_FILTERS);
+  const filterError = invoiceScanFilterError(filters);
+  const filtered = useMemo(
+    () => filterInvoiceScans(query.data ?? [], filters),
+    [query.data, filters],
   );
+  const { pending, completed } = useMemo(
+    () => partitionInvoiceScans(filtered),
+    [filtered],
+  );
+  const hasFilters = Object.entries(filters).some(([key, value]) => value !== EMPTY_INVOICE_SCAN_FILTERS[key as keyof typeof filters]);
 
   return (
     <div className="flex w-full flex-1 flex-col gap-3">
@@ -56,6 +65,16 @@ export function InvoiceScansPage() {
       />
 
       <NewTransactionDialog open={transactionOpen} onOpenChange={setTransactionOpen} />
+
+      <InvoiceScanFiltersBar
+        filters={filters}
+        onChange={setFilters}
+        onReset={() => setFilters(EMPTY_INVOICE_SCAN_FILTERS)}
+        matched={filtered.length}
+        total={query.data?.length ?? 0}
+        loading={query.isLoading}
+        error={filterError}
+      />
 
       {query.isError && (
         <Alert variant="destructive">
@@ -91,10 +110,12 @@ export function InvoiceScansPage() {
               <Camera className="h-4 w-4" aria-hidden="true" />
             </div>
             <h3 className="font-display text-base font-semibold tracking-tight">
-              {query.data?.length ? "Everything is entered" : "No documents or transactions yet"}
+              {hasFilters ? "No matching documents to enter" : query.data?.length ? "Everything is entered" : "No documents or transactions yet"}
             </h3>
             <p className="mt-1.5 max-w-md text-xs leading-5 text-muted-foreground">
-              {query.data?.length
+              {hasFilters
+                ? "Change or clear your filters to see more documents."
+                : query.data?.length
                 ? "New scans will show up here until they are marked as entered in QuickBooks."
                 : "Scan a document or add a payment manually. Items appear here to review before entering them in QuickBooks."}
             </p>
